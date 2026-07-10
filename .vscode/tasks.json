@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm: install",
+      "type": "shell",
+      "command": "npm install",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" }
+    },
+    {
+      "label": "npm: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "runOptions": { "runOn": "folderOpen" }
+    },
+    {
+      "label": "dotnet: build",
+      "type": "shell",
+      "command": "dotnet build api/YahwehHrms.sln",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "new" }
+    },
+    {
+      "label": "dotnet: run API",
+      "type": "shell",
+      "command": "dotnet run --project api/YahwehHrms.API",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "db: apply schema",
+      "type": "shell",
+      "command": "bash database/run-schema.sh",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "new" }
+    },
+    {
+      "label": "drizzle: studio",
+      "type": "shell",
+      "command": "npm run db:studio",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}

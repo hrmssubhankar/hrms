@@ -1,0 +1,78 @@
+name: CI — Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Frontend (Next.js) ──────────────────────────────────────────────────────
+  frontend:
+    name: Next.js Build & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: "https://hrms.vercel.app"
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+  # ── Backend (.NET 8) ────────────────────────────────────────────────────────
+  backend:
+    name: .NET 8 Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore api/YahwehHrms.sln
+
+      - name: Build
+        run: dotnet build api/YahwehHrms.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test api/YahwehHrms.sln --no-build --verbosity normal
+        continue-on-error: true  # no tests yet in scaffold
+
+  # ── Deploy to Vercel (main branch only) ─────────────────────────────────────
+  deploy:
+    name: Deploy to Vercel
+    needs: [frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./

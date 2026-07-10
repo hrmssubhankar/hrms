@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: dev server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": ".NET API: debug",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "dotnet: build",
+      "program": "${workspaceFolder}/api/YahwehHrms.API/bin/Debug/net8.0/YahwehHrms.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/api/YahwehHrms.API",
+      "console": "integratedTerminal",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack (Next.js + .NET)",
+      "configurations": ["Next.js: dev server", ".NET API: debug"]
+    }
+  ]
+}
