@@ -8,6 +8,7 @@ export const metadata: Metadata = { title: 'Super Admin | HRMS' }
 const nav = [
   { href: '/super-admin',          label: '🏠 Dashboard' },
   { href: '/super-admin/clients',  label: '🏢 Clients' },
+  { href: '/super-admin/admins',   label: '👤 Admins' },
   { href: '/super-admin/settings', label: '⚙️  Settings' },
 ]
 
