@@ -69,13 +69,6 @@ export default function AdminDropdown({ name, email }: Props) {
           {/* Actions */}
           <div className="py-1">
             <Link
-              href="/super-admin/admins"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition"
-            >
-              <span>👤</span> Manage Admins
-            </Link>
-            <Link
               href="/super-admin/settings"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition"
