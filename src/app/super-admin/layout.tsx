@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import LogoutButton from '@/components/auth/LogoutButton'
+import { getSession } from '@/lib/auth/session'
 
 export const metadata: Metadata = { title: 'Super Admin | HRMS' }
 
@@ -9,7 +11,9 @@ const nav = [
   { href: '/super-admin/settings', label: '⚙️  Settings' },
 ]
 
-export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession()
+
   return (
     <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
       {/* Sidebar */}
@@ -30,8 +34,16 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             </Link>
           ))}
         </nav>
-        <div className="px-4 py-3 border-t border-gray-800 text-xs text-gray-500">
-          HRMS Platform v1.0
+
+        {/* User + Logout at bottom of sidebar */}
+        <div className="px-3 py-3 border-t border-gray-800 space-y-2">
+          {session && (
+            <div className="px-3 py-2 rounded-lg bg-gray-800/50">
+              <p className="text-xs font-medium text-white truncate">{session.name ?? 'Super Admin'}</p>
+              <p className="text-xs text-gray-500 truncate">{session.email}</p>
+            </div>
+          )}
+          <LogoutButton className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition text-left" />
         </div>
       </aside>
 
@@ -44,6 +56,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               <span className="w-1.5 h-1.5 bg-purple-400 rounded-full" />
               Super Admin
             </span>
+            <LogoutButton className="text-xs text-gray-400 hover:text-red-400 transition px-2 py-1 rounded hover:bg-red-900/20" />
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6 bg-gray-950">
