@@ -6,7 +6,6 @@ import {
   pgTable, uuid, varchar, text, boolean, integer, decimal,
   timestamp, date, jsonb, pgEnum, index, uniqueIndex,
 } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
 
 // ──────────────────────────────────────────────
 // Enums
