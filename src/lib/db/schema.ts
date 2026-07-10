@@ -697,3 +697,18 @@ export const notifications = pgTable('notifications', {
 }, (t) => ({
   userIdx: index('notifications_user_idx').on(t.userId),
 }))
+
+// ──────────────────────────────────────────────
+// Platform — Super Admins (no tenant FK)
+// ──────────────────────────────────────────────
+
+export const superAdmins = pgTable('super_admins', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  email:        varchar('email', { length: 255 }).notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  name:         varchar('name', { length: 255 }).notNull(),
+  isActive:     boolean('is_active').notNull().default(true),
+  lastLoginAt:  timestamp('last_login_at'),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+})
