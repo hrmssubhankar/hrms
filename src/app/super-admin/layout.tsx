@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Super Admin | Yahweh HRMS' }
+export const metadata: Metadata = { title: 'Super Admin | HRMS' }
 
 const nav = [
   { href: '/super-admin',          label: '🏠 Dashboard' },
@@ -16,7 +16,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       <aside className="w-60 bg-gray-900 border-r border-gray-800 flex flex-col">
         <div className="px-5 py-5 border-b border-gray-800">
           <p className="text-xs font-bold uppercase tracking-widest text-purple-400 mb-1">Super Admin</p>
-          <p className="text-base font-semibold">Yahweh HRMS</p>
+          <p className="text-base font-semibold">HRMS</p>
           <p className="text-xs text-gray-400">Platform Control</p>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -31,7 +31,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           ))}
         </nav>
         <div className="px-4 py-3 border-t border-gray-800 text-xs text-gray-500">
-          Yahweh HRMS v1.0 · Super Admin
+          HRMS Platform v1.0
         </div>
       </aside>
 

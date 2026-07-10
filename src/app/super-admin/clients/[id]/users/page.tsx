@@ -145,9 +145,9 @@ export default function UsersPage() {
 
       {/* Login info banner */}
       <div className="bg-blue-950 border border-blue-800 rounded-xl p-4 text-sm text-blue-300">
-        <strong className="text-blue-200">Tenant login URL:</strong>{' '}
+        <strong className="text-blue-200">Client login URL:</strong>{' '}
         <code className="text-purple-300">
-          https://yahweh-hrms-app.vercel.app/login?tenant={tenantSlug}
+          {typeof window !== 'undefined' ? window.location.origin : ''}/login?tenant={tenantSlug}
         </code>
         <p className="text-xs text-blue-400 mt-1">Users visit this URL and sign in with their email + password.</p>
       </div>

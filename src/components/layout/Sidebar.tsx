@@ -82,7 +82,7 @@ export default function Sidebar() {
           <span className="text-white text-sm font-bold">Y</span>
         </div>
         <div>
-          <p className="text-sm font-semibold text-gray-900">Yahweh HRMS</p>
+          <p className="text-sm font-semibold text-gray-900">HRMS</p>
           <p className="text-xs text-gray-400">Enterprise Edition</p>
         </div>
       </div>

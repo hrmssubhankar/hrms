@@ -70,7 +70,7 @@ function LoginForm() {
             {isSuperAdmin ? '★' : 'H'}
           </div>
           <h1 className="text-xl font-bold text-white">
-            {isSuperAdmin ? 'Super Admin' : 'Yahweh HRMS'}
+            {isSuperAdmin ? 'Super Admin' : 'HRMS'}
           </h1>
           <p className="text-sm text-gray-400">
             {isSuperAdmin
@@ -127,7 +127,7 @@ function LoginForm() {
         </form>
 
         <p className="text-center text-xs text-gray-600">
-          Yahweh HRMS · Enterprise HR Platform
+          HRMS · Enterprise HR Platform
         </p>
       </div>
     </div>

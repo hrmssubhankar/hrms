@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'Yahweh HRMS',
-    template: '%s | Yahweh HRMS',
+    default: 'HRMS',
+    template: '%s | HRMS',
   },
   description:
     'Enterprise HR Management System for Yahweh Care & Yahweh Property Care — multi-tenant, compliance-first, production-ready.',

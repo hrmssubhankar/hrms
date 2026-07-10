@@ -108,7 +108,7 @@ export default async function TenantLayout({ children }: { children: React.React
 
           {/* Footer */}
           <div className="px-4 py-3 text-xs opacity-40" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            {tenantName} · Powered by Yahweh HRMS
+            {tenantName} · Powered by HRMS Platform
           </div>
         </aside>
 
