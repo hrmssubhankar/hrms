@@ -1,23 +1,9 @@
 {
-  "name": "HRMS",
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "regions": ["syd1"],
-  "env": {
-    "DATABASE_URL": "@hrms_database_url",
-    "DIRECT_URL": "@hrms_direct_url",
-    "NEXTAUTH_SECRET": "@hrms_nextauth_secret",
-    "NEXTAUTH_URL": "@hrms_nextauth_url",
-    "JWT_SECRET": "@hrms_jwt_secret",
-    "NEXT_PUBLIC_API_URL": "@hrms_api_url",
-    "BREVO_API_KEY": "@hrms_brevo_api_key",
-    "AZURE_STORAGE_ACCOUNT_NAME": "@hrms_azure_storage_account",
-    "AZURE_STORAGE_ACCOUNT_KEY": "@hrms_azure_storage_key",
-    "AZURE_STORAGE_CONTAINER_NAME": "@hrms_azure_container"
-  },
   "headers": [
     {
       "source": "/(.*)",
