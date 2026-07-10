@@ -148,6 +148,12 @@ export default function ClientsPage() {
                         Edit
                       </Link>
                       <Link
+                        href={`/super-admin/clients/${c.id}/users`}
+                        className="text-xs text-green-400 hover:text-green-300 font-medium"
+                      >
+                        Users
+                      </Link>
+                      <Link
                         href={`/super-admin/clients/${c.id}/modules`}
                         className="text-xs text-purple-400 hover:text-purple-300 font-medium"
                       >
