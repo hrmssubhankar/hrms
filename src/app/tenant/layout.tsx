@@ -1,6 +1,7 @@
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import LogoutButton from '@/components/auth/LogoutButton'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getSession } from '@/lib/auth/session'
 
 // Module nav labels (only shown if enabled for tenant)
@@ -130,10 +131,11 @@ export default async function TenantLayout({ children }: { children: React.React
             style={{ borderBottom: `3px solid ${primaryColor}` }}
           >
             <span className="text-sm font-semibold text-gray-700">{tenantName}</span>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {userEmail && (
                 <span className="text-xs text-gray-500 hidden sm:block">{userEmail}</span>
               )}
+              <ThemeToggle className="p-2 rounded-lg text-gray-400 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition" />
               <LogoutButton className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 hover:border-red-200 px-3 py-1.5 rounded-lg transition" />
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"

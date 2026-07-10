@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import AdminDropdown from '@/components/auth/AdminDropdown'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import { getSession } from '@/lib/auth/session'
 
 export const metadata: Metadata = { title: 'Super Admin | HRMS' }
@@ -48,7 +49,10 @@ export default async function SuperAdminLayout({ children }: { children: React.R
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-14 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6 flex-shrink-0">
           <span className="text-sm text-gray-400">Platform Administration</span>
-          <AdminDropdown name={name} email={email} />
+          <div className="flex items-center gap-2">
+            <ThemeToggle className="p-2 rounded-lg text-gray-400 hover:text-yellow-400 hover:bg-gray-800 transition" />
+            <AdminDropdown name={name} email={email} />
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6 bg-gray-950">
           {children}
