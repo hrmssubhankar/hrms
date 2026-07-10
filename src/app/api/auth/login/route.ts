@@ -2,13 +2,26 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { superAdmins, users, tenants } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { signToken } from '@/lib/auth/jwt'
+import { signToken, verifyToken } from '@/lib/auth/jwt'
 import { sessionCookieOptions } from '@/lib/auth/session'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, tenantSlug } = await req.json()
+    const body = await req.json()
+
+    // ── Impersonation shortcut (super admin "Login as Tenant") ──
+    if (body.__impersonateToken) {
+      const payload = await verifyToken(body.__impersonateToken)
+      if (!payload || payload.role !== 'tenant_user') {
+        return NextResponse.json({ error: 'Invalid impersonation token' }, { status: 401 })
+      }
+      const res = NextResponse.json({ ok: true, role: 'tenant_user', redirectTo: '/tenant/dashboard' })
+      res.cookies.set(sessionCookieOptions(body.__impersonateToken))
+      return res
+    }
+
+    const { email, password, tenantSlug } = body
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 })

@@ -20,9 +20,10 @@ const TIER_COLORS: Record<string, string> = {
 }
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [clients, setClients]           = useState<Client[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [search, setSearch]             = useState('')
+  const [impersonating, setImpersonating] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/super-admin/clients')
@@ -46,6 +47,34 @@ export default function ClientsPage() {
     setClients(c => c.filter(x => x.id !== id))
   }
 
+  async function loginAsTenant(clientId: string, clientName: string) {
+    if (!confirm(`Open ${clientName}'s portal as impersonated user? You will get a 1-hour session.`)) return
+    setImpersonating(clientId)
+    try {
+      const res  = await fetch('/api/super-admin/impersonate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId: clientId }),
+      })
+      const data = await res.json()
+      if (!res.ok) { alert(data.error ?? 'Impersonation failed'); return }
+
+      // Set the session cookie via the login API endpoint
+      await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ __impersonateToken: data.token }),
+      })
+
+      // Open tenant portal in new tab
+      window.open(data.redirectTo, '_blank')
+    } catch {
+      alert('Failed to impersonate tenant')
+    } finally {
+      setImpersonating(null)
+    }
+  }
+
   const filtered = clients.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.slug.toLowerCase().includes(search.toLowerCase())
@@ -54,7 +83,10 @@ export default function ClientsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Clients</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Clients</h1>
+          <p className="text-gray-400 text-sm mt-1">{clients.length} client{clients.length !== 1 ? 's' : ''} · {clients.filter(c => c.isActive).length} active</p>
+        </div>
         <Link
           href="/super-admin/clients/new"
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
@@ -66,7 +98,7 @@ export default function ClientsPage() {
       {/* Search */}
       <input
         type="search"
-        placeholder="Search clients…"
+        placeholder="Search clients by name or slug…"
         value={search}
         onChange={e => setSearch(e.target.value)}
         className="w-full max-w-sm bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
@@ -91,20 +123,26 @@ export default function ClientsPage() {
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-gray-500">
-                    No clients yet. <Link href="/super-admin/clients/new" className="text-purple-400 hover:underline">Add one →</Link>
+                    No clients yet.{' '}
+                    <Link href="/super-admin/clients/new" className="text-purple-400 hover:underline">Add one →</Link>
                   </td>
                 </tr>
               ) : filtered.map((c, i) => (
-                <tr key={c.id} className={`border-b border-gray-800 hover:bg-gray-800/50 ${i % 2 === 0 ? '' : 'bg-gray-900/50'}`}>
+                <tr key={c.id} className={`border-b border-gray-800 hover:bg-gray-800/50 transition ${i % 2 === 0 ? '' : 'bg-gray-900/50'}`}>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
                         style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
                       >
                         {c.name[0]}
                       </div>
-                      <span className="font-medium text-white">{c.name}</span>
+                      <div>
+                        <span className="font-medium text-white">{c.name}</span>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Since {new Date(c.createdAt).toLocaleDateString('en-AU', { month: 'short', year: 'numeric' })}
+                        </p>
+                      </div>
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
@@ -140,31 +178,19 @@ export default function ClientsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/super-admin/clients/${c.id}`}
-                        className="text-xs text-blue-400 hover:text-blue-300 font-medium"
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Link href={`/super-admin/clients/${c.id}`}           className="text-xs text-blue-400 hover:text-blue-300 font-medium">Edit</Link>
+                      <Link href={`/super-admin/clients/${c.id}/users`}     className="text-xs text-green-400 hover:text-green-300 font-medium">Users</Link>
+                      <Link href={`/super-admin/clients/${c.id}/modules`}   className="text-xs text-purple-400 hover:text-purple-300 font-medium">Modules</Link>
+                      <Link href={`/super-admin/clients/${c.id}/theme`}     className="text-xs text-pink-400 hover:text-pink-300 font-medium">Theme</Link>
+                      <button
+                        onClick={() => loginAsTenant(c.id, c.name)}
+                        disabled={impersonating === c.id || !c.isActive}
+                        className="text-xs text-yellow-400 hover:text-yellow-300 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                        title={c.isActive ? 'Open this tenant\'s portal as an impersonated session' : 'Client is inactive'}
                       >
-                        Edit
-                      </Link>
-                      <Link
-                        href={`/super-admin/clients/${c.id}/users`}
-                        className="text-xs text-green-400 hover:text-green-300 font-medium"
-                      >
-                        Users
-                      </Link>
-                      <Link
-                        href={`/super-admin/clients/${c.id}/modules`}
-                        className="text-xs text-purple-400 hover:text-purple-300 font-medium"
-                      >
-                        Modules
-                      </Link>
-                      <Link
-                        href={`/super-admin/clients/${c.id}/theme`}
-                        className="text-xs text-pink-400 hover:text-pink-300 font-medium"
-                      >
-                        Theme
-                      </Link>
+                        {impersonating === c.id ? '…' : '🔑 Login as'}
+                      </button>
                       <button
                         onClick={() => deleteClient(c.id, c.name)}
                         className="text-xs text-red-400 hover:text-red-300 font-medium"
