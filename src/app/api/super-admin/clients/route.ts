@@ -1,0 +1,105 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { tenants, tenantModules } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
+
+const ALL_MODULES = [
+  { id: 1,  name: 'Enterprise Dashboard' },
+  { id: 2,  name: 'Employee Master Profiles' },
+  { id: 3,  name: 'RBAC & Custom Authentication' },
+  { id: 4,  name: 'Audit Logging' },
+  { id: 5,  name: 'Document Management System' },
+  { id: 6,  name: 'Pre-Employment Screening' },
+  { id: 7,  name: 'Compliance Lock System' },
+  { id: 8,  name: 'Ongoing Compliance Tracking' },
+  { id: 9,  name: 'Onboarding & Induction' },
+  { id: 10, name: 'Training Management & LMS' },
+  { id: 11, name: 'Competency Management' },
+  { id: 12, name: 'Supervision Management' },
+  { id: 13, name: 'Workforce Planning & Role Design' },
+  { id: 14, name: 'Recruitment & Applicant Tracking' },
+  { id: 15, name: 'Employment Contracting & E-Sign' },
+  { id: 16, name: 'Probation & Performance Management' },
+  { id: 17, name: 'WHS & Injury Management' },
+  { id: 18, name: 'Grievance & Investigation Management' },
+  { id: 19, name: 'Separation & Exit Management' },
+  { id: 20, name: 'Reporting & Analytics' },
+  { id: 21, name: 'Employee Experience & Benefits' },
+  { id: 22, name: 'Recognition & Rewards' },
+  { id: 23, name: 'Referral Program' },
+  { id: 24, name: 'Diversity, Equity & Inclusion' },
+  { id: 25, name: 'Employee Voice & Engagement' },
+  { id: 26, name: 'Asset & Equipment Register' },
+  { id: 27, name: 'Rostering & Attendance Integration' },
+  { id: 28, name: 'Payroll & Award Compliance Integration' },
+]
+
+const STARTER_MODULES  = [1,2,3,4,5,6,7,8,9]
+const PRO_MODULES      = [...STARTER_MODULES, 10,11,12,13,14,15,16,17,18,19]
+const ENTERPRISE_MODULES = ALL_MODULES.map(m => m.id)
+
+function getDefaultModules(tier: string): number[] {
+  if (tier === 'professional') return PRO_MODULES
+  if (tier === 'enterprise')   return ENTERPRISE_MODULES
+  return STARTER_MODULES
+}
+
+// GET /api/super-admin/clients — list all tenants
+export async function GET() {
+  try {
+    const clients = await db.select().from(tenants).orderBy(tenants.createdAt)
+    return NextResponse.json({ clients })
+  } catch (error) {
+    console.error('GET /api/super-admin/clients error:', error)
+    return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 })
+  }
+}
+
+// POST /api/super-admin/clients — create new tenant
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const { name, slug, tier = 'starter', primaryColor, logoUrl, enabledModules } = body
+
+    if (!name || !slug) {
+      return NextResponse.json({ error: 'name and slug are required' }, { status: 400 })
+    }
+
+    // Create tenant
+    const [tenant] = await db.insert(tenants).values({
+      name,
+      slug: slug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+      tier,
+      primaryColor: primaryColor || '#1a4fff',
+      logoUrl,
+      settings: {
+        theme: {
+          primaryColor: primaryColor || '#1a4fff',
+          logoUrl: logoUrl || null,
+          fontFamily: 'Inter',
+          borderRadius: '0.5rem',
+        }
+      },
+      isActive: true,
+    }).returning()
+
+    // Enable modules based on tier (or custom selection)
+    const modulesToEnable = enabledModules ?? getDefaultModules(tier)
+    const moduleRows = ALL_MODULES.map(m => ({
+      tenantId: tenant.id,
+      moduleId: m.id,
+      moduleName: m.name,
+      isEnabled: modulesToEnable.includes(m.id),
+    }))
+
+    await db.insert(tenantModules).values(moduleRows)
+
+    return NextResponse.json({ tenant }, { status: 201 })
+  } catch (error: any) {
+    if (error?.message?.includes('unique')) {
+      return NextResponse.json({ error: 'A client with this slug already exists' }, { status: 409 })
+    }
+    console.error('POST /api/super-admin/clients error:', error)
+    return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })
+  }
+}

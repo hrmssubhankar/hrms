@@ -1,0 +1,178 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+
+type Client = {
+  id: string
+  name: string
+  slug: string
+  tier: string
+  isActive: boolean
+  primaryColor: string
+  createdAt: string
+}
+
+const TIER_COLORS: Record<string, string> = {
+  enterprise:   'bg-purple-900 text-purple-200',
+  professional: 'bg-blue-900 text-blue-200',
+  starter:      'bg-gray-700 text-gray-200',
+}
+
+export default function ClientsPage() {
+  const [clients, setClients] = useState<Client[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    fetch('/api/super-admin/clients')
+      .then(r => r.json())
+      .then(d => { setClients(d.clients ?? []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  async function toggleActive(id: string, current: boolean) {
+    await fetch(`/api/super-admin/clients/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isActive: !current }),
+    })
+    setClients(c => c.map(x => x.id === id ? { ...x, isActive: !current } : x))
+  }
+
+  async function deleteClient(id: string, name: string) {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    await fetch(`/api/super-admin/clients/${id}`, { method: 'DELETE' })
+    setClients(c => c.filter(x => x.id !== id))
+  }
+
+  const filtered = clients.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.slug.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white">Clients</h1>
+        <Link
+          href="/super-admin/clients/new"
+          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+        >
+          + Add Client
+        </Link>
+      </div>
+
+      {/* Search */}
+      <input
+        type="search"
+        placeholder="Search clients…"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        className="w-full max-w-sm bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+      />
+
+      {loading ? (
+        <div className="text-gray-400 text-sm">Loading clients…</div>
+      ) : (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-800 text-left">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Client</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Slug / URL</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Tier</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Theme</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-gray-500">
+                    No clients yet. <Link href="/super-admin/clients/new" className="text-purple-400 hover:underline">Add one →</Link>
+                  </td>
+                </tr>
+              ) : filtered.map((c, i) => (
+                <tr key={c.id} className={`border-b border-gray-800 hover:bg-gray-800/50 ${i % 2 === 0 ? '' : 'bg-gray-900/50'}`}>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                        style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
+                      >
+                        {c.name[0]}
+                      </div>
+                      <span className="font-medium text-white">{c.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <code className="text-purple-300 text-xs">{c.slug}</code>
+                    <p className="text-gray-500 text-xs mt-0.5">{c.slug}.yourdomain.com</p>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${TIER_COLORS[c.tier] ?? TIER_COLORS.starter}`}>
+                      {c.tier}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <button
+                      onClick={() => toggleActive(c.id, c.isActive)}
+                      className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium transition ${
+                        c.isActive
+                          ? 'bg-green-900 text-green-300 hover:bg-red-900 hover:text-red-300'
+                          : 'bg-red-900 text-red-300 hover:bg-green-900 hover:text-green-300'
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${c.isActive ? 'bg-green-400' : 'bg-red-400'}`} />
+                      {c.isActive ? 'Active' : 'Inactive'}
+                    </button>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-5 h-5 rounded-full border border-gray-600"
+                        style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
+                        title={c.primaryColor}
+                      />
+                      <span className="text-xs text-gray-400">{c.primaryColor || 'default'}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/super-admin/clients/${c.id}`}
+                        className="text-xs text-blue-400 hover:text-blue-300 font-medium"
+                      >
+                        Edit
+                      </Link>
+                      <Link
+                        href={`/super-admin/clients/${c.id}/modules`}
+                        className="text-xs text-purple-400 hover:text-purple-300 font-medium"
+                      >
+                        Modules
+                      </Link>
+                      <Link
+                        href={`/super-admin/clients/${c.id}/theme`}
+                        className="text-xs text-pink-400 hover:text-pink-300 font-medium"
+                      >
+                        Theme
+                      </Link>
+                      <button
+                        onClick={() => deleteClient(c.id, c.name)}
+                        className="text-xs text-red-400 hover:text-red-300 font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
