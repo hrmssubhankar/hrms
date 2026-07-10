@@ -3,13 +3,16 @@ import { db } from '@/lib/db'
 import { tenants, tenantModules } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
+type RouteContext = { params: Promise<{ id: string }> }
+
 // GET /api/super-admin/clients/[id]
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, ctx: RouteContext) {
+  const { id } = await ctx.params
   try {
-    const [tenant] = await db.select().from(tenants).where(eq(tenants.id, params.id))
+    const [tenant] = await db.select().from(tenants).where(eq(tenants.id, id))
     if (!tenant) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
 
-    const modules = await db.select().from(tenantModules).where(eq(tenantModules.tenantId, params.id))
+    const modules = await db.select().from(tenantModules).where(eq(tenantModules.tenantId, id))
     return NextResponse.json({ tenant, modules })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch client' }, { status: 500 })
@@ -17,7 +20,8 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 }
 
 // PATCH /api/super-admin/clients/[id] — update tenant
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, ctx: RouteContext) {
+  const { id } = await ctx.params
   try {
     const body = await req.json()
     const { name, tier, isActive, logoUrl, primaryColor, settings } = body
@@ -34,15 +38,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const [updated] = await db
       .update(tenants)
       .set({
-        ...(name        && { name }),
-        ...(tier        && { tier }),
-        ...(isActive !== undefined && { isActive }),
-        ...(logoUrl     && { logoUrl }),
-        ...(primaryColor && { primaryColor }),
+        ...(name         !== undefined && { name }),
+        ...(tier         !== undefined && { tier }),
+        ...(isActive     !== undefined && { isActive }),
+        ...(logoUrl      !== undefined && { logoUrl }),
+        ...(primaryColor !== undefined && { primaryColor }),
         settings: mergedSettings,
         updatedAt: new Date(),
       })
-      .where(eq(tenants.id, params.id))
+      .where(eq(tenants.id, id))
       .returning()
 
     if (!updated) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
@@ -54,9 +58,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 // DELETE /api/super-admin/clients/[id]
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, ctx: RouteContext) {
+  const { id } = await ctx.params
   try {
-    await db.delete(tenants).where(eq(tenants.id, params.id))
+    await db.delete(tenants).where(eq(tenants.id, id))
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete client' }, { status: 500 })
