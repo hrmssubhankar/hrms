@@ -3,6 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
+const PRESET_THEMES = [
+  { label: 'Ocean Blue',    primaryColor: '#1a4fff', accentColor: '#7c3aed', fontFamily: 'Inter',   borderRadius: '8px',    sidebarDark: true  },
+  { label: 'Forest Green', primaryColor: '#16a34a', accentColor: '#0d9488', fontFamily: 'DM Sans', borderRadius: '8px',    sidebarDark: true  },
+  { label: 'Sunrise',      primaryColor: '#ea580c', accentColor: '#d97706', fontFamily: 'Poppins', borderRadius: '12px',   sidebarDark: true  },
+  { label: 'Midnight',     primaryColor: '#6d28d9', accentColor: '#db2777', fontFamily: 'Inter',   borderRadius: '8px',    sidebarDark: true  },
+  { label: 'Rose Gold',    primaryColor: '#be185d', accentColor: '#9d174d', fontFamily: 'Nunito',  borderRadius: '12px',   sidebarDark: false },
+  { label: 'Slate',        primaryColor: '#334155', accentColor: '#0ea5e9', fontFamily: 'Roboto',  borderRadius: '4px',    sidebarDark: true  },
+  { label: 'Teal',         primaryColor: '#0d9488', accentColor: '#0891b2', fontFamily: 'DM Sans', borderRadius: '8px',    sidebarDark: true  },
+  { label: 'Corporate',    primaryColor: '#1e40af', accentColor: '#1d4ed8', fontFamily: 'Inter',   borderRadius: '0',      sidebarDark: true  },
+]
+
 const FONT_OPTIONS = [
   { value: 'Inter',     label: 'Inter (default)' },
   { value: 'Poppins',  label: 'Poppins' },
@@ -97,6 +108,29 @@ export default function ThemePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Controls */}
         <div className="space-y-5 bg-gray-900 border border-gray-800 rounded-xl p-6">
+          {/* Preset themes */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Preset Themes</label>
+            <div className="grid grid-cols-4 gap-2">
+              {PRESET_THEMES.map(p => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => setTheme(t => ({ ...t, ...p }))}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-lg border border-gray-700 hover:border-gray-500 transition group"
+                >
+                  <div className="flex gap-1">
+                    <div className="w-5 h-5 rounded-full" style={{ background: p.primaryColor }} />
+                    <div className="w-5 h-5 rounded-full" style={{ background: p.accentColor }} />
+                  </div>
+                  <span className="text-xs text-gray-400 group-hover:text-white transition">{p.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800" />
+
           {/* Primary colour */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Primary Colour</label>

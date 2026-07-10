@@ -1,10 +1,10 @@
 import { headers } from 'next/headers'
-import Link from 'next/link'
-import LogoutButton from '@/components/auth/LogoutButton'
 import ThemeToggle from '@/components/ui/ThemeToggle'
+import NotificationBell from '@/components/tenant/NotificationBell'
+import TenantSidebar from '@/components/tenant/TenantSidebar'
+import TenantUserDropdown from '@/components/tenant/TenantUserDropdown'
 import { getSession } from '@/lib/auth/session'
 
-// Module nav labels (only shown if enabled for tenant)
 const MODULE_NAV: Record<string, string> = {
   'employee-management':    '👥 Employees',
   'leave-management':       '🏖  Leave',
@@ -18,6 +18,7 @@ const MODULE_NAV: Record<string, string> = {
   'whs-safety':             '🦺 Safety',
   'reporting-analytics':    '📊 Reports',
   'time-attendance':        '🕐 Timesheets',
+  'communications':         '✉️  Communications',
 }
 
 async function getTenantConfig(slug: string) {
@@ -26,9 +27,7 @@ async function getTenantConfig(slug: string) {
     const res = await fetch(`${base}/api/tenant/config?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' })
     if (!res.ok) return null
     return res.json()
-  } catch {
-    return null
-  }
+  } catch { return null }
 }
 
 export default async function TenantLayout({ children }: { children: React.ReactNode }) {
@@ -43,7 +42,7 @@ export default async function TenantLayout({ children }: { children: React.React
   const tenant  = config?.tenant
   const enabledModules: string[] = config?.enabledModules ?? []
 
-  // Theme values
+  // Theme
   const primaryColor = tenant?.primaryColor ?? '#1a4fff'
   const logoUrl      = tenant?.logoUrl ?? ''
   const tenantName   = tenant?.name ?? 'HRMS'
@@ -56,11 +55,15 @@ export default async function TenantLayout({ children }: { children: React.React
   const accentColor  = settings.accentColor  ?? '#7c3aed'
   const sidebarBg    = sidebarDark ? '#111827' : primaryColor
 
-  const navItems = Object.entries(MODULE_NAV).filter(([key]) => enabledModules.includes(key))
-
-  // User initials for avatar
+  // Session
   const userEmail   = session?.email ?? ''
   const userInitial = userEmail[0]?.toUpperCase() ?? 'U'
+  const userRole    = (session as any)?.role_label ?? 'employee'
+
+  // Build nav items from enabled modules
+  const navItems = Object.entries(MODULE_NAV)
+    .filter(([key]) => enabledModules.includes(key))
+    .map(([key, label]) => ({ key, label }))
 
   return (
     <>
@@ -74,80 +77,45 @@ export default async function TenantLayout({ children }: { children: React.React
         body { font-family: var(--font); }
       `}</style>
 
-      <div className="flex h-screen bg-gray-50 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-60 flex flex-col shrink-0" style={{ background: sidebarBg, color: '#fff' }}>
-          {/* Brand */}
-          <div className="px-5 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-            {logoUrl ? (
-              <img src={logoUrl} alt={tenantName} className="h-8 object-contain mb-1" />
-            ) : (
-              <p className="text-base font-bold">{tenantName}</p>
-            )}
-            <p className="text-xs opacity-60 mt-0.5">HR Management</p>
-          </div>
-
-          {/* Nav */}
-          <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
-            <Link
-              href="/tenant/dashboard"
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm opacity-90 hover:opacity-100 hover:bg-white/10 transition"
-            >
-              🏠 Dashboard
-            </Link>
-            {navItems.map(([key, label]) => (
-              <Link
-                key={key}
-                href={`/tenant/${key}`}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm opacity-80 hover:opacity-100 hover:bg-white/10 transition"
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* User + logout at bottom */}
-          <div className="px-3 py-3 space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            {userEmail && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                  style={{ background: primaryColor }}
-                >
-                  {userInitial}
-                </div>
-                <p className="text-xs opacity-80 truncate">{userEmail}</p>
-              </div>
-            )}
-            <LogoutButton className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-red-300 hover:bg-red-900/20 hover:text-red-200 transition text-left opacity-80 hover:opacity-100" />
-          </div>
-        </aside>
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
+        {/* Sidebar — client component with active highlighting */}
+        <TenantSidebar
+          navItems={navItems}
+          sidebarBg={sidebarBg}
+          primaryColor={primaryColor}
+          tenantName={tenantName}
+          logoUrl={logoUrl}
+          userEmail={userEmail}
+          userInitial={userInitial}
+          userRole={userRole}
+          borderRadius={borderRadius}
+        />
 
         {/* Main area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top bar */}
           <header
-            className="h-14 flex items-center justify-between px-6 bg-white shadow-sm shrink-0"
+            className="h-14 flex items-center justify-between px-6 bg-white dark:bg-gray-900 shadow-sm shrink-0"
             style={{ borderBottom: `3px solid ${primaryColor}` }}
           >
-            <span className="text-sm font-semibold text-gray-700">{tenantName}</span>
-            <div className="flex items-center gap-2">
-              {userEmail && (
-                <span className="text-xs text-gray-500 hidden sm:block">{userEmail}</span>
-              )}
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{tenantName}</span>
+
+            <div className="flex items-center gap-1.5">
               <ThemeToggle className="p-2 rounded-lg text-gray-400 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition" />
-              <LogoutButton className="text-xs text-gray-500 hover:text-red-500 border border-gray-200 hover:border-red-200 px-3 py-1.5 rounded-lg transition" />
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ background: primaryColor, borderRadius }}
-              >
-                {userInitial}
-              </div>
+              <NotificationBell primaryColor={primaryColor} />
+              <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
+              <TenantUserDropdown
+                email={userEmail}
+                role={userRole}
+                initial={userInitial}
+                primaryColor={primaryColor}
+                borderRadius={borderRadius}
+              />
             </div>
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-6 dark:bg-gray-950">
             {children}
           </main>
         </div>
