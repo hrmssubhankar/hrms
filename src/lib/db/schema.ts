@@ -712,3 +712,27 @@ export const superAdmins = pgTable('super_admins', {
   createdAt:    timestamp('created_at').notNull().defaultNow(),
   updatedAt:    timestamp('updated_at').notNull().defaultNow(),
 })
+
+// ──────────────────────────────────────────────
+// Platform — Announcements (no tenant FK)
+// Broadcast messages from super admins to all tenants or specific ones.
+// ──────────────────────────────────────────────
+
+export const announcementPriorityEnum = pgEnum('announcement_priority', ['info', 'warning', 'critical'])
+
+export const platformAnnouncements = pgTable('platform_announcements', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  title:          varchar('title', { length: 300 }).notNull(),
+  body:           text('body').notNull(),
+  priority:       announcementPriorityEnum('priority').notNull().default('info'),
+  // 'all' or a JSON array of tenant IDs
+  targetTenants:  text('target_tenants').notNull().default('all'),
+  expiresAt:      timestamp('expires_at'),
+  isActive:       boolean('is_active').notNull().default(true),
+  createdBy:      varchar('created_by', { length: 255 }).notNull(), // super admin email
+  createdAt:      timestamp('created_at').notNull().defaultNow(),
+  updatedAt:      timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  activeIdx:   index('announcements_active_idx').on(t.isActive),
+  createdIdx:  index('announcements_created_idx').on(t.createdAt),
+}))
