@@ -7,10 +7,12 @@ import { getSession } from '@/lib/auth/session'
 export const metadata: Metadata = { title: 'Super Admin | HRMS' }
 
 const nav = [
-  { href: '/super-admin',          label: '🏠 Dashboard' },
-  { href: '/super-admin/clients',  label: '🏢 Clients' },
-  { href: '/super-admin/admins',   label: '👤 Admins' },
-  { href: '/super-admin/settings', label: '⚙️  Settings' },
+  { href: '/super-admin',            label: '🏠 Dashboard'  },
+  { href: '/super-admin/clients',    label: '🏢 Clients'    },
+  { href: '/super-admin/billing',    label: '💳 Billing'    },
+  { href: '/super-admin/audit-logs', label: '📋 Audit Logs' },
+  { href: '/super-admin/admins',     label: '👤 Admins'     },
+  { href: '/super-admin/settings',   label: '⚙️  Settings'  },
 ]
 
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
