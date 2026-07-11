@@ -88,12 +88,6 @@ export default async function SuperAdminDashboard() {
           <h1 className="text-2xl font-bold text-white">Platform Dashboard</h1>
           <p className="text-gray-400 text-sm mt-1">Manage all client tenants and platform settings</p>
         </div>
-        <Link
-          href="/super-admin/clients/new"
-          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
-        >
-          + Add Client
-        </Link>
       </div>
 
       {/* Primary stat cards */}
