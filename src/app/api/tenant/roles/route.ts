@@ -3,13 +3,14 @@ import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  const session = await getSession()
-  if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+  const guard = await apiGuard('roles:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
   const tenantUsers = await db
     .select({
@@ -29,8 +30,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+  const guard = await apiGuard('roles:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
   const body = await req.json()
   const { email, role, password } = body
@@ -53,8 +55,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const session = await getSession()
-  if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+  const guard = await apiGuard('roles:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
   const body = await req.json()
   const { id, role, isActive } = body

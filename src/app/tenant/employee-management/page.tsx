@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import PermissionGate from '@/components/auth/PermissionGate'
 
 type Employee = {
   id: string
@@ -86,13 +87,15 @@ export default function EmployeeManagementPage() {
             Manage your workforce
           </p>
         </div>
-        <Link
-          href="/tenant/employee-management/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition hover:opacity-90"
-          style={{ background: 'var(--primary)' }}
-        >
-          + Add Employee
-        </Link>
+        <PermissionGate permission="employees:write">
+          <Link
+            href="/tenant/employee-management/new"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition hover:opacity-90"
+            style={{ background: 'var(--primary)' }}
+          >
+            + Add Employee
+          </Link>
+        </PermissionGate>
       </div>
 
       {/* Stat cards */}
@@ -159,13 +162,15 @@ export default function EmployeeManagementPage() {
               {search || status || empType ? 'No employees match your filters' : 'No employees yet'}
             </p>
             {!search && !status && !empType && (
-              <Link
-                href="/tenant/employee-management/new"
-                className="mt-2 px-4 py-2 rounded-xl text-sm font-semibold text-white"
-                style={{ background: 'var(--primary)' }}
-              >
-                Add your first employee
-              </Link>
+              <PermissionGate permission="employees:write">
+                <Link
+                  href="/tenant/employee-management/new"
+                  className="mt-2 px-4 py-2 rounded-xl text-sm font-semibold text-white"
+                  style={{ background: 'var(--primary)' }}
+                >
+                  Add your first employee
+                </Link>
+              </PermissionGate>
             )}
           </div>
         ) : (

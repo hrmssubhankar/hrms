@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { jobRequisitions, candidates, applications, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 // GET — list requisitions with application counts, or candidates for a requisition
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('recruitment:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const { searchParams } = req.nextUrl
     const view         = searchParams.get('view') ?? 'requisitions' // requisitions | candidates | applications
@@ -85,8 +86,9 @@ export async function GET(req: NextRequest) {
 // POST — create requisition, candidate, or application
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('recruitment:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
 
@@ -130,8 +132,9 @@ export async function POST(req: NextRequest) {
 // PATCH — update requisition or application status/notes
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('recruitment:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { id, _type = 'requisition', status, notes, interviewScore, approvedBy } = body

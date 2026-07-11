@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { surveys, surveyResponses, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
+import { apiGuard } from '@/lib/auth/apiGuard'
 import { getSession } from '@/lib/auth/session'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('engagement:read')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { searchParams } = req.nextUrl
     const surveyId = searchParams.get('surveyId')
 
@@ -35,8 +37,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('engagement:write')
+    if (guard.error) return guard.error
+    const { session } = guard
     const body = await req.json()
 
     if (body._type === 'response') {

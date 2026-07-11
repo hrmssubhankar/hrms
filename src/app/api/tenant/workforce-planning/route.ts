@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { headcountPlan, departments, positions } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
+import { apiGuard } from '@/lib/auth/apiGuard'
 import { getSession } from '@/lib/auth/session'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('workforce_planning:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const rows = await db
       .select({
@@ -46,8 +48,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('workforce_planning:write')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { departmentId, positionId, plannedCount, currentCount, vacancyCount, targetDate, notes } = await req.json()
     if (!plannedCount) return NextResponse.json({ error: 'plannedCount required' }, { status: 400 })
     const [record] = await db.insert(headcountPlan).values({

@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { payrollRecords, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('payroll:read')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { searchParams } = req.nextUrl
     const status     = searchParams.get('status')
     const employeeId = searchParams.get('employeeId')
@@ -46,8 +47,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('payroll:write')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { employeeId, periodStart, periodEnd, grossPay, netPay } = await req.json()
     if (!employeeId || !periodStart || !periodEnd) {
       return NextResponse.json({ error: 'employeeId, periodStart, periodEnd required' }, { status: 400 })
@@ -64,8 +66,9 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('payroll:write')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { id, status, exportedToXero } = await req.json()
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
     const updates: Record<string, unknown> = {}

@@ -6,12 +6,13 @@ import {
   grievances, separationRecords, supervisionRecords,
 } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('analytics:read')
+    if (guard.error) return guard.error
+    const { session } = guard
     const tid = session.tenantId
 
     const today = new Date().toISOString().split('T')[0]

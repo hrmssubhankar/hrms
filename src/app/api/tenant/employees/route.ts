@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { employees, departments, positions } from '@/lib/db/schema'
 import { eq, and, ilike, or, desc, asc } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 // GET /api/tenant/employees?search=&status=&type=&page=1&limit=20
 export async function GET(req: NextRequest) {
-  const session = await getSession()
-  if (!session?.tenantId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
+  const guard = await apiGuard('employees:read')
+  if (guard.error) return guard.error
+  const { session } = guard
 
   const { searchParams } = req.nextUrl
   const search = searchParams.get('search') ?? ''
@@ -76,8 +77,9 @@ export async function GET(req: NextRequest) {
 
 // POST /api/tenant/employees
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session?.tenantId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
+  const guard = await apiGuard('employees:write')
+  if (guard.error) return guard.error
+  const { session } = guard
 
   try {
     const body = await req.json()

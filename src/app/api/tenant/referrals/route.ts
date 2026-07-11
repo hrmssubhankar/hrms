@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { referrals, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
+import { apiGuard } from '@/lib/auth/apiGuard'
 import { getSession } from '@/lib/auth/session'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('referrals:read')
+    if (guard.error) return guard.error
+    const { session } = guard
     const rows = await db.select({
       id: referrals.id, referrerId: referrals.referrerId,
       referredName: referrals.referredName, referredEmail: referrals.referredEmail,
@@ -32,8 +34,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('referrals:write')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { referrerId, referredName, referredEmail, bonusAmount, notes } = await req.json()
     if (!referrerId || !referredName) return NextResponse.json({ error: 'referrerId and referredName required' }, { status: 400 })
     const [record] = await db.insert(referrals).values({

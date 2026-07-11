@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { auditLogs, users } from '@/lib/db/schema'
 import { eq, and, desc, gte, ilike } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('audit_logs:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const { searchParams } = req.nextUrl
     const resource = searchParams.get('resource')
@@ -59,8 +60,9 @@ export async function GET(req: NextRequest) {
 // POST — write a new audit log entry (called internally by other APIs)
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('audit_logs:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { action, resource, resourceId, oldValues, newValues } = body

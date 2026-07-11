@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { complianceLockExceptions, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
+import { apiGuard } from '@/lib/auth/apiGuard'
 import { getSession } from '@/lib/auth/session'
 
 // GET — list active compliance lock exceptions
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('compliance:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const records = await db
       .select({
@@ -38,8 +40,9 @@ export async function GET(req: NextRequest) {
 // POST — grant a temporary compliance lock exception
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('compliance:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { employeeId, reason, expiresAt } = body

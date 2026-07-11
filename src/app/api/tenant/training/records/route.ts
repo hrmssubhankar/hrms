@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { trainingRecords, courses, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
+import { apiGuard } from '@/lib/auth/apiGuard'
 import { getSession } from '@/lib/auth/session'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('training:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const { searchParams } = req.nextUrl
     const courseId   = searchParams.get('courseId')
@@ -85,8 +87,9 @@ export async function GET(req: NextRequest) {
 // Enrol employee(s) in a course
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('training:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { employeeId, courseId, employeeIds } = body

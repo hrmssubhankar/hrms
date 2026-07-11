@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { competencies, competencyAssessments, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 // GET — list competencies + optionally their assessments
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('competencies:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const { searchParams } = req.nextUrl
     const includeAssessments = searchParams.get('assessments') === '1'
@@ -74,8 +75,9 @@ export async function GET(req: NextRequest) {
 // POST — create competency OR assessment
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('competencies:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
 
@@ -114,8 +116,9 @@ export async function POST(req: NextRequest) {
 // PATCH — update assessment
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('competencies:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { id, outcome, evidence, notes, expiryDate, assessedAt } = body

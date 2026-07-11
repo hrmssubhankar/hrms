@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { recognitions, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('recognition:read')
+    if (guard.error) return guard.error
+    const { session } = guard
     const nominator = { id: employees.id, firstName: employees.firstName, lastName: employees.lastName }
     const rows = await db.select({
       id: recognitions.id, recipientId: recognitions.recipientId,
@@ -27,8 +28,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('recognition:write')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { recipientId, nominatedBy, type, reason, period, isPublic } = await req.json()
     if (!recipientId || !type) return NextResponse.json({ error: 'recipientId and type required' }, { status: 400 })
     const [record] = await db.insert(recognitions).values({

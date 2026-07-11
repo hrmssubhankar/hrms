@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { diversityData, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('dei:read')
+    if (guard.error) return guard.error
+    const { session } = guard
     const rows = await db.select({
       id: diversityData.id, employeeId: diversityData.employeeId,
       gender: diversityData.gender, indigenousStatus: diversityData.indigenousStatus,
@@ -41,8 +42,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('dei:write')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { employeeId, gender, indigenousStatus, disabilityStatus, culturalBackground, adjustmentsRequired } = await req.json()
     if (!employeeId) return NextResponse.json({ error: 'employeeId required' }, { status: 400 })
     // Upsert via delete+insert (no onConflict in schema, use unique index)

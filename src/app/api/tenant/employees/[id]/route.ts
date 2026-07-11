@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { employees, departments, positions } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 type Ctx = { params: Promise<{ id: string }> }
 
 // GET /api/tenant/employees/[id]
 export async function GET(_: NextRequest, ctx: Ctx) {
-  const session = await getSession()
-  if (!session?.tenantId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
+  const guard = await apiGuard('employees:read')
+  if (guard.error) return guard.error
+  const { session } = guard
 
   const { id } = await ctx.params
   try {
@@ -59,8 +60,9 @@ export async function GET(_: NextRequest, ctx: Ctx) {
 
 // PATCH /api/tenant/employees/[id]
 export async function PATCH(req: NextRequest, ctx: Ctx) {
-  const session = await getSession()
-  if (!session?.tenantId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
+  const guard = await apiGuard('employees:write')
+  if (guard.error) return guard.error
+  const { session } = guard
 
   const { id } = await ctx.params
   try {
@@ -94,8 +96,9 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
 // DELETE /api/tenant/employees/[id] — soft-delete (set isActive=false)
 export async function DELETE(_: NextRequest, ctx: Ctx) {
-  const session = await getSession()
-  if (!session?.tenantId) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
+  const guard = await apiGuard('employees:delete')
+  if (guard.error) return guard.error
+  const { session } = guard
 
   const { id } = await ctx.params
   try {

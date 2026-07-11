@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { documents, employees } from '@/lib/db/schema'
 import { eq, and, desc, lt } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('documents:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const { searchParams } = req.nextUrl
     const category   = searchParams.get('category')
@@ -71,8 +72,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('documents:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { title, category, blobUrl, employeeId, fileName, fileSizeBytes, mimeType, expiryDate, notes } = body
@@ -105,8 +107,9 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('documents:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { id, status, notes, expiryDate, title } = body

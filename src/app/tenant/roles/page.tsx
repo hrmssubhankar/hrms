@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import PermissionGate from '@/components/auth/PermissionGate'
 
 type User = {
   id: string; email: string; role: string; isActive: boolean
@@ -104,10 +105,12 @@ export default function RolesPage() {
           <h1 className="text-2xl font-bold text-white">Roles & Access</h1>
           <p className="text-gray-400 text-sm mt-1">Manage portal users and their access roles</p>
         </div>
-        <button onClick={() => { setShowForm(v => !v); setForm({ email: '', role: 'employee', password: generatePassword() }) }}
-          className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
-          {showForm ? 'Cancel' : '+ Invite User'}
-        </button>
+        <PermissionGate permission="roles:write">
+          <button onClick={() => { setShowForm(v => !v); setForm({ email: '', role: 'employee', password: generatePassword() }) }}
+            className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
+            {showForm ? 'Cancel' : '+ Invite User'}
+          </button>
+        </PermissionGate>
       </div>
 
       {/* Stats */}
@@ -201,23 +204,30 @@ export default function RolesPage() {
                 <tr key={u.id} className={`hover:bg-gray-800/30 ${!u.isActive ? 'opacity-50' : ''}`}>
                   <td className="px-4 py-3 text-gray-200 font-mono text-xs">{u.email}</td>
                   <td className="px-4 py-3">
-                    {editId === u.id ? (
-                      <div className="flex gap-1.5">
-                        <select value={editRole} onChange={e => setEditRole(e.target.value)}
-                          className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-white">
-                          {ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
-                        </select>
-                        <button onClick={() => changeRole(u.id, editRole)}
-                          className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded transition">✓</button>
-                        <button onClick={() => setEditId(null)}
-                          className="text-xs text-gray-500 hover:text-white px-1">✕</button>
-                      </div>
-                    ) : (
-                      <button onClick={() => { setEditId(u.id); setEditRole(u.role) }}
-                        className={`text-xs px-2 py-0.5 rounded-full border cursor-pointer hover:opacity-80 transition ${ROLE_STYLE[u.role] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
-                        {ROLE_LABEL[u.role] ?? u.role}
-                      </button>
-                    )}
+                    <PermissionGate permission="roles:write"
+                      fallback={
+                        <span className={`text-xs px-2 py-0.5 rounded-full border ${ROLE_STYLE[u.role] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                          {ROLE_LABEL[u.role] ?? u.role}
+                        </span>
+                      }>
+                      {editId === u.id ? (
+                        <div className="flex gap-1.5">
+                          <select value={editRole} onChange={e => setEditRole(e.target.value)}
+                            className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-white">
+                            {ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
+                          </select>
+                          <button onClick={() => changeRole(u.id, editRole)}
+                            className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded transition">✓</button>
+                          <button onClick={() => setEditId(null)}
+                            className="text-xs text-gray-500 hover:text-white px-1">✕</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => { setEditId(u.id); setEditRole(u.role) }}
+                          className={`text-xs px-2 py-0.5 rounded-full border cursor-pointer hover:opacity-80 transition ${ROLE_STYLE[u.role] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                          {ROLE_LABEL[u.role] ?? u.role}
+                        </button>
+                      )}
+                    </PermissionGate>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs ${u.totpEnabled ? 'text-green-400' : 'text-gray-600'}`}>
@@ -233,12 +243,14 @@ export default function RolesPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleActive(u.id, !u.isActive)}
-                      className={`text-xs px-2.5 py-1 rounded border transition ${u.isActive
-                        ? 'bg-red-900/20 border-red-800 text-red-400 hover:bg-red-900/40'
-                        : 'bg-green-900/20 border-green-800 text-green-400 hover:bg-green-900/40'}`}>
-                      {u.isActive ? 'Suspend' : 'Activate'}
-                    </button>
+                    <PermissionGate permission="roles:write">
+                      <button onClick={() => toggleActive(u.id, !u.isActive)}
+                        className={`text-xs px-2.5 py-1 rounded border transition ${u.isActive
+                          ? 'bg-red-900/20 border-red-800 text-red-400 hover:bg-red-900/40'
+                          : 'bg-green-900/20 border-green-800 text-green-400 hover:bg-green-900/40'}`}>
+                        {u.isActive ? 'Suspend' : 'Activate'}
+                      </button>
+                    </PermissionGate>
                   </td>
                 </tr>
               ))}

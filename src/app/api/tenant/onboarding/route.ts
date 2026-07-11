@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { onboardingRecords, employees } from '@/lib/db/schema'
 import { eq, desc, and } from 'drizzle-orm'
-import { getSession } from '@/lib/auth/session'
+import { apiGuard } from '@/lib/auth/apiGuard'
 
 // GET /api/tenant/onboarding
 export async function GET(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('onboarding:read')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const { searchParams } = req.nextUrl
     const status = searchParams.get('status')
@@ -71,8 +72,9 @@ export async function GET(req: NextRequest) {
 // POST /api/tenant/onboarding
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('onboarding:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { employeeId, stage, buddyId, notes, checklist } = body
