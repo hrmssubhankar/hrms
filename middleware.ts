@@ -2,34 +2,32 @@ import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
 /**
- * Middleware — two responsibilities:
- * 1. Subdomain-based multi-tenant routing
- * 2. JWT session guard for /super-admin/* and /tenant/*
+ * Middleware — multi-tenant routing + JWT auth guard.
+ *
+ * Works in two modes:
+ *
+ * A) Separate-project mode (current approach):
+ *    Each Vercel project sets NEXT_PUBLIC_TENANT_SLUG:
+ *      superadmin-hrms  →  NEXT_PUBLIC_TENANT_SLUG=admin
+ *      yahwehcare-hrms  →  NEXT_PUBLIC_TENANT_SLUG=yahweh-care
+ *      yahwehpc-hrms    →  NEXT_PUBLIC_TENANT_SLUG=yahweh-property-care
+ *
+ * B) Subdomain mode (future, with a custom domain):
+ *    superadmin.yourdomain.com, yahwehcare.yourdomain.com, etc.
+ *    Set NEXT_PUBLIC_ROOT_DOMAIN=yourdomain.com in Vercel.
  */
 
-const SESSION_COOKIE   = 'hrms_session'
+const SESSION_COOKIE = 'hrms_session'
 
-// Hostnames whose first segment identifies a super admin deployment
-const SUPER_ADMIN_HOSTS = ['admin', 'superadmin', 'superadmin-hrms', 'admin-hrms']
+// Subdomains that identify the super admin portal (used in subdomain mode)
+const SUPER_ADMIN_SUBDOMAINS = ['superadmin', 'admin']
 
-// All known app hostnames (prevents treating vercel.app as a subdomain)
-const APP_HOSTNAMES = [
-  'yahweh-hrms.vercel.app',
-  'superadmin-hrms.vercel.app',
-  'yahwehcare-hrms.vercel.app',
-  'yahwehpc-hrms.vercel.app',
-  'admin-hrms.vercel.app',
-  'localhost',
-  '127.0.0.1',
-]
-
-// Dedicated per-tenant deployment URLs → tenant slug in the database
-const HOST_TENANT_MAP: Record<string, string> = {
-  'yahwehcare-hrms.vercel.app': 'yahweh-care',
-  'yahwehpc-hrms.vercel.app':   'yahweh-property-care',
+// Subdomain → DB tenant slug mapping (used in subdomain mode)
+const SUBDOMAIN_TENANT_MAP: Record<string, string> = {
+  yahwehcare: 'yahweh-care',
+  yahwehpc:   'yahweh-property-care',
 }
 
-// Paths that never require authentication
 const PUBLIC_PATHS = [
   '/login',
   '/api/auth',
@@ -54,37 +52,45 @@ async function verifySession(token: string) {
   }
 }
 
-function getSubdomain(hostname: string): string | null {
-  const host = hostname.split(':')[0]
-  for (const appHost of APP_HOSTNAMES) {
-    if (host === appHost || host.endsWith(`.${appHost}`)) {
-      const parts = host.split('.')
-      if (parts.length > appHost.split('.').length) return parts[0]
-      return null
+function extractSubdomain(hostname: string): string | null {
+  const host       = hostname.split(':')[0]
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? ''
+
+  if (rootDomain) {
+    if (host === rootDomain) return null
+    if (host.endsWith(`.${rootDomain}`)) {
+      return host.slice(0, host.length - rootDomain.length - 1).split('.')[0]
     }
+    return null
   }
-  const parts = host.split('.')
-  if (parts.length > 2) return parts[0]
-  return null
+
+  if (host === 'localhost' || host === '127.0.0.1') return null
+  return null   // no root domain configured → subdomain mode inactive
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const hostname = request.headers.get('host') ?? ''
 
-  // Always allow public paths
+  // ── Public paths always pass through ──────────────────────────────────────
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next()
   }
 
-  const bareHost   = hostname.split(':')[0]
-  const subdomain  = getSubdomain(hostname)
-  const isSuperAdminHost =
-    (subdomain && SUPER_ADMIN_HOSTS.includes(subdomain)) ||
-    SUPER_ADMIN_HOSTS.some((h) => bareHost === `${h}.vercel.app`)
+  // ── Deployment-level tenant (NEXT_PUBLIC_TENANT_SLUG env var) ─────────────
+  // Set per-project in Vercel. Takes priority over everything else.
+  const deploymentTenant = process.env.NEXT_PUBLIC_TENANT_SLUG ?? ''
 
-  // ── Super Admin routing + auth guard ───────────────────────────────────────
-  if (isSuperAdminHost || pathname.startsWith('/super-admin')) {
+  // ── Subdomain detection (future custom domain support) ─────────────────────
+  const subdomain = extractSubdomain(hostname)
+
+  // ── Determine if this is a super admin context ────────────────────────────
+  const isSuperAdmin =
+    deploymentTenant === 'admin' ||
+    (subdomain !== null && SUPER_ADMIN_SUBDOMAINS.includes(subdomain))
+
+  // ── Super Admin routing + auth guard ──────────────────────────────────────
+  if (isSuperAdmin || pathname.startsWith('/super-admin')) {
     const token   = request.cookies.get(SESSION_COOKIE)?.value
     const session = token ? await verifySession(token) : null
 
@@ -95,25 +101,24 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    if (isSuperAdminHost && !pathname.startsWith('/super-admin') && !pathname.startsWith('/api')) {
+    if (isSuperAdmin && !pathname.startsWith('/super-admin') && !pathname.startsWith('/api')) {
       const url = request.nextUrl.clone()
-      url.pathname = `/super-admin${pathname}`
+      url.pathname = `/super-admin${pathname === '/' ? '' : pathname}`
       return NextResponse.rewrite(url)
     }
 
     return NextResponse.next()
   }
 
-  // ── Tenant routing + auth guard ────────────────────────────────────────────
+  // ── Tenant routing + auth guard ───────────────────────────────────────────
   const tenantSlug =
-    HOST_TENANT_MAP[bareHost] ??                                           // dedicated deployment URL
-    (subdomain && !SUPER_ADMIN_HOSTS.includes(subdomain) ? subdomain : null) ??
+    (deploymentTenant && deploymentTenant !== 'admin' ? deploymentTenant : null) ??
+    (subdomain ? (SUBDOMAIN_TENANT_MAP[subdomain] ?? subdomain) : null) ??
     searchParams.get('tenant') ??
     request.cookies.get('tenant_slug')?.value
 
   if (tenantSlug) {
-    // Auth guard for tenant routes
-    if (pathname.startsWith('/tenant') || (!pathname.startsWith('/api'))) {
+    if (pathname.startsWith('/tenant') || !pathname.startsWith('/api')) {
       const token   = request.cookies.get(SESSION_COOKIE)?.value
       const session = token ? await verifySession(token) : null
 
@@ -125,14 +130,12 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // Already on /tenant path
     if (pathname.startsWith('/tenant') || pathname.startsWith('/api/tenant')) {
       const res = NextResponse.next()
       res.headers.set('x-tenant-slug', tenantSlug)
       return res
     }
 
-    // Rewrite slug.domain.com/* → /tenant/*
     const url = request.nextUrl.clone()
     url.pathname = `/tenant${pathname === '/' ? '/dashboard' : pathname}`
     const res = NextResponse.rewrite(url)
@@ -141,7 +144,7 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
-  // ── Root → login ───────────────────────────────────────────────────────────
+  // ── Root → login ──────────────────────────────────────────────────────────
   if (pathname === '/') {
     const url = request.nextUrl.clone()
     url.pathname = '/login'

@@ -4,51 +4,57 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
-// Dedicated deployment hostname → { tenantSlug, isAdmin, label }
-const HOST_CONFIG: Record<string, { slug: string; isAdmin: boolean; label: string }> = {
-  'superadmin-hrms.vercel.app': { slug: 'admin',                 isAdmin: true,  label: 'Platform Administration' },
-  'admin-hrms.vercel.app':      { slug: 'admin',                 isAdmin: true,  label: 'Platform Administration' },
-  'yahwehcare-hrms.vercel.app': { slug: 'yahweh-care',           isAdmin: false, label: 'Yahweh Care' },
-  'yahwehpc-hrms.vercel.app':   { slug: 'yahweh-property-care',  isAdmin: false, label: 'Yahweh Property Care' },
+// Tenant slug → display label
+const TENANT_LABELS: Record<string, string> = {
+  'yahweh-care':           'Yahweh Care',
+  'yahweh-property-care':  'Yahweh Property Care',
 }
 
 function LoginForm() {
-  const router      = useRouter()
-  const params      = useSearchParams()
-  const [tenantSlug, setTenantSlug] = useState<string>('')
+  const router  = useRouter()
+  const params  = useSearchParams()
+  const [tenantSlug,  setTenantSlug]  = useState('')
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
-  const [orgLabel, setOrgLabel] = useState('')
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [error, setError]   = useState('')
+  const [orgLabel,    setOrgLabel]    = useState('')
+  const [form,   setForm]   = useState({ email: '', password: '' })
+  const [error,  setError]  = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const slug = params.get('tenant') ?? ''
-    const host = window.location.hostname
-
-    // 1. Check dedicated deployment hostname map first
-    const hostCfg = HOST_CONFIG[host]
-    if (hostCfg) {
-      setIsSuperAdmin(hostCfg.isAdmin)
-      setTenantSlug(hostCfg.slug)
-      setOrgLabel(hostCfg.label)
+    // Priority 1: NEXT_PUBLIC_TENANT_SLUG set per Vercel project
+    const deploymentTenant = process.env.NEXT_PUBLIC_TENANT_SLUG ?? ''
+    if (deploymentTenant) {
+      if (deploymentTenant === 'admin') {
+        setIsSuperAdmin(true)
+        setTenantSlug('admin')
+        setOrgLabel('Platform Administration')
+      } else {
+        setIsSuperAdmin(false)
+        setTenantSlug(deploymentTenant)
+        setOrgLabel(TENANT_LABELS[deploymentTenant] ?? deploymentTenant)
+      }
       return
     }
 
-    // 2. URL param or empty → super admin
-    if (host.startsWith('admin.') || slug === 'admin' || slug === '') {
+    // Priority 2: ?tenant= URL param (set by middleware on redirect)
+    const paramTenant = params.get('tenant') ?? ''
+    if (paramTenant === 'admin') {
       setIsSuperAdmin(true)
       setTenantSlug('admin')
       setOrgLabel('Platform Administration')
       return
     }
+    if (paramTenant) {
+      setIsSuperAdmin(false)
+      setTenantSlug(paramTenant)
+      setOrgLabel(TENANT_LABELS[paramTenant] ?? paramTenant)
+      return
+    }
 
-    // 3. Explicit tenant param or subdomain
-    const subdomain = host.split('.')[0]
-    const resolved  = slug || subdomain
-    setTenantSlug(resolved)
-    setIsSuperAdmin(false)
-    setOrgLabel(resolved)
+    // Priority 3: default → super admin (local dev / yahweh-hrms.vercel.app root)
+    setIsSuperAdmin(true)
+    setTenantSlug('admin')
+    setOrgLabel('Platform Administration')
   }, [params])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -58,9 +64,9 @@ function LoginForm() {
 
     try {
       const res = await fetch('/api/auth/login', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, tenantSlug }),
+        body:    JSON.stringify({ ...form, tenantSlug }),
       })
       const data = await res.json()
 
@@ -80,21 +86,20 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
       <div className="w-full max-w-sm space-y-6">
+
         {/* Logo / Brand */}
         <div className="text-center space-y-2">
           <div
             className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-white text-xl font-bold"
             style={{ background: isSuperAdmin ? '#7c3aed' : '#1a4fff' }}
           >
-            {isSuperAdmin ? '★' : 'H'}
+            {isSuperAdmin ? '★' : orgLabel[0]?.toUpperCase() ?? 'H'}
           </div>
           <h1 className="text-xl font-bold text-white">
             {isSuperAdmin ? 'Super Admin' : 'HRMS'}
           </h1>
           <p className="text-sm text-gray-400">
-            {isSuperAdmin
-              ? 'Platform administration'
-              : `Sign in to ${orgLabel || tenantSlug || 'your organisation'}`}
+            {isSuperAdmin ? 'Platform administration' : `Sign in to ${orgLabel || 'your organisation'}`}
           </p>
         </div>
 
