@@ -4,6 +4,11 @@ import NotificationBell from '@/components/tenant/NotificationBell'
 import TenantSidebar from '@/components/tenant/TenantSidebar'
 import TenantUserDropdown from '@/components/tenant/TenantUserDropdown'
 import { getSession } from '@/lib/auth/session'
+import { db } from '@/lib/db'
+import { tenants, tenantModules } from '@/lib/db/schema'
+import { eq, and } from 'drizzle-orm'
+
+export const dynamic = 'force-dynamic'
 
 const MODULE_NAV: Record<string, string> = {
   'employee-management':    '👥 Employees',
@@ -22,11 +27,20 @@ const MODULE_NAV: Record<string, string> = {
 }
 
 async function getTenantConfig(slug: string) {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   try {
-    const res = await fetch(`${base}/api/tenant/config?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' })
-    if (!res.ok) return null
-    return res.json()
+    const [tenant] = await db.select().from(tenants).where(eq(tenants.slug, slug))
+    if (!tenant || !tenant.isActive) return null
+    const modules = await db
+      .select()
+      .from(tenantModules)
+      .where(and(eq(tenantModules.tenantId, tenant.id), eq(tenantModules.isEnabled, true)))
+    return {
+      tenant: {
+        id: tenant.id, name: tenant.name, slug: tenant.slug,
+        logoUrl: tenant.logoUrl, primaryColor: tenant.primaryColor, settings: tenant.settings,
+      },
+      enabledModules: modules.map(m => m.moduleName),
+    }
   } catch { return null }
 }
 

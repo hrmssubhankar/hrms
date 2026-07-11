@@ -76,11 +76,12 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
 export async function PATCH(req: NextRequest, ctx: RouteContext) {
   const { id } = await ctx.params
   try {
-    const { userId, isActive, newPassword } = await req.json()
+    const { userId, isActive, newPassword, role } = await req.json()
 
     const updates: Record<string, unknown> = { updatedAt: new Date() }
     if (isActive !== undefined) updates.isActive = isActive
     if (newPassword) updates.passwordHash = await bcrypt.hash(newPassword, 12)
+    if (role) updates.role = role
 
     const [updated] = await db
       .update(users)
