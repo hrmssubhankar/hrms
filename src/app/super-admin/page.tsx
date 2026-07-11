@@ -1,49 +1,61 @@
 import Link from 'next/link'
+import { db } from '@/lib/db'
+import { tenants, users, tenantModules, auditLogs } from '@/lib/db/schema'
+import { eq, count, desc } from 'drizzle-orm'
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+export const dynamic = 'force-dynamic'
 
 async function getPlatformData() {
   try {
-    const [clientsRes, statsRes, auditRes] = await Promise.all([
-      fetch(`${BASE}/api/super-admin/clients`,    { cache: 'no-store' }),
-      fetch(`${BASE}/api/super-admin/stats`,      { cache: 'no-store' }),
-      fetch(`${BASE}/api/super-admin/audit-logs?page=1`, { cache: 'no-store' }),
-    ])
+    const [allTenants, totalUsersResult, activeUsersResult, enabledModulesResult, recentLogs] =
+      await Promise.all([
+        db.select().from(tenants),
+        db.select({ count: count() }).from(users),
+        db.select({ count: count() }).from(users).where(eq(users.isActive, true)),
+        db.select({ count: count() }).from(tenantModules).where(eq(tenantModules.isEnabled, true)),
+        db
+          .select({
+            id:        auditLogs.id,
+            action:    auditLogs.action,
+            resource:  auditLogs.resource,
+            createdAt: auditLogs.createdAt,
+            tenantId:  auditLogs.tenantId,
+          })
+          .from(auditLogs)
+          .orderBy(desc(auditLogs.createdAt))
+          .limit(6),
+      ])
 
-    const clientsData = await clientsRes.json()
-    const statsData   = statsRes.ok ? await statsRes.json() : {}
-    const auditData   = auditRes.ok ? await auditRes.json() : {}
+    // Tenant lookup for audit log labels
+    const tenantMap = Object.fromEntries(allTenants.map((t) => [t.id, t.name]))
 
-    const clients: any[] = clientsData.clients ?? []
-    const recentLogs: any[] = (auditData.logs ?? []).slice(0, 6)
+    const recentLogsWithName = recentLogs.map((l) => ({
+      ...l,
+      tenantName: l.tenantId ? tenantMap[l.tenantId] ?? null : null,
+    }))
 
-    // Onboarding completion per client
-    const clientsWithStatus = clients.map((c: any) => {
-      // We can't query per-client modules/users here without extra fetches,
-      // so we use a simple heuristic: isActive + has primaryColor ≠ default = themed
-      const themed  = c.primaryColor && c.primaryColor !== '#1a4fff'
-      const hasSlug = Boolean(c.slug)
-      const score   = [c.isActive, themed, hasSlug].filter(Boolean).length
+    const activeTenants = allTenants.filter((t) => t.isActive)
+    const prices: Record<string, number> = { starter: 57, professional: 120, enterprise: 217 }
+    const mrr = activeTenants.reduce((sum, t) => sum + (prices[t.tier] ?? 0), 0)
+
+    const clientsWithStatus = allTenants.slice(0, 5).map((c) => {
+      const themed = c.primaryColor && c.primaryColor !== '#1a4fff'
+      const score  = [c.isActive, themed, Boolean(c.slug)].filter(Boolean).length
       return { ...c, onboardingScore: score, onboardingTotal: 3 }
     })
 
-    const mrr = clients.filter((c: any) => c.isActive).reduce((sum: number, c: any) => {
-      const prices: Record<string, number> = { starter: 57, professional: 120, enterprise: 217 }
-      return sum + (prices[c.tier] ?? 0)
-    }, 0)
-
     return {
-      totalClients:   clients.length,
-      activeClients:  clients.filter((c: any) => c.isActive).length,
-      enterprise:     clients.filter((c: any) => c.tier === 'enterprise').length,
-      professional:   clients.filter((c: any) => c.tier === 'professional').length,
-      starter:        clients.filter((c: any) => c.tier === 'starter').length,
-      totalUsers:     statsData.totalUsers     ?? 0,
-      activeUsers:    statsData.activeUsers    ?? 0,
-      enabledModules: statsData.enabledModules ?? 0,
+      totalClients:   allTenants.length,
+      activeClients:  activeTenants.length,
+      enterprise:     allTenants.filter((t) => t.tier === 'enterprise').length,
+      professional:   allTenants.filter((t) => t.tier === 'professional').length,
+      starter:        allTenants.filter((t) => t.tier === 'starter').length,
+      totalUsers:     Number(totalUsersResult[0]?.count ?? 0),
+      activeUsers:    Number(activeUsersResult[0]?.count ?? 0),
+      enabledModules: Number(enabledModulesResult[0]?.count ?? 0),
       mrr,
-      recentLogs,
-      clients: clientsWithStatus.slice(0, 5),
+      recentLogs:     recentLogsWithName,
+      clients:        clientsWithStatus,
     }
   } catch {
     return {
@@ -61,7 +73,7 @@ const ACTION_COLOR: Record<string, string> = {
 }
 
 function actionColor(action: string) {
-  const key = Object.keys(ACTION_COLOR).find(k => action.toLowerCase().includes(k))
+  const key = Object.keys(ACTION_COLOR).find((k) => action.toLowerCase().includes(k))
   return key ? ACTION_COLOR[key] : 'text-gray-400'
 }
 
@@ -106,16 +118,16 @@ export default async function SuperAdminDashboard() {
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
-              { label: '➕ Add Client',      href: '/super-admin/clients/new',     desc: 'Onboard a new organisation' },
-              { label: '🏢 Clients',         href: '/super-admin/clients',         desc: 'View, edit or deactivate' },
-              { label: '💳 Billing',         href: '/super-admin/billing',         desc: 'Subscriptions & revenue' },
-              { label: '🧩 Modules',         href: '/super-admin/modules',         desc: 'Cross-tenant module usage' },
-              { label: '📋 Audit Logs',      href: '/super-admin/audit-logs',      desc: 'Platform-wide event log' },
-              { label: '📢 Announcements',   href: '/super-admin/announcements',   desc: 'Broadcast to tenants' },
-              { label: '🖥️  System Health',  href: '/super-admin/system',          desc: 'DB status & infra checks' },
-              { label: '👤 Admins',          href: '/super-admin/admins',          desc: 'Super admin accounts' },
-              { label: '⚙️  Settings',        href: '/super-admin/settings',        desc: 'Email, security, maintenance' },
-            ].map(a => (
+              { label: '➕ Add Client',     href: '/super-admin/clients/new',   desc: 'Onboard a new organisation' },
+              { label: '🏢 Clients',        href: '/super-admin/clients',       desc: 'View, edit or deactivate' },
+              { label: '💳 Billing',        href: '/super-admin/billing',       desc: 'Subscriptions & revenue' },
+              { label: '🧩 Modules',        href: '/super-admin/modules',       desc: 'Cross-tenant module usage' },
+              { label: '📋 Audit Logs',     href: '/super-admin/audit-logs',    desc: 'Platform-wide event log' },
+              { label: '📢 Announcements',  href: '/super-admin/announcements', desc: 'Broadcast to tenants' },
+              { label: '🖥️  System Health', href: '/super-admin/system',        desc: 'DB status & infra checks' },
+              { label: '👤 Admins',         href: '/super-admin/admins',        desc: 'Super admin accounts' },
+              { label: '⚙️  Settings',       href: '/super-admin/settings',      desc: 'Email, security, maintenance' },
+            ].map((a) => (
               <Link
                 key={a.href}
                 href={a.href}
@@ -147,10 +159,10 @@ export default async function SuperAdminDashboard() {
                       <p className="text-sm text-white font-medium truncate">{c.name}</p>
                       <div className="flex items-center gap-1 mt-1">
                         {[
-                          { label: 'Active',  done: c.isActive },
-                          { label: 'Themed',  done: c.primaryColor !== '#1a4fff' },
-                          { label: 'Slug',    done: Boolean(c.slug) },
-                        ].map(step => (
+                          { label: 'Active', done: c.isActive },
+                          { label: 'Themed', done: c.primaryColor !== '#1a4fff' },
+                          { label: 'Slug',   done: Boolean(c.slug) },
+                        ].map((step) => (
                           <span
                             key={step.label}
                             className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-900/50 text-green-400' : 'bg-gray-800 text-gray-500'}`}
