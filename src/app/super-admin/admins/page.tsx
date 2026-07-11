@@ -12,14 +12,43 @@ type Admin = {
 }
 
 export default function AdminsPage() {
-  const [admins, setAdmins]   = useState<Admin[]>([])
-  const [loading, setLoading] = useState(true)
+  const [admins,    setAdmins]    = useState<Admin[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [showForm,  setShowForm]  = useState(false)
+  const [saving,    setSaving]    = useState(false)
+  const [formError, setFormError] = useState('')
+  const [formSuccess, setFormSuccess] = useState('')
+  const [form, setForm] = useState({ name: '', email: '', password: '' })
 
   useEffect(() => {
     fetch('/api/super-admin/admins')
       .then(r => r.json())
       .then(d => { setAdmins(d.admins ?? []); setLoading(false) })
   }, [])
+
+  async function createAdmin(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    setFormError('')
+    try {
+      const res  = await fetch('/api/super-admin/admins', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to create admin')
+      setAdmins(a => [...a, { ...data.admin, lastLoginAt: null }])
+      setForm({ name: '', email: '', password: '' })
+      setShowForm(false)
+      setFormSuccess(`${data.admin.name} added as super admin.`)
+      setTimeout(() => setFormSuccess(''), 4000)
+    } catch (err: any) {
+      setFormError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   async function toggleActive(admin: Admin) {
     await fetch('/api/super-admin/admins', {
@@ -44,10 +73,83 @@ export default function AdminsPage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Super Admins</h1>
-        <p className="text-gray-400 text-sm mt-1">Platform-level administrator accounts</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Super Admins</h1>
+          <p className="text-gray-400 text-sm mt-1">Platform-level administrator accounts</p>
+        </div>
+        <button
+          onClick={() => { setShowForm(v => !v); setFormError('') }}
+          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+        >
+          {showForm ? 'Cancel' : '+ Add Admin'}
+        </button>
       </div>
+
+      {formSuccess && (
+        <div className="bg-green-900/50 border border-green-700 rounded-lg p-3 text-sm text-green-300">{formSuccess}</div>
+      )}
+
+      {/* Add admin form */}
+      {showForm && (
+        <form onSubmit={createAdmin} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-purple-300">New Super Admin</h2>
+          {formError && (
+            <div className="bg-red-900/50 border border-red-700 rounded-lg p-2 text-xs text-red-300">{formError}</div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Full Name *</label>
+              <input
+                required
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="Jane Smith"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Email *</label>
+              <input
+                required
+                type="email"
+                value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="jane@example.com"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Password *</label>
+              <input
+                required
+                type="password"
+                minLength={8}
+                value={form.password}
+                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                placeholder="min 8 characters"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-5 py-2 rounded-lg transition"
+            >
+              {saving ? 'Creating…' : 'Create Super Admin'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowForm(false); setFormError('') }}
+              className="border border-gray-700 text-gray-300 hover:text-white text-sm px-4 py-2 rounded-lg transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
