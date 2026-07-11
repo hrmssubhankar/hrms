@@ -100,6 +100,19 @@ export default function TenantSidebar({
 
       {/* User section at bottom */}
       <div className="px-3 pb-4 pt-3 space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        {/* Settings link */}
+        <Link
+          href="/tenant/settings"
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition ${
+            pathname.includes('/tenant/settings')
+              ? 'text-white font-medium'
+              : 'text-white/60 hover:text-white hover:bg-white/10'
+          }`}
+          style={pathname.includes('/tenant/settings') ? { background: primaryColor } : {}}
+        >
+          ⚙️ Settings
+        </Link>
+
         <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.08)' }}>
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"

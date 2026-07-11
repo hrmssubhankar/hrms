@@ -10,6 +10,7 @@ type Client = {
   tier: string
   isActive: boolean
   primaryColor: string
+  logoUrl: string | null
   createdAt: string
 }
 
@@ -131,12 +132,17 @@ export default function ClientsPage() {
                 <tr key={c.id} className={`border-b border-gray-800 hover:bg-gray-800/50 transition ${i % 2 === 0 ? '' : 'bg-gray-900/50'}`}>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
-                        style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
-                      >
-                        {c.name[0]}
-                      </div>
+                      {c.logoUrl ? (
+                        <img src={c.logoUrl} alt={c.name}
+                          className="w-8 h-8 rounded-lg object-contain bg-gray-800 p-0.5 shrink-0" />
+                      ) : (
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                          style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
+                        >
+                          {c.name[0]}
+                        </div>
+                      )}
                       <div>
                         <span className="font-medium text-white">{c.name}</span>
                         <p className="text-xs text-gray-500 mt-0.5">
@@ -179,10 +185,10 @@ export default function ClientsPage() {
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Link href={`/super-admin/clients/${c.id}`}           className="text-xs text-blue-400 hover:text-blue-300 font-medium">Edit</Link>
-                      <Link href={`/super-admin/clients/${c.id}/users`}     className="text-xs text-green-400 hover:text-green-300 font-medium">Users</Link>
-                      <Link href={`/super-admin/clients/${c.id}/modules`}   className="text-xs text-purple-400 hover:text-purple-300 font-medium">Modules</Link>
-                      <Link href={`/super-admin/clients/${c.id}/theme`}     className="text-xs text-pink-400 hover:text-pink-300 font-medium">Theme</Link>
+                      <Link href={`/super-admin/clients/${c.id}`}         className="text-xs text-blue-400 hover:text-blue-300 font-medium">Edit</Link>
+                      <Link href={`/super-admin/clients/${c.id}/users`}   className="text-xs text-green-400 hover:text-green-300 font-medium">Users</Link>
+                      <Link href={`/super-admin/clients/${c.id}/modules`} className="text-xs text-purple-400 hover:text-purple-300 font-medium">Modules</Link>
+                      <Link href={`/super-admin/clients/${c.id}?tab=theme`} className="text-xs text-pink-400 hover:text-pink-300 font-medium">🎨 Theme</Link>
                       <button
                         onClick={() => loginAsTenant(c.id, c.name)}
                         disabled={impersonating === c.id || !c.isActive}

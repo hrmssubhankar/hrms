@@ -4,77 +4,67 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
-// Tenant slug → display label
-const TENANT_LABELS: Record<string, string> = {
-  'yahweh-care':           'Yahweh Care',
-  'yahweh-property-care':  'Yahweh Property Care',
+type Branding = {
+  name: string
+  logoUrl: string | null
+  primaryColor: string
+  isActive?: boolean
 }
 
 function LoginForm() {
   const router  = useRouter()
   const params  = useSearchParams()
-  const [tenantSlug,  setTenantSlug]  = useState('')
+  const [tenantSlug,   setTenantSlug]   = useState('')
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
-  const [orgLabel,    setOrgLabel]    = useState('')
-  const [form,   setForm]   = useState({ email: '', password: '' })
-  const [error,  setError]  = useState('')
+  const [branding,     setBranding]     = useState<Branding>({ name: '', logoUrl: null, primaryColor: '#1a4fff' })
+  const [brandingLoaded, setBrandingLoaded] = useState(false)
+  const [form,    setForm]    = useState({ email: '', password: '' })
+  const [error,   setError]   = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Priority 1: NEXT_PUBLIC_TENANT_SLUG set per Vercel project
+    // Determine slug from env → URL param → default
     const deploymentTenant = process.env.NEXT_PUBLIC_TENANT_SLUG ?? ''
-    if (deploymentTenant) {
-      if (deploymentTenant === 'admin') {
-        setIsSuperAdmin(true)
-        setTenantSlug('admin')
-        setOrgLabel('Platform Administration')
-      } else {
-        setIsSuperAdmin(false)
-        setTenantSlug(deploymentTenant)
-        setOrgLabel(TENANT_LABELS[deploymentTenant] ?? deploymentTenant)
-      }
-      return
-    }
+    const paramTenant      = params.get('tenant') ?? ''
+    const slug = deploymentTenant || paramTenant || 'admin'
 
-    // Priority 2: ?tenant= URL param (set by middleware on redirect)
-    const paramTenant = params.get('tenant') ?? ''
-    if (paramTenant === 'admin') {
-      setIsSuperAdmin(true)
-      setTenantSlug('admin')
-      setOrgLabel('Platform Administration')
-      return
-    }
-    if (paramTenant) {
-      setIsSuperAdmin(false)
-      setTenantSlug(paramTenant)
-      setOrgLabel(TENANT_LABELS[paramTenant] ?? paramTenant)
-      return
-    }
+    const isAdmin = slug === 'admin'
+    setIsSuperAdmin(isAdmin)
+    setTenantSlug(slug)
 
-    // Priority 3: default → super admin (local dev / yahweh-hrms.vercel.app root)
-    setIsSuperAdmin(true)
-    setTenantSlug('admin')
-    setOrgLabel('Platform Administration')
+    // Fetch live branding from DB
+    fetch(`/api/auth/tenant-branding?slug=${slug}`)
+      .then(r => r.json())
+      .then((d: Branding) => {
+        setBranding({
+          name:         d.name         ?? (isAdmin ? 'Platform Administration' : slug),
+          logoUrl:      d.logoUrl      ?? null,
+          primaryColor: d.primaryColor ?? (isAdmin ? '#7c3aed' : '#1a4fff'),
+        })
+        setBrandingLoaded(true)
+      })
+      .catch(() => {
+        setBranding({
+          name:         isAdmin ? 'Platform Administration' : slug,
+          logoUrl:      null,
+          primaryColor: isAdmin ? '#7c3aed' : '#1a4fff',
+        })
+        setBrandingLoaded(true)
+      })
   }, [params])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
-
     try {
-      const res = await fetch('/api/auth/login', {
+      const res  = await fetch('/api/auth/login', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ ...form, tenantSlug }),
       })
       const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Login failed')
-        return
-      }
-
+      if (!res.ok) { setError(data.error || 'Login failed'); return }
       router.push(data.redirectTo)
     } catch {
       setError('Network error — please try again')
@@ -83,30 +73,50 @@ function LoginForm() {
     }
   }
 
+  const accentColor = branding.primaryColor
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
-      <div className="w-full max-w-sm space-y-6">
+      {/* Subtle branded glow behind card */}
+      <div
+        className="absolute inset-0 opacity-5 pointer-events-none"
+        style={{ background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${accentColor}, transparent)` }}
+      />
+
+      <div className="relative w-full max-w-sm space-y-6">
 
         {/* Logo / Brand */}
-        <div className="text-center space-y-2">
-          <div
-            className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-white text-xl font-bold"
-            style={{ background: isSuperAdmin ? '#7c3aed' : '#1a4fff' }}
-          >
-            {isSuperAdmin ? '★' : orgLabel[0]?.toUpperCase() ?? 'H'}
+        <div className="text-center space-y-3">
+          {brandingLoaded && branding.logoUrl ? (
+            <img
+              src={branding.logoUrl}
+              alt={`${branding.name} logo`}
+              className="h-16 max-w-[180px] object-contain mx-auto"
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+          ) : (
+            <div
+              className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-white text-2xl font-bold shadow-lg"
+              style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` }}
+            >
+              {isSuperAdmin ? '★' : (branding.name[0]?.toUpperCase() ?? 'H')}
+            </div>
+          )}
+
+          <div>
+            <h1 className="text-xl font-bold text-white">
+              {isSuperAdmin ? 'Super Admin' : branding.name}
+            </h1>
+            <p className="text-sm text-gray-400 mt-0.5">
+              {isSuperAdmin ? 'Platform administration' : `Sign in to ${branding.name || 'your organisation'}`}
+            </p>
           </div>
-          <h1 className="text-xl font-bold text-white">
-            {isSuperAdmin ? 'Super Admin' : 'HRMS'}
-          </h1>
-          <p className="text-sm text-gray-400">
-            {isSuperAdmin ? 'Platform administration' : `Sign in to ${orgLabel || 'your organisation'}`}
-          </p>
         </div>
 
         {/* Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4"
+          className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4 shadow-xl"
         >
           {error && (
             <div className="bg-red-900/50 border border-red-700 rounded-lg px-3 py-2 text-sm text-red-300">
@@ -117,12 +127,13 @@ function LoginForm() {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
             <input
-              type="email"
-              required
-              autoComplete="email"
+              type="email" required autoComplete="email"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none transition"
+              style={{ '--tw-ring-color': accentColor } as React.CSSProperties}
+              onFocus={e => (e.target.style.borderColor = accentColor)}
+              onBlur={e => (e.target.style.borderColor = '')}
               placeholder="you@example.com"
             />
           </div>
@@ -130,28 +141,27 @@ function LoginForm() {
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
             <input
-              type="password"
-              required
-              autoComplete="current-password"
+              type="password" required autoComplete="current-password"
               value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none transition"
+              onFocus={e => (e.target.style.borderColor = accentColor)}
+              onBlur={e => (e.target.style.borderColor = '')}
               placeholder="••••••••"
             />
           </div>
 
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition disabled:opacity-60"
-            style={{ background: isSuperAdmin ? '#7c3aed' : '#1a4fff' }}
+            type="submit" disabled={loading}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition disabled:opacity-60 hover:opacity-90"
+            style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` }}
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
         <p className="text-center text-xs text-gray-600">
-          HRMS · Enterprise HR Platform
+          {isSuperAdmin ? 'HRMS · Platform Administration' : `${branding.name} · Powered by HRMS`}
         </p>
       </div>
     </div>
