@@ -1,25 +1,50 @@
 import { headers } from 'next/headers'
 import { getSession } from '@/lib/auth/session'
 import { db } from '@/lib/db'
-import { tenants, tenantModules } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import {
+  tenants, tenantModules, employees, screeningRecords,
+  supervisionRecords, grievances, timesheets, payrollRecords, auditLogs, users,
+} from '@/lib/db/schema'
+import { eq, and, ne, count, lt, sql } from 'drizzle-orm'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-async function getTenantConfig(slug: string) {
-  try {
-    const [tenant] = await db.select().from(tenants).where(eq(tenants.slug, slug))
-    if (!tenant || !tenant.isActive) return null
-    const modules = await db
-      .select()
-      .from(tenantModules)
-      .where(and(eq(tenantModules.tenantId, tenant.id), eq(tenantModules.isEnabled, true)))
-    return {
-      tenant: { id: tenant.id, name: tenant.name, slug: tenant.slug, primaryColor: tenant.primaryColor },
-      enabledModules: modules.map(m => m.moduleName),
-    }
-  } catch { return null }
+const MODULE_SHORTCUTS = [
+  { key: 'employee-management', icon: '👥', label: 'Employees',   desc: 'View & manage staff' },
+  { key: 'compliance',          icon: '🔒', label: 'Compliance',  desc: 'Screening & tracking' },
+  { key: 'onboarding',          icon: '🎉', label: 'Onboarding',  desc: 'New starter checklist' },
+  { key: 'training',            icon: '📚', label: 'Training',    desc: 'Courses & records' },
+  { key: 'performance',         icon: '📈', label: 'Performance', desc: 'Reviews & goals' },
+  { key: 'recruitment',         icon: '🔍', label: 'Recruitment', desc: 'Jobs & candidates' },
+  { key: 'rostering',           icon: '🕐', label: 'Rostering',   desc: 'Shifts & timesheets' },
+  { key: 'payroll',             icon: '💰', label: 'Payroll',     desc: 'Pay runs & Xero' },
+  { key: 'whs',                 icon: '🦺', label: 'Safety',      desc: 'WHS incidents' },
+  { key: 'documents',           icon: '📄', label: 'Documents',   desc: 'Upload & manage docs' },
+  { key: 'analytics',           icon: '📊', label: 'Analytics',   desc: 'Reports & insights' },
+  { key: 'contracts',           icon: '📝', label: 'Contracts',   desc: 'Employment contracts' },
+]
+
+const QUICK_ACTIONS = [
+  { label: '+ Add Employee',     href: '/tenant/employee-management/new' },
+  { label: '📋 Log Timesheet',   href: '/tenant/rostering' },
+  { label: '🔍 New Job',         href: '/tenant/recruitment' },
+  { label: '📄 Upload Document', href: '/tenant/documents' },
+]
+
+const ACTION_COLOUR = [
+  'bg-blue-900/30 text-blue-300 border-blue-800 hover:bg-blue-900/50',
+  'bg-purple-900/30 text-purple-300 border-purple-800 hover:bg-purple-900/50',
+  'bg-teal-900/30 text-teal-300 border-teal-800 hover:bg-teal-900/50',
+  'bg-amber-900/30 text-amber-300 border-amber-800 hover:bg-amber-900/50',
+]
+
+const ACTION_LABEL_COLOUR: Record<string, string> = {
+  create: 'text-green-400',
+  update: 'text-blue-400',
+  delete: 'text-red-400',
+  login:  'text-purple-400',
+  export: 'text-amber-400',
 }
 
 function greeting() {
@@ -29,46 +54,94 @@ function greeting() {
   return 'Good evening'
 }
 
-const MODULE_SHORTCUTS = [
-  { key: 'employee-management',    icon: '👥', label: 'Employees',  desc: 'View & manage staff' },
-  { key: 'leave-management',       icon: '🏖',  label: 'Leave',      desc: 'Approve & track leave' },
-  { key: 'payroll',                icon: '💰', label: 'Payroll',    desc: 'Process & review pay' },
-  { key: 'document-management',    icon: '📄', label: 'Documents',  desc: 'Upload & manage docs' },
-  { key: 'compliance-screening',   icon: '🔒', label: 'Compliance', desc: 'Track requirements' },
-  { key: 'onboarding',             icon: '🎉', label: 'Onboarding', desc: 'New starter checklist' },
-  { key: 'training-development',   icon: '📚', label: 'Training',   desc: 'Courses & records' },
-  { key: 'performance-management', icon: '📈', label: 'Performance',desc: 'Reviews & goals' },
-  { key: 'recruitment',            icon: '🔍', label: 'Recruitment',desc: 'Jobs & applicants' },
-  { key: 'whs-safety',             icon: '🦺', label: 'Safety',     desc: 'Incidents & WHS' },
-  { key: 'reporting-analytics',    icon: '📊', label: 'Reports',    desc: 'Analytics & exports' },
-  { key: 'time-attendance',        icon: '🕐', label: 'Timesheets', desc: 'Hours & rosters' },
-  { key: 'communications',         icon: '✉️',  label: 'Comms',      desc: 'Internal messaging' },
-]
-
-const QUICK_ACTIONS = [
-  { label: '+ Add Employee',      href: '/tenant/employee-management/new',   color: 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border-blue-100 dark:border-blue-900' },
-  { label: '✓ Approve Leave',     href: '/tenant/leave-management',          color: 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-green-100 dark:border-green-900' },
-  { label: '📋 Log Timesheet',    href: '/tenant/time-attendance',           color: 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-900' },
-  { label: '📄 Upload Document',  href: '/tenant/document-management',       color: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-900' },
-]
-
 export default async function TenantDashboard() {
   const headersList = await headers()
   const tenantSlug  = headersList.get('x-tenant-slug') ?? 'default'
-  const [config, session] = await Promise.all([
-    getTenantConfig(tenantSlug),
-    getSession(),
+
+  const [tenantRow] = await db.select().from(tenants).where(eq(tenants.slug, tenantSlug))
+  const session = await getSession()
+
+  if (!tenantRow || !session?.tenantId) {
+    return <p className="text-gray-400 p-8">Unable to load dashboard.</p>
+  }
+
+  const tid   = tenantRow.id
+  const today = new Date().toISOString().split('T')[0]
+  const in30  = new Date(Date.now() + 30 * 864e5).toISOString().split('T')[0]
+
+  const [
+    [{ total: totalEmployees }],
+    [{ total: redScreenings }],
+    [{ total: overdueSupervision }],
+    [{ total: openGrievances }],
+    [{ total: pendingTimesheets }],
+    [{ total: pendingPayroll }],
+    recentActivity,
+  ] = await Promise.all([
+    db.select({ total: count() })
+      .from(employees)
+      .where(and(eq(employees.tenantId, tid), eq(employees.isActive, true))),
+
+    db.select({ total: count() })
+      .from(screeningRecords)
+      .where(and(
+        eq(screeningRecords.tenantId, tid),
+        sql`${screeningRecords.expiryDate} <= ${in30}`,
+        ne(screeningRecords.status, 'green' as const),
+      )),
+
+    db.select({ total: count() })
+      .from(supervisionRecords)
+      .where(and(
+        eq(supervisionRecords.tenantId, tid),
+        eq(supervisionRecords.status, 'scheduled'),
+        lt(supervisionRecords.scheduledDate, today),
+      )),
+
+    db.select({ total: count() })
+      .from(grievances)
+      .where(and(
+        eq(grievances.tenantId, tid),
+        ne(grievances.status, 'closed'),
+      )),
+
+    db.select({ total: count() })
+      .from(timesheets)
+      .where(and(eq(timesheets.tenantId, tid), eq(timesheets.status, 'pending'))),
+
+    db.select({ total: count() })
+      .from(payrollRecords)
+      .where(and(eq(payrollRecords.tenantId, tid), eq(payrollRecords.status, 'pending'))),
+
+    db.select({
+      id:        auditLogs.id,
+      action:    auditLogs.action,
+      resource:  auditLogs.resource,
+      createdAt: auditLogs.createdAt,
+      userEmail: users.email,
+    })
+      .from(auditLogs)
+      .leftJoin(users, eq(auditLogs.userId, users.id))
+      .where(eq(auditLogs.tenantId, tid))
+      .orderBy(sql`${auditLogs.createdAt} desc`)
+      .limit(8),
   ])
 
-  const enabledModules: string[] = config?.enabledModules ?? []
-  const tenantName  = config?.tenant?.name ?? 'Your Organisation'
-  const primaryColor = config?.tenant?.primaryColor ?? '#1a4fff'
-  const userEmail   = session?.email ?? ''
-  const firstName   = userEmail.split('@')[0]
+  const tenantName   = tenantRow.name
+  const primaryColor = tenantRow.primaryColor ?? '#6d28d9'
+  const userEmail    = session.email ?? ''
+  const firstName    = userEmail.split('@')[0]
     .replace(/[._-]/g, ' ')
     .replace(/\b\w/g, (c: string) => c.toUpperCase())
 
-  const visibleShortcuts = MODULE_SHORTCUTS.filter(m => enabledModules.includes(m.key))
+  const stats = [
+    { label: 'Active Employees',     value: totalEmployees,    icon: '👥', color: 'text-blue-400',   href: '/tenant/employee-management' },
+    { label: 'Pending Timesheets',   value: pendingTimesheets, icon: '⏱',  color: 'text-purple-400', href: '/tenant/rostering' },
+    { label: 'Compliance Alerts',    value: redScreenings,     icon: '🔒', color: 'text-amber-400',  href: '/tenant/compliance' },
+    { label: 'Open Grievances',      value: openGrievances,    icon: '⚖️',  color: 'text-red-400',    href: '/tenant/grievances' },
+    { label: 'Overdue Supervisions', value: overdueSupervision,icon: '👁',  color: 'text-orange-400', href: '/tenant/supervision' },
+    { label: 'Payroll Pending',      value: pendingPayroll,    icon: '💰', color: 'text-green-400',  href: '/tenant/payroll' },
+  ]
 
   return (
     <div className="space-y-7 max-w-6xl">
@@ -76,50 +149,43 @@ export default async function TenantDashboard() {
       {/* Welcome banner */}
       <div
         className="rounded-2xl p-6 text-white relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)` }}
+        style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}99)` }}
       >
         <div className="relative z-10">
           <p className="text-sm font-medium opacity-80">{greeting()},</p>
           <h1 className="text-2xl font-bold mt-0.5">{firstName} 👋</h1>
           <p className="text-sm opacity-70 mt-1">{tenantName} · HR Portal</p>
         </div>
-        {/* Decorative circles */}
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-white" />
         <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full opacity-10 bg-white" />
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Employees',    value: '—', icon: '👥', color: 'border-blue-100 dark:border-blue-900',   bg: 'bg-blue-50 dark:bg-blue-950/30',    text: 'text-blue-600 dark:text-blue-400' },
-          { label: 'On Leave Today',     value: '—', icon: '🏖', color: 'border-amber-100 dark:border-amber-900', bg: 'bg-amber-50 dark:bg-amber-950/30',  text: 'text-amber-600 dark:text-amber-400' },
-          { label: 'Pending Approvals',  value: '—', icon: '⏳', color: 'border-purple-100 dark:border-purple-900',bg: 'bg-purple-50 dark:bg-purple-950/30',text: 'text-purple-600 dark:text-purple-400' },
-          { label: 'Compliance Due',     value: '—', icon: '🔒', color: 'border-red-100 dark:border-red-900',     bg: 'bg-red-50 dark:bg-red-950/30',      text: 'text-red-600 dark:text-red-400' },
-        ].map(s => (
-          <div key={s.label} className={`bg-white dark:bg-gray-900 border rounded-2xl p-5 ${s.color}`}>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 ${s.bg}`}>
-              {s.icon}
+      {/* Live stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        {stats.map(s => (
+          <Link key={s.label} href={s.href}
+            className="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-4 transition group">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">{s.icon}</span>
+              <p className="text-xs text-gray-500 group-hover:text-gray-400 transition">{s.label}</p>
             </div>
-            <p className={`text-2xl font-bold ${s.text}`}>{s.value}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{s.label}</p>
-          </div>
+            <p className={`text-3xl font-bold ${s.color}`}>{Number(s.value)}</p>
+          </Link>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
         {/* Module shortcuts */}
-        <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Your Modules</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {(visibleShortcuts.length > 0 ? visibleShortcuts : MODULE_SHORTCUTS.slice(0, 6)).map(m => (
-              <Link
-                key={m.key}
-                href={`/tenant/${m.key}`}
-                className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm rounded-2xl p-4 transition"
-              >
-                <span className="text-2xl">{m.icon}</span>
-                <p className="text-sm font-semibold text-gray-800 dark:text-white mt-2">{m.label}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{m.desc}</p>
+        <div className="lg:col-span-2 space-y-3">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Modules</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {MODULE_SHORTCUTS.map(m => (
+              <Link key={m.key} href={`/tenant/${m.key}`}
+                className="bg-gray-900 border border-gray-800 hover:border-gray-700 hover:bg-gray-800/50 rounded-xl p-3.5 transition group">
+                <span className="text-xl">{m.icon}</span>
+                <p className="text-sm font-semibold text-white mt-2 group-hover:text-purple-300 transition">{m.label}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{m.desc}</p>
               </Link>
             ))}
           </div>
@@ -127,39 +193,48 @@ export default async function TenantDashboard() {
 
         {/* Right column */}
         <div className="space-y-4">
+
           {/* Quick actions */}
           <div>
-            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Quick Actions</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Quick Actions</h2>
             <div className="space-y-2">
-              {QUICK_ACTIONS.map(a => (
-                <Link
-                  key={a.href}
-                  href={a.href}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition hover:shadow-sm ${a.color}`}
-                >
+              {QUICK_ACTIONS.map((a, i) => (
+                <Link key={a.href} href={a.href}
+                  className={`flex items-center px-4 py-2.5 rounded-xl border text-sm font-medium transition ${ACTION_COLOUR[i]}`}>
                   {a.label}
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Recent activity placeholder */}
+          {/* Recent activity */}
           <div>
-            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Recent Activity</h2>
-            <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl divide-y divide-gray-50 dark:divide-gray-800">
-              {[
-                { text: 'No recent activity yet', sub: 'Activity will appear here as you use the system', icon: '📋' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-start gap-3 px-4 py-4">
-                  <span className="text-lg">{item.icon}</span>
-                  <div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{item.text}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{item.sub}</p>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recent Activity</h2>
+            <div className="bg-gray-900 border border-gray-800 rounded-xl divide-y divide-gray-800/60 overflow-hidden">
+              {recentActivity.length === 0 ? (
+                <div className="px-4 py-6 text-center">
+                  <p className="text-gray-600 text-sm">No activity yet</p>
+                </div>
+              ) : recentActivity.map(a => (
+                <div key={a.id} className="px-4 py-3">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={`text-xs font-semibold uppercase ${ACTION_LABEL_COLOUR[a.action] ?? 'text-gray-400'}`}>
+                      {a.action}
+                    </span>
+                    <span className="text-xs text-gray-400 truncate">{a.resource}</span>
                   </div>
+                  <p className="text-xs text-gray-600 mt-0.5 truncate">
+                    {a.userEmail ?? 'System'} · {a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-AU') : ''}
+                  </p>
                 </div>
               ))}
+              <Link href="/tenant/audit-logs"
+                className="block px-4 py-2.5 text-xs text-purple-400 hover:text-purple-300 text-center transition">
+                View all activity →
+              </Link>
             </div>
           </div>
+
         </div>
       </div>
     </div>
