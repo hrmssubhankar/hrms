@@ -112,9 +112,11 @@ function EditClientInner() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError(''); setSuccess('')
     try {
+      // General tab: only save form fields — do NOT send logoUrl or settings
+      // (logo is managed by its own API; settings by the Theme tab)
       const res  = await fetch(`/api/super-admin/clients/${id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body:   JSON.stringify({ ...form, logoUrl }),
+        body:   JSON.stringify({ name: form.name, slug: form.slug, tier: form.tier, isActive: form.isActive }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Update failed')
@@ -349,9 +351,23 @@ function EditClientInner() {
             </div>
           </div>
 
-          <button onClick={handleSubmit as any} disabled={saving}
-            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-            {saving ? 'Saving…' : 'Save Branding'}
+          <button
+            onClick={async () => {
+              setSaving(true); setError(''); setSuccess('')
+              try {
+                const res = await fetch(`/api/super-admin/clients/${id}`, {
+                  method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name: form.name }),
+                })
+                if (!res.ok) throw new Error('Save failed')
+                setSuccess('Branding saved.')
+              } catch (err: any) { setError(err.message) }
+              finally { setSaving(false); setTimeout(() => setSuccess(''), 3000) }
+            }}
+            disabled={saving}
+            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition"
+          >
+            {saving ? 'Saving…' : 'Save Display Name'}
           </button>
         </div>
       )}

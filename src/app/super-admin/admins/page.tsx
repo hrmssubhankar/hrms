@@ -163,6 +163,14 @@ export default function AdminsPage() {
             </tr>
           </thead>
           <tbody>
+            {admins.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-5 py-10 text-center text-gray-500 text-sm">
+                  No super admins found.{' '}
+                  <button onClick={() => setShowForm(true)} className="text-purple-400 hover:underline">Add the first one →</button>
+                </td>
+              </tr>
+            )}
             {admins.map(a => (
               <tr key={a.id} className="border-b border-gray-800 hover:bg-gray-800/50">
                 <td className="px-5 py-3.5">

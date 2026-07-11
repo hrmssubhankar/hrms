@@ -118,7 +118,7 @@ export default function ModulesPage() {
     })
     setSaving(false)
     if (andContinue) {
-      router.push(`/super-admin/clients/${id}/theme`)
+      router.push(`/super-admin/clients/${id}?tab=theme`)
     } else {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)

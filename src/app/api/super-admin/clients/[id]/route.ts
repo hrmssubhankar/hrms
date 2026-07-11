@@ -26,14 +26,18 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
     const body = await req.json()
     const { name, tier, isActive, logoUrl, primaryColor, settings } = body
 
-    const mergedSettings = settings ?? {
-      theme: {
-        primaryColor: primaryColor,
-        logoUrl: logoUrl,
-        fontFamily: 'Inter',
-        borderRadius: '0.5rem',
-      }
-    }
+    // Fetch existing settings so we can deep-merge instead of overwrite
+    const [existing] = await db
+      .select({ settings: tenants.settings })
+      .from(tenants)
+      .where(eq(tenants.id, id))
+
+    const existingSettings = (existing?.settings ?? {}) as Record<string, unknown>
+
+    // Only touch settings column when caller explicitly provides a settings object
+    const newSettings = settings !== undefined
+      ? { ...existingSettings, ...settings }
+      : existingSettings
 
     const [updated] = await db
       .update(tenants)
@@ -43,7 +47,7 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
         ...(isActive     !== undefined && { isActive }),
         ...(logoUrl      !== undefined && { logoUrl }),
         ...(primaryColor !== undefined && { primaryColor }),
-        settings: mergedSettings,
+        settings: newSettings,
         updatedAt: new Date(),
       })
       .where(eq(tenants.id, id))

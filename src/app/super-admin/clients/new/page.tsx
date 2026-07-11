@@ -15,7 +15,7 @@ export default function NewClientPage() {
   const router  = useRouter()
   const [form, setForm] = useState({
     name: '', slug: '', tier: 'enterprise',
-    primaryColor: '#1a4fff', logoUrl: '',
+    primaryColor: '#1a4fff',
     adminEmail: '', adminPassword: '',
   })
   const [loading, setLoading] = useState(false)
@@ -40,6 +40,7 @@ export default function NewClientPage() {
     try {
       const payload: any = { ...form }
       if (!form.adminEmail) { delete payload.adminEmail; delete payload.adminPassword }
+      delete payload.logoUrl  // logo is set after creation via Edit Client → Logo & Branding
       const res  = await fetch('/api/super-admin/clients', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -127,11 +128,8 @@ export default function NewClientPage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Logo URL (optional)</label>
-            <input type="url" value={form.logoUrl}
-              onChange={e => setForm(f => ({ ...f, logoUrl: e.target.value }))}
-              placeholder="https://example.com/logo.png" className={INPUT} />
+          <div className="bg-gray-800/60 border border-gray-700 rounded-lg px-4 py-3 text-xs text-gray-400">
+            💡 Logo upload is available after creation via <strong className="text-gray-300">Edit Client → Logo &amp; Branding</strong>
           </div>
         </section>
 
