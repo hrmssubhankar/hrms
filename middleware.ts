@@ -8,13 +8,26 @@ import { jwtVerify } from 'jose'
  */
 
 const SESSION_COOKIE   = 'hrms_session'
-const SUPER_ADMIN_HOSTS = ['admin', 'superadmin']
+
+// Hostnames whose first segment identifies a super admin deployment
+const SUPER_ADMIN_HOSTS = ['admin', 'superadmin', 'superadmin-hrms', 'admin-hrms']
+
+// All known app hostnames (prevents treating vercel.app as a subdomain)
 const APP_HOSTNAMES = [
-  'yahweh-hrms-app.vercel.app',
   'yahweh-hrms.vercel.app',
+  'superadmin-hrms.vercel.app',
+  'yahwehcare-hrms.vercel.app',
+  'yahwehpc-hrms.vercel.app',
+  'admin-hrms.vercel.app',
   'localhost',
   '127.0.0.1',
 ]
+
+// Dedicated per-tenant deployment URLs → tenant slug in the database
+const HOST_TENANT_MAP: Record<string, string> = {
+  'yahwehcare-hrms.vercel.app': 'yahweh-care',
+  'yahwehpc-hrms.vercel.app':   'yahweh-property-care',
+}
 
 // Paths that never require authentication
 const PUBLIC_PATHS = [
@@ -64,8 +77,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  const bareHost   = hostname.split(':')[0]
   const subdomain  = getSubdomain(hostname)
-  const isSuperAdminHost = subdomain && SUPER_ADMIN_HOSTS.includes(subdomain)
+  const isSuperAdminHost =
+    (subdomain && SUPER_ADMIN_HOSTS.includes(subdomain)) ||
+    SUPER_ADMIN_HOSTS.some((h) => bareHost === `${h}.vercel.app`)
 
   // ── Super Admin routing + auth guard ───────────────────────────────────────
   if (isSuperAdminHost || pathname.startsWith('/super-admin')) {
@@ -90,6 +106,7 @@ export async function middleware(request: NextRequest) {
 
   // ── Tenant routing + auth guard ────────────────────────────────────────────
   const tenantSlug =
+    HOST_TENANT_MAP[bareHost] ??                                           // dedicated deployment URL
     (subdomain && !SUPER_ADMIN_HOSTS.includes(subdomain) ? subdomain : null) ??
     searchParams.get('tenant') ??
     request.cookies.get('tenant_slug')?.value

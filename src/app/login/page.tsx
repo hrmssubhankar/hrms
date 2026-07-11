@@ -4,32 +4,51 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
+// Dedicated deployment hostname → { tenantSlug, isAdmin, label }
+const HOST_CONFIG: Record<string, { slug: string; isAdmin: boolean; label: string }> = {
+  'superadmin-hrms.vercel.app': { slug: 'admin',                 isAdmin: true,  label: 'Platform Administration' },
+  'admin-hrms.vercel.app':      { slug: 'admin',                 isAdmin: true,  label: 'Platform Administration' },
+  'yahwehcare-hrms.vercel.app': { slug: 'yahweh-care',           isAdmin: false, label: 'Yahweh Care' },
+  'yahwehpc-hrms.vercel.app':   { slug: 'yahweh-property-care',  isAdmin: false, label: 'Yahweh Property Care' },
+}
+
 function LoginForm() {
   const router      = useRouter()
   const params      = useSearchParams()
   const [tenantSlug, setTenantSlug] = useState<string>('')
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [orgLabel, setOrgLabel] = useState('')
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError]   = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Detect context from query param (local dev) or hostname (production)
     const slug = params.get('tenant') ?? ''
     const host = window.location.hostname
 
-    if (host.startsWith('admin.') || slug === 'admin' || slug === '') {
-      // Treat empty slug as super admin in dev
-      if (!slug || slug === 'admin') {
-        setIsSuperAdmin(true)
-        setTenantSlug('admin')
-      }
-    } else {
-      // Extract subdomain e.g. "yahweh-care" from "yahweh-care.yourdomain.com"
-      const subdomain = host.split('.')[0]
-      setTenantSlug(slug || subdomain)
-      setIsSuperAdmin(false)
+    // 1. Check dedicated deployment hostname map first
+    const hostCfg = HOST_CONFIG[host]
+    if (hostCfg) {
+      setIsSuperAdmin(hostCfg.isAdmin)
+      setTenantSlug(hostCfg.slug)
+      setOrgLabel(hostCfg.label)
+      return
     }
+
+    // 2. URL param or empty → super admin
+    if (host.startsWith('admin.') || slug === 'admin' || slug === '') {
+      setIsSuperAdmin(true)
+      setTenantSlug('admin')
+      setOrgLabel('Platform Administration')
+      return
+    }
+
+    // 3. Explicit tenant param or subdomain
+    const subdomain = host.split('.')[0]
+    const resolved  = slug || subdomain
+    setTenantSlug(resolved)
+    setIsSuperAdmin(false)
+    setOrgLabel(resolved)
   }, [params])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -75,7 +94,7 @@ function LoginForm() {
           <p className="text-sm text-gray-400">
             {isSuperAdmin
               ? 'Platform administration'
-              : `Sign in to ${tenantSlug || 'your organisation'}`}
+              : `Sign in to ${orgLabel || tenantSlug || 'your organisation'}`}
           </p>
         </div>
 
