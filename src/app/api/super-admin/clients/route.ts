@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
-import { tenants, tenantModules } from '@/lib/db/schema'
+import { tenants, tenantModules, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 const ALL_MODULES = [
@@ -59,7 +60,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, slug, tier = 'starter', primaryColor, logoUrl, enabledModules } = body
+    const { name, slug, tier = 'starter', primaryColor, logoUrl, enabledModules, adminEmail, adminPassword } = body
 
     if (!name || !slug) {
       return NextResponse.json({ error: 'name and slug are required' }, { status: 400 })
@@ -94,7 +95,24 @@ export async function POST(req: NextRequest) {
 
     await db.insert(tenantModules).values(moduleRows)
 
-    return NextResponse.json({ tenant }, { status: 201 })
+    // Create admin user if email + password supplied
+    let adminUser = null
+    if (adminEmail && adminPassword) {
+      if (adminPassword.length < 8) {
+        return NextResponse.json({ error: 'Admin password must be at least 8 characters' }, { status: 400 })
+      }
+      const passwordHash = await bcrypt.hash(adminPassword, 12)
+      const [u] = await db.insert(users).values({
+        tenantId:     tenant.id,
+        email:        adminEmail.toLowerCase().trim(),
+        passwordHash,
+        role:         'director',
+        isActive:     true,
+      }).returning({ id: users.id, email: users.email, role: users.role })
+      adminUser = u
+    }
+
+    return NextResponse.json({ tenant, adminUser }, { status: 201 })
   } catch (error: any) {
     if (error?.message?.includes('unique')) {
       return NextResponse.json({ error: 'A client with this slug already exists' }, { status: 409 })
