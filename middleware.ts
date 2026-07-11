@@ -111,11 +111,23 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Tenant routing + auth guard ───────────────────────────────────────────
-  const tenantSlug =
+  let tenantSlug: string | null | undefined =
     (deploymentTenant && deploymentTenant !== 'admin' ? deploymentTenant : null) ??
     (subdomain ? (SUBDOMAIN_TENANT_MAP[subdomain] ?? subdomain) : null) ??
     searchParams.get('tenant') ??
     request.cookies.get('tenant_slug')?.value
+
+  // Last resort: read tenantSlug from the JWT itself (covers deployments where
+  // NEXT_PUBLIC_TENANT_SLUG isn't configured and tenant_slug cookie has expired)
+  if (!tenantSlug) {
+    const token = request.cookies.get(SESSION_COOKIE)?.value
+    if (token) {
+      const jwtPayload = await verifySession(token)
+      if (jwtPayload?.role === 'tenant_user' && jwtPayload.tenantSlug) {
+        tenantSlug = jwtPayload.tenantSlug
+      }
+    }
+  }
 
   if (tenantSlug) {
     if (pathname.startsWith('/tenant') || !pathname.startsWith('/api')) {
@@ -133,6 +145,12 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/tenant') || pathname.startsWith('/api/tenant')) {
       const res = NextResponse.next()
       res.headers.set('x-tenant-slug', tenantSlug)
+      // Refresh the cookie so it stays alive across navigation
+      res.cookies.set('tenant_slug', tenantSlug, {
+        path: '/', httpOnly: false, sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 8,
+      })
       return res
     }
 

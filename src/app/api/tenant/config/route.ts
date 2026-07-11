@@ -4,21 +4,26 @@ import { tenants, tenantModules } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { getSession } from '@/lib/auth/session'
 
-// GET /api/tenant/config?slug=yahweh-care
-// Returns tenant config + enabled modules. Used by the tenant layout.
+// GET /api/tenant/config
+// Works two ways:
+//   ?slug=yahweh-care   → used by tenant layout (no auth required)
+//   no slug             → uses session.tenantId (for tenant settings page)
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug')
     ?? req.headers.get('x-tenant-slug')
 
-  if (!slug) {
-    return NextResponse.json({ error: 'slug required' }, { status: 400 })
-  }
-
   try {
-    const [tenant] = await db
-      .select()
-      .from(tenants)
-      .where(eq(tenants.slug, slug))
+    let tenantQuery
+    if (slug) {
+      tenantQuery = db.select().from(tenants).where(eq(tenants.slug, slug))
+    } else {
+      // Fall back to session-based lookup
+      const session = await getSession()
+      if (!session?.tenantId) return NextResponse.json({ error: 'slug or session required' }, { status: 400 })
+      tenantQuery = db.select().from(tenants).where(eq(tenants.id, session.tenantId))
+    }
+
+    const [tenant] = await tenantQuery
 
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
@@ -57,30 +62,46 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PATCH /api/tenant/config — tenant admin self-service: update domain/email settings
+// PATCH /api/tenant/config — tenant admin self-service
+// Accepts: { settings? } for domain/email/notifications
+//          { name? }     to update the portal display name
+//          { logoUrl? }  to update the logo (base64 data URL, ≤512KB, or null to remove)
 export async function PATCH(req: NextRequest) {
   const session = await getSession()
   if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
 
   try {
     const body = await req.json()
-    const { settings: incoming } = body
+    const { settings: incoming, name, logoUrl } = body
 
-    if (!incoming || typeof incoming !== 'object') {
-      return NextResponse.json({ error: 'settings object required' }, { status: 400 })
+    // Validate logo if provided
+    if (logoUrl !== undefined && logoUrl !== null) {
+      if (typeof logoUrl !== 'string' || !logoUrl.startsWith('data:image/')) {
+        return NextResponse.json({ error: 'Invalid logo — must be a data:image/ URL' }, { status: 400 })
+      }
+      if (logoUrl.length * 0.75 > 512 * 1024) {
+        return NextResponse.json({ error: 'Logo too large — max 512 KB' }, { status: 413 })
+      }
     }
 
-    // Fetch current settings to deep-merge
-    const [current] = await db.select({ settings: tenants.settings }).from(tenants).where(eq(tenants.id, session.tenantId))
-    const existing = (current?.settings ?? {}) as Record<string, unknown>
+    // Build column-level updates
+    const colUpdates: Record<string, unknown> = { updatedAt: new Date() }
+    if (name  !== undefined) colUpdates.name    = String(name).trim()
+    if (logoUrl !== undefined) colUpdates.logoUrl = logoUrl  // null clears it
 
-    const merged = { ...existing, ...incoming }
+    // Merge settings jsonb if provided
+    if (incoming && typeof incoming === 'object') {
+      const [current] = await db.select({ settings: tenants.settings }).from(tenants).where(eq(tenants.id, session.tenantId))
+      const existing  = (current?.settings ?? {}) as Record<string, unknown>
+      colUpdates.settings = { ...existing, ...incoming }
+    }
 
-    await db.update(tenants)
-      .set({ settings: merged, updatedAt: new Date() })
+    const [updated] = await db.update(tenants)
+      .set(colUpdates)
       .where(eq(tenants.id, session.tenantId))
+      .returning({ name: tenants.name, logoUrl: tenants.logoUrl, settings: tenants.settings })
 
-    return NextResponse.json({ ok: true, settings: merged })
+    return NextResponse.json({ ok: true, ...updated })
   } catch (err) {
     console.error('PATCH /api/tenant/config error:', err)
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 })

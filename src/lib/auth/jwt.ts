@@ -7,6 +7,7 @@ export type JWTPayload = {
   tenantId?: string  // only for tenant users
   tenantSlug?: string
   name?: string
+  userRole?: string  // tenant user's actual DB role (director, hr_officer, etc.)
 }
 
 function getSecret() {

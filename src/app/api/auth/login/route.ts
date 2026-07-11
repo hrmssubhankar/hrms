@@ -99,10 +99,17 @@ export async function POST(req: NextRequest) {
       role:       'tenant_user',
       tenantId:   tenant.id,
       tenantSlug: tenant.slug,
+      userRole:   user.role,   // actual DB role: director, hr_officer, etc.
     })
 
     const res = NextResponse.json({ ok: true, role: 'tenant_user', redirectTo: '/tenant/dashboard' })
     res.cookies.set(sessionCookieOptions(token))
+    // Set tenant_slug cookie so middleware can always resolve tenant without NEXT_PUBLIC_TENANT_SLUG
+    res.cookies.set('tenant_slug', tenant.slug, {
+      path: '/', httpOnly: false, sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 8,
+    })
     return res
 
   } catch (error) {

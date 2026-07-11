@@ -88,7 +88,7 @@ export default async function TenantLayout({ children }: { children: React.React
   // Session
   const userEmail   = session?.email ?? ''
   const userInitial = userEmail[0]?.toUpperCase() ?? 'U'
-  const userRole    = (session as any)?.role_label ?? 'employee'
+  const userRole    = session?.userRole ?? 'employee'
 
   // Build nav items from enabled module IDs (skip Dashboard — always shown separately)
   const navItems = Object.entries(MODULE_ROUTES)
