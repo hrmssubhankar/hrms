@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 
 type Branding = {
   name: string
@@ -76,12 +77,17 @@ function LoginForm() {
   const accentColor = branding.primaryColor
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 transition-colors">
       {/* Subtle branded glow behind card */}
       <div
         className="absolute inset-0 opacity-5 pointer-events-none"
         style={{ background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${accentColor}, transparent)` }}
       />
+
+      {/* Theme toggle — top right */}
+      <div className="absolute top-4 right-4">
+        <ThemeToggle className="p-2 rounded-lg text-gray-400 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition" />
+      </div>
 
       <div className="relative w-full max-w-sm space-y-6">
 
@@ -104,10 +110,10 @@ function LoginForm() {
           )}
 
           <div>
-            <h1 className="text-xl font-bold text-white">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               {isSuperAdmin ? 'Super Admin' : branding.name}
             </h1>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
               {isSuperAdmin ? 'Platform administration' : `Sign in to ${branding.name || 'your organisation'}`}
             </p>
           </div>
@@ -116,22 +122,21 @@ function LoginForm() {
         {/* Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4 shadow-xl"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4 shadow-xl"
         >
           {error && (
-            <div className="bg-red-900/50 border border-red-700 rounded-lg px-3 py-2 text-sm text-red-300">
+            <div className="bg-red-50 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-lg px-3 py-2 text-sm text-red-600 dark:text-red-300">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
             <input
               type="email" required autoComplete="email"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none transition"
-              style={{ '--tw-ring-color': accentColor } as React.CSSProperties}
+              className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none transition"
               onFocus={e => (e.target.style.borderColor = accentColor)}
               onBlur={e => (e.target.style.borderColor = '')}
               placeholder="you@example.com"
@@ -139,12 +144,12 @@ function LoginForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
             <input
               type="password" required autoComplete="current-password"
               value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none transition"
+              className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none transition"
               onFocus={e => (e.target.style.borderColor = accentColor)}
               onBlur={e => (e.target.style.borderColor = '')}
               placeholder="••••••••"
@@ -160,7 +165,7 @@ function LoginForm() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-600">
+        <p className="text-center text-xs text-gray-400 dark:text-gray-600">
           {isSuperAdmin ? 'HRMS · Platform Administration' : `${branding.name} · Powered by HRMS`}
         </p>
       </div>
