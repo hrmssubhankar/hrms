@@ -1,8 +1,8 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import LogoutButton from '@/components/auth/LogoutButton'
+import { useState, useRef, useEffect } from 'react'
 
 type NavItem = { key: string; label: string }
 
@@ -34,7 +34,26 @@ export default function TenantSidebar({
   navItems, sidebarBg, primaryColor, tenantName,
   logoUrl, userEmail, userInitial, userRole, borderRadius,
 }: Props) {
-  const pathname = usePathname()
+  const pathname  = usePathname()
+  const router    = useRouter()
+  const [open, setOpen]     = useState(false)
+  const dropdownRef         = useRef<HTMLDivElement>(null)
+
+  // Close on outside click
+  useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [])
+
+  async function handleSignOut() {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
 
   function isActive(key: string) {
     return pathname.includes(`/tenant/${key}`)
@@ -98,34 +117,62 @@ export default function TenantSidebar({
         })}
       </nav>
 
-      {/* User section at bottom */}
-      <div className="px-3 pb-4 pt-3 space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-        {/* Settings link */}
-        <Link
-          href="/tenant/settings"
-          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition ${
-            pathname.includes('/tenant/settings')
-              ? 'text-white font-medium'
-              : 'text-white/60 hover:text-white hover:bg-white/10'
-          }`}
-          style={pathname.includes('/tenant/settings') ? { background: primaryColor } : {}}
-        >
-          ⚙️ Settings
-        </Link>
+      {/* User section at bottom — click to open dropdown */}
+      <div
+        ref={dropdownRef}
+        className="relative px-3 pb-4 pt-3"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}
+      >
+        {/* Dropdown menu — appears above the card */}
+        {open && (
+          <div
+            className="absolute bottom-full left-3 right-3 mb-2 rounded-xl overflow-hidden shadow-2xl"
+            style={{ background: sidebarBg, border: '1px solid rgba(255,255,255,0.12)' }}
+          >
+            <Link
+              href="/tenant/settings"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition"
+            >
+              <span className="text-base">⚙️</span>
+              Settings
+            </Link>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-300/90 hover:text-red-200 hover:bg-red-900/20 transition text-left"
+            >
+              <span className="text-base">🚪</span>
+              Sign out
+            </button>
+          </div>
+        )}
 
-        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.08)' }}>
+        {/* User card — toggles dropdown */}
+        <button
+          onClick={() => setOpen(v => !v)}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition hover:bg-white/10 text-left"
+          style={{ background: open ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.08)' }}
+        >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
             style={{ background: primaryColor }}
           >
             {userInitial}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-white truncate">{userEmail}</p>
             <p className="text-xs opacity-50">{ROLE_LABELS[userRole] ?? userRole}</p>
           </div>
-        </div>
-        <LogoutButton className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-300/80 hover:text-red-200 hover:bg-red-900/20 transition text-left" />
+          {/* Chevron */}
+          <svg
+            className="w-3.5 h-3.5 text-white/40 shrink-0 transition-transform"
+            style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
       </div>
     </aside>
   )
