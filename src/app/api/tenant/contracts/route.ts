@@ -109,7 +109,7 @@ export async function PATCH(req: NextRequest) {
     const { session } = guard
 
     const body = await req.json()
-    const { id, status, tfnProvided, superFund, bankBsb, bankAccount, signatureData } = body
+    const { id, status, tfnProvided, superFund, bankBsb, bankAccount, signatureData, pdfUrl, signedPdfUrl } = body
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
     const updates: Record<string, unknown> = {}
@@ -118,6 +118,8 @@ export async function PATCH(req: NextRequest) {
     if (superFund     !== undefined) updates.superFund     = superFund
     if (bankBsb       !== undefined) updates.bankBsb       = bankBsb
     if (bankAccount   !== undefined) updates.bankAccount   = bankAccount
+    if (pdfUrl        !== undefined) updates.pdfUrl        = pdfUrl
+    if (signedPdfUrl  !== undefined) updates.signedPdfUrl  = signedPdfUrl
     if (signatureData !== undefined) { updates.signatureData = signatureData; updates.signedAt = new Date() }
     if (status === 'sent')   updates.sentAt   = new Date()
     if (status === 'signed') updates.signedAt = new Date()

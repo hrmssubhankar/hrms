@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import FileUpload, { type UploadResult } from '@/components/ui/FileUpload'
 
 type Doc = {
   id: string; employeeId: string | null; category: string; title: string
@@ -57,7 +58,7 @@ export default function DocumentsPage() {
   const [search,     setSearch]     = useState('')
   const [form, setForm] = useState({
     title: '', category: 'Policy', blobUrl: '', employeeId: '',
-    fileName: '', expiryDate: '', notes: '',
+    fileName: '', fileSizeBytes: 0, mimeType: '', expiryDate: '', notes: '',
   })
 
   const load = useCallback(async (cat = filterCat, st = filterStat) => {
@@ -78,12 +79,25 @@ export default function DocumentsPage() {
   }, [])
 
   async function create(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
+    e.preventDefault()
+    if (!form.blobUrl) return
+    setSaving(true)
     await fetch('/api/tenant/documents', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title:         form.title,
+        category:      form.category,
+        blobUrl:       form.blobUrl,
+        employeeId:    form.employeeId,
+        fileName:      form.fileName,
+        fileSizeBytes: form.fileSizeBytes,
+        mimeType:      form.mimeType,
+        expiryDate:    form.expiryDate,
+        notes:         form.notes,
+      }),
     })
     setShowForm(false)
-    setForm({ title:'', category:'Policy', blobUrl:'', employeeId:'', fileName:'', expiryDate:'', notes:'' })
+    setForm({ title:'', category:'Policy', blobUrl:'', employeeId:'', fileName:'', fileSizeBytes:0, mimeType:'', expiryDate:'', notes:'' })
     setSaving(false); load()
   }
 
@@ -162,14 +176,20 @@ export default function DocumentsPage() {
               </select>
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-400 mb-1 block">Document URL *</label>
-              <input required value={form.blobUrl} onChange={e => setForm(f => ({ ...f, blobUrl: e.target.value }))}
-                placeholder="https://… (SharePoint, Azure Blob, S3, Google Drive…)" className={INPUT} />
-            </div>
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">File Name</label>
-              <input value={form.fileName} onChange={e => setForm(f => ({ ...f, fileName: e.target.value }))}
-                placeholder="manual-handling-policy.pdf" className={INPUT} />
+              <FileUpload
+                label="Upload Document *"
+                currentUrl={form.blobUrl || null}
+                currentName={form.fileName || null}
+                onUpload={(r: UploadResult) => setForm(f => ({
+                  ...f,
+                  blobUrl:       r.url,
+                  fileName:      r.fileName,
+                  fileSizeBytes: r.fileSizeBytes,
+                  mimeType:      r.mimeType,
+                }))}
+              />
+              {/* Hidden required sentinel so form validation fires */}
+              <input type="hidden" required value={form.blobUrl} onChange={() => {}} />
             </div>
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Expiry Date</label>

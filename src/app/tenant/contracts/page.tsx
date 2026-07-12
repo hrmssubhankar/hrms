@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import FileUpload from '@/components/ui/FileUpload'
 
 type Contract = {
   id: string; employeeId: string; type: string; status: string
@@ -125,9 +126,12 @@ export default function ContractsPage() {
               </select>
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-400 mb-1 block">Document URL (optional)</label>
-              <input value={form.pdfUrl} onChange={e => setForm(f => ({ ...f, pdfUrl: e.target.value }))}
-                placeholder="https://… (e.g. SharePoint or S3 link)" className={INPUT} />
+              <FileUpload
+                label="Contract Document (optional)"
+                accept=".pdf,.doc,.docx"
+                currentUrl={form.pdfUrl || null}
+                onUpload={r => setForm(f => ({ ...f, pdfUrl: r.url }))}
+              />
             </div>
           </div>
           <button type="submit" disabled={saving}
@@ -207,14 +211,27 @@ export default function ContractsPage() {
                       </div>
                     )}
 
-                    {/* Document link */}
-                    {c.pdfUrl && (
+                    {/* Document upload / link */}
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Contract Document</p>
+                      <FileUpload
+                        accept=".pdf,.doc,.docx"
+                        currentUrl={c.pdfUrl}
+                        currentName={c.pdfUrl ? 'Contract document' : null}
+                        onUpload={r => patch(c.id, { pdfUrl: r.url })}
+                      />
+                    </div>
+
+                    {/* Signed PDF upload */}
+                    {(c.status === 'signed' || c.signedPdfUrl) && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Document</p>
-                        <a href={c.pdfUrl} target="_blank" rel="noopener noreferrer"
-                          className="text-sm text-purple-400 hover:text-purple-300 underline underline-offset-2">
-                          📄 View Contract Document ↗
-                        </a>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Signed Copy</p>
+                        <FileUpload
+                          accept=".pdf"
+                          currentUrl={c.signedPdfUrl}
+                          currentName={c.signedPdfUrl ? 'Signed contract' : null}
+                          onUpload={r => patch(c.id, { signedPdfUrl: r.url })}
+                        />
                       </div>
                     )}
 
