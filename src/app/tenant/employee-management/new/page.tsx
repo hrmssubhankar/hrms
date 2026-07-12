@@ -177,10 +177,7 @@ export default function NewEmployeePage() {
       <SECTION title="Employment Details">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FIELD label="Entity" required>
-            <select required value={form.entityName} onChange={e => set('entityName', e.target.value)} className={SELECT_CLS}>
-              <option value="">Select entity…</option>
-              {tenantName && <option value={tenantName}>{tenantName}</option>}
-            </select>
+            <input readOnly value={tenantName} className={`${INPUT_CLS} cursor-not-allowed opacity-70`} />
           </FIELD>
           <FIELD label="Employment Type" required>
             <select required value={form.employmentType} onChange={e => set('employmentType', e.target.value)} className={SELECT_CLS}>
