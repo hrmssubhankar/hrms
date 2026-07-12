@@ -95,11 +95,6 @@ export default function LeavePage() {
   })
   const computedDays = calcDays(form.startDate, form.endDate)
 
-  // Holidays that fall within the selected leave range
-  const overlappingHolidays = (form.startDate && form.endDate)
-    ? holidays.filter(h => h.date >= form.startDate && h.date <= form.endDate)
-    : []
-
   // Expanded card + review state
   const [expanded,    setExpanded]    = useState<string | null>(null)
   const [reviewNote,  setReviewNote]  = useState<Record<string, string>>({})
@@ -108,6 +103,11 @@ export default function LeavePage() {
 
   // Public holidays — fetched once per year when form opens
   const [holidays,    setHolidays]    = useState<{ name: string; date: string }[]>([])
+
+  // Holidays that fall within the selected leave range
+  const overlappingHolidays = (form.startDate && form.endDate)
+    ? holidays.filter(h => h.date >= form.startDate && h.date <= form.endDate)
+    : []
 
   // ── Detect role from /api/auth/me ──
   useEffect(() => {
