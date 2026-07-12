@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get('status')           // 'active' | 'inactive'
   const type   = searchParams.get('type')             // employment_type
   const page   = Math.max(1, Number(searchParams.get('page') ?? 1))
-  const limit  = Math.min(100, Number(searchParams.get('limit') ?? 20))
+  const limit  = Math.min(500, Number(searchParams.get('limit') ?? 20))
   const offset = (page - 1) * limit
 
   try {
