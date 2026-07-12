@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 type Shift = { id: string; employeeId: string; startTime: string; endTime: string; location: string | null; clientSite: string | null; status: string; notes: string | null; employeeFirstName: string | null; employeeLastName: string | null }
-type Timesheet = { id: string; employeeId: string; shiftId: string | null; clockIn: string; clockOut: string | null; totalHours: string | null; status: string; employeeFirstName: string | null; employeeLastName: string | null }
+type Timesheet = { id: string; employeeId: string; shiftId: string | null; clockIn: string; clockOut: string | null; hoursWorked: string | null; status: string; employeeFirstName: string | null; employeeLastName: string | null }
 type Stats = { totalShifts: number; pendingShifts: number; confirmedShifts: number; completedShifts: number }
 type Employee = { id: string; firstName: string; lastName: string }
 
@@ -270,7 +270,7 @@ export default function RosteringPage() {
                         <td className="px-4 py-3 text-gray-200">{t.employeeFirstName} {t.employeeLastName}</td>
                         <td className="px-4 py-3 text-gray-400 text-xs">{fmtDateTime(t.clockIn)}</td>
                         <td className="px-4 py-3 text-gray-400 text-xs">{t.clockOut ? fmtDateTime(t.clockOut) : <span className="text-amber-400">In progress</span>}</td>
-                        <td className="px-4 py-3 text-gray-300 font-mono text-xs">{t.totalHours ? `${Number(t.totalHours).toFixed(1)}h` : '—'}</td>
+                        <td className="px-4 py-3 text-gray-300 font-mono text-xs">{t.hoursWorked ? `${Number(t.hoursWorked).toFixed(1)}h` : '—'}</td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${TS_STATUS_STYLE[t.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                             {t.status}

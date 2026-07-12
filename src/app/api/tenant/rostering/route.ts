@@ -47,10 +47,10 @@ export async function GET(req: NextRequest) {
     }
 
     const stats = {
-      total:     shiftList.length,
-      scheduled: shiftList.filter(s => s.status === 'scheduled').length,
-      completed: shiftList.filter(s => s.status === 'completed').length,
-      cancelled: shiftList.filter(s => s.status === 'cancelled').length,
+      totalShifts:     shiftList.length,
+      pendingShifts:   shiftList.filter(s => s.status === 'pending').length,
+      confirmedShifts: shiftList.filter(s => s.status === 'confirmed').length,
+      completedShifts: shiftList.filter(s => s.status === 'completed').length,
     }
     return NextResponse.json({ shifts: shiftList, stats })
   } catch (err) {
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
       tenantId: session.tenantId, employeeId,
       startTime: new Date(startTime), endTime: new Date(endTime),
       location: location || null, clientSite: clientSite || null,
-      notes: notes || null, status: 'scheduled', compliancePassed: false,
+      notes: notes || null, status: 'pending', compliancePassed: false,
     }).returning()
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
