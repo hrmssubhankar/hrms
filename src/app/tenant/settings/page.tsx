@@ -35,6 +35,13 @@ type XeroStatus = {
   tokenExpired?: boolean
 }
 
+type MyobStatus = {
+  connected: boolean
+  companyFileName?: string
+  companyFileUri?: string
+  tokenExpired?: boolean
+}
+
 export default function TenantSettingsPage() {
   const [tab,          setTab]          = useState<Tab>('branding')
   const [settings,     setSettings]     = useState<Settings>({})
@@ -55,6 +62,13 @@ export default function TenantSettingsPage() {
   const [xeroDisconnecting, setXeroDisconnecting] = useState(false)
   const [xeroMsg,         setXeroMsg]         = useState('')
 
+  // MYOB integration state
+  const [myobStatus,      setMyobStatus]      = useState<MyobStatus | null>(null)
+  const [myobLoading,     setMyobLoading]     = useState(false)
+  const [myobConnecting,  setMyobConnecting]  = useState(false)
+  const [myobDisconnecting, setMyobDisconnecting] = useState(false)
+  const [myobMsg,         setMyobMsg]         = useState('')
+
   useEffect(() => {
     fetch('/api/tenant/config').then(r => r.json()).then(d => {
       const t = d.tenant ?? {}
@@ -67,18 +81,26 @@ export default function TenantSettingsPage() {
     })
   }, [])
 
-  // Load Xero status + handle callback query params
+  // Load Xero + MYOB status + handle callback query params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('tab') === 'integrations') setTab('integrations')
     if (params.get('xero_success')) setXeroMsg('✓ Xero connected successfully!')
     if (params.get('xero_error'))   setXeroMsg(`Xero error: ${params.get('xero_error')}`)
+    if (params.get('myob_success')) setMyobMsg('✓ MYOB connected successfully!')
+    if (params.get('myob_error'))   setMyobMsg(`MYOB error: ${params.get('myob_error')}`)
 
     setXeroLoading(true)
     fetch('/api/tenant/xero/status')
       .then(r => r.json())
       .then(d => setXeroStatus(d))
       .finally(() => setXeroLoading(false))
+
+    setMyobLoading(true)
+    fetch('/api/tenant/myob/status')
+      .then(r => r.json())
+      .then(d => setMyobStatus(d))
+      .finally(() => setMyobLoading(false))
   }, [])
 
   async function connectXero() {
@@ -98,6 +120,25 @@ export default function TenantSettingsPage() {
     setXeroStatus({ connected: false })
     setXeroMsg('Xero disconnected.')
     setXeroDisconnecting(false)
+  }
+
+  async function connectMyob() {
+    setMyobConnecting(true); setMyobMsg('')
+    try {
+      const res = await fetch('/api/tenant/myob/connect')
+      const d   = await res.json()
+      if (!res.ok) { setMyobMsg(d.error); setMyobConnecting(false); return }
+      window.location.href = d.url   // redirect to MYOB
+    } catch { setMyobMsg('Failed to start MYOB connection'); setMyobConnecting(false) }
+  }
+
+  async function disconnectMyob() {
+    if (!confirm('Disconnect MYOB? Payroll records already exported will remain exported.')) return
+    setMyobDisconnecting(true); setMyobMsg('')
+    await fetch('/api/tenant/myob/status', { method: 'DELETE' })
+    setMyobStatus({ connected: false })
+    setMyobMsg('MYOB disconnected.')
+    setMyobDisconnecting(false)
   }
 
   function flash() { setSaved(true); setTimeout(() => setSaved(false), 3000) }
@@ -634,6 +675,83 @@ export default function TenantSettingsPage() {
                       <button onClick={connectXero} disabled={xeroConnecting}
                         className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#13B5EA] hover:bg-[#0da3d8] transition disabled:opacity-60">
                         {xeroConnecting ? 'Redirecting to Xero…' : '🔗 Connect Xero'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* MYOB */}
+              {myobMsg && (
+                <div className={`rounded-lg px-4 py-2.5 text-sm border ${myobMsg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+                  {myobMsg}
+                </div>
+              )}
+
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {/* MYOB logo (purple M) */}
+                    <div className="w-10 h-10 rounded-xl bg-[#7B2D8B] flex items-center justify-center text-white font-black text-lg shrink-0">M</div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">MYOB AccountRight</p>
+                      <p className="text-xs text-gray-500">Export payroll runs as General Journal Transactions to your MYOB ledger</p>
+                    </div>
+                  </div>
+                  {myobLoading ? (
+                    <span className="text-xs text-gray-500">Checking…</span>
+                  ) : myobStatus?.connected ? (
+                    <span className="text-xs px-2 py-1 rounded-full bg-green-900/40 border border-green-700 text-green-300">
+                      {myobStatus.tokenExpired ? '⚠ Token expired' : '● Connected'}
+                    </span>
+                  ) : (
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-800 border border-gray-700 text-gray-400">Not connected</span>
+                  )}
+                </div>
+
+                {myobStatus?.connected && (
+                  <div className="bg-gray-800/60 border border-gray-700 rounded-lg p-3 text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Company File</span>
+                      <span className="text-white font-medium">{myobStatus.companyFileName}</span>
+                    </div>
+                  </div>
+                )}
+
+                {myobStatus?.tokenExpired && (
+                  <div className="bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-2 text-xs text-amber-300">
+                    ⚠ Your MYOB access token has expired. Reconnect to restore the integration.
+                  </div>
+                )}
+
+                <div className="border-t border-gray-800 pt-4">
+                  <p className="text-xs text-gray-500 mb-3">
+                    When you export a pay run to MYOB, a General Journal Transaction is created with these account codes:
+                    <br />
+                    <span className="font-mono">6-1000</span> Wages &amp; Salaries (DR) ·
+                    <span className="font-mono"> 2-1410</span> PAYG Withholding (CR) ·
+                    <span className="font-mono"> 2-1420</span> Superannuation Payable (CR) ·
+                    <span className="font-mono"> 2-1400</span> Net Wages Payable (CR)
+                    <br />
+                    You can remap these in MYOB's chart of accounts.
+                  </p>
+
+                  <div className="flex gap-3">
+                    {myobStatus?.connected ? (
+                      <>
+                        <button onClick={connectMyob} disabled={myobConnecting}
+                          className="px-4 py-2 rounded-lg text-sm font-medium border border-[#7B2D8B] text-[#c084e8] hover:bg-[#7B2D8B]/10 transition disabled:opacity-60">
+                          {myobConnecting ? 'Redirecting…' : '🔄 Reconnect MYOB'}
+                        </button>
+                        <button onClick={disconnectMyob} disabled={myobDisconnecting}
+                          className="px-4 py-2 rounded-lg text-sm font-medium border border-red-800 text-red-400 hover:bg-red-900/20 transition disabled:opacity-60">
+                          {myobDisconnecting ? 'Disconnecting…' : 'Disconnect'}
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={connectMyob} disabled={myobConnecting}
+                        className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#7B2D8B] hover:bg-[#6a2578] transition disabled:opacity-60">
+                        {myobConnecting ? 'Redirecting to MYOB…' : '🔗 Connect MYOB'}
                       </button>
                     )}
                   </div>

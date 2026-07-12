@@ -115,6 +115,31 @@ export default function TenantSidebar({
             </Link>
           )
         })}
+
+        {/* ── Self-Service section — always shown to all users ── */}
+        <div className="pt-3 mt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <p className="px-3 pb-1.5 text-xs font-medium uppercase tracking-widest opacity-30">My Portal</p>
+          {[
+            { key: 'my-profile',  label: '👤 My Profile' },
+            { key: 'my-payslips', label: '💵 My Payslips' },
+          ].map(({ key, label }) => {
+            const active = isActive(key)
+            return (
+              <Link
+                key={key}
+                href={`/tenant/${key}`}
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition ${
+                  active
+                    ? 'text-white font-medium'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+                style={active ? { background: primaryColor } : {}}
+              >
+                {label}
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
       {/* User section at bottom — click to open dropdown */}

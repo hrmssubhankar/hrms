@@ -21,6 +21,26 @@ type FormState = {
 
 const BLANK_FORM: FormState = { name: '', date: '', country: 'AU', state: '', isNational: true }
 
+/** Converts a 2-letter ISO country code to its flag emoji */
+function countryFlag(cc: string): string {
+  const upper = cc.toUpperCase().slice(0, 2)
+  if (upper.length < 2) return '🌏'
+  const [a, b] = upper.split('')
+  return String.fromCodePoint(
+    0x1F1E6 + a.charCodeAt(0) - 65,
+    0x1F1E6 + b.charCodeAt(0) - 65,
+  )
+}
+
+const COUNTRY_NAMES: Record<string, string> = {
+  AU: 'Australia', NZ: 'New Zealand', US: 'United States', CA: 'Canada',
+  GB: 'United Kingdom', IE: 'Ireland', IN: 'India', SG: 'Singapore',
+  MY: 'Malaysia', PH: 'Philippines', AE: 'UAE', SA: 'Saudi Arabia',
+  DE: 'Germany', FR: 'France', ES: 'Spain', IT: 'Italy', NL: 'Netherlands',
+  BE: 'Belgium', SE: 'Sweden', NO: 'Norway', DK: 'Denmark', CH: 'Switzerland',
+  JP: 'Japan', KR: 'South Korea', CN: 'China', HK: 'Hong Kong', ZA: 'South Africa',
+}
+
 const MONTHS = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December',
@@ -49,6 +69,11 @@ export default function PublicHolidaysPage() {
   const [holidays,   setHolidays]   = useState<Holiday[]>([])
   const [loading,    setLoading]    = useState(true)
   const [canManage,  setCanManage]  = useState(false)
+  const [tenantCountry, setTenantCountry] = useState('AU')
+
+  // Import from Nager.Date
+  const [importing,  setImporting]  = useState(false)
+  const [importMsg,  setImportMsg]  = useState('')
 
   // Form / modal state
   const [showForm,   setShowForm]   = useState(false)
@@ -58,11 +83,19 @@ export default function PublicHolidaysPage() {
   const [formError,  setFormError]  = useState<string | null>(null)
   const [deleting,   setDeleting]   = useState<string | null>(null)
 
-  // Role detection
+  // Role detection + tenant country
   useEffect(() => {
     fetch('/api/auth/me')
       .then(r => r.json())
       .then(d => setCanManage(MANAGER_ROLES.includes(d.userRole ?? '')))
+      .catch(() => {})
+    fetch('/api/tenant/config')
+      .then(r => r.json())
+      .then(d => {
+        const s = d.tenant?.settings ?? {}
+        const cc = (typeof s === 'string' ? JSON.parse(s) : s)?.country ?? 'AU'
+        setTenantCountry(cc.toUpperCase())
+      })
       .catch(() => {})
   }, [])
 
@@ -78,9 +111,28 @@ export default function PublicHolidaysPage() {
 
   function openAdd() {
     setEditing(null)
-    setForm({ ...BLANK_FORM, date: `${year}-01-01` })
+    setForm({ ...BLANK_FORM, country: tenantCountry, date: `${year}-01-01` })
     setFormError(null)
     setShowForm(true)
+  }
+
+  async function importHolidays() {
+    setImporting(true); setImportMsg('')
+    try {
+      const res = await fetch('/api/tenant/public-holidays/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year, countryCode: tenantCountry }),
+      })
+      const d = await res.json()
+      if (!res.ok) { setImportMsg(`⚠ ${d.error}`); return }
+      setImportMsg(`✓ Imported ${d.imported} holiday(s) for ${d.year} · ${d.skipped} already existed.`)
+      load(year)
+    } catch {
+      setImportMsg('⚠ Import failed — check connection.')
+    } finally {
+      setImporting(false)
+    }
   }
 
   function openEdit(h: Holiday) {
@@ -148,9 +200,11 @@ export default function PublicHolidaysPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">🇦🇺 Public Holidays</h1>
+          <h1 className="text-2xl font-bold text-white">{countryFlag(tenantCountry)} Public Holidays</h1>
           <p className="text-sm text-gray-400 mt-0.5">
-            {canManage ? 'Manage public holidays for your organisation' : 'Australian national public holidays'}
+            {canManage
+              ? `Manage public holidays for your organisation (${COUNTRY_NAMES[tenantCountry] ?? tenantCountry})`
+              : `${COUNTRY_NAMES[tenantCountry] ?? tenantCountry} national public holidays`}
           </p>
         </div>
 
@@ -170,6 +224,18 @@ export default function PublicHolidaysPage() {
             >→</button>
           </div>
 
+          {/* Import button — managers only */}
+          {canManage && (
+            <button
+              onClick={importHolidays}
+              disabled={importing}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              title={`Auto-import ${year} public holidays from Nager.Date for ${tenantCountry}`}
+            >
+              {importing ? 'Importing…' : `⬇ Import ${year}`}
+            </button>
+          )}
+
           {/* Add button — managers only */}
           {canManage && (
             <button
@@ -181,6 +247,12 @@ export default function PublicHolidaysPage() {
           )}
         </div>
       </div>
+
+      {importMsg && (
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${importMsg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-amber-900/40 border-amber-700 text-amber-300'}`}>
+          {importMsg}
+        </div>
+      )}
 
       {/* Next holiday banner */}
       {nextHoliday && year === currentYear && (

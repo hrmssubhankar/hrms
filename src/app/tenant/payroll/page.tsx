@@ -25,7 +25,8 @@ type PayrollRecord = {
   createdAt: string
 }
 
-type XeroStatus = { connected: boolean; orgName?: string; tokenExpired?: boolean }
+type XeroStatus  = { connected: boolean; orgName?: string; tokenExpired?: boolean }
+type MyobStatus  = { connected: boolean; companyFileName?: string; tokenExpired?: boolean }
 
 type Breakdown = {
   grossPay: number
@@ -61,7 +62,9 @@ export default function PayrollPage() {
   const [selected, setSelected]   = useState<PayrollRecord | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
   const [xeroStatus,   setXeroStatus]  = useState<XeroStatus | null>(null)
+  const [myobStatus,   setMyobStatus]  = useState<MyobStatus | null>(null)
   const [exporting,    setExporting]   = useState<Set<string>>(new Set())
+  const [myobExporting, setMyobExporting] = useState<Set<string>>(new Set())
   const [exportMsg,    setExportMsg]   = useState('')
 
   const [form, setForm] = useState({
@@ -102,6 +105,10 @@ export default function PayrollPage() {
       .then(r => r.json())
       .then(d => setXeroStatus(d))
       .catch(() => {})
+    fetch('/api/tenant/myob/status')
+      .then(r => r.json())
+      .then(d => setMyobStatus(d))
+      .catch(() => {})
   }, [])
 
   async function exportToXero(ids: string[]) {
@@ -124,6 +131,28 @@ export default function PayrollPage() {
       load()
     } catch { setExportMsg('Export failed — check connection.') }
     finally { setExporting(new Set()) }
+  }
+
+  async function exportToMyob(ids: string[]) {
+    if (!myobStatus?.connected) {
+      setExportMsg('MYOB is not connected. Go to Settings → Integrations to connect.')
+      return
+    }
+    setMyobExporting(new Set(ids))
+    setExportMsg('')
+    try {
+      const res = await fetch('/api/tenant/myob/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      })
+      const d = await res.json()
+      if (!res.ok) { setExportMsg(d.error ?? 'MYOB export failed'); return }
+      const { exported, skipped, errors } = d.summary
+      setExportMsg(`✓ Exported ${exported} record(s) to MYOB${skipped > 0 ? ` · ${skipped} skipped` : ''}${errors > 0 ? ` · ${errors} error(s)` : ''}.`)
+      load()
+    } catch { setExportMsg('MYOB export failed — check connection.') }
+    finally { setMyobExporting(new Set()) }
   }
 
   async function handlePreview() {
@@ -210,6 +239,25 @@ export default function PayrollPage() {
               <a href="/tenant/settings?tab=integrations"
                 className="px-3 py-2 rounded-xl text-xs border border-gray-700 text-gray-400 hover:text-white transition">
                 Connect Xero
+              </a>
+            )
+          )}
+          {myobStatus && (
+            myobStatus.connected ? (
+              <button
+                onClick={() => {
+                  const unexported = records.filter(r => (r.status === 'approved' || r.status === 'paid')).map(r => r.id)
+                  if (unexported.length === 0) { setExportMsg('No approved/paid records to export.'); return }
+                  exportToMyob(unexported)
+                }}
+                disabled={myobExporting.size > 0}
+                className="px-4 py-2 rounded-xl text-sm font-semibold border border-[#7B2D8B] text-[#c084e8] hover:bg-[#7B2D8B]/10 transition disabled:opacity-60">
+                {myobExporting.size > 0 ? 'Exporting…' : '⬆ Export All to MYOB'}
+              </button>
+            ) : (
+              <a href="/tenant/settings?tab=integrations"
+                className="px-3 py-2 rounded-xl text-xs border border-gray-700 text-gray-400 hover:text-white transition">
+                Connect MYOB
               </a>
             )
           )}
@@ -306,6 +354,14 @@ export default function PayrollPage() {
                             {exporting.has(r.id) ? '…' : '⬆ Xero'}
                           </button>
                         )
+                      )}
+                      {(r.status === 'approved' || r.status === 'paid') && myobStatus?.connected && (
+                        <button
+                          onClick={() => exportToMyob([r.id])}
+                          disabled={myobExporting.has(r.id)}
+                          className="text-xs px-2 py-1 rounded border border-[#7B2D8B]/60 text-[#c084e8] hover:bg-[#7B2D8B]/10 transition disabled:opacity-50">
+                          {myobExporting.has(r.id) ? '…' : '⬆ MYOB'}
+                        </button>
                       )}
                       <button onClick={() => setSelected(r)} className="text-xs px-2 py-1 rounded border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">View</button>
                       {r.status === 'pending'  && <button onClick={() => updateStatus(r.id, 'approved')} className="text-xs px-2 py-1 rounded border border-blue-700 text-blue-400 hover:bg-blue-900/20 transition">Approve</button>}
