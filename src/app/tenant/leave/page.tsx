@@ -95,11 +95,19 @@ export default function LeavePage() {
   })
   const computedDays = calcDays(form.startDate, form.endDate)
 
+  // Holidays that fall within the selected leave range
+  const overlappingHolidays = (form.startDate && form.endDate)
+    ? holidays.filter(h => h.date >= form.startDate && h.date <= form.endDate)
+    : []
+
   // Expanded card + review state
   const [expanded,    setExpanded]    = useState<string | null>(null)
   const [reviewNote,  setReviewNote]  = useState<Record<string, string>>({})
   const [reviewing,   setReviewing]   = useState<string | null>(null)
   const [formError,   setFormError]   = useState<string | null>(null)
+
+  // Public holidays — fetched once per year when form opens
+  const [holidays,    setHolidays]    = useState<{ name: string; date: string }[]>([])
 
   // ── Detect role from /api/auth/me ──
   useEffect(() => {
@@ -196,7 +204,17 @@ export default function LeavePage() {
           </p>
         </div>
         <button
-          onClick={() => { setShowForm(true); setFormError(null) }}
+          onClick={() => {
+            setShowForm(true); setFormError(null)
+            // Fetch holidays for the current year if not already loaded
+            if (holidays.length === 0) {
+              const year = new Date().getFullYear()
+              fetch(`/api/tenant/public-holidays?year=${year}`)
+                .then(r => r.json())
+                .then(d => setHolidays(d.holidays ?? []))
+                .catch(() => {})
+            }
+          }}
           className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
         >
           + New Request
@@ -322,6 +340,17 @@ export default function LeavePage() {
               <p className="text-xs text-purple-400 -mt-2">
                 {computedDays} calendar day{computedDays !== 1 ? 's' : ''}
               </p>
+            )}
+
+            {overlappingHolidays.length > 0 && (
+              <div className="rounded-lg bg-amber-900/30 border border-amber-700 px-4 py-3 text-sm text-amber-300 -mt-1">
+                <p className="font-medium mb-1">🇦🇺 Public holiday{overlappingHolidays.length > 1 ? 's' : ''} in this period:</p>
+                <ul className="space-y-0.5 text-xs text-amber-400">
+                  {overlappingHolidays.map(h => (
+                    <li key={h.date}>• {h.name} — {new Date(h.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             <div>

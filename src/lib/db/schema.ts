@@ -756,6 +756,22 @@ export const leaveRequests = pgTable('leave_requests', {
   dateIdx:      index('leave_date_idx').on(t.startDate),
 }))
 
+// ── Public Holidays ───────────────────────────────────────────────────────────
+export const publicHolidays = pgTable('public_holidays', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  tenantId:   uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  name:       varchar('name', { length: 200 }).notNull(),
+  date:       date('date').notNull(),
+  country:    varchar('country', { length: 10 }).notNull().default('AU'),
+  state:      varchar('state', { length: 10 }),  // null = national
+  isNational: boolean('is_national').notNull().default(true),
+  createdAt:  timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:  index('ph_tenant_idx').on(t.tenantId),
+  dateIdx:    index('ph_date_idx').on(t.date),
+  uniqueIdx:  uniqueIndex('ph_unique').on(t.tenantId, t.date, t.name),
+}))
+
 export const announcementPriorityEnum = pgEnum('announcement_priority', ['info', 'warning', 'critical'])
 
 export const platformAnnouncements = pgTable('platform_announcements', {
