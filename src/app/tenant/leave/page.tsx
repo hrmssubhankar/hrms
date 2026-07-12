@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type LeaveRequest = {
@@ -32,20 +33,48 @@ type Stats = {
 
 type Employee = { id: string; firstName: string; lastName: string }
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-const LEAVE_TYPES = [
-  { value: 'annual',        label: '🌴 Annual Leave' },
-  { value: 'sick',          label: '🤒 Sick Leave' },
-  { value: 'personal',      label: '👤 Personal Leave' },
-  { value: 'unpaid',        label: '💸 Unpaid Leave' },
-  { value: 'long_service',  label: '🏅 Long Service Leave' },
-  { value: 'carer',         label: '🤝 Carer\'s Leave' },
-  { value: 'compassionate', label: '🕊 Compassionate Leave' },
-]
+type LeaveTypeConfig = {
+  key: string
+  label: string
+  emoji: string
+  color: string
+  accrualNote?: string
+  entitlementDaysFT: number
+  entitlementDaysPT: number
+  entitlementDaysCasual: number
+  isActive: boolean
+}
 
-const LEAVE_TYPE_LABEL: Record<string, string> = Object.fromEntries(
-  LEAVE_TYPES.map(t => [t.value, t.label])
-)
+type Balance = {
+  key: string
+  label: string
+  emoji: string
+  color: string
+  accrualNote: string
+  entitlement: number | null
+  taken: number
+  pending: number
+  remaining: number | null
+}
+
+type CalendarEvent = {
+  id: string
+  employeeId: string
+  employeeName: string
+  leaveType: string
+  label: string
+  emoji: string
+  color: string
+  startDate: string
+  endDate: string
+  totalDays: number
+  status: string
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+const MONTHS = ['January','February','March','April','May','June',
+  'July','August','September','October','November','December']
+const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
 const STATUS_STYLE: Record<string, string> = {
   pending:   'bg-yellow-900/50 text-yellow-300 border-yellow-700',
@@ -55,16 +84,12 @@ const STATUS_STYLE: Record<string, string> = {
 }
 
 const MANAGER_ROLES = ['director', 'hr_officer', 'operations_manager', 'team_leader', 'compliance_manager']
-
 const INPUT  = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL  = 'block text-xs font-medium text-gray-400 mb-1'
-const STAT   = 'bg-gray-800 border border-gray-700 rounded-xl p-4'
 
-// Calculate calendar days inclusive
 function calcDays(start: string, end: string): number {
   if (!start || !end) return 0
-  const s = new Date(start)
-  const e = new Date(end)
+  const s = new Date(start), e = new Date(end)
   if (e < s) return 0
   return Math.round((e.getTime() - s.getTime()) / 86400000) + 1
 }
@@ -74,227 +99,628 @@ function fmt(dateStr: string | null): string {
   return new Date(dateStr).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function fmtShort(dateStr: string): string {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+}
+
+type Tab = 'requests' | 'balances' | 'calendar'
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LeavePage() {
-  const [requests,  setRequests]  = useState<LeaveRequest[]>([])
-  const [stats,     setStats]     = useState<Stats>({ total:0, pending:0, approved:0, rejected:0, cancelled:0, totalDaysApproved:0 })
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [canApprove, setCanApprove] = useState(false)
+  const [tab, setTab] = useState<Tab>('requests')
 
-  // Filters
+  // ── Shared state ──
+  const [canApprove, setCanApprove] = useState(false)
+  const [userRole,   setUserRole]   = useState('employee')
+  const [employees,  setEmployees]  = useState<Employee[]>([])
+  const [leaveTypes, setLeaveTypes] = useState<LeaveTypeConfig[]>([])
+
+  // ── Requests tab ──
+  const [requests,     setRequests]     = useState<LeaveRequest[]>([])
+  const [stats,        setStats]        = useState<Stats>({ total:0, pending:0, approved:0, rejected:0, cancelled:0, totalDaysApproved:0 })
+  const [loadingReqs,  setLoadingReqs]  = useState(true)
   const [filterStatus, setFilterStatus] = useState('')
   const [filterType,   setFilterType]   = useState('')
-
-  // New request form
-  const [showForm,  setShowForm]  = useState(false)
-  const [saving,    setSaving]    = useState(false)
-  const [form, setForm] = useState({
-    employeeId: '', leaveType: 'annual',
-    startDate: '', endDate: '', reason: '',
-  })
+  const [showForm,     setShowForm]     = useState(false)
+  const [saving,       setSaving]       = useState(false)
+  const [form, setForm] = useState({ employeeId: '', leaveType: 'annual', startDate: '', endDate: '', reason: '' })
   const computedDays = calcDays(form.startDate, form.endDate)
-
-  // Expanded card + review state
   const [expanded,    setExpanded]    = useState<string | null>(null)
   const [reviewNote,  setReviewNote]  = useState<Record<string, string>>({})
   const [reviewing,   setReviewing]   = useState<string | null>(null)
   const [formError,   setFormError]   = useState<string | null>(null)
-
-  // Public holidays — fetched once per year when form opens
   const [holidays,    setHolidays]    = useState<{ name: string; date: string }[]>([])
-
-  // Holidays that fall within the selected leave range
   const overlappingHolidays = (form.startDate && form.endDate)
     ? holidays.filter(h => h.date >= form.startDate && h.date <= form.endDate)
     : []
 
-  // ── Detect role from /api/auth/me ──
+  // ── Balances tab ──
+  const [balances,      setBalances]      = useState<Balance[]>([])
+  const [loadingBal,    setLoadingBal]    = useState(false)
+  const [balYear,       setBalYear]       = useState(new Date().getFullYear())
+  const [balEmployee,   setBalEmployee]   = useState('')
+  const [balLinked,     setBalLinked]     = useState(true)
+
+  // ── Calendar tab ──
+  const [calYear,   setCalYear]   = useState(new Date().getFullYear())
+  const [calMonth,  setCalMonth]  = useState(new Date().getMonth() + 1)   // 1-12
+  const [calEvents, setCalEvents] = useState<CalendarEvent[]>([])
+  const [loadingCal, setLoadingCal] = useState(false)
+
+  // ── Bootstrap ──
   useEffect(() => {
     fetch('/api/auth/me')
       .then(r => r.json())
       .then(d => {
-        const role = (d.userRole ?? 'employee') as string
+        const role = d.userRole ?? 'employee'
+        setUserRole(role)
         setCanApprove(MANAGER_ROLES.includes(role))
       })
-      .catch(() => {/* leave defaults */})
+      .catch(() => {})
+
+    fetch('/api/tenant/leave/types')
+      .then(r => r.json())
+      .then(d => setLeaveTypes(d.types ?? []))
+      .catch(() => {})
+
+    fetch('/api/tenant/employees?status=active&limit=500')
+      .then(r => r.json())
+      .then(d => setEmployees(d.employees ?? []))
+      .catch(() => {})
   }, [])
 
-  const load = useCallback(async (st = filterStatus, t = filterType) => {
-    setLoading(true)
+  // ── Load requests ──
+  const loadRequests = useCallback(async (st = filterStatus, t = filterType) => {
+    setLoadingReqs(true)
     const p = new URLSearchParams()
-    if (st) p.set('status',    st)
+    if (st) p.set('status', st)
     if (t)  p.set('leaveType', t)
     const res  = await fetch(`/api/tenant/leave?${p}`)
     const data = await res.json()
     setRequests(data.requests ?? [])
     setStats(data.stats ?? { total:0, pending:0, approved:0, rejected:0, cancelled:0, totalDaysApproved:0 })
-    setLoading(false)
+    setLoadingReqs(false)
   }, [filterStatus, filterType])
 
+  useEffect(() => { loadRequests() }, [])
+
+  // ── Load balances ──
+  const loadBalances = useCallback(async (year = balYear, empId = balEmployee) => {
+    setLoadingBal(true)
+    const p = new URLSearchParams({ year: String(year) })
+    if (empId) p.set('employeeId', empId)
+    const res  = await fetch(`/api/tenant/leave/balances?${p}`)
+    const data = await res.json()
+    setBalLinked(data.employeeLinked !== false)
+    setBalances(data.balances ?? [])
+    setLoadingBal(false)
+  }, [balYear, balEmployee])
+
   useEffect(() => {
-    load()
-    // Only managers need the full employee list (for submitting on behalf)
-    fetch('/api/tenant/employees?status=active&limit=500')
-      .then(r => r.json())
-      .then(d => setEmployees(d.employees ?? []))
-  }, [])
+    if (tab === 'balances') loadBalances()
+  }, [tab])
+
+  // ── Load calendar ──
+  const loadCalendar = useCallback(async (year = calYear, month = calMonth) => {
+    setLoadingCal(true)
+    const res  = await fetch(`/api/tenant/leave/calendar?year=${year}&month=${month}`)
+    const data = await res.json()
+    setCalEvents(data.events ?? [])
+    setLoadingCal(false)
+  }, [calYear, calMonth])
+
+  useEffect(() => {
+    if (tab === 'calendar') loadCalendar()
+  }, [tab])
 
   // ── Submit new request ──
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (computedDays <= 0) return
-    setSaving(true)
-    setFormError(null)
+    setSaving(true); setFormError(null)
     try {
       const res = await fetch('/api/tenant/leave', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ...form, totalDays: computedDays }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body:   JSON.stringify({ ...form, totalDays: computedDays }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        setFormError(data.error ?? `Request failed (${res.status}). Please try again.`)
-        setSaving(false)
+        setFormError(data.error ?? `Request failed (${res.status}).`)
         return
       }
       setShowForm(false)
       setForm({ employeeId: '', leaveType: 'annual', startDate: '', endDate: '', reason: '' })
-      load()
+      loadRequests()
     } catch {
-      setFormError('Network error — please check your connection and try again.')
-    } finally {
-      setSaving(false)
-    }
+      setFormError('Network error — please try again.')
+    } finally { setSaving(false) }
   }
 
-  // ── Approve / Reject ──
   async function review(id: string, action: 'approve' | 'reject') {
     setReviewing(id)
     await fetch('/api/tenant/leave', {
-      method:  'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ id, action, reviewNote: reviewNote[id] ?? '' }),
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body:   JSON.stringify({ id, action, reviewNote: reviewNote[id] ?? '' }),
     })
-    setReviewing(null)
-    load()
+    setReviewing(null); loadRequests()
   }
 
-  // ── Cancel ──
   async function cancel(id: string) {
     setReviewing(id)
     await fetch('/api/tenant/leave', {
-      method:  'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ id, action: 'cancel' }),
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body:   JSON.stringify({ id, action: 'cancel' }),
     })
-    setReviewing(null)
-    load()
+    setReviewing(null); loadRequests()
   }
+
+  // ── Calendar helpers ──
+  function calendarDays(year: number, month: number) {
+    const firstDate = new Date(year, month - 1, 1)
+    const lastDate  = new Date(year, month, 0)
+    const startPad  = firstDate.getDay()   // 0=Sun
+    const days: (number | null)[] = Array(startPad).fill(null)
+    for (let d = 1; d <= lastDate.getDate(); d++) days.push(d)
+    return days
+  }
+
+  function eventsOnDay(year: number, month: number, day: number): CalendarEvent[] {
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    return calEvents.filter(e => e.startDate <= dateStr && e.endDate >= dateStr)
+  }
+
+  const days = calendarDays(calYear, calMonth)
+
+  // ── Leave type label map ──
+  const typeLabel = Object.fromEntries(leaveTypes.map(t => [t.key, `${t.emoji} ${t.label}`]))
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">🏖 Leave Management</h1>
           <p className="text-sm text-gray-400 mt-0.5">
-            {canApprove ? 'Review and manage team leave requests' : 'Submit and track your leave requests'}
+            {canApprove ? 'Review team leave requests, balances and calendar' : 'Submit and track your leave'}
           </p>
         </div>
-        <button
-          onClick={() => {
-            setShowForm(true); setFormError(null)
-            // Fetch holidays for the current year if not already loaded
-            if (holidays.length === 0) {
-              const year = new Date().getFullYear()
-              fetch(`/api/tenant/public-holidays?year=${year}`)
-                .then(r => r.json())
-                .then(d => setHolidays(d.holidays ?? []))
-                .catch(() => {})
-            }
-          }}
-          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          + New Request
-        </button>
+        <div className="flex items-center gap-3">
+          {canApprove && (
+            <Link href="/tenant/leave/settings"
+              className="px-3 py-2 rounded-lg text-xs border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition">
+              ⚙ Leave Settings
+            </Link>
+          )}
+          <button
+            onClick={() => {
+              setShowForm(true); setFormError(null)
+              if (holidays.length === 0) {
+                fetch(`/api/tenant/public-holidays?year=${new Date().getFullYear()}`)
+                  .then(r => r.json()).then(d => setHolidays(d.holidays ?? []))
+              }
+            }}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            + New Request
+          </button>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {[
-          { label: 'Total',     value: stats.total,             color: 'text-white' },
-          { label: 'Pending',   value: stats.pending,           color: 'text-yellow-400' },
-          { label: 'Approved',  value: stats.approved,          color: 'text-green-400' },
-          { label: 'Rejected',  value: stats.rejected,          color: 'text-red-400' },
-          { label: 'Cancelled', value: stats.cancelled,         color: 'text-gray-500' },
-          { label: 'Days Approved', value: stats.totalDaysApproved, color: 'text-purple-400' },
-        ].map(s => (
-          <div key={s.label} className={STAT}>
-            <p className="text-xs text-gray-500">{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
-          </div>
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-gray-800">
+        {([
+          { id: 'requests', label: '📋 Requests' },
+          { id: 'balances', label: '⚖ Balances' },
+          { id: 'calendar', label: '📅 Calendar' },
+        ] as { id: Tab; label: string }[]).map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`px-5 py-2.5 text-sm font-medium transition border-b-2 -mb-px ${
+              tab === t.id
+                ? 'border-purple-500 text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            {t.label}
+          </button>
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <select
-          value={filterStatus}
-          onChange={e => { setFilterStatus(e.target.value); load(e.target.value, filterType) }}
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
-        >
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <select
-          value={filterType}
-          onChange={e => { setFilterType(e.target.value); load(filterStatus, e.target.value) }}
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
-        >
-          <option value="">All types</option>
-          {LEAVE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
-        {(filterStatus || filterType) && (
-          <button
-            onClick={() => { setFilterStatus(''); setFilterType(''); load('', '') }}
-            className="text-xs text-gray-400 hover:text-white px-3 py-2 border border-gray-700 rounded-lg"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
+      {/* ── REQUESTS TAB ── */}
+      {tab === 'requests' && (
+        <div className="space-y-6">
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {[
+              { label: 'Total',        value: stats.total,             color: 'text-white' },
+              { label: 'Pending',      value: stats.pending,           color: 'text-yellow-400' },
+              { label: 'Approved',     value: stats.approved,          color: 'text-green-400' },
+              { label: 'Rejected',     value: stats.rejected,          color: 'text-red-400' },
+              { label: 'Cancelled',    value: stats.cancelled,         color: 'text-gray-500' },
+              { label: 'Days Approved',value: stats.totalDaysApproved, color: 'text-purple-400' },
+            ].map(s => (
+              <div key={s.label} className="bg-gray-800 border border-gray-700 rounded-xl p-4">
+                <p className="text-xs text-gray-500">{s.label}</p>
+                <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+              </div>
+            ))}
+          </div>
 
-      {/* New Request Modal */}
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3">
+            <select value={filterStatus}
+              onChange={e => { setFilterStatus(e.target.value); loadRequests(e.target.value, filterType) }}
+              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              <option value="">All statuses</option>
+              {['pending','approved','rejected','cancelled'].map(s => (
+                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              ))}
+            </select>
+            <select value={filterType}
+              onChange={e => { setFilterType(e.target.value); loadRequests(filterStatus, e.target.value) }}
+              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              <option value="">All types</option>
+              {leaveTypes.map(t => <option key={t.key} value={t.key}>{t.emoji} {t.label}</option>)}
+            </select>
+            {(filterStatus || filterType) && (
+              <button onClick={() => { setFilterStatus(''); setFilterType(''); loadRequests('', '') }}
+                className="text-xs text-gray-400 hover:text-white px-3 py-2 border border-gray-700 rounded-lg">
+                Clear filters
+              </button>
+            )}
+          </div>
+
+          {/* Request list */}
+          {loadingReqs ? (
+            <div className="text-center py-12 text-gray-500">Loading…</div>
+          ) : requests.length === 0 ? (
+            <div className="text-center py-16 bg-gray-800/50 rounded-2xl border border-gray-700">
+              <p className="text-4xl mb-3">🏖</p>
+              <p className="text-gray-400 font-medium">No leave requests found</p>
+              <p className="text-sm text-gray-600 mt-1">
+                {canApprove ? 'No requests match your filters' : 'Submit your first leave request above'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {requests.map(r => {
+                const isExpanded = expanded === r.id
+                const isBusy     = reviewing === r.id
+                return (
+                  <div key={r.id} className="bg-gray-800/70 border border-gray-700 rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setExpanded(isExpanded ? null : r.id)}
+                      className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-800 transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        {(r.employeeFirstName?.[0] ?? '?').toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {canApprove && (
+                            <span className="text-sm font-medium text-white">{r.employeeFirstName} {r.employeeLastName}</span>
+                          )}
+                          <span className="text-xs text-gray-400">{typeLabel[r.leaveType] ?? r.leaveType}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {fmt(r.startDate)} → {fmt(r.endDate)}
+                          <span className="ml-2 text-purple-400">{r.totalDays}d</span>
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className={`text-xs px-2.5 py-1 rounded-full border font-medium capitalize ${STATUS_STYLE[r.status] ?? 'text-gray-400'}`}>
+                          {r.status}
+                        </span>
+                        <span className="text-gray-600 text-xs">{isExpanded ? '▲' : '▼'}</span>
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-5 pb-5 border-t border-gray-700 pt-4 space-y-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                          <div>
+                            <p className="text-xs text-gray-500">Requested on</p>
+                            <p className="text-white">{fmt(r.createdAt)}</p>
+                          </div>
+                          {r.reason && (
+                            <div className="col-span-2">
+                              <p className="text-xs text-gray-500">Reason</p>
+                              <p className="text-gray-300">{r.reason}</p>
+                            </div>
+                          )}
+                          {r.reviewedAt && (
+                            <div>
+                              <p className="text-xs text-gray-500">Reviewed on</p>
+                              <p className="text-white">{fmt(r.reviewedAt)}</p>
+                            </div>
+                          )}
+                          {r.reviewNote && (
+                            <div className="col-span-2">
+                              <p className="text-xs text-gray-500">Review note</p>
+                              <p className="text-gray-300">{r.reviewNote}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {canApprove && r.status === 'pending' && (
+                          <div className="space-y-3 pt-2 border-t border-gray-700">
+                            <div>
+                              <label className={LABEL}>Note (optional)</label>
+                              <input type="text" placeholder="Add a note for the employee…"
+                                value={reviewNote[r.id] ?? ''}
+                                onChange={e => setReviewNote(prev => ({ ...prev, [r.id]: e.target.value }))}
+                                className={INPUT} />
+                            </div>
+                            <div className="flex gap-3">
+                              <button onClick={() => review(r.id, 'approve')} disabled={isBusy}
+                                className="flex-1 py-2 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
+                                {isBusy ? '…' : '✓ Approve'}
+                              </button>
+                              <button onClick={() => review(r.id, 'reject')} disabled={isBusy}
+                                className="flex-1 py-2 bg-red-800 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
+                                {isBusy ? '…' : '✗ Reject'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {!canApprove && r.status === 'pending' && (
+                          <div className="pt-2 border-t border-gray-700">
+                            <button onClick={() => cancel(r.id)} disabled={isBusy}
+                              className="px-4 py-2 border border-red-800 text-red-400 hover:bg-red-900/30 disabled:opacity-50 text-sm rounded-lg transition-colors">
+                              {isBusy ? 'Cancelling…' : 'Cancel Request'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── BALANCES TAB ── */}
+      {tab === 'balances' && (
+        <div className="space-y-6">
+          {/* Controls */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button onClick={() => { const y = balYear - 1; setBalYear(y); loadBalances(y, balEmployee) }}
+                className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition">←</button>
+              <span className="px-4 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-white font-semibold min-w-[80px] text-center">{balYear}</span>
+              <button onClick={() => { const y = balYear + 1; setBalYear(y); loadBalances(y, balEmployee) }}
+                className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition">→</button>
+            </div>
+            {canApprove && employees.length > 0 && (
+              <select value={balEmployee}
+                onChange={e => { setBalEmployee(e.target.value); loadBalances(balYear, e.target.value) }}
+                className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                <option value="">My balance</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
+                ))}
+              </select>
+            )}
+            <button onClick={() => loadBalances(balYear, balEmployee)}
+              className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-400 hover:text-white transition">
+              ↻ Refresh
+            </button>
+          </div>
+
+          {!balLinked ? (
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center">
+              <p className="text-5xl mb-4">🔗</p>
+              <p className="text-gray-400">Your account is not linked to an employee record. Contact HR.</p>
+            </div>
+          ) : loadingBal ? (
+            <div className="text-center py-12 text-gray-500">Calculating balances…</div>
+          ) : balances.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No leave types configured.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {balances.map(b => {
+                const pct = b.entitlement && b.entitlement < 999
+                  ? Math.min(100, Math.round(((b.taken + b.pending) / b.entitlement) * 100))
+                  : null
+                const remainingColor = b.remaining == null ? 'text-gray-400'
+                  : b.remaining === 0 ? 'text-red-400'
+                  : b.remaining <= 5  ? 'text-amber-400'
+                  : 'text-green-400'
+
+                return (
+                  <div key={b.key} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-2xl">{b.emoji}</span>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{b.label}</p>
+                        {b.accrualNote && <p className="text-xs text-gray-600 mt-0.5">{b.accrualNote}</p>}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="bg-gray-800/60 rounded-lg px-3 py-2">
+                        <p className="text-xs text-gray-500">Entitlement</p>
+                        <p className="font-semibold text-white">
+                          {b.entitlement == null || b.entitlement >= 999 ? '∞' : `${b.entitlement}d`}
+                        </p>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg px-3 py-2">
+                        <p className="text-xs text-gray-500">Taken</p>
+                        <p className="font-semibold text-white">{b.taken}d</p>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg px-3 py-2">
+                        <p className="text-xs text-gray-500">Pending</p>
+                        <p className="font-semibold text-yellow-400">{b.pending}d</p>
+                      </div>
+                      <div className="bg-gray-800/60 rounded-lg px-3 py-2">
+                        <p className="text-xs text-gray-500">Remaining</p>
+                        <p className={`font-semibold ${remainingColor}`}>
+                          {b.remaining == null ? '∞' : `${b.remaining}d`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {pct != null && (
+                      <div>
+                        <div className="flex justify-between text-xs text-gray-600 mb-1">
+                          <span>Used</span><span>{pct}%</span>
+                        </div>
+                        <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${pct}%`,
+                              background: pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : b.color,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CALENDAR TAB ── */}
+      {tab === 'calendar' && (
+        <div className="space-y-4">
+          {/* Month nav */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => {
+                let m = calMonth - 1, y = calYear
+                if (m < 1) { m = 12; y-- }
+                setCalMonth(m); setCalYear(y); loadCalendar(y, m)
+              }}
+              className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition"
+            >← Prev</button>
+            <h2 className="text-lg font-semibold text-white">{MONTHS[calMonth - 1]} {calYear}</h2>
+            <button
+              onClick={() => {
+                let m = calMonth + 1, y = calYear
+                if (m > 12) { m = 1; y++ }
+                setCalMonth(m); setCalYear(y); loadCalendar(y, m)
+              }}
+              className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition"
+            >Next →</button>
+          </div>
+
+          {/* Legend */}
+          {calEvents.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {[...new Map(calEvents.map(e => [e.leaveType, { label: e.label, emoji: e.emoji, color: e.color }])).entries()].map(([key, cfg]) => (
+                <div key={key} className="flex items-center gap-1.5 text-xs text-gray-400">
+                  <span className="w-3 h-3 rounded-full inline-block shrink-0" style={{ background: cfg.color }} />
+                  {cfg.emoji} {cfg.label}
+                </div>
+              ))}
+              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                <span className="w-3 h-3 rounded-full inline-block shrink-0 border-2 border-yellow-500 bg-transparent" />
+                Pending
+              </div>
+            </div>
+          )}
+
+          {loadingCal ? (
+            <div className="text-center py-12 text-gray-500">Loading calendar…</div>
+          ) : (
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+              {/* Weekday headers */}
+              <div className="grid grid-cols-7 border-b border-gray-800">
+                {WEEKDAYS.map(d => (
+                  <div key={d} className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {d}
+                  </div>
+                ))}
+              </div>
+
+              {/* Day grid */}
+              <div className="grid grid-cols-7">
+                {days.map((day, idx) => {
+                  const today = new Date()
+                  const isToday = day !== null
+                    && today.getFullYear() === calYear
+                    && today.getMonth() + 1 === calMonth
+                    && today.getDate() === day
+
+                  const dayEvents = day !== null ? eventsOnDay(calYear, calMonth, day) : []
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`min-h-[90px] border-r border-b border-gray-800 p-1.5 last:border-r-0 ${
+                        !day ? 'bg-gray-900/30' : 'bg-gray-900'
+                      }`}
+                    >
+                      {day && (
+                        <>
+                          <p className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
+                            isToday ? 'bg-purple-600 text-white' : 'text-gray-400'
+                          }`}>
+                            {day}
+                          </p>
+                          <div className="space-y-0.5">
+                            {dayEvents.slice(0, 3).map(ev => (
+                              <div
+                                key={ev.id}
+                                className="text-[10px] leading-tight px-1 py-0.5 rounded truncate"
+                                style={{
+                                  background: `${ev.color}22`,
+                                  borderLeft: `2px solid ${ev.status === 'pending' ? '#eab308' : ev.color}`,
+                                  color: ev.color,
+                                }}
+                                title={`${ev.employeeName} — ${ev.label} (${ev.status})\n${fmtShort(ev.startDate)} → ${fmtShort(ev.endDate)}`}
+                              >
+                                {canApprove ? ev.employeeName || ev.emoji : ev.emoji} {ev.label}
+                              </div>
+                            ))}
+                            {dayEvents.length > 3 && (
+                              <p className="text-[10px] text-gray-600">+{dayEvents.length - 3} more</p>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {calEvents.length === 0 && !loadingCal && (
+            <p className="text-center text-sm text-gray-600 py-4">No approved or pending leave in {MONTHS[calMonth - 1]} {calYear}.</p>
+          )}
+        </div>
+      )}
+
+      {/* ── NEW REQUEST MODAL ── */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <form
-            onSubmit={submit}
-            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-lg space-y-4"
-          >
-            <div className="flex items-center justify-between mb-2">
+          <form onSubmit={submit}
+            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">New Leave Request</h2>
-              <button type="button" onClick={() => setShowForm(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+              <button type="button" onClick={() => { setShowForm(false); setFormError(null) }}
+                className="text-gray-500 hover:text-white text-2xl leading-none">×</button>
             </div>
 
-            {/* Manager can submit on behalf of an employee */}
             {canApprove && (
               <div>
-                <label className={LABEL}>Employee (leave blank to submit for yourself)</label>
-                <select
-                  value={form.employeeId}
+                <label className={LABEL}>Employee</label>
+                <select value={form.employeeId}
                   onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))}
-                  className={INPUT}
-                >
-                  <option value="">— Myself —</option>
+                  className={INPUT}>
+                  <option value="">— My own request —</option>
                   {employees.map(emp => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.firstName} {emp.lastName}
-                    </option>
+                    <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
                   ))}
                 </select>
               </div>
@@ -302,227 +728,75 @@ export default function LeavePage() {
 
             <div>
               <label className={LABEL}>Leave Type *</label>
-              <select
-                value={form.leaveType}
+              <select value={form.leaveType}
                 onChange={e => setForm(f => ({ ...f, leaveType: e.target.value }))}
-                className={INPUT}
-                required
-              >
-                {LEAVE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                className={INPUT} required>
+                {leaveTypes.map(t => (
+                  <option key={t.key} value={t.key}>{t.emoji} {t.label}</option>
+                ))}
               </select>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={LABEL}>Start Date *</label>
-                <input
-                  type="date"
-                  value={form.startDate}
+                <input type="date" value={form.startDate}
                   onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
-                  className={INPUT}
-                  required
-                />
+                  className={INPUT} required />
               </div>
               <div>
                 <label className={LABEL}>End Date *</label>
-                <input
-                  type="date"
-                  value={form.endDate}
-                  min={form.startDate}
+                <input type="date" value={form.endDate} min={form.startDate}
                   onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
-                  className={INPUT}
-                  required
-                />
+                  className={INPUT} required />
               </div>
             </div>
 
             {computedDays > 0 && (
-              <p className="text-xs text-purple-400 -mt-2">
-                {computedDays} calendar day{computedDays !== 1 ? 's' : ''}
-              </p>
-            )}
-
-            {overlappingHolidays.length > 0 && (
-              <div className="rounded-lg bg-amber-900/30 border border-amber-700 px-4 py-3 text-sm text-amber-300 -mt-1">
-                <p className="font-medium mb-1">🇦🇺 Public holiday{overlappingHolidays.length > 1 ? 's' : ''} in this period:</p>
-                <ul className="space-y-0.5 text-xs text-amber-400">
-                  {overlappingHolidays.map(h => (
-                    <li key={h.date}>• {h.name} — {new Date(h.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</li>
-                  ))}
-                </ul>
+              <div className="bg-purple-900/30 border border-purple-800 rounded-lg px-4 py-2.5">
+                <p className="text-sm text-purple-300 font-medium">
+                  {computedDays} calendar day{computedDays !== 1 ? 's' : ''} requested
+                </p>
+                {overlappingHolidays.length > 0 && (
+                  <div className="mt-1.5 space-y-0.5">
+                    <p className="text-xs text-amber-400 font-medium">
+                      🗓 Public holiday{overlappingHolidays.length > 1 ? 's' : ''} in this period:
+                    </p>
+                    {overlappingHolidays.map(h => (
+                      <p key={h.date} className="text-xs text-amber-300 pl-2">
+                        {fmtShort(h.date)} — {h.name}
+                      </p>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             <div>
               <label className={LABEL}>Reason (optional)</label>
-              <textarea
-                value={form.reason}
+              <textarea value={form.reason}
                 onChange={e => setForm(f => ({ ...f, reason: e.target.value }))}
-                rows={3}
-                className={INPUT}
-                placeholder="Briefly describe the reason for your leave…"
-              />
+                className={INPUT + ' min-h-[70px] resize-none'}
+                placeholder="Brief description…" />
             </div>
 
             {formError && (
-              <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
+              <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-sm text-red-300">
                 ⚠ {formError}
               </div>
             )}
 
-            <div className="flex gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={saving || computedDays <= 0}
-                className="flex-1 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-              >
+            <div className="flex gap-3 pt-1">
+              <button type="submit" disabled={saving || computedDays <= 0}
+                className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
                 {saving ? 'Submitting…' : 'Submit Request'}
               </button>
-              <button
-                type="button"
-                onClick={() => { setShowForm(false); setFormError(null) }}
-                className="px-4 py-2 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg"
-              >
+              <button type="button" onClick={() => { setShowForm(false); setFormError(null) }}
+                className="px-5 py-2.5 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg">
                 Cancel
               </button>
             </div>
           </form>
-        </div>
-      )}
-
-      {/* Leave Requests List */}
-      {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading…</div>
-      ) : requests.length === 0 ? (
-        <div className="text-center py-16 bg-gray-800/50 rounded-2xl border border-gray-700">
-          <p className="text-4xl mb-3">🏖</p>
-          <p className="text-gray-400 font-medium">No leave requests found</p>
-          <p className="text-sm text-gray-600 mt-1">
-            {canApprove ? 'No requests match your filters' : 'Submit your first leave request above'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {requests.map(r => {
-            const isExpanded = expanded === r.id
-            const isBusy     = reviewing === r.id
-            return (
-              <div
-                key={r.id}
-                className="bg-gray-800/70 border border-gray-700 rounded-xl overflow-hidden"
-              >
-                {/* Row */}
-                <button
-                  onClick={() => setExpanded(isExpanded ? null : r.id)}
-                  className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-800 transition-colors"
-                >
-                  {/* Employee avatar */}
-                  <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    {(r.employeeFirstName?.[0] ?? '?').toUpperCase()}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {canApprove && (
-                        <span className="text-sm font-medium text-white">
-                          {r.employeeFirstName} {r.employeeLastName}
-                        </span>
-                      )}
-                      <span className="text-xs text-gray-400">
-                        {LEAVE_TYPE_LABEL[r.leaveType] ?? r.leaveType}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {fmt(r.startDate)} → {fmt(r.endDate)}
-                      <span className="ml-2 text-purple-400">{r.totalDays}d</span>
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-xs px-2.5 py-1 rounded-full border font-medium capitalize ${STATUS_STYLE[r.status] ?? 'text-gray-400'}`}>
-                      {r.status}
-                    </span>
-                    <span className="text-gray-600 text-xs">{isExpanded ? '▲' : '▼'}</span>
-                  </div>
-                </button>
-
-                {/* Expanded detail */}
-                {isExpanded && (
-                  <div className="px-5 pb-5 border-t border-gray-700 pt-4 space-y-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-xs text-gray-500">Requested on</p>
-                        <p className="text-white">{fmt(r.createdAt)}</p>
-                      </div>
-                      {r.reason && (
-                        <div className="col-span-2">
-                          <p className="text-xs text-gray-500">Reason</p>
-                          <p className="text-gray-300">{r.reason}</p>
-                        </div>
-                      )}
-                      {r.reviewedAt && (
-                        <div>
-                          <p className="text-xs text-gray-500">Reviewed on</p>
-                          <p className="text-white">{fmt(r.reviewedAt)}</p>
-                        </div>
-                      )}
-                      {r.reviewNote && (
-                        <div className="col-span-2">
-                          <p className="text-xs text-gray-500">Review note</p>
-                          <p className="text-gray-300">{r.reviewNote}</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Manager actions — pending only */}
-                    {canApprove && r.status === 'pending' && (
-                      <div className="space-y-3 pt-2 border-t border-gray-700">
-                        <div>
-                          <label className={LABEL}>Note (optional)</label>
-                          <input
-                            type="text"
-                            placeholder="Add a note for the employee…"
-                            value={reviewNote[r.id] ?? ''}
-                            onChange={e => setReviewNote(prev => ({ ...prev, [r.id]: e.target.value }))}
-                            className={INPUT}
-                          />
-                        </div>
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => review(r.id, 'approve')}
-                            disabled={isBusy}
-                            className="flex-1 py-2 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-                          >
-                            {isBusy ? '…' : '✓ Approve'}
-                          </button>
-                          <button
-                            onClick={() => review(r.id, 'reject')}
-                            disabled={isBusy}
-                            className="flex-1 py-2 bg-red-800 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-                          >
-                            {isBusy ? '…' : '✗ Reject'}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Employee cancel — own pending request */}
-                    {!canApprove && r.status === 'pending' && (
-                      <div className="pt-2 border-t border-gray-700">
-                        <button
-                          onClick={() => cancel(r.id)}
-                          disabled={isBusy}
-                          className="px-4 py-2 border border-red-800 text-red-400 hover:bg-red-900/30 disabled:opacity-50 text-sm rounded-lg transition-colors"
-                        >
-                          {isBusy ? 'Cancelling…' : 'Cancel Request'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )
-          })}
         </div>
       )}
     </div>
