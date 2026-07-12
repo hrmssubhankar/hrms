@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       .select({ id: employees.id })
       .from(employees)
       .where(and(eq(employees.tenantId, session.tenantId), eq(employees.userId, session.sub)))
-    if (!emp) return NextResponse.json({ error: 'Employee record not found for your account' }, { status: 404 })
+    if (!emp) return NextResponse.json({ error: 'No employee profile found for your account. Please ask an admin to create your employee record, or select a specific employee from the dropdown.' }, { status: 404 })
     resolvedEmployeeId = emp.id
   }
 

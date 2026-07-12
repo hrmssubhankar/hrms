@@ -99,6 +99,7 @@ export default function LeavePage() {
   const [expanded,    setExpanded]    = useState<string | null>(null)
   const [reviewNote,  setReviewNote]  = useState<Record<string, string>>({})
   const [reviewing,   setReviewing]   = useState<string | null>(null)
+  const [formError,   setFormError]   = useState<string | null>(null)
 
   // ── Detect role from /api/auth/me ──
   useEffect(() => {
@@ -136,15 +137,27 @@ export default function LeavePage() {
     e.preventDefault()
     if (computedDays <= 0) return
     setSaving(true)
-    await fetch('/api/tenant/leave', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ ...form, totalDays: computedDays }),
-    })
-    setShowForm(false)
-    setForm({ employeeId: '', leaveType: 'annual', startDate: '', endDate: '', reason: '' })
-    setSaving(false)
-    load()
+    setFormError(null)
+    try {
+      const res = await fetch('/api/tenant/leave', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ ...form, totalDays: computedDays }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setFormError(data.error ?? `Request failed (${res.status}). Please try again.`)
+        setSaving(false)
+        return
+      }
+      setShowForm(false)
+      setForm({ employeeId: '', leaveType: 'annual', startDate: '', endDate: '', reason: '' })
+      load()
+    } catch {
+      setFormError('Network error — please check your connection and try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   // ── Approve / Reject ──
@@ -183,7 +196,7 @@ export default function LeavePage() {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => { setShowForm(true); setFormError(null) }}
           className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
         >
           + New Request
@@ -322,6 +335,12 @@ export default function LeavePage() {
               />
             </div>
 
+            {formError && (
+              <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
+                ⚠ {formError}
+              </div>
+            )}
+
             <div className="flex gap-3 pt-2">
               <button
                 type="submit"
@@ -332,7 +351,7 @@ export default function LeavePage() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={() => { setShowForm(false); setFormError(null) }}
                 className="px-4 py-2 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg"
               >
                 Cancel
