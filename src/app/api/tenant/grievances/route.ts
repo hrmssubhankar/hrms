@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { grievances, employees } from '@/lib/db/schema'
+import { getTenantEmailCtx, getTenantRoleEmails, fireEmail } from '@/lib/email/emailHelper'
+import { grievanceSubmittedEmail, grievanceAlertEmail, grievanceResolvedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -90,6 +92,30 @@ export async function POST(req: NextRequest) {
       status:      'new',
     }).returning()
 
+    // Email the lodger + alert HR
+    try {
+      const ctx = await getTenantEmailCtx(session.tenantId)
+      if (ctx.notify.emailGrievance) {
+        const shortRef = record.id.slice(0, 8).toUpperCase()
+        const [lodger] = await db.select({ firstName: employees.firstName, email: employees.email })
+          .from(employees).where(eq(employees.id, record.lodgedBy!))
+        if (lodger?.email && !record.isAnonymous) {
+          fireEmail(ctx, { to: lodger.email, ...grievanceSubmittedEmail({
+            recipientName: lodger.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+            referenceId: shortRef, grievanceType: record.type, isAnonymous: record.isAnonymous ?? false, loginUrl: ctx.loginUrl,
+          }) })
+        }
+        // Alert HR
+        const hrEmails = await getTenantRoleEmails(session.tenantId, ['hr_officer', 'director', 'compliance_manager'])
+        if (hrEmails.length) {
+          fireEmail(ctx, { to: hrEmails, ...grievanceAlertEmail({
+            recipientName: 'HR Team', orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+            referenceId: shortRef, grievanceType: record.type, riskRating: record.riskRating ?? 'medium', loginUrl: ctx.loginUrl,
+          }) })
+        }
+      }
+    } catch (emailErr) { console.error('Grievance email error:', emailErr) }
+
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/grievances', err)
@@ -119,6 +145,23 @@ export async function PATCH(req: NextRequest) {
       .set(updates)
       .where(and(eq(grievances.id, id), eq(grievances.tenantId, session.tenantId)))
       .returning()
+
+    // Email lodger when grievance is resolved
+    if (status === 'resolved' && updated) {
+      try {
+        const ctx = await getTenantEmailCtx(session.tenantId)
+        if (ctx.notify.emailGrievance && updated.lodgedBy != null && !updated.isAnonymous) {
+          const [lodger] = await db.select({ firstName: employees.firstName, email: employees.email })
+            .from(employees).where(eq(employees.id, updated.lodgedBy!))
+          if (lodger?.email) {
+            fireEmail(ctx, { to: lodger.email, ...grievanceResolvedEmail({
+              recipientName: lodger.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+              referenceId: updated.id.slice(0, 8).toUpperCase(), outcome: updated.outcome ?? 'Matter resolved', loginUrl: ctx.loginUrl,
+            }) })
+          }
+        }
+      } catch (emailErr) { console.error('Grievance resolved email error:', emailErr) }
+    }
 
     return NextResponse.json({ record: updated })
   } catch (err) {

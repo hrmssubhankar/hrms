@@ -11,11 +11,11 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { documents, employees, users, tenants } from '@/lib/db/schema'
+import { documents, employees, users } from '@/lib/db/schema'
 import { eq, and, lte, gte, isNotNull, ne } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
-import { sendEmail } from '@/lib/email/resend'
-import { documentExpiryEmail, genericNotificationEmail } from '@/lib/email/templates'
+import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
+import { documentExpiryEmail, documentExpiredEmail, genericNotificationEmail } from '@/lib/email/templates'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,16 +35,34 @@ export async function POST(req: NextRequest) {
   const cutoffStr = cutoff.toISOString().split('T')[0]
 
   try {
-    // 1. Get tenant info
-    const [tenant] = await db
-      .select({ name: tenants.name, slug: tenants.slug, primaryColor: tenants.primaryColor })
-      .from(tenants)
-      .where(eq(tenants.id, session.tenantId))
+    // 1. Get tenant email context
+    const ctx = await getTenantEmailCtx(session.tenantId)
+    const loginUrl = ctx.loginUrl
 
-    const loginUrl = process.env.NEXT_PUBLIC_APP_URL
-      ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+    // 2a. Find documents ALREADY expired (to notify if missed)
+    const alreadyExpiredDocs = await db
+      .select({
+        id:           documents.id,
+        name:         documents.title,
+        expiryDate:   documents.expiryDate,
+        employeeId:   documents.employeeId,
+        employeeFirst:employees.firstName,
+        employeeLast: employees.lastName,
+        employeeEmail:employees.email,
+      })
+      .from(documents)
+      .leftJoin(employees, eq(documents.employeeId, employees.id))
+      .where(
+        and(
+          eq(documents.tenantId, session.tenantId),
+          ne(documents.status, 'archived'),
+          isNotNull(documents.expiryDate),
+          lte(documents.expiryDate, todayStr),
+          gte(documents.expiryDate, new Date(today.getTime() - 7 * 86400000).toISOString().split('T')[0]), // only last 7 days
+        )
+      )
 
-    // 2. Find documents expiring within the window (not already expired)
+    // 2b. Find documents expiring within the window (not already expired)
     const expiringDocs = await db
       .select({
         id:           documents.id,
@@ -68,69 +86,83 @@ export async function POST(req: NextRequest) {
         )
       )
 
-    // 3. Get compliance managers and HR officers to notify
+    // 3. Get compliance managers and HR officers
     const notifyRoles = ['compliance_manager', 'hr_officer', 'director'] as const
     const managers = await db
       .select({ email: users.email, role: users.role })
       .from(users)
-      .where(
-        and(
-          eq(users.tenantId, session.tenantId),
-          eq(users.isActive, true),
-        )
-      )
+      .where(and(eq(users.tenantId, session.tenantId), eq(users.isActive, true)))
     const alertRecipients = managers
       .filter(u => notifyRoles.includes(u.role as any))
       .map(u => u.email)
 
-    // 4. Send per-document alerts to the employee + compliance managers
     const sent: string[] = []
     const failed: string[] = []
+    const msPerDay = 1000 * 60 * 60 * 24
 
+    // 4a. Send EXPIRED document alerts (missed, expired in last 7 days)
+    for (const doc of alreadyExpiredDocs) {
+      if (!doc.expiryDate || !doc.employeeEmail) continue
+      const expiredStr = new Date(doc.expiryDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
+      if (ctx.notify.emailDocExpiry) {
+        const tmpl = documentExpiredEmail({
+          recipientName: doc.employeeFirst ?? 'Team Member',
+          orgName:       ctx.orgName,
+          logoUrl:       ctx.logoUrl,
+          primaryColor:  ctx.primaryColor,
+          documentName:  doc.name,
+          expiredDate:   expiredStr,
+          loginUrl,
+        })
+        fireEmail(ctx, { to: doc.employeeEmail, ...tmpl })
+        sent.push(`EXPIRED: ${doc.name} → ${doc.employeeEmail}`)
+      }
+    }
+
+    // 4b. Send EXPIRING document alerts
     for (const doc of expiringDocs) {
       if (!doc.expiryDate) continue
 
-      const expiry    = new Date(doc.expiryDate)
-      const msPerDay  = 1000 * 60 * 60 * 24
-      const daysLeft  = Math.round((expiry.getTime() - today.getTime()) / msPerDay)
+      const expiry   = new Date(doc.expiryDate)
+      const daysLeft = Math.round((expiry.getTime() - today.getTime()) / msPerDay)
       const expiryStr = expiry.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
 
       // Email the employee
-      if (doc.employeeEmail) {
+      if (doc.employeeEmail && ctx.notify.emailDocExpiry) {
         const tmpl = documentExpiryEmail({
           recipientName: doc.employeeFirst ?? 'Team Member',
-          orgName:       tenant?.name ?? 'Your Organisation',
+          orgName:       ctx.orgName,
+          logoUrl:       ctx.logoUrl,
+          primaryColor:  ctx.primaryColor,
           documentName:  doc.name,
           expiryDate:    expiryStr,
           daysLeft,
           loginUrl,
-          primaryColor:  tenant?.primaryColor ?? '#1a4fff',
         })
-        const result = await sendEmail({ to: doc.employeeEmail, ...tmpl })
-        if (result.ok) sent.push(`${doc.name} → ${doc.employeeEmail}`)
-        else failed.push(`${doc.name} → ${doc.employeeEmail}: ${result.error}`)
+        fireEmail(ctx, { to: doc.employeeEmail, ...tmpl })
+        sent.push(`${doc.name} → ${doc.employeeEmail}`)
       }
 
-      // Email compliance managers (batched — one email per doc listing all recipients)
-      if (alertRecipients.length > 0) {
+      // Alert compliance managers
+      if (alertRecipients.length > 0 && ctx.notify.emailCompliance) {
         const tmpl = genericNotificationEmail({
-          recipientName: 'Team',
-          orgName:       tenant?.name ?? 'Your Organisation',
+          recipientName: 'Compliance Team',
+          orgName:       ctx.orgName,
+          logoUrl:       ctx.logoUrl,
+          primaryColor:  ctx.primaryColor,
           title:         `Document Expiry Alert: ${doc.name}`,
-          message:       `<strong>${doc.employeeFirst ?? ''} ${doc.employeeLast ?? ''}</strong>'s document <strong>${doc.name}</strong> expires on <strong>${expiryStr}</strong> (${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining). Please take action to renew it.`,
-          ctaLabel:      'Manage Compliance →',
+          message:       `<strong>${doc.employeeFirst ?? ''} ${doc.employeeLast ?? ''}</strong>'s document <strong>${doc.name}</strong> expires on <strong>${expiryStr}</strong> (${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining). Please take action to renew it before it expires.`,
+          ctaLabel:      'Manage Compliance',
           ctaUrl:        `${loginUrl}/tenant/compliance`,
-          primaryColor:  tenant?.primaryColor ?? '#1a4fff',
         })
-        const result = await sendEmail({ to: alertRecipients, ...tmpl })
-        if (result.ok) sent.push(`${doc.name} → managers`)
-        else failed.push(`${doc.name} → managers: ${result.error}`)
+        fireEmail(ctx, { to: alertRecipients, ...tmpl })
+        sent.push(`${doc.name} → managers (${alertRecipients.length})`)
       }
     }
 
     return NextResponse.json({
       ok:      true,
-      scanned: expiringDocs.length,
+      scanned: expiringDocs.length + alreadyExpiredDocs.length,
       sent:    sent.length,
       failed:  failed.length,
       details: { sent, failed },

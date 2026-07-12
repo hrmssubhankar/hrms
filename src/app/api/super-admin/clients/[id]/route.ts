@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { tenants, tenantModules } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { tenants, tenantModules, users } from '@/lib/db/schema'
+import { eq, and } from 'drizzle-orm'
+import { sendEmail } from '@/lib/email/resend'
+import { tenantSuspendedEmail, tenantReactivatedEmail, tenantTierChangedEmail } from '@/lib/email/templates'
 
 type RouteContext = { params: Promise<{ id: string }> }
 
@@ -54,6 +56,33 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       .returning()
 
     if (!updated) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
+
+    // Email notifications (fire-and-forget)
+    try {
+      const loginUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+      // Get tenant admin emails
+      const admins = await db.select({ email: users.email })
+        .from(users)
+        .where(and(eq(users.tenantId, id), eq(users.isActive, true), eq(users.role, 'director')))
+      const adminEmails = admins.map(a => a.email)
+      if (adminEmails.length) {
+        if (isActive === false) {
+          const tmpl = tenantSuspendedEmail({ recipientName: 'Portal Admin', orgName: updated.name, loginUrl })
+          sendEmail({ to: adminEmails, ...tmpl }).catch(console.error)
+        } else if (isActive === true && existing) {
+          const tmpl = tenantReactivatedEmail({ recipientName: 'Portal Admin', orgName: updated.name, loginUrl })
+          sendEmail({ to: adminEmails, ...tmpl }).catch(console.error)
+        }
+        if (tier !== undefined && existing) {
+          const prev = await db.select({ tier: tenants.tier }).from(tenants).where(eq(tenants.id, id))
+          if (prev[0]?.tier && prev[0].tier !== tier) {
+            const tmpl = tenantTierChangedEmail({ recipientName: 'Portal Admin', orgName: updated.name, oldTier: prev[0].tier, newTier: tier, loginUrl })
+            sendEmail({ to: adminEmails, ...tmpl }).catch(console.error)
+          }
+        }
+      }
+    } catch (emailErr) { console.error('Tenant status email error:', emailErr) }
+
     return NextResponse.json({ tenant: updated })
   } catch (error) {
     console.error('PATCH client error:', error)

@@ -4,7 +4,7 @@ import { payrollRecords, employees, tenants } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 import { calculatePayroll, grossFromHours, grossFromSalary, type PayFrequency } from '@/lib/payroll/calculator'
-import { sendEmail } from '@/lib/email/resend'
+import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
 import { payslipReadyEmail } from '@/lib/email/templates'
 
 export async function GET(req: NextRequest) {
@@ -157,25 +157,21 @@ export async function PATCH(req: NextRequest) {
           .from(employees)
           .where(eq(employees.id, updated.employeeId))
 
-        const [tenant] = await db
-          .select({ name: tenants.name, primaryColor: tenants.primaryColor })
-          .from(tenants)
-          .where(eq(tenants.id, session.tenantId))
-
         if (emp?.email) {
-          const loginUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+          const ctx = await getTenantEmailCtx(session.tenantId)
           const tmpl = payslipReadyEmail({
             recipientName: emp.firstName,
-            orgName:       tenant?.name ?? 'Your Organisation',
+            orgName:       ctx.orgName,
+            logoUrl:       ctx.logoUrl,
+            primaryColor:  ctx.primaryColor,
             periodStart:   updated.periodStart,
             periodEnd:     updated.periodEnd,
             grossPay:      Number(updated.grossPay ?? 0),
             netPay:        Number(updated.netPay ?? 0),
             superAmount:   Number(updated.superContribution ?? 0),
-            loginUrl:      `${loginUrl}/tenant/payroll`,
-            primaryColor:  tenant?.primaryColor ?? '#1a4fff',
+            loginUrl:      `${ctx.loginUrl}/tenant/payroll`,
           })
-          sendEmail({ to: emp.email, ...tmpl }).catch(console.error)
+          fireEmail(ctx, { to: emp.email, ...tmpl })
         }
       } catch (e) {
         console.error('Payslip email error:', e)

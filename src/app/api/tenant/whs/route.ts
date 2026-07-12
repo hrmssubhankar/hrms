@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { whsIncidents, employees } from '@/lib/db/schema'
+import { getTenantEmailCtx, getTenantRoleEmails, fireEmail } from '@/lib/email/emailHelper'
+import { whsIncidentReportedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -98,6 +100,25 @@ export async function POST(req: NextRequest) {
       status:            'open',
       correctiveActions: [],
     }).returning()
+
+    // Alert WHS managers
+    try {
+      const ctx = await getTenantEmailCtx(session.tenantId)
+      if (ctx.notify.emailWhs) {
+        const whsEmails = await getTenantRoleEmails(session.tenantId, ['director', 'hr_officer', 'operations_manager'])
+        if (whsEmails.length) {
+          const [reporter] = await db.select({ firstName: employees.firstName, lastName: employees.lastName })
+            .from(employees).where(eq(employees.id, record.reportedBy!))
+          fireEmail(ctx, { to: whsEmails, ...whsIncidentReportedEmail({
+            recipientName: 'WHS Team', orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+            incidentType: record.type, severity: record.severity ?? 'unknown', location: record.location ?? 'Not specified',
+            occurredAt: record.occurredAt?.toString() ?? new Date().toISOString(),
+            reportedByName: reporter ? `${reporter.firstName} ${reporter.lastName}` : 'Unknown',
+            loginUrl: ctx.loginUrl,
+          }) })
+        }
+      }
+    } catch (emailErr) { console.error('WHS email error:', emailErr) }
 
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {

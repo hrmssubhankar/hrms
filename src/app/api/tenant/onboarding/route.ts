@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { onboardingRecords, employees } from '@/lib/db/schema'
+import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
+import { onboardingWelcomeEmail } from '@/lib/email/templates'
 import { eq, desc, and } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -102,6 +104,27 @@ export async function POST(req: NextRequest) {
       notes:     notes   ?? null,
       checklist: defaultChecklist,
     }).returning()
+
+    // Send onboarding welcome email to the employee
+    try {
+      const ctx = await getTenantEmailCtx(session.tenantId)
+      if (ctx.notify.emailOnboarding) {
+        const [emp] = await db.select({ firstName: employees.firstName, email: employees.email, startDate: employees.startDate })
+          .from(employees).where(eq(employees.id, employeeId))
+        if (emp?.email) {
+          const taskCount = Array.isArray(record.checklist) ? record.checklist.length : 9
+          fireEmail(ctx, { to: emp.email, ...onboardingWelcomeEmail({
+            recipientName: emp.firstName,
+            orgName:       ctx.orgName,
+            logoUrl:       ctx.logoUrl,
+            primaryColor:  ctx.primaryColor,
+            startDate:     emp.startDate ?? new Date().toISOString().split('T')[0],
+            taskCount,
+            loginUrl:      ctx.loginUrl,
+          }) })
+        }
+      }
+    } catch (emailErr) { console.error('Onboarding email error:', emailErr) }
 
     return NextResponse.json({ record }, { status: 201 })
   } catch (err: any) {

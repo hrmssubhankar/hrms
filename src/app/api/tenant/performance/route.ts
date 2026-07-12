@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { performanceReviews, employees } from '@/lib/db/schema'
+import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
+import { performanceReviewScheduledEmail, performanceReviewCompletedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -105,6 +107,21 @@ export async function POST(req: NextRequest) {
       kpis:          defaultKpis,
     }).returning()
 
+    // Email employee about scheduled review
+    try {
+      const ctx = await getTenantEmailCtx(session.tenantId)
+      if (ctx.notify.emailPerformance && scheduledDate) {
+        const [emp] = await db.select({ firstName: employees.firstName, email: employees.email })
+          .from(employees).where(eq(employees.id, employeeId))
+        if (emp?.email) {
+          fireEmail(ctx, { to: emp.email, ...performanceReviewScheduledEmail({
+            recipientName: emp.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+            reviewType: type, scheduledDate, loginUrl: ctx.loginUrl,
+          }) })
+        }
+      }
+    } catch (emailErr) { console.error('Performance review email error:', emailErr) }
+
     return NextResponse.json({ review }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/performance', err)
@@ -137,6 +154,23 @@ export async function PATCH(req: NextRequest) {
       .set(updates)
       .where(and(eq(performanceReviews.id, id), eq(performanceReviews.tenantId, session.tenantId)))
       .returning()
+
+    // Email employee when review is completed
+    if (status === 'completed' && updated) {
+      try {
+        const ctx = await getTenantEmailCtx(session.tenantId)
+        if (ctx.notify.emailPerformance) {
+          const [emp] = await db.select({ firstName: employees.firstName, email: employees.email })
+            .from(employees).where(eq(employees.id, updated.employeeId))
+          if (emp?.email) {
+            fireEmail(ctx, { to: emp.email, ...performanceReviewCompletedEmail({
+              recipientName: emp.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+              reviewType: updated.type, overallRating: updated.overallRating ?? undefined, loginUrl: ctx.loginUrl,
+            }) })
+          }
+        }
+      } catch (emailErr) { console.error('Performance completed email error:', emailErr) }
+    }
 
     return NextResponse.json({ review: updated })
   } catch (err) {

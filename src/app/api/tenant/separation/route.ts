@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { separationRecords, employees } from '@/lib/db/schema'
+import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
+import { separationInitiatedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -97,6 +99,21 @@ export async function POST(req: NextRequest) {
       systemAccessRevoked: false,
       status: 'pending',
     }).returning()
+
+    // Email the departing employee
+    try {
+      const ctx = await getTenantEmailCtx(session.tenantId)
+      if (ctx.notify.emailSeparation) {
+        const [emp] = await db.select({ firstName: employees.firstName, email: employees.email })
+          .from(employees).where(eq(employees.id, record.employeeId))
+        if (emp?.email) {
+          fireEmail(ctx, { to: emp.email, ...separationInitiatedEmail({
+            recipientName: emp.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+            separationType: record.type, lastWorkingDay: record.lastWorkingDay ?? 'TBD', loginUrl: ctx.loginUrl,
+          }) })
+        }
+      }
+    } catch (emailErr) { console.error('Separation email error:', emailErr) }
 
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {

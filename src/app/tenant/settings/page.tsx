@@ -5,7 +5,22 @@ import { useEffect, useRef, useState } from 'react'
 type Settings = {
   domain?: { customDomain?: string; subdomain?: string; wwwRedirect?: boolean; sslForced?: boolean }
   email?:  { smtpHost?: string; smtpPort?: number; smtpUser?: string; smtpPass?: string; fromName?: string; fromEmail?: string; replyTo?: string; useTLS?: boolean }
-  notifications?: { emailOnboarding?: boolean; emailCompliance?: boolean; emailPayroll?: boolean; emailGrievance?: boolean; slackWebhook?: string }
+  notifications?: {
+    // Employee lifecycle
+    emailWelcome?: boolean; emailOnboarding?: boolean; emailRoleChange?: boolean
+    // Compliance & documents
+    emailCompliance?: boolean; emailDocExpiry?: boolean
+    // Payroll
+    emailPayroll?: boolean
+    // HR processes
+    emailGrievance?: boolean; emailSeparation?: boolean; emailWhs?: boolean
+    // Development
+    emailPerformance?: boolean; emailContracts?: boolean; emailTraining?: boolean
+    // Culture
+    emailRecruitment?: boolean; emailRecognition?: boolean
+    // Integrations
+    slackWebhook?: string
+  }
 }
 
 const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
@@ -361,35 +376,127 @@ export default function TenantSettingsPage() {
 
           {/* ── NOTIFICATIONS TAB ── */}
           {tab === 'notifications' && (
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Email Notifications</p>
-              <div className="space-y-3">
-                {[
-                  { key: 'emailOnboarding', label: 'New employee onboarding',       desc: 'Send welcome email when employee is onboarded' },
-                  { key: 'emailCompliance', label: 'Compliance expiry alerts',       desc: 'Notify when WWCC/police check is expiring within 30 days' },
-                  { key: 'emailPayroll',    label: 'Payroll approved notifications', desc: 'Notify employee when pay run is approved' },
-                  { key: 'emailGrievance', label: 'Grievance lodged alerts',        desc: 'Alert HR Officer when a grievance is submitted' },
-                ].map(n => (
-                  <label key={n.key} className="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" className="accent-purple-500 w-4 h-4 mt-0.5"
-                      checked={(notif as any)[n.key] ?? true}
-                      onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, [n.key]: e.target.checked } }))} />
-                    <div>
-                      <p className="text-sm text-gray-300">{n.label}</p>
-                      <p className="text-xs text-gray-500">{n.desc}</p>
-                    </div>
-                  </label>
-                ))}
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6">
+
+              {/* Employee Lifecycle */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">👤 Employee Lifecycle</p>
+                <div className="space-y-3">
+                  {[
+                    { key: 'emailWelcome',    label: 'User invitation welcome',    desc: 'Send login credentials when a new portal user is invited' },
+                    { key: 'emailOnboarding', label: 'New employee onboarding',    desc: 'Send onboarding welcome + checklist when employee is set up' },
+                    { key: 'emailRoleChange', label: 'Account status changes',     desc: 'Notify user when their account is suspended or reactivated' },
+                  ].map(n => (
+                    <label key={n.key} className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" className="accent-purple-500 w-4 h-4 mt-0.5"
+                        checked={(notif as any)[n.key] ?? true}
+                        onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, [n.key]: e.target.checked } }))} />
+                      <div><p className="text-sm text-gray-300">{n.label}</p><p className="text-xs text-gray-500">{n.desc}</p></div>
+                    </label>
+                  ))}
+                </div>
               </div>
 
-              <div className="border-t border-gray-800 pt-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Slack Integration</p>
+              {/* Compliance & Documents */}
+              <div className="border-t border-gray-800 pt-5">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">📋 Compliance & Documents</p>
+                <div className="space-y-3">
+                  {[
+                    { key: 'emailDocExpiry',  label: 'Document expiry alerts (to employee)', desc: 'Notify employee when their compliance document is expiring or has expired' },
+                    { key: 'emailCompliance', label: 'Compliance alerts (to managers)',       desc: 'Alert compliance managers & HR officers about expiring documents' },
+                  ].map(n => (
+                    <label key={n.key} className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" className="accent-purple-500 w-4 h-4 mt-0.5"
+                        checked={(notif as any)[n.key] ?? true}
+                        onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, [n.key]: e.target.checked } }))} />
+                      <div><p className="text-sm text-gray-300">{n.label}</p><p className="text-xs text-gray-500">{n.desc}</p></div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Payroll & Contracts */}
+              <div className="border-t border-gray-800 pt-5">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">💰 Payroll & Contracts</p>
+                <div className="space-y-3">
+                  {[
+                    { key: 'emailPayroll',   label: 'Payslip notifications',   desc: 'Email employee when their pay run is marked as paid' },
+                    { key: 'emailContracts', label: 'Contract notifications',   desc: 'Notify employee when contract is sent; notify HR when signed' },
+                  ].map(n => (
+                    <label key={n.key} className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" className="accent-purple-500 w-4 h-4 mt-0.5"
+                        checked={(notif as any)[n.key] ?? true}
+                        onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, [n.key]: e.target.checked } }))} />
+                      <div><p className="text-sm text-gray-300">{n.label}</p><p className="text-xs text-gray-500">{n.desc}</p></div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* HR Processes */}
+              <div className="border-t border-gray-800 pt-5">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">⚖️ HR Processes</p>
+                <div className="space-y-3">
+                  {[
+                    { key: 'emailGrievance',  label: 'Grievance alerts',           desc: 'Confirm to lodger; alert HR when a grievance is submitted or resolved' },
+                    { key: 'emailWhs',        label: 'WHS incident alerts',         desc: 'Alert managers immediately when a WHS incident is reported' },
+                    { key: 'emailSeparation', label: 'Exit process notifications',  desc: 'Notify employee when their exit process is initiated' },
+                  ].map(n => (
+                    <label key={n.key} className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" className="accent-purple-500 w-4 h-4 mt-0.5"
+                        checked={(notif as any)[n.key] ?? true}
+                        onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, [n.key]: e.target.checked } }))} />
+                      <div><p className="text-sm text-gray-300">{n.label}</p><p className="text-xs text-gray-500">{n.desc}</p></div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Development */}
+              <div className="border-t border-gray-800 pt-5">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">📈 Development & Training</p>
+                <div className="space-y-3">
+                  {[
+                    { key: 'emailPerformance', label: 'Performance review notifications', desc: 'Notify employee when review is scheduled or completed' },
+                    { key: 'emailTraining',    label: 'Training notifications',           desc: 'Notify employee when training is assigned or completed' },
+                  ].map(n => (
+                    <label key={n.key} className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" className="accent-purple-500 w-4 h-4 mt-0.5"
+                        checked={(notif as any)[n.key] ?? true}
+                        onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, [n.key]: e.target.checked } }))} />
+                      <div><p className="text-sm text-gray-300">{n.label}</p><p className="text-xs text-gray-500">{n.desc}</p></div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Culture */}
+              <div className="border-t border-gray-800 pt-5">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">🌟 Culture & Recruitment</p>
+                <div className="space-y-3">
+                  {[
+                    { key: 'emailRecognition', label: 'Recognition awards',       desc: 'Notify employee when they receive a recognition award' },
+                    { key: 'emailRecruitment', label: 'Recruitment stage updates', desc: 'Notify candidates when their application status changes' },
+                  ].map(n => (
+                    <label key={n.key} className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" className="accent-purple-500 w-4 h-4 mt-0.5"
+                        checked={(notif as any)[n.key] ?? true}
+                        onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, [n.key]: e.target.checked } }))} />
+                      <div><p className="text-sm text-gray-300">{n.label}</p><p className="text-xs text-gray-500">{n.desc}</p></div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Slack */}
+              <div className="border-t border-gray-800 pt-5">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">💬 Slack Integration</p>
                 <label className={LABEL}>Incoming Webhook URL</label>
                 <input value={notif.slackWebhook ?? ''} placeholder="https://hooks.slack.com/services/..."
                   onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, slackWebhook: e.target.value } }))}
                   className={INPUT} />
                 <p className="text-xs text-gray-600 mt-1">
-                  Create an Incoming Webhook in your Slack workspace to receive HR alerts in a channel.
+                  Create an Incoming Webhook in your Slack workspace to receive HR alerts in a dedicated channel.
                 </p>
               </div>
 

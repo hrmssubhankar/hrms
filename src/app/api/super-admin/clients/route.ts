@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { tenants, tenantModules, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { sendEmail } from '@/lib/email/resend'
+import { newTenantOnboardedEmail } from '@/lib/email/templates'
 
 const ALL_MODULES = [
   { id: 1,  name: 'Enterprise Dashboard' },
@@ -110,6 +112,20 @@ export async function POST(req: NextRequest) {
         isActive:     true,
       }).returning({ id: users.id, email: users.email, role: users.role })
       adminUser = u
+    }
+
+    // Send welcome email to tenant admin
+    if (adminEmail && adminUser) {
+      const loginUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+      const tmpl = newTenantOnboardedEmail({
+        recipientName: adminEmail.split('@')[0],
+        orgName:       name,
+        tier,
+        loginUrl:      `${loginUrl}/login`,
+        adminEmail,
+        tempPassword:  adminPassword,
+      })
+      sendEmail({ to: adminEmail, ...tmpl }).catch(console.error)
     }
 
     return NextResponse.json({ tenant, adminUser }, { status: 201 })

@@ -3,6 +3,8 @@ import { db } from '@/lib/db'
 import { superAdmins } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
+import { sendEmail } from '@/lib/email/resend'
+import { superAdminInviteEmail } from '@/lib/email/templates'
 
 // GET — list all super admins
 export async function GET() {
@@ -43,6 +45,11 @@ export async function POST(req: NextRequest) {
       .insert(superAdmins)
       .values({ name, email: email.toLowerCase().trim(), passwordHash, isActive: true })
       .returning({ id: superAdmins.id, email: superAdmins.email, name: superAdmins.name, isActive: superAdmins.isActive, createdAt: superAdmins.createdAt })
+
+    // Send invite email
+    const loginUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+    const tmpl = superAdminInviteEmail({ recipientName: name, adminEmail: email, tempPassword: password, loginUrl: `${loginUrl}/super-admin` })
+    sendEmail({ to: email, ...tmpl }).catch(console.error)
 
     return NextResponse.json({ admin }, { status: 201 })
   } catch (error: any) {

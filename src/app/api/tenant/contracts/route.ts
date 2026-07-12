@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { contracts, employees } from '@/lib/db/schema'
+import { getTenantEmailCtx, getTenantRoleEmails, fireEmail } from '@/lib/email/emailHelper'
+import { contractSentEmail, contractSignedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -78,6 +80,21 @@ export async function POST(req: NextRequest) {
       status:      'draft',
     }).returning()
 
+    // Email employee when contract is sent
+    try {
+      const ctx = await getTenantEmailCtx(session.tenantId)
+      if (ctx.notify.emailContracts) {
+        const [emp] = await db.select({ firstName: employees.firstName, email: employees.email })
+          .from(employees).where(eq(employees.id, employeeId))
+        if (emp?.email) {
+          fireEmail(ctx, { to: emp.email, ...contractSentEmail({
+            recipientName: emp.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+            contractType: type, loginUrl: ctx.loginUrl,
+          }) })
+        }
+      }
+    } catch (emailErr) { console.error('Contract sent email error:', emailErr) }
+
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/contracts', err)
@@ -108,6 +125,25 @@ export async function PATCH(req: NextRequest) {
     const [updated] = await db.update(contracts).set(updates)
       .where(and(eq(contracts.id, id), eq(contracts.tenantId, session.tenantId)))
       .returning()
+
+    // Email HR when contract is signed
+    if (status === 'signed' && updated) {
+      try {
+        const ctx = await getTenantEmailCtx(session.tenantId)
+        if (ctx.notify.emailContracts) {
+          const [emp] = await db.select({ firstName: employees.firstName, lastName: employees.lastName, email: employees.email })
+            .from(employees).where(eq(employees.id, updated.employeeId))
+          const hrEmails = await getTenantRoleEmails(session.tenantId, ['hr_officer', 'director'])
+          if (hrEmails.length && emp) {
+            fireEmail(ctx, { to: hrEmails, ...contractSignedEmail({
+              recipientName: 'HR Team', orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+              employeeName: `${emp.firstName} ${emp.lastName}`, contractType: updated.type,
+              signedAt: new Date().toISOString(), loginUrl: ctx.loginUrl,
+            }) })
+          }
+        }
+      } catch (emailErr) { console.error('Contract signed email error:', emailErr) }
+    }
 
     return NextResponse.json({ record: updated })
   } catch (err) {

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { trainingRecords, courses, employees } from '@/lib/db/schema'
+import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
+import { trainingAssignedEmail, trainingCompletedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
-import { getSession } from '@/lib/auth/session'
 
 export async function GET(req: NextRequest) {
   try {
@@ -115,6 +116,23 @@ export async function POST(req: NextRequest) {
       }))
     ).returning()
 
+    // Email each enrolled employee
+    try {
+      const ctx = await getTenantEmailCtx(session.tenantId)
+      if (ctx.notify.emailTraining) {
+        for (const rec of inserted) {
+          const [emp] = await db.select({ firstName: employees.firstName, email: employees.email })
+            .from(employees).where(eq(employees.id, rec.employeeId))
+          if (emp?.email) {
+            fireEmail(ctx, { to: emp.email, ...trainingAssignedEmail({
+              recipientName: emp.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+              courseTitle: course.title, isMandatory: course.isMandatory ?? false, loginUrl: ctx.loginUrl,
+            }) })
+          }
+        }
+      }
+    } catch (emailErr) { console.error('Training assigned email error:', emailErr) }
+
     return NextResponse.json({ records: inserted }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/training/records', err)
@@ -125,8 +143,9 @@ export async function POST(req: NextRequest) {
 // Mark complete / update status
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('training:write')
+    if (guard.error) return guard.error
+    const { session } = guard
 
     const body = await req.json()
     const { id, status, score, certificateUrl } = body
