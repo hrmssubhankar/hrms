@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { payrollRecords, employees } from '@/lib/db/schema'
+import { payrollRecords, employees, tenants } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 import { calculatePayroll, grossFromHours, grossFromSalary, type PayFrequency } from '@/lib/payroll/calculator'
+import { sendEmail } from '@/lib/email/resend'
+import { payslipReadyEmail } from '@/lib/email/templates'
 
 export async function GET(req: NextRequest) {
   try {
@@ -146,6 +148,39 @@ export async function PATCH(req: NextRequest) {
       .set(updates)
       .where(and(eq(payrollRecords.id, id), eq(payrollRecords.tenantId, session.tenantId)))
       .returning()
+
+    // Send payslip email when a pay run is marked as paid
+    if (status === 'paid' && updated) {
+      try {
+        const [emp] = await db
+          .select({ firstName: employees.firstName, lastName: employees.lastName, email: employees.email })
+          .from(employees)
+          .where(eq(employees.id, updated.employeeId))
+
+        const [tenant] = await db
+          .select({ name: tenants.name, primaryColor: tenants.primaryColor })
+          .from(tenants)
+          .where(eq(tenants.id, session.tenantId))
+
+        if (emp?.email) {
+          const loginUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+          const tmpl = payslipReadyEmail({
+            recipientName: emp.firstName,
+            orgName:       tenant?.name ?? 'Your Organisation',
+            periodStart:   updated.periodStart,
+            periodEnd:     updated.periodEnd,
+            grossPay:      Number(updated.grossPay ?? 0),
+            netPay:        Number(updated.netPay ?? 0),
+            superAmount:   Number(updated.superContribution ?? 0),
+            loginUrl:      `${loginUrl}/tenant/payroll`,
+            primaryColor:  tenant?.primaryColor ?? '#1a4fff',
+          })
+          sendEmail({ to: emp.email, ...tmpl }).catch(console.error)
+        }
+      } catch (e) {
+        console.error('Payslip email error:', e)
+      }
+    }
 
     return NextResponse.json({ record: updated })
   } catch (err) {

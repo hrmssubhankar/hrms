@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { users } from '@/lib/db/schema'
+import { users, tenants } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { sendEmail } from '@/lib/email/resend'
+import { welcomeEmail } from '@/lib/email/templates'
+import { ROLE_LABELS } from '@/lib/auth/permissions'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +53,23 @@ export async function POST(req: NextRequest) {
     passwordHash,
     isActive: true,
   }).returning({ id: users.id, email: users.email, role: users.role })
+
+  // Send welcome email (fire-and-forget — don't block the response)
+  const [tenant] = await db.select({ name: tenants.name, slug: tenants.slug, primaryColor: tenants.primaryColor })
+    .from(tenants).where(eq(tenants.id, session.tenantId))
+
+  const loginUrl = process.env.NEXT_PUBLIC_APP_URL
+    ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+
+  const tmpl = welcomeEmail({
+    recipientName: email.split('@')[0],
+    orgName:       tenant?.name ?? 'Your Organisation',
+    role:          ROLE_LABELS[role as keyof typeof ROLE_LABELS] ?? role,
+    loginUrl:      `${loginUrl}/login?tenant=${tenant?.slug ?? ''}`,
+    tempPassword:  password,
+    primaryColor:  tenant?.primaryColor ?? '#1a4fff',
+  })
+  sendEmail({ to: email, ...tmpl }).catch(console.error)
 
   return NextResponse.json({ user: created }, { status: 201 })
 }
