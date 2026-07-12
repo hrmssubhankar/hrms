@@ -21,8 +21,11 @@ type PayrollRecord = {
   netPay: string | null
   status: string
   exportedToXero: boolean
+  exportedAt: string | null
   createdAt: string
 }
+
+type XeroStatus = { connected: boolean; orgName?: string; tokenExpired?: boolean }
 
 type Breakdown = {
   grossPay: number
@@ -57,6 +60,9 @@ export default function PayrollPage() {
   const [showModal, setShowModal] = useState(false)
   const [selected, setSelected]   = useState<PayrollRecord | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
+  const [xeroStatus,   setXeroStatus]  = useState<XeroStatus | null>(null)
+  const [exporting,    setExporting]   = useState<Set<string>>(new Set())
+  const [exportMsg,    setExportMsg]   = useState('')
 
   const [form, setForm] = useState({
     employeeId: '', periodStart: '', periodEnd: '',
@@ -90,6 +96,35 @@ export default function PayrollPage() {
       .then(r => r.json())
       .then(d => setEmployees(d.employees ?? []))
   }, [])
+
+  useEffect(() => {
+    fetch('/api/tenant/xero/status')
+      .then(r => r.json())
+      .then(d => setXeroStatus(d))
+      .catch(() => {})
+  }, [])
+
+  async function exportToXero(ids: string[]) {
+    if (!xeroStatus?.connected) {
+      setExportMsg('Xero is not connected. Go to Settings → Integrations to connect.')
+      return
+    }
+    setExporting(new Set(ids))
+    setExportMsg('')
+    try {
+      const res = await fetch('/api/tenant/xero/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      })
+      const d = await res.json()
+      if (!res.ok) { setExportMsg(d.error ?? 'Export failed'); return }
+      const { exported, skipped, errors } = d.summary
+      setExportMsg(`✓ Exported ${exported} record(s) to Xero${skipped > 0 ? ` · ${skipped} skipped` : ''}${errors > 0 ? ` · ${errors} error(s)` : ''}.`)
+      load()
+    } catch { setExportMsg('Export failed — check connection.') }
+    finally { setExporting(new Set()) }
+  }
 
   async function handlePreview() {
     setPreviewing(true); setError(''); setPreview(null)
@@ -158,12 +193,39 @@ export default function PayrollPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">💰 Payroll</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Australian PAYG · Super 11.5% · Medicare 2%</p>
         </div>
-        <button onClick={() => { setShowModal(true); setPreview(null); setError('') }}
-          className="px-4 py-2 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition"
-          style={{ background: 'var(--primary)' }}>
-          + New Pay Run
-        </button>
+        <div className="flex items-center gap-3">
+          {xeroStatus && (
+            xeroStatus.connected ? (
+              <button
+                onClick={() => {
+                  const unexported = records.filter(r => (r.status === 'approved' || r.status === 'paid') && !r.exportedToXero).map(r => r.id)
+                  if (unexported.length === 0) { setExportMsg('No approved/paid records to export.'); return }
+                  exportToXero(unexported)
+                }}
+                disabled={exporting.size > 0}
+                className="px-4 py-2 rounded-xl text-sm font-semibold border border-[#13B5EA] text-[#13B5EA] hover:bg-[#13B5EA]/10 transition disabled:opacity-60">
+                {exporting.size > 0 ? 'Exporting…' : '⬆ Export All to Xero'}
+              </button>
+            ) : (
+              <a href="/tenant/settings?tab=integrations"
+                className="px-3 py-2 rounded-xl text-xs border border-gray-700 text-gray-400 hover:text-white transition">
+                Connect Xero
+              </a>
+            )
+          )}
+          <button onClick={() => { setShowModal(true); setPreview(null); setError('') }}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition"
+            style={{ background: 'var(--primary)' }}>
+            + New Pay Run
+          </button>
+        </div>
       </div>
+
+      {exportMsg && (
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${exportMsg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-amber-900/40 border-amber-700 text-amber-300'}`}>
+          {exportMsg}
+        </div>
+      )}
 
       {/* Stats */}
       {stats && (
@@ -230,7 +292,21 @@ export default function PayrollPage() {
                     <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>{r.status}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-1.5 justify-end">
+                    <div className="flex flex-wrap gap-1.5 justify-end items-center">
+                      {r.exportedToXero ? (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-[#13B5EA]/20 border border-[#13B5EA]/40 text-[#13B5EA]" title={r.exportedAt ? `Exported ${new Date(r.exportedAt).toLocaleDateString('en-AU')}` : 'Exported'}>
+                          ✓ Xero
+                        </span>
+                      ) : (
+                        (r.status === 'approved' || r.status === 'paid') && xeroStatus?.connected && (
+                          <button
+                            onClick={() => exportToXero([r.id])}
+                            disabled={exporting.has(r.id)}
+                            className="text-xs px-2 py-1 rounded border border-[#13B5EA]/60 text-[#13B5EA] hover:bg-[#13B5EA]/10 transition disabled:opacity-50">
+                            {exporting.has(r.id) ? '…' : '⬆ Xero'}
+                          </button>
+                        )
+                      )}
                       <button onClick={() => setSelected(r)} className="text-xs px-2 py-1 rounded border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">View</button>
                       {r.status === 'pending'  && <button onClick={() => updateStatus(r.id, 'approved')} className="text-xs px-2 py-1 rounded border border-blue-700 text-blue-400 hover:bg-blue-900/20 transition">Approve</button>}
                       {r.status === 'approved' && <button onClick={() => updateStatus(r.id, 'paid')}     className="text-xs px-2 py-1 rounded border border-green-700 text-green-400 hover:bg-green-900/20 transition">Mark Paid</button>}

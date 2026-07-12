@@ -26,7 +26,14 @@ type Settings = {
 const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL = 'block text-xs font-medium text-gray-400 mb-1'
 
-type Tab = 'branding' | 'domain' | 'email' | 'notifications'
+type Tab = 'branding' | 'domain' | 'email' | 'notifications' | 'integrations'
+
+type XeroStatus = {
+  connected: boolean
+  orgName?: string
+  xeroTenantId?: string
+  tokenExpired?: boolean
+}
 
 export default function TenantSettingsPage() {
   const [tab,          setTab]          = useState<Tab>('branding')
@@ -41,6 +48,13 @@ export default function TenantSettingsPage() {
   const [error,        setError]        = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
+  // Xero integration state
+  const [xeroStatus,      setXeroStatus]      = useState<XeroStatus | null>(null)
+  const [xeroLoading,     setXeroLoading]     = useState(false)
+  const [xeroConnecting,  setXeroConnecting]  = useState(false)
+  const [xeroDisconnecting, setXeroDisconnecting] = useState(false)
+  const [xeroMsg,         setXeroMsg]         = useState('')
+
   useEffect(() => {
     fetch('/api/tenant/config').then(r => r.json()).then(d => {
       const t = d.tenant ?? {}
@@ -52,6 +66,39 @@ export default function TenantSettingsPage() {
       setLoading(false)
     })
   }, [])
+
+  // Load Xero status + handle callback query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('tab') === 'integrations') setTab('integrations')
+    if (params.get('xero_success')) setXeroMsg('✓ Xero connected successfully!')
+    if (params.get('xero_error'))   setXeroMsg(`Xero error: ${params.get('xero_error')}`)
+
+    setXeroLoading(true)
+    fetch('/api/tenant/xero/status')
+      .then(r => r.json())
+      .then(d => setXeroStatus(d))
+      .finally(() => setXeroLoading(false))
+  }, [])
+
+  async function connectXero() {
+    setXeroConnecting(true); setXeroMsg('')
+    try {
+      const res = await fetch('/api/tenant/xero/connect')
+      const d   = await res.json()
+      if (!res.ok) { setXeroMsg(d.error); setXeroConnecting(false); return }
+      window.location.href = d.url   // redirect to Xero
+    } catch { setXeroMsg('Failed to start Xero connection'); setXeroConnecting(false) }
+  }
+
+  async function disconnectXero() {
+    if (!confirm('Disconnect Xero? Payroll records already exported will remain exported.')) return
+    setXeroDisconnecting(true); setXeroMsg('')
+    await fetch('/api/tenant/xero/status', { method: 'DELETE' })
+    setXeroStatus({ connected: false })
+    setXeroMsg('Xero disconnected.')
+    setXeroDisconnecting(false)
+  }
 
   function flash() { setSaved(true); setTimeout(() => setSaved(false), 3000) }
 
@@ -134,6 +181,7 @@ export default function TenantSettingsPage() {
           { id: 'domain',        label: '🌐 Domain' },
           { id: 'email',         label: '✉️ Email' },
           { id: 'notifications', label: '🔔 Notifications' },
+          { id: 'integrations',  label: '🔗 Integrations' },
         ] as { id: Tab; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === t.id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
@@ -504,6 +552,98 @@ export default function TenantSettingsPage() {
                 className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2.5 rounded-lg">
                 {saving ? 'Saving…' : 'Save Notification Settings'}
               </button>
+            </div>
+          )}
+
+          {/* ── INTEGRATIONS TAB ── */}
+          {tab === 'integrations' && (
+            <div className="space-y-6">
+
+              {xeroMsg && (
+                <div className={`rounded-lg px-4 py-2.5 text-sm border ${xeroMsg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+                  {xeroMsg}
+                </div>
+              )}
+
+              {/* Xero */}
+              <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {/* Xero logo (blue X) */}
+                    <div className="w-10 h-10 rounded-xl bg-[#13B5EA] flex items-center justify-center text-white font-black text-lg shrink-0">X</div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">Xero Accounting</p>
+                      <p className="text-xs text-gray-500">Export payroll runs as manual journal entries to your Xero ledger</p>
+                    </div>
+                  </div>
+                  {xeroLoading ? (
+                    <span className="text-xs text-gray-500">Checking…</span>
+                  ) : xeroStatus?.connected ? (
+                    <span className="text-xs px-2 py-1 rounded-full bg-green-900/40 border border-green-700 text-green-300">
+                      {xeroStatus.tokenExpired ? '⚠ Token expired' : '● Connected'}
+                    </span>
+                  ) : (
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-800 border border-gray-700 text-gray-400">Not connected</span>
+                  )}
+                </div>
+
+                {xeroStatus?.connected && (
+                  <div className="bg-gray-800/60 border border-gray-700 rounded-lg p-3 text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Organisation</span>
+                      <span className="text-white font-medium">{xeroStatus.orgName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Xero Tenant ID</span>
+                      <span className="text-gray-300 font-mono text-xs">{xeroStatus.xeroTenantId}</span>
+                    </div>
+                  </div>
+                )}
+
+                {xeroStatus?.tokenExpired && (
+                  <div className="bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-2 text-xs text-amber-300">
+                    ⚠ Your Xero access token has expired. Reconnect to restore the integration.
+                  </div>
+                )}
+
+                <div className="border-t border-gray-800 pt-4">
+                  <p className="text-xs text-gray-500 mb-3">
+                    When you export a pay run to Xero, a Manual Journal is created with these account codes:
+                    <br />
+                    <span className="font-mono">493</span> Wages &amp; Salaries (DR) ·
+                    <span className="font-mono"> 825</span> PAYG Withholding (CR) ·
+                    <span className="font-mono"> 826</span> Superannuation Payable (CR) ·
+                    <span className="font-mono"> 800</span> Net Wages Payable (CR)
+                    <br />
+                    You can remap these in Xero's chart of accounts.
+                  </p>
+
+                  <div className="flex gap-3">
+                    {xeroStatus?.connected ? (
+                      <>
+                        <button onClick={connectXero} disabled={xeroConnecting}
+                          className="px-4 py-2 rounded-lg text-sm font-medium border border-[#13B5EA] text-[#13B5EA] hover:bg-[#13B5EA]/10 transition disabled:opacity-60">
+                          {xeroConnecting ? 'Redirecting…' : '🔄 Reconnect Xero'}
+                        </button>
+                        <button onClick={disconnectXero} disabled={xeroDisconnecting}
+                          className="px-4 py-2 rounded-lg text-sm font-medium border border-red-800 text-red-400 hover:bg-red-900/20 transition disabled:opacity-60">
+                          {xeroDisconnecting ? 'Disconnecting…' : 'Disconnect'}
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={connectXero} disabled={xeroConnecting}
+                        className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#13B5EA] hover:bg-[#0da3d8] transition disabled:opacity-60">
+                        {xeroConnecting ? 'Redirecting to Xero…' : '🔗 Connect Xero'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Future integrations placeholder */}
+              <div className="bg-gray-900/50 border border-dashed border-gray-700 rounded-xl p-6 text-center">
+                <p className="text-gray-500 text-sm">More integrations coming soon — ADP, Workday, myGov</p>
+              </div>
             </div>
           )}
         </>
