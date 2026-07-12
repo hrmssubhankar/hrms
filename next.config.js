@@ -4,8 +4,9 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
+        // Vercel Blob CDN — document/file uploads via @vercel/blob
         protocol: 'https',
-        hostname: '*.blob.core.windows.net',
+        hostname: '*.public.blob.vercel-storage.com',
       },
       {
         protocol: 'https',
