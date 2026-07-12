@@ -40,7 +40,7 @@ export default function CompetencyPage() {
     setLoading(true)
     const p = new URLSearchParams({ assessments: '1' })
     if (filterEmp) p.set('employeeId', filterEmp)
-    const res  = await fetch(`/api/tenant/competency?${p}`)
+    const res  = await fetch(`/api/tenant/competencies?${p}`)
     const data = await res.json()
     setCompetencies(data.competencies ?? [])
     setAssessments(data.assessments  ?? [])
@@ -56,14 +56,14 @@ export default function CompetencyPage() {
   async function createComp(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/competency', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(compForm) })
+    await fetch('/api/tenant/competencies', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(compForm) })
     setShowCompForm(false); setCompForm({ name:'', description:'', category:'' }); setSaving(false); load()
   }
 
   async function createAss(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/competency', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(assForm) })
+    await fetch('/api/tenant/competencies', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(assForm) })
     setShowAssForm(false)
     setAssForm({ employeeId:'', competencyId:'', assessorId:'', outcome:'competent', assessedAt:'', expiryDate:'', evidence:'', notes:'' })
     setSaving(false); load()
