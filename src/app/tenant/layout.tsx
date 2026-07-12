@@ -40,6 +40,7 @@ const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
   26: { key: 'assets',                label: '🖥 Assets' },
   27: { key: 'rostering',             label: '🕐 Rostering' },
   28: { key: 'payroll',               label: '💰 Payroll' },
+  29: { key: 'leave',                 label: '🏖 Leave Management' },
 }
 
 async function getTenantConfig(slug: string) {

@@ -93,6 +93,10 @@ export type Permission =
   // Referrals
   | 'referrals:read'
   | 'referrals:write'
+  // Leave Management
+  | 'leave:read'
+  | 'leave:write'
+  | 'leave:approve'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -126,6 +130,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'engagement:read', 'engagement:write',
     'recognition:read', 'recognition:write',
     'referrals:read', 'referrals:write',
+    'leave:read', 'leave:write', 'leave:approve',
     'settings:read', 'settings:write',
   ],
 
@@ -152,6 +157,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'engagement:read', 'engagement:write',
     'recognition:read', 'recognition:write',
     'referrals:read',
+    'leave:read', 'leave:write', 'leave:approve',
     'settings:read',
   ],
 
@@ -178,6 +184,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'analytics:read',
     'whs:read',
     'documents:read',
+    'leave:read', 'leave:approve',
   ],
 
   team_leader: [
@@ -190,6 +197,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'whs:read',
     'recognition:read', 'recognition:write',
     'engagement:read',
+    'leave:read', 'leave:approve',
   ],
 
   payroll_officer: [
@@ -198,6 +206,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'benefits:read', 'benefits:write',
     'documents:read',
     'analytics:read',
+    'leave:read',
   ],
 
   auditor: [
@@ -229,6 +238,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'whs:read',
     'benefits:read',
     'competencies:read',
+    'leave:read', 'leave:write',
   ],
 
   contractor: [

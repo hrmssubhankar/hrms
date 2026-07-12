@@ -730,6 +730,32 @@ export const superAdmins = pgTable('super_admins', {
 // Broadcast messages from super admins to all tenants or specific ones.
 // ──────────────────────────────────────────────
 
+// ── Leave Management ─────────────────────────────────────────────────────────
+export const leaveTypeEnum   = pgEnum('leave_type',   ['annual', 'sick', 'personal', 'unpaid', 'long_service', 'carer', 'compassionate'])
+export const leaveStatusEnum = pgEnum('leave_status', ['pending', 'approved', 'rejected', 'cancelled'])
+
+export const leaveRequests = pgTable('leave_requests', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  employeeId:   uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  leaveType:    leaveTypeEnum('leave_type').notNull(),
+  startDate:    date('start_date').notNull(),
+  endDate:      date('end_date').notNull(),
+  totalDays:    integer('total_days').notNull(),
+  reason:       text('reason'),
+  status:       leaveStatusEnum('status').notNull().default('pending'),
+  reviewedBy:   varchar('reviewed_by', { length: 255 }), // user id (JWT sub) of approver
+  reviewedAt:   timestamp('reviewed_at'),
+  reviewNote:   text('review_note'),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:    index('leave_tenant_idx').on(t.tenantId),
+  employeeIdx:  index('leave_employee_idx').on(t.employeeId),
+  statusIdx:    index('leave_status_idx').on(t.status),
+  dateIdx:      index('leave_date_idx').on(t.startDate),
+}))
+
 export const announcementPriorityEnum = pgEnum('announcement_priority', ['info', 'warning', 'critical'])
 
 export const platformAnnouncements = pgTable('platform_announcements', {
