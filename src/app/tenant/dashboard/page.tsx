@@ -84,7 +84,7 @@ const EMP_TYPE_COLOR: Record<string, string> = {
 const ENTITY_COLORS = ['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ef4444']
 
 const MODULE_SHORTCUTS = [
-  { key: 'employees',       icon: '👥', label: 'Employees',   desc: 'View & manage staff' },
+  { key: 'employee-management', icon: '👥', label: 'Employees', desc: 'View & manage staff' },
   { key: 'leave',           icon: '🏖', label: 'Leave',       desc: 'Requests & balances' },
   { key: 'payroll',         icon: '💰', label: 'Payroll',     desc: 'Pay runs & exports' },
   { key: 'documents',       icon: '📄', label: 'Documents',   desc: 'Upload & manage docs' },
@@ -186,7 +186,7 @@ export default function DashboardPage() {
         <div className="bg-red-950/40 border border-red-700/60 rounded-2xl px-5 py-4 flex flex-wrap gap-4 items-center">
           <p className="text-sm font-semibold text-red-300 shrink-0">🚨 Attention required</p>
           {data!.compliance.redCount > 0 && (
-            <Link href="/tenant/employees" className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2">
+            <Link href="/tenant/employee-management" className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2">
               {data!.compliance.redCount} employee{data!.compliance.redCount > 1 ? 's' : ''} — red compliance
             </Link>
           )}
@@ -226,12 +226,12 @@ export default function DashboardPage() {
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">👥 Workforce</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {[
-                { label: 'Total', value: data.headcount.total, color: 'text-white', href: '/tenant/employees' },
-                { label: 'Active', value: data.headcount.active, color: 'text-green-400', href: '/tenant/employees' },
+                { label: 'Total', value: data.headcount.total, color: 'text-white', href: '/tenant/employee-management' },
+                { label: 'Active', value: data.headcount.active, color: 'text-green-400', href: '/tenant/employee-management' },
                 { label: 'New This Month', value: data.headcount.newThisMonth, color: 'text-purple-400' },
                 { label: 'Leaving This Month', value: data.headcount.leavingThisMonth, color: data.headcount.leavingThisMonth > 0 ? 'text-amber-400' : 'text-gray-600' },
-                { label: 'Amber Compliance', value: data.compliance.amberCount, color: data.compliance.amberCount > 0 ? 'text-amber-400' : 'text-gray-600', href: '/tenant/employees' },
-                { label: 'Red Compliance', value: data.compliance.redCount, color: data.compliance.redCount > 0 ? 'text-red-400' : 'text-gray-600', href: '/tenant/employees' },
+                { label: 'Amber Compliance', value: data.compliance.amberCount, color: data.compliance.amberCount > 0 ? 'text-amber-400' : 'text-gray-600', href: '/tenant/employee-management' },
+                { label: 'Red Compliance', value: data.compliance.redCount, color: data.compliance.redCount > 0 ? 'text-red-400' : 'text-gray-600', href: '/tenant/employee-management' },
               ].map(s => (
                 <div key={s.label} className={`bg-gray-900 border rounded-2xl p-5 ${data.compliance.redCount > 0 && s.label === 'Red Compliance' ? 'border-red-800/50' : 'border-gray-800'}`}>
                   {s.href ? (
