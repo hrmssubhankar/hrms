@@ -11,27 +11,60 @@ type Holiday = {
   isNational: boolean
 }
 
+type FormState = {
+  name: string
+  date: string
+  country: string
+  state: string
+  isNational: boolean
+}
+
+const BLANK_FORM: FormState = { name: '', date: '', country: 'AU', state: '', isNational: true }
+
 const MONTHS = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December',
 ]
 
+const MANAGER_ROLES = ['director', 'hr_officer', 'operations_manager', 'compliance_manager']
+
+const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const LABEL = 'block text-xs font-medium text-gray-400 mb-1'
+
 function fmt(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-AU', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  })
 }
 
 function daysUntil(dateStr: string): number {
-  const today = new Date(); today.setHours(0,0,0,0)
-  const d     = new Date(dateStr + 'T00:00:00')
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const d = new Date(dateStr + 'T00:00:00')
   return Math.ceil((d.getTime() - today.getTime()) / 86400000)
 }
 
 export default function PublicHolidaysPage() {
   const currentYear = new Date().getFullYear()
-  const [year,     setYear]     = useState(currentYear)
-  const [holidays, setHolidays] = useState<Holiday[]>([])
-  const [loading,  setLoading]  = useState(true)
+  const [year,       setYear]       = useState(currentYear)
+  const [holidays,   setHolidays]   = useState<Holiday[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [canManage,  setCanManage]  = useState(false)
+
+  // Form / modal state
+  const [showForm,   setShowForm]   = useState(false)
+  const [editing,    setEditing]    = useState<Holiday | null>(null)
+  const [form,       setForm]       = useState<FormState>(BLANK_FORM)
+  const [saving,     setSaving]     = useState(false)
+  const [formError,  setFormError]  = useState<string | null>(null)
+  const [deleting,   setDeleting]   = useState<string | null>(null)
+
+  // Role detection
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(d => setCanManage(MANAGER_ROLES.includes(d.userRole ?? '')))
+      .catch(() => {})
+  }, [])
 
   const load = useCallback(async (y: number) => {
     setLoading(true)
@@ -42,6 +75,62 @@ export default function PublicHolidaysPage() {
   }, [])
 
   useEffect(() => { load(year) }, [year, load])
+
+  function openAdd() {
+    setEditing(null)
+    setForm({ ...BLANK_FORM, date: `${year}-01-01` })
+    setFormError(null)
+    setShowForm(true)
+  }
+
+  function openEdit(h: Holiday) {
+    setEditing(h)
+    setForm({ name: h.name, date: h.date, country: h.country, state: h.state ?? '', isNational: h.isNational })
+    setFormError(null)
+    setShowForm(true)
+  }
+
+  async function saveHoliday(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    setFormError(null)
+    try {
+      const payload = { ...form, state: form.state || null }
+      const res = editing
+        ? await fetch('/api/tenant/public-holidays', {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: editing.id, ...payload }),
+          })
+        : await fetch('/api/tenant/public-holidays', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        setFormError(d.error ?? `Failed (${res.status})`)
+        return
+      }
+      setShowForm(false)
+      load(year)
+    } catch {
+      setFormError('Network error — please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function deleteHoliday(id: string) {
+    setDeleting(id)
+    try {
+      await fetch('/api/tenant/public-holidays', {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      setHolidays(prev => prev.filter(h => h.id !== id))
+    } finally {
+      setDeleting(null)
+    }
+  }
 
   // Group by month
   const byMonth: Record<number, Holiday[]> = {}
@@ -60,26 +149,36 @@ export default function PublicHolidaysPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">🇦🇺 Public Holidays</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Australian national public holidays</p>
+          <p className="text-sm text-gray-400 mt-0.5">
+            {canManage ? 'Manage public holidays for your organisation' : 'Australian national public holidays'}
+          </p>
         </div>
 
-        {/* Year selector */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setYear(y => y - 1)}
-            className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:border-gray-500 transition-colors"
-          >
-            ←
-          </button>
-          <span className="px-4 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-white font-semibold min-w-[80px] text-center">
-            {year}
-          </span>
-          <button
-            onClick={() => setYear(y => y + 1)}
-            className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:border-gray-500 transition-colors"
-          >
-            →
-          </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Year selector */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setYear(y => y - 1)}
+              className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:border-gray-500 transition-colors"
+            >←</button>
+            <span className="px-4 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-white font-semibold min-w-[80px] text-center">
+              {year}
+            </span>
+            <button
+              onClick={() => setYear(y => y + 1)}
+              className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white hover:border-gray-500 transition-colors"
+            >→</button>
+          </div>
+
+          {/* Add button — managers only */}
+          {canManage && (
+            <button
+              onClick={openAdd}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              + Add Holiday
+            </button>
+          )}
         </div>
       </div>
 
@@ -92,13 +191,113 @@ export default function PublicHolidaysPage() {
             <p className="text-white font-semibold">{nextHoliday.name}</p>
             <p className="text-sm text-gray-400">
               {fmt(nextHoliday.date)}
-              {daysUntil(nextHoliday.date) === 0
-                ? ' — Today!'
-                : daysUntil(nextHoliday.date) === 1
-                ? ' — Tomorrow!'
+              {daysUntil(nextHoliday.date) === 0 ? ' — Today!'
+                : daysUntil(nextHoliday.date) === 1 ? ' — Tomorrow!'
                 : ` — in ${daysUntil(nextHoliday.date)} days`}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Add / Edit Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <form
+            onSubmit={saveHoliday}
+            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold text-white">
+                {editing ? 'Edit Holiday' : 'Add Public Holiday'}
+              </h2>
+              <button type="button" onClick={() => setShowForm(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+            </div>
+
+            <div>
+              <label className={LABEL}>Holiday Name *</label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                className={INPUT}
+                placeholder="e.g. Christmas Day"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={LABEL}>Date *</label>
+                <input
+                  type="date"
+                  value={form.date}
+                  onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                  className={INPUT}
+                  required
+                />
+              </div>
+              <div>
+                <label className={LABEL}>Country *</label>
+                <input
+                  type="text"
+                  value={form.country}
+                  onChange={e => setForm(f => ({ ...f, country: e.target.value.toUpperCase().slice(0, 10) }))}
+                  className={INPUT}
+                  placeholder="AU"
+                  maxLength={10}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={LABEL}>State / Territory (optional)</label>
+                <input
+                  type="text"
+                  value={form.state}
+                  onChange={e => setForm(f => ({ ...f, state: e.target.value.toUpperCase().slice(0, 10) }))}
+                  className={INPUT}
+                  placeholder="e.g. NSW, VIC"
+                  maxLength={10}
+                />
+              </div>
+              <div className="flex items-end pb-0.5">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.isNational}
+                    onChange={e => setForm(f => ({ ...f, isNational: e.target.checked }))}
+                    className="w-4 h-4 rounded accent-purple-600"
+                  />
+                  <span className="text-sm text-gray-300">National holiday</span>
+                </label>
+              </div>
+            </div>
+
+            {formError && (
+              <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
+                ⚠ {formError}
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex-1 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Holiday'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="px-4 py-2 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
@@ -109,6 +308,11 @@ export default function PublicHolidaysPage() {
         <div className="text-center py-16 bg-gray-800/50 rounded-2xl border border-gray-700">
           <p className="text-4xl mb-3">📅</p>
           <p className="text-gray-400 font-medium">No public holidays found for {year}</p>
+          {canManage && (
+            <button onClick={openAdd} className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg">
+              + Add First Holiday
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-6">
@@ -116,26 +320,25 @@ export default function PublicHolidaysPage() {
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([monthIdx, monthHolidays]) => {
               const m = Number(monthIdx)
-              const isPast = new Date(year, m + 1, 1) < new Date()
+              const isPastMonth = new Date(year, m + 1, 1) < new Date()
               return (
                 <div key={m}>
-                  <h2 className={`text-xs font-semibold uppercase tracking-widest mb-3 ${isPast ? 'text-gray-600' : 'text-purple-400'}`}>
+                  <h2 className={`text-xs font-semibold uppercase tracking-widest mb-3 ${isPastMonth ? 'text-gray-600' : 'text-purple-400'}`}>
                     {MONTHS[m]}
                   </h2>
                   <div className="space-y-2">
                     {monthHolidays.map(h => {
-                      const diff   = daysUntil(h.date)
-                      const isToday  = diff === 0
-                      const isPastH  = diff < 0
+                      const diff    = daysUntil(h.date)
+                      const isToday = diff === 0
+                      const isPast  = diff < 0
+                      const isBusy  = deleting === h.id
                       return (
                         <div
                           key={h.id}
                           className={`flex items-center gap-4 px-5 py-3.5 rounded-xl border transition-colors ${
-                            isToday
-                              ? 'bg-purple-900/40 border-purple-600'
-                              : isPastH
-                              ? 'bg-gray-800/30 border-gray-800 opacity-50'
-                              : 'bg-gray-800/60 border-gray-700'
+                            isToday ? 'bg-purple-900/40 border-purple-600'
+                            : isPast ? 'bg-gray-800/30 border-gray-800 opacity-50'
+                            : 'bg-gray-800/60 border-gray-700'
                           }`}
                         >
                           {/* Date block */}
@@ -143,7 +346,7 @@ export default function PublicHolidaysPage() {
                             <p className="text-xs text-gray-500 uppercase">
                               {new Date(h.date + 'T00:00:00').toLocaleDateString('en-AU', { month: 'short' })}
                             </p>
-                            <p className={`text-2xl font-bold leading-none ${isToday ? 'text-purple-300' : isPastH ? 'text-gray-600' : 'text-white'}`}>
+                            <p className={`text-2xl font-bold leading-none ${isToday ? 'text-purple-300' : isPast ? 'text-gray-600' : 'text-white'}`}>
                               {new Date(h.date + 'T00:00:00').getDate()}
                             </p>
                             <p className="text-xs text-gray-600">
@@ -153,10 +356,10 @@ export default function PublicHolidaysPage() {
 
                           {/* Name + badges */}
                           <div className="flex-1 min-w-0">
-                            <p className={`font-medium ${isPastH ? 'text-gray-600' : 'text-white'}`}>{h.name}</p>
+                            <p className={`font-medium ${isPast ? 'text-gray-600' : 'text-white'}`}>{h.name}</p>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               <span className="text-xs px-2 py-0.5 rounded-full bg-green-900/50 text-green-400 border border-green-800">
-                                🇦🇺 Australia
+                                🌏 {h.country}
                               </span>
                               {h.isNational && (
                                 <span className="text-xs px-2 py-0.5 rounded-full bg-blue-900/50 text-blue-400 border border-blue-800">
@@ -171,16 +374,31 @@ export default function PublicHolidaysPage() {
                             </div>
                           </div>
 
-                          {/* Countdown */}
-                          <div className="text-right shrink-0">
-                            {isToday ? (
-                              <span className="text-xs font-semibold text-purple-300">Today 🎉</span>
-                            ) : isPastH ? (
-                              <span className="text-xs text-gray-600">Passed</span>
-                            ) : diff === 1 ? (
-                              <span className="text-xs text-yellow-400">Tomorrow</span>
-                            ) : (
-                              <span className="text-xs text-gray-500">{diff}d away</span>
+                          {/* Countdown + manager actions */}
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="text-xs">
+                              {isToday ? <span className="text-purple-300 font-semibold">Today 🎉</span>
+                                : isPast ? <span className="text-gray-600">Passed</span>
+                                : diff === 1 ? <span className="text-yellow-400">Tomorrow</span>
+                                : <span className="text-gray-500">{diff}d away</span>}
+                            </span>
+
+                            {canManage && (
+                              <>
+                                <button
+                                  onClick={() => openEdit(h)}
+                                  className="text-xs text-gray-500 hover:text-purple-400 transition-colors px-1"
+                                  title="Edit"
+                                >✏</button>
+                                <button
+                                  onClick={() => deleteHoliday(h.id)}
+                                  disabled={isBusy}
+                                  className="text-xs text-gray-500 hover:text-red-400 disabled:opacity-40 transition-colors px-1"
+                                  title="Delete"
+                                >
+                                  {isBusy ? '…' : '🗑'}
+                                </button>
+                              </>
                             )}
                           </div>
                         </div>
@@ -194,7 +412,9 @@ export default function PublicHolidaysPage() {
       )}
 
       <p className="text-xs text-gray-600 pt-2">
-        Dates reflect national observed holidays. Some states may observe additional or substituted dates.
+        {canManage
+          ? 'Add, edit or remove holidays as needed. Changes apply immediately to all employees.'
+          : 'Dates reflect national observed holidays. Some states may observe additional or substituted dates.'}
       </p>
     </div>
   )
