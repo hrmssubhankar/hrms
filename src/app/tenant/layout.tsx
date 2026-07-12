@@ -1,4 +1,4 @@
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import NotificationBell from '@/components/tenant/NotificationBell'
 import TenantSidebar from '@/components/tenant/TenantSidebar'
@@ -63,8 +63,14 @@ async function getTenantConfig(slug: string) {
 }
 
 export default async function TenantLayout({ children }: { children: React.ReactNode }) {
-  const headersList = await headers()
-  const tenantSlug  = headersList.get('x-tenant-slug') ?? 'default'
+  const headersList  = await headers()
+  const cookieStore  = await cookies()
+  // Priority: request header (set by middleware) → cookie → deployment env var → 'default'
+  const tenantSlug   =
+    headersList.get('x-tenant-slug') ??
+    cookieStore.get('tenant_slug')?.value ??
+    process.env.NEXT_PUBLIC_TENANT_SLUG ??
+    'default'
 
   const [config, session] = await Promise.all([
     getTenantConfig(tenantSlug),
