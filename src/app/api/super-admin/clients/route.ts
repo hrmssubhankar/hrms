@@ -35,11 +35,13 @@ const ALL_MODULES = [
   { id: 26, name: 'Asset & Equipment Register' },
   { id: 27, name: 'Rostering & Attendance Integration' },
   { id: 28, name: 'Payroll & Award Compliance Integration' },
+  { id: 29, name: 'Leave Management' },            // ← was missing
+  { id: 30, name: 'Public Holidays' },             // ← was missing
 ]
 
-const STARTER_MODULES  = [1,2,3,4,5,6,7,8,9]
-const PRO_MODULES      = [...STARTER_MODULES, 10,11,12,13,14,15,16,17,18,19]
-const ENTERPRISE_MODULES = ALL_MODULES.map(m => m.id)
+const STARTER_MODULES    = [1,2,3,4,5,6,7,8,9]
+const PRO_MODULES        = [...STARTER_MODULES, 10,11,12,13,14,15,16,17,18,19]
+const ENTERPRISE_MODULES = ALL_MODULES.map(m => m.id)  // now includes 29 & 30
 
 function getDefaultModules(tier: string): number[] {
   if (tier === 'professional') return PRO_MODULES
@@ -62,28 +64,38 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, slug, tier = 'starter', primaryColor, logoUrl, enabledModules, adminEmail, adminPassword } = body
+    const {
+      name, slug, tier = 'starter', primaryColor, logoUrl,
+      enabledModules, adminEmail, adminPassword,
+      settings: incomingSettings,   // ← new: from enhanced new-client form
+    } = body
 
     if (!name || !slug) {
       return NextResponse.json({ error: 'name and slug are required' }, { status: 400 })
     }
 
+    // Merge caller-supplied settings with theme defaults so neither overwrites the other
+    const settingsPayload = {
+      // Theme defaults
+      theme: {
+        primaryColor: primaryColor || '#1a4fff',
+        logoUrl:      logoUrl || null,
+        fontFamily:   'Inter',
+        borderRadius: '0.5rem',
+      },
+      // Country / currency / contact / address from the enhanced new-client form
+      ...(incomingSettings ?? {}),
+    }
+
     // Create tenant
     const [tenant] = await db.insert(tenants).values({
       name,
-      slug: slug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+      slug:         slug.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
       tier,
       primaryColor: primaryColor || '#1a4fff',
       logoUrl,
-      settings: {
-        theme: {
-          primaryColor: primaryColor || '#1a4fff',
-          logoUrl: logoUrl || null,
-          fontFamily: 'Inter',
-          borderRadius: '0.5rem',
-        }
-      },
-      isActive: true,
+      settings:     settingsPayload,
+      isActive:     true,
     }).returning()
 
     // Enable modules based on tier (or custom selection)

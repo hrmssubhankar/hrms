@@ -184,8 +184,9 @@ function EditClientInner() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/super-admin/clients/${id}/users`}   className="text-xs border border-green-700 text-green-300 hover:bg-green-900/30 px-3 py-1.5 rounded-lg transition">👥 Users</Link>
-          <Link href={`/super-admin/clients/${id}/modules`} className="text-xs border border-purple-700 text-purple-300 hover:bg-purple-900/30 px-3 py-1.5 rounded-lg transition">🧩 Modules</Link>
+          <Link href={`/super-admin/clients/${id}/users`}        className="text-xs border border-green-700 text-green-300 hover:bg-green-900/30 px-3 py-1.5 rounded-lg transition">👥 Users</Link>
+          <Link href={`/super-admin/clients/${id}/modules`}      className="text-xs border border-purple-700 text-purple-300 hover:bg-purple-900/30 px-3 py-1.5 rounded-lg transition">🧩 Modules</Link>
+          <Link href={`/super-admin/clients/${id}/integrations`} className="text-xs border border-blue-700 text-blue-300 hover:bg-blue-900/30 px-3 py-1.5 rounded-lg transition">🔗 Integrations</Link>
         </div>
       </div>
 
