@@ -24,6 +24,8 @@ type Employee = {
   employmentType: string
   awardClassification: string | null
   payLevel: string | null
+  annualSalary: string | null
+  ordinaryHoursPerWeek: string | null
   startDate: string
   probationEndDate: string | null
   endDate: string | null
@@ -64,6 +66,29 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 const TABS = ['Overview', 'Employment', 'Emergency Contacts', 'Compliance', 'Documents', 'Training'] as const
 type Tab = typeof TABS[number]
 
+type ScreeningRecord = {
+  id: string
+  checkType: string
+  status: string
+  referenceNumber: string | null
+  issuedDate: string | null
+  expiryDate: string | null
+  notes: string | null
+}
+
+type EmployeeDoc = {
+  id: string
+  category: string
+  title: string
+  blobUrl: string
+  fileName: string | null
+  fileSizeBytes: number | null
+  mimeType: string | null
+  status: string
+  expiryDate: string | null
+  createdAt: string
+}
+
 type EmergencyContact = {
   id: string
   name: string
@@ -94,6 +119,14 @@ export default function EmployeeProfilePage() {
   const [contactError,   setContactError]   = useState('')
   const [deletingContact, setDeletingContact] = useState<string | null>(null)
 
+  // Compliance screening state
+  const [screening,        setScreening]        = useState<ScreeningRecord[]>([])
+  const [screeningLoaded,  setScreeningLoaded]  = useState(false)
+
+  // Documents state
+  const [docs,       setDocs]       = useState<EmployeeDoc[]>([])
+  const [docsLoaded, setDocsLoaded] = useState(false)
+
   useEffect(() => {
     fetch(`/api/tenant/employees/${id}`)
       .then(r => r.json())
@@ -110,6 +143,26 @@ export default function EmployeeProfilePage() {
         .catch(() => setContactsLoaded(true))
     }
   }, [tab, id, contactsLoaded])
+
+  // Load screening records when Compliance tab is first opened
+  useEffect(() => {
+    if (tab === 'Compliance' && !screeningLoaded) {
+      fetch(`/api/tenant/compliance/screening?employeeId=${id}`)
+        .then(r => r.json())
+        .then(d => { setScreening(d.records ?? []); setScreeningLoaded(true) })
+        .catch(() => setScreeningLoaded(true))
+    }
+  }, [tab, id, screeningLoaded])
+
+  // Load documents when Documents tab is first opened
+  useEffect(() => {
+    if (tab === 'Documents' && !docsLoaded) {
+      fetch(`/api/tenant/documents?employeeId=${id}`)
+        .then(r => r.json())
+        .then(d => { setDocs(d.documents ?? []); setDocsLoaded(true) })
+        .catch(() => setDocsLoaded(true))
+    }
+  }, [tab, id, docsLoaded])
 
   function openAddContact() {
     setEditingContact(null)
@@ -325,9 +378,11 @@ export default function EmployeeProfilePage() {
             <Row label="Employment Type"  value={EMP_TYPE_LABEL[emp.employmentType] ?? emp.employmentType} />
             <Row label="Department"       value={emp.departmentName} />
             <Row label="Position"         value={emp.positionTitle} />
-            <Row label="Award / Class."   value={emp.awardClassification} />
-            <Row label="Pay Level"        value={emp.payLevel} />
-            <Row label="Start Date"       value={fmt(emp.startDate)} />
+            <Row label="Award / Class."      value={emp.awardClassification} />
+            <Row label="Pay Level"           value={emp.payLevel} />
+            {emp.annualSalary && <Row label="Annual Salary"  value={`$${Number(emp.annualSalary).toLocaleString('en-AU', { minimumFractionDigits: 2 })}`} />}
+            {emp.ordinaryHoursPerWeek && <Row label="Hrs / Week"  value={`${emp.ordinaryHoursPerWeek} hrs`} />}
+            <Row label="Start Date"          value={fmt(emp.startDate)} />
             <Row label="Probation End"    value={emp.probationEndDate ? fmt(emp.probationEndDate) : '—'} />
             {emp.endDate && <Row label="End Date" value={fmt(emp.endDate)} />}
             <Row label="NDIS Worker"      value={emp.ndisWorker ? '✅ Yes' : 'No'} />
@@ -470,21 +525,22 @@ export default function EmployeeProfilePage() {
 
         {tab === 'Compliance' && (
           <div className="space-y-5">
-            <div className="flex items-center justify-between">
+            {/* Overall status + change */}
+            <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Compliance Status</p>
-                <span className={`inline-flex mt-1.5 px-3 py-1 rounded-full text-sm font-medium ${badge.cls}`}>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Overall Status</p>
+                <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${badge.cls}`}>
                   {badge.label}
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {(['green','amber','red','pending'] as const).map(s => (
                   <button
                     key={s}
                     onClick={() => setCompliance(s)}
                     disabled={saving || emp.complianceStatus === s}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                      emp.complianceStatus === s ? 'ring-2 ring-offset-1 opacity-100' : 'opacity-60 hover:opacity-100'
+                      emp.complianceStatus === s ? 'ring-2 ring-offset-1' : 'opacity-60 hover:opacity-100'
                     } ${COMPLIANCE_BADGE[s].cls}`}
                   >
                     {COMPLIANCE_BADGE[s].label}
@@ -492,18 +548,110 @@ export default function EmployeeProfilePage() {
                 ))}
               </div>
             </div>
-            <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4 text-sm text-gray-500 dark:text-gray-400">
-              Detailed compliance checks (police checks, WWCC, NDIS screening, visa) will appear here once the Compliance module is enabled.
+
+            {/* Screening records */}
+            <div>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">Screening Checks</p>
+              {!screeningLoaded ? (
+                <p className="text-sm text-gray-400">Loading…</p>
+              ) : screening.length === 0 ? (
+                <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-6 text-center">
+                  <p className="text-3xl mb-2">🔒</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No screening records yet</p>
+                  <a href="/tenant/compliance" className="mt-2 inline-block text-xs text-blue-500 hover:underline">
+                    Add via Compliance module →
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {screening.map(sr => {
+                    const statusStyle: Record<string, string> = {
+                      green:'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400',
+                      amber:'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
+                      red:'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
+                      pending:'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+                    }
+                    return (
+                      <div key={sr.id} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{sr.checkType}</p>
+                          <div className="flex flex-wrap gap-2 mt-0.5 text-xs text-gray-400">
+                            {sr.referenceNumber && <span>Ref: {sr.referenceNumber}</span>}
+                            {sr.issuedDate && <span>Issued: {fmt(sr.issuedDate)}</span>}
+                            {sr.expiryDate && <span>Expires: {fmt(sr.expiryDate)}</span>}
+                          </div>
+                        </div>
+                        <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${statusStyle[sr.status] ?? statusStyle.pending}`}>
+                          {sr.status.charAt(0).toUpperCase() + sr.status.slice(1)}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {tab === 'Documents' && (
-          <div className="text-center py-10">
-            <span className="text-4xl">📄</span>
-            <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-              Employee documents will appear here once the Document Management module is enabled.
-            </p>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Employee Documents</p>
+              <a
+                href="/tenant/documents"
+                className="text-xs text-blue-500 hover:underline"
+              >
+                Manage in Documents module →
+              </a>
+            </div>
+            {!docsLoaded ? (
+              <p className="text-sm text-gray-400">Loading…</p>
+            ) : docs.length === 0 ? (
+              <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-6 text-center">
+                <p className="text-3xl mb-2">📄</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">No documents uploaded for this employee</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {docs.map(doc => {
+                  const statusStyle: Record<string, string> = {
+                    active:'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400',
+                    expired:'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
+                    archived:'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+                    pending_review:'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
+                  }
+                  const size = doc.fileSizeBytes ? `${(doc.fileSizeBytes / 1024).toFixed(0)} KB` : ''
+                  return (
+                    <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                      <span className="text-2xl shrink-0">
+                        {doc.mimeType?.includes('pdf') ? '📄' : doc.mimeType?.includes('image') ? '🖼' : '📎'}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{doc.title}</p>
+                        <div className="flex gap-2 mt-0.5 text-xs text-gray-400">
+                          <span>{doc.category}</span>
+                          {size && <span>{size}</span>}
+                          {doc.expiryDate && <span>Expires: {fmt(doc.expiryDate)}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyle[doc.status] ?? statusStyle.active}`}>
+                          {doc.status.replace('_', ' ')}
+                        </span>
+                        <a
+                          href={doc.blobUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-500 hover:underline"
+                        >
+                          View
+                        </a>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         )}
 

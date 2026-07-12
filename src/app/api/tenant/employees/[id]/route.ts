@@ -39,11 +39,13 @@ export async function GET(_: NextRequest, ctx: Ctx) {
         endDate:             employees.endDate,
         isActive:            employees.isActive,
         complianceStatus:    employees.complianceStatus,
-        ndisWorker:          employees.ndisWorker,
-        createdAt:           employees.createdAt,
-        updatedAt:           employees.updatedAt,
-        departmentName:      departments.name,
-        positionTitle:       positions.title,
+        ndisWorker:           employees.ndisWorker,
+        annualSalary:         employees.annualSalary,
+        ordinaryHoursPerWeek: employees.ordinaryHoursPerWeek,
+        createdAt:            employees.createdAt,
+        updatedAt:            employees.updatedAt,
+        departmentName:       departments.name,
+        positionTitle:        positions.title,
       })
       .from(employees)
       .leftJoin(departments, eq(employees.departmentId, departments.id))
@@ -74,6 +76,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
       'employmentType','awardClassification','payLevel',
       'startDate','probationEndDate','endDate',
       'isActive','complianceStatus','ndisWorker',
+      'annualSalary','ordinaryHoursPerWeek',
     ]
     const updates: Record<string, unknown> = { updatedAt: new Date() }
     for (const key of allowed) {

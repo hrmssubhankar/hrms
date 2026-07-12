@@ -11,13 +11,15 @@ export async function GET(req: NextRequest) {
     const { session } = guard
 
     const { searchParams } = req.nextUrl
-    const status    = searchParams.get('status')
-    const checkType = searchParams.get('checkType')
-    const search    = searchParams.get('search') ?? ''
+    const status     = searchParams.get('status')
+    const checkType  = searchParams.get('checkType')
+    const employeeId = searchParams.get('employeeId')
+    const search     = searchParams.get('search') ?? ''
 
     const conditions = [eq(screeningRecords.tenantId, session.tenantId)]
-    if (status)    conditions.push(eq(screeningRecords.status, status as any))
-    if (checkType) conditions.push(eq(screeningRecords.checkType, checkType))
+    if (status)     conditions.push(eq(screeningRecords.status, status as any))
+    if (checkType)  conditions.push(eq(screeningRecords.checkType, checkType))
+    if (employeeId) conditions.push(eq(screeningRecords.employeeId, employeeId))
 
     const records = await db
       .select({
