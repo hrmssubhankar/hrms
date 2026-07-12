@@ -99,9 +99,11 @@ export default async function TenantLayout({ children }: { children: React.React
   const userRole    = session?.userRole ?? 'employee'
 
   // Build nav items from enabled module IDs (skip Dashboard — always shown separately)
+  // Deduplicate by key so sub-modules that share a route (e.g. compliance 6/7/8) appear once
   const navItems = Object.entries(MODULE_ROUTES)
     .filter(([id]) => enabledModuleIds.includes(Number(id)) && Number(id) !== 1)
     .map(([, { key, label }]) => ({ key, label }))
+    .filter((item, idx, arr) => arr.findIndex(x => x.key === item.key) === idx)
 
   return (
     <>

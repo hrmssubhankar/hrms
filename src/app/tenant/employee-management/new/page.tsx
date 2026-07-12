@@ -40,6 +40,7 @@ export default function NewEmployeePage() {
   const [positions,   setPositions]   = useState<Pos[]>([])
   const [saving,      setSaving]      = useState(false)
   const [error,       setError]       = useState('')
+  const [tenantName,  setTenantName]  = useState<string>('')
 
   const [form, setForm] = useState({
     firstName: '', lastName: '', preferredName: '',
@@ -55,9 +56,14 @@ export default function NewEmployeePage() {
     Promise.all([
       fetch('/api/tenant/departments').then(r => r.json()),
       fetch('/api/tenant/positions').then(r => r.json()),
-    ]).then(([d, p]) => {
+      fetch('/api/tenant/config').then(r => r.json()),
+    ]).then(([d, p, cfg]) => {
       setDepartments(d.departments ?? [])
       setPositions(p.positions ?? [])
+      const name = cfg?.tenant?.name ?? ''
+      setTenantName(name)
+      // Pre-select the entity so users don't have to pick it
+      if (name) setForm(f => ({ ...f, entityName: name }))
     }).catch(() => {})
   }, [])
 
@@ -173,8 +179,7 @@ export default function NewEmployeePage() {
           <FIELD label="Entity" required>
             <select required value={form.entityName} onChange={e => set('entityName', e.target.value)} className={SELECT_CLS}>
               <option value="">Select entity…</option>
-              <option value="Yahweh Care Pty Ltd">Yahweh Care Pty Ltd</option>
-              <option value="Yahweh Property Care Pty Ltd">Yahweh Property Care Pty Ltd</option>
+              {tenantName && <option value={tenantName}>{tenantName}</option>}
             </select>
           </FIELD>
           <FIELD label="Employment Type" required>
