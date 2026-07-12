@@ -120,8 +120,9 @@ export default function TenantSidebar({
         <div className="pt-3 mt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <p className="px-3 pb-1.5 text-xs font-medium uppercase tracking-widest opacity-30">My Portal</p>
           {[
-            { key: 'my-profile',  label: '👤 My Profile' },
-            { key: 'my-payslips', label: '💵 My Payslips' },
+            { key: 'my-profile',   label: '👤 My Profile' },
+            { key: 'my-payslips',  label: '💵 My Payslips' },
+            { key: 'my-documents', label: '📂 My Documents' },
           ].map(({ key, label }) => {
             const active = isActive(key)
             return (

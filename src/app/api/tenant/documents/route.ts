@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { documents, employees } from '@/lib/db/schema'
-import { eq, and, desc, lt } from 'drizzle-orm'
+import { eq, and, desc, gte, lte } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
 export async function GET(req: NextRequest) {
@@ -15,10 +15,19 @@ export async function GET(req: NextRequest) {
     const status     = searchParams.get('status')
     const employeeId = searchParams.get('employeeId')
 
+    const expiring = searchParams.get('expiring') // '1' = expiring in 30 days
+
+    const today = new Date().toISOString().split('T')[0]
+    const in30  = new Date(Date.now() + 30 * 864e5).toISOString().split('T')[0]
+
     const conditions = [eq(documents.tenantId, session.tenantId)]
     if (category)   conditions.push(eq(documents.category, category))
     if (status)     conditions.push(eq(documents.status, status as 'active' | 'expired' | 'archived' | 'pending_review'))
     if (employeeId) conditions.push(eq(documents.employeeId, employeeId))
+    if (expiring === '1') {
+      conditions.push(gte(documents.expiryDate, today))
+      conditions.push(lte(documents.expiryDate, in30))
+    }
 
     const rows = await db
       .select({
@@ -48,9 +57,6 @@ export async function GET(req: NextRequest) {
       .select({ status: documents.status, expiryDate: documents.expiryDate, category: documents.category })
       .from(documents)
       .where(eq(documents.tenantId, session.tenantId))
-
-    const today = new Date().toISOString().split('T')[0]
-    const in30  = new Date(Date.now() + 30 * 864e5).toISOString().split('T')[0]
 
     const stats = {
       total:        all.length,
@@ -130,5 +136,25 @@ export async function PATCH(req: NextRequest) {
   } catch (err) {
     console.error('PATCH /api/tenant/documents', err)
     return NextResponse.json({ error: 'Failed to update document' }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const guard = await apiGuard('documents:write')
+    if (guard.error) return guard.error
+    const { session } = guard
+
+    const { searchParams } = req.nextUrl
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+    await db.delete(documents)
+      .where(and(eq(documents.id, id), eq(documents.tenantId, session.tenantId)))
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('DELETE /api/tenant/documents', err)
+    return NextResponse.json({ error: 'Failed to delete document' }, { status: 500 })
   }
 }
