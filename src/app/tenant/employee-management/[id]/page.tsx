@@ -61,8 +61,19 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-const TABS = ['Overview', 'Employment', 'Compliance', 'Documents', 'Training'] as const
+const TABS = ['Overview', 'Employment', 'Emergency Contacts', 'Compliance', 'Documents', 'Training'] as const
 type Tab = typeof TABS[number]
+
+type EmergencyContact = {
+  id: string
+  name: string
+  relationship: string | null
+  phone: string | null
+  email: string | null
+  isPrimary: boolean
+}
+
+const BLANK_CONTACT = { name: '', relationship: '', phone: '', email: '', isPrimary: false }
 
 export default function EmployeeProfilePage() {
   const { id }   = useParams<{ id: string }>()
@@ -73,12 +84,77 @@ export default function EmployeeProfilePage() {
   const [saving,  setSaving] = useState(false)
   const [msg,     setMsg]    = useState('')
 
+  // Emergency contacts state
+  const [contacts,      setContacts]      = useState<EmergencyContact[]>([])
+  const [contactsLoaded, setContactsLoaded] = useState(false)
+  const [showContactForm, setShowContactForm] = useState(false)
+  const [editingContact,  setEditingContact]  = useState<EmergencyContact | null>(null)
+  const [contactForm,    setContactForm]    = useState(BLANK_CONTACT)
+  const [contactSaving,  setContactSaving]  = useState(false)
+  const [contactError,   setContactError]   = useState('')
+  const [deletingContact, setDeletingContact] = useState<string | null>(null)
+
   useEffect(() => {
     fetch(`/api/tenant/employees/${id}`)
       .then(r => r.json())
       .then(d => { setEmp(d.employee ?? null); setLoading(false) })
       .catch(() => setLoading(false))
   }, [id])
+
+  // Load emergency contacts when that tab is first opened
+  useEffect(() => {
+    if (tab === 'Emergency Contacts' && !contactsLoaded) {
+      fetch(`/api/tenant/employees/${id}/emergency-contacts`)
+        .then(r => r.json())
+        .then(d => { setContacts(d.contacts ?? []); setContactsLoaded(true) })
+        .catch(() => setContactsLoaded(true))
+    }
+  }, [tab, id, contactsLoaded])
+
+  function openAddContact() {
+    setEditingContact(null)
+    setContactForm(BLANK_CONTACT)
+    setContactError('')
+    setShowContactForm(true)
+  }
+
+  function openEditContact(c: EmergencyContact) {
+    setEditingContact(c)
+    setContactForm({ name: c.name, relationship: c.relationship ?? '', phone: c.phone ?? '', email: c.email ?? '', isPrimary: c.isPrimary })
+    setContactError('')
+    setShowContactForm(true)
+  }
+
+  async function saveContact(e: React.FormEvent) {
+    e.preventDefault()
+    setContactSaving(true)
+    setContactError('')
+    try {
+      const payload = { ...contactForm, relationship: contactForm.relationship || null, phone: contactForm.phone || null, email: contactForm.email || null }
+      const res = editingContact
+        ? await fetch(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contactId: editingContact.id, ...payload }) })
+        : await fetch(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'POST',  headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      if (!res.ok) { const d = await res.json(); setContactError(d.error ?? 'Failed to save'); return }
+      // Refresh list
+      const refreshed = await fetch(`/api/tenant/employees/${id}/emergency-contacts`).then(r => r.json())
+      setContacts(refreshed.contacts ?? [])
+      setShowContactForm(false)
+    } catch {
+      setContactError('Network error — please try again.')
+    } finally {
+      setContactSaving(false)
+    }
+  }
+
+  async function deleteContact(contactId: string) {
+    setDeletingContact(contactId)
+    try {
+      await fetch(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contactId }) })
+      setContacts(prev => prev.filter(c => c.id !== contactId))
+    } finally {
+      setDeletingContact(null)
+    }
+  }
 
   async function toggleActive() {
     if (!emp) return
@@ -255,6 +331,140 @@ export default function EmployeeProfilePage() {
             <Row label="Probation End"    value={emp.probationEndDate ? fmt(emp.probationEndDate) : '—'} />
             {emp.endDate && <Row label="End Date" value={fmt(emp.endDate)} />}
             <Row label="NDIS Worker"      value={emp.ndisWorker ? '✅ Yes' : 'No'} />
+          </div>
+        )}
+
+        {tab === 'Emergency Contacts' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500 dark:text-gray-400">People to contact in an emergency</p>
+              <button
+                onClick={openAddContact}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium text-white transition hover:opacity-90"
+                style={{ background: 'var(--primary)' }}
+              >
+                + Add Contact
+              </button>
+            </div>
+
+            {/* Add/Edit modal */}
+            {showContactForm && (
+              <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                <form
+                  onSubmit={saveContact}
+                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {editingContact ? 'Edit Contact' : 'Add Emergency Contact'}
+                    </h3>
+                    <button type="button" onClick={() => setShowContactForm(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name *</label>
+                    <input required value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-400"
+                      placeholder="e.g. John Smith" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Relationship</label>
+                    <input value={contactForm.relationship} onChange={e => setContactForm(f => ({ ...f, relationship: e.target.value }))}
+                      className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-400"
+                      placeholder="e.g. Spouse, Parent, Sibling" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                      <input value={contactForm.phone} onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))}
+                        className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-400"
+                        placeholder="+61 4xx xxx xxx" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                      <input type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
+                        className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-400"
+                        placeholder="john@example.com" />
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={contactForm.isPrimary} onChange={e => setContactForm(f => ({ ...f, isPrimary: e.target.checked }))}
+                      className="w-4 h-4 rounded accent-blue-600" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Primary emergency contact</span>
+                  </label>
+
+                  {contactError && (
+                    <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+                      ⚠ {contactError}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-1">
+                    <button type="submit" disabled={contactSaving}
+                      className="flex-1 py-2 rounded-lg text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                      style={{ background: 'var(--primary)' }}>
+                      {contactSaving ? 'Saving…' : editingContact ? 'Save Changes' : 'Add Contact'}
+                    </button>
+                    <button type="button" onClick={() => setShowContactForm(false)}
+                      className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Contact list */}
+            {!contactsLoaded ? (
+              <p className="text-sm text-gray-400 py-4">Loading…</p>
+            ) : contacts.length === 0 ? (
+              <div className="text-center py-10 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                <p className="text-3xl mb-2">📞</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">No emergency contacts added yet</p>
+                <button onClick={openAddContact} className="mt-3 text-sm font-medium text-blue-500 hover:text-blue-700">
+                  + Add first contact
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {contacts.map(c => (
+                  <div key={c.id} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                      style={{ background: 'var(--primary)' }}
+                    >
+                      {c.name[0]?.toUpperCase() ?? '?'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-gray-900 dark:text-white">{c.name}</p>
+                        {c.isPrimary && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-medium">Primary</span>
+                        )}
+                        {c.relationship && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{c.relationship}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {c.phone && <span>📞 {c.phone}</span>}
+                        {c.email && <span>✉ {c.email}</span>}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button onClick={() => openEditContact(c)} className="text-xs text-gray-400 hover:text-blue-500 transition px-1" title="Edit">✏</button>
+                      <button
+                        onClick={() => deleteContact(c.id)}
+                        disabled={deletingContact === c.id}
+                        className="text-xs text-gray-400 hover:text-red-500 disabled:opacity-40 transition px-1"
+                        title="Delete"
+                      >
+                        {deletingContact === c.id ? '…' : '🗑'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
