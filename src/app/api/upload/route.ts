@@ -67,8 +67,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const blob = await put(blobKey, file, {
-      access:      'public',
-      contentType: mimeType,
+      access:           'public',
+      contentType:      mimeType,
+      addRandomSuffix:  false,   // we already embed timestamp+rand in blobKey
     })
 
     return NextResponse.json({
