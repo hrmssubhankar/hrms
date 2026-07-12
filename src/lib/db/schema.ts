@@ -99,6 +99,9 @@ export const employees = pgTable('employees', {
   employmentType:   employmentTypeEnum('employment_type').notNull(),
   awardClassification: varchar('award_classification', { length: 100 }),
   payLevel:         varchar('pay_level', { length: 50 }),
+  hourlyRate:       decimal('hourly_rate', { precision: 10, scale: 4 }),
+  annualSalary:     decimal('annual_salary', { precision: 12, scale: 2 }),
+  ordinaryHoursPerWeek: decimal('ordinary_hours_per_week', { precision: 5, scale: 2 }).default('38'),
   startDate:        date('start_date').notNull(),
   probationEndDate: date('probation_end_date'),
   endDate:          date('end_date'),
@@ -619,8 +622,17 @@ export const payrollRecords = pgTable('payroll_records', {
   employeeId:       uuid('employee_id').notNull().references(() => employees.id),
   periodStart:      date('period_start').notNull(),
   periodEnd:        date('period_end').notNull(),
+  // Pay inputs
+  hoursWorked:      decimal('hours_worked', { precision: 8, scale: 2 }),
+  hourlyRate:       decimal('hourly_rate', { precision: 10, scale: 4 }),
+  // Calculated amounts
   grossPay:         decimal('gross_pay', { precision: 10, scale: 2 }),
+  paygWithholding:  decimal('payg_withholding', { precision: 10, scale: 2 }),
+  medicareLevy:     decimal('medicare_levy', { precision: 10, scale: 2 }),
+  superContribution:decimal('super_contribution', { precision: 10, scale: 2 }),
   netPay:           decimal('net_pay', { precision: 10, scale: 2 }),
+  // Full breakdown stored as JSON (allowances, deductions, leave loadings, etc.)
+  payslipData:      jsonb('payslip_data').default({}),
   status:           varchar('status', { length: 50 }).notNull().default('pending'),
   exportedToXero:   boolean('exported_to_xero').notNull().default(false),
   exportedAt:       timestamp('exported_at'),
