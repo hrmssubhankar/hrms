@@ -143,8 +143,10 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathname.startsWith('/tenant') || pathname.startsWith('/api/tenant')) {
-      const res = NextResponse.next()
-      res.headers.set('x-tenant-slug', tenantSlug)
+      // Forward tenantSlug as a REQUEST header so Server Components can read it via headers()
+      const reqHeaders = new Headers(request.headers)
+      reqHeaders.set('x-tenant-slug', tenantSlug)
+      const res = NextResponse.next({ request: { headers: reqHeaders } })
       // Refresh the cookie so it stays alive across navigation
       res.cookies.set('tenant_slug', tenantSlug, {
         path: '/', httpOnly: false, sameSite: 'lax',
@@ -156,8 +158,9 @@ export async function middleware(request: NextRequest) {
 
     const url = request.nextUrl.clone()
     url.pathname = `/tenant${pathname === '/' ? '/dashboard' : pathname}`
-    const res = NextResponse.rewrite(url)
-    res.headers.set('x-tenant-slug', tenantSlug)
+    const reqHeaders = new Headers(request.headers)
+    reqHeaders.set('x-tenant-slug', tenantSlug)
+    const res = NextResponse.rewrite(url, { request: { headers: reqHeaders } })
     res.cookies.set('tenant_slug', tenantSlug, { path: '/', httpOnly: false, maxAge: 60 * 60 * 8 })
     return res
   }
