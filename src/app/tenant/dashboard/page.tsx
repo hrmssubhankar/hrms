@@ -1,4 +1,4 @@
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 import { getSession } from '@/lib/auth/session'
 import { db } from '@/lib/db'
 import {
@@ -56,10 +56,17 @@ function greeting() {
 
 export default async function TenantDashboard() {
   const headersList = await headers()
-  const tenantSlug  = headersList.get('x-tenant-slug') ?? 'default'
+  const cookieStore = await cookies()
+  const tenantSlug  =
+    headersList.get('x-tenant-slug') ??
+    cookieStore.get('tenant_slug')?.value ??
+    process.env.NEXT_PUBLIC_TENANT_SLUG ??
+    'default'
 
-  const [tenantRow] = await db.select().from(tenants).where(eq(tenants.slug, tenantSlug))
-  const session = await getSession()
+  const [[tenantRow], session] = await Promise.all([
+    db.select().from(tenants).where(eq(tenants.slug, tenantSlug)),
+    getSession(),
+  ])
 
   if (!tenantRow || !session?.tenantId) {
     return <p className="text-gray-400 p-8">Unable to load dashboard.</p>
@@ -68,6 +75,14 @@ export default async function TenantDashboard() {
   const tid   = tenantRow.id
   const today = new Date().toISOString().split('T')[0]
   const in30  = new Date(Date.now() + 30 * 864e5).toISOString().split('T')[0]
+
+  // Wrap stats in try/catch — some tables (supervision, grievances, timesheets, payroll)
+  // may not exist in all DB environments yet; default to 0 if they error.
+  const safe = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
+    try { return await fn() } catch { return fallback }
+  }
+
+  const zero = [{ total: 0 }]
 
   const [
     [{ total: totalEmployees }],
@@ -78,42 +93,42 @@ export default async function TenantDashboard() {
     [{ total: pendingPayroll }],
     recentActivity,
   ] = await Promise.all([
-    db.select({ total: count() })
+    safe(() => db.select({ total: count() })
       .from(employees)
-      .where(and(eq(employees.tenantId, tid), eq(employees.isActive, true))),
+      .where(and(eq(employees.tenantId, tid), eq(employees.isActive, true))), zero),
 
-    db.select({ total: count() })
+    safe(() => db.select({ total: count() })
       .from(screeningRecords)
       .where(and(
         eq(screeningRecords.tenantId, tid),
         sql`${screeningRecords.expiryDate} <= ${in30}`,
         ne(screeningRecords.status, 'green' as const),
-      )),
+      )), zero),
 
-    db.select({ total: count() })
+    safe(() => db.select({ total: count() })
       .from(supervisionRecords)
       .where(and(
         eq(supervisionRecords.tenantId, tid),
         eq(supervisionRecords.status, 'scheduled'),
         lt(supervisionRecords.scheduledDate, today),
-      )),
+      )), zero),
 
-    db.select({ total: count() })
+    safe(() => db.select({ total: count() })
       .from(grievances)
       .where(and(
         eq(grievances.tenantId, tid),
         ne(grievances.status, 'closed'),
-      )),
+      )), zero),
 
-    db.select({ total: count() })
+    safe(() => db.select({ total: count() })
       .from(timesheets)
-      .where(and(eq(timesheets.tenantId, tid), eq(timesheets.status, 'pending'))),
+      .where(and(eq(timesheets.tenantId, tid), eq(timesheets.status, 'pending'))), zero),
 
-    db.select({ total: count() })
+    safe(() => db.select({ total: count() })
       .from(payrollRecords)
-      .where(and(eq(payrollRecords.tenantId, tid), eq(payrollRecords.status, 'pending'))),
+      .where(and(eq(payrollRecords.tenantId, tid), eq(payrollRecords.status, 'pending'))), zero),
 
-    db.select({
+    safe(() => db.select({
       id:        auditLogs.id,
       action:    auditLogs.action,
       resource:  auditLogs.resource,
@@ -124,7 +139,7 @@ export default async function TenantDashboard() {
       .leftJoin(users, eq(auditLogs.userId, users.id))
       .where(eq(auditLogs.tenantId, tid))
       .orderBy(sql`${auditLogs.createdAt} desc`)
-      .limit(8),
+      .limit(8), []),
   ])
 
   const tenantName   = tenantRow.name
