@@ -1,52 +1,71 @@
-import { headers, cookies } from 'next/headers'
-import { getSession } from '@/lib/auth/session'
-import { db } from '@/lib/db'
-import {
-  tenants, tenantModules, employees, screeningRecords,
-  supervisionRecords, grievances, timesheets, payrollRecords, auditLogs, users,
-} from '@/lib/db/schema'
-import { eq, and, ne, count, lt, sql } from 'drizzle-orm'
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
-
-const MODULE_SHORTCUTS = [
-  { key: 'employee-management', icon: '👥', label: 'Employees',   desc: 'View & manage staff' },
-  { key: 'compliance',          icon: '🔒', label: 'Compliance',  desc: 'Screening & tracking' },
-  { key: 'onboarding',          icon: '🎉', label: 'Onboarding',  desc: 'New starter checklist' },
-  { key: 'training',            icon: '📚', label: 'Training',    desc: 'Courses & records' },
-  { key: 'performance',         icon: '📈', label: 'Performance', desc: 'Reviews & goals' },
-  { key: 'recruitment',         icon: '🔍', label: 'Recruitment', desc: 'Jobs & candidates' },
-  { key: 'rostering',           icon: '🕐', label: 'Rostering',   desc: 'Shifts & timesheets' },
-  { key: 'payroll',             icon: '💰', label: 'Payroll',     desc: 'Pay runs & Xero' },
-  { key: 'whs',                 icon: '🦺', label: 'Safety',      desc: 'WHS incidents' },
-  { key: 'documents',           icon: '📄', label: 'Documents',   desc: 'Upload & manage docs' },
-  { key: 'analytics',           icon: '📊', label: 'Analytics',   desc: 'Reports & insights' },
-  { key: 'contracts',           icon: '📝', label: 'Contracts',   desc: 'Employment contracts' },
-]
-
-const QUICK_ACTIONS = [
-  { label: '+ Add Employee',     href: '/tenant/employee-management/new' },
-  { label: '📋 Log Timesheet',   href: '/tenant/rostering' },
-  { label: '🔍 New Job',         href: '/tenant/recruitment' },
-  { label: '📄 Upload Document', href: '/tenant/documents' },
-]
-
-const ACTION_COLOUR = [
-  'bg-blue-900/30 text-blue-300 border-blue-800 hover:bg-blue-900/50',
-  'bg-purple-900/30 text-purple-300 border-purple-800 hover:bg-purple-900/50',
-  'bg-teal-900/30 text-teal-300 border-teal-800 hover:bg-teal-900/50',
-  'bg-amber-900/30 text-amber-300 border-amber-800 hover:bg-amber-900/50',
-]
-
-const ACTION_LABEL_COLOUR: Record<string, string> = {
-  create: 'text-green-400',
-  update: 'text-blue-400',
-  delete: 'text-red-400',
-  login:  'text-purple-400',
-  export: 'text-amber-400',
+// ── Types ─────────────────────────────────────────────────────────────────────
+type DashboardData = {
+  headcount: {
+    total: number
+    active: number
+    byEntity: { name: string; count: number }[]
+    byEmploymentType: { type: string; count: number }[]
+    newThisMonth: number
+    leavingThisMonth: number
+  }
+  payroll: {
+    lastRunPeriodStart: string | null
+    lastRunPeriodEnd:   string | null
+    lastRunCount:       number
+    lastRunGross:       string
+    lastRunNet:         string
+    lastRunSuper:       string
+    ytdGross:           string
+    ytdNet:             string
+    ytdSuper:           string
+  }
+  leave: {
+    pendingCount:          number
+    approvedDaysThisMonth: number
+    approvedDaysThisYear:  number
+  }
+  holidays: {
+    upcoming: { name: string; date: string; country: string }[]
+  }
+  documents: {
+    expiringIn30Days: number
+    expiredActive:    number
+  }
+  incidents: {
+    open:         number
+    openCritical: number
+  }
+  compliance: {
+    redCount:   number
+    amberCount: number
+  }
+  generatedAt: string
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const CURRENCY = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
+
+function fmt(n: string | number) {
+  return CURRENCY.format(typeof n === 'string' ? parseFloat(n) : n)
+}
+function fmtDate(d: string | null) {
+  if (!d) return '—'
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+function fmtHolidayDate(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+function daysUntil(d: string) {
+  const diff = Math.round((new Date(d + 'T00:00:00').getTime() - Date.now()) / 86400000)
+  if (diff === 0) return 'Today'
+  if (diff === 1) return 'Tomorrow'
+  return `in ${diff}d`
+}
 function greeting() {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
@@ -54,204 +73,375 @@ function greeting() {
   return 'Good evening'
 }
 
-export default async function TenantDashboard() {
-  const headersList = await headers()
-  const cookieStore = await cookies()
-  const tenantSlug  =
-    headersList.get('x-tenant-slug') ??
-    cookieStore.get('tenant_slug')?.value ??
-    process.env.NEXT_PUBLIC_TENANT_SLUG ??
-    'default'
+const EMP_TYPE_LABEL: Record<string, string> = {
+  full_time: 'Full-Time', part_time: 'Part-Time', casual: 'Casual',
+  contractor: 'Contractor', volunteer: 'Volunteer',
+}
+const EMP_TYPE_COLOR: Record<string, string> = {
+  full_time: '#8b5cf6', part_time: '#06b6d4', casual: '#f59e0b',
+  contractor: '#10b981', volunteer: '#64748b',
+}
+const ENTITY_COLORS = ['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ef4444']
 
-  const [[tenantRow], session] = await Promise.all([
-    db.select().from(tenants).where(eq(tenants.slug, tenantSlug)),
-    getSession(),
-  ])
+const MODULE_SHORTCUTS = [
+  { key: 'employees',       icon: '👥', label: 'Employees',   desc: 'View & manage staff' },
+  { key: 'leave',           icon: '🏖', label: 'Leave',       desc: 'Requests & balances' },
+  { key: 'payroll',         icon: '💰', label: 'Payroll',     desc: 'Pay runs & exports' },
+  { key: 'documents',       icon: '📄', label: 'Documents',   desc: 'Upload & manage docs' },
+  { key: 'whs',             icon: '⚠️', label: 'WHS',         desc: 'Incidents & hazards' },
+  { key: 'public-holidays', icon: '📅', label: 'Holidays',    desc: 'Public holiday calendar' },
+  { key: 'training',        icon: '📚', label: 'Training',    desc: 'Courses & records' },
+  { key: 'recruitment',     icon: '🔍', label: 'Recruitment', desc: 'Jobs & candidates' },
+  { key: 'rostering',       icon: '🕐', label: 'Rostering',   desc: 'Shifts & timesheets' },
+  { key: 'onboarding',      icon: '🎉', label: 'Onboarding',  desc: 'New starter checklist' },
+  { key: 'settings',        icon: '⚙',  label: 'Settings',    desc: 'Tenant configuration' },
+  { key: 'audit-logs',      icon: '📋', label: 'Audit Log',   desc: 'System activity' },
+]
 
-  if (!tenantRow || !session?.tenantId) {
-    return <p className="text-gray-400 p-8">Unable to load dashboard.</p>
+// ── Mini bar chart ────────────────────────────────────────────────────────────
+function MiniBar({ items }: { items: { label: string; value: number; color: string }[] }) {
+  const max = Math.max(...items.map(i => i.value), 1)
+  return (
+    <div className="space-y-2.5">
+      {items.map(item => (
+        <div key={item.label} className="flex items-center gap-3">
+          <span className="text-xs text-gray-500 w-28 shrink-0 truncate">{item.label}</span>
+          <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${Math.max(4, (item.value / max) * 100)}%`, background: item.color }}
+            />
+          </div>
+          <span className="text-xs font-semibold text-white w-8 text-right">{item.value}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+export default function DashboardPage() {
+  const [data,    setData]    = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState<string | null>(null)
+  const [userName, setUserName] = useState('')
+  const [tenantName, setTenantName] = useState('')
+  const [primaryColor, setPrimaryColor] = useState('#6d28d9')
+
+  useEffect(() => {
+    // Load user info for greeting
+    fetch('/api/auth/me').then(r => r.json()).then(d => {
+      const email = d.email ?? ''
+      setUserName(email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()))
+    }).catch(() => {})
+
+    fetch('/api/tenant/config').then(r => r.json()).then(d => {
+      setTenantName(d.name ?? '')
+      setPrimaryColor(d.primaryColor ?? '#6d28d9')
+    }).catch(() => {})
+
+    loadDashboard()
+  }, [])
+
+  function loadDashboard() {
+    setLoading(true)
+    fetch('/api/tenant/dashboard')
+      .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json() })
+      .then(d => { setData(d); setError(null) })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
   }
 
-  const tid   = tenantRow.id
-  const today = new Date().toISOString().split('T')[0]
-  const in30  = new Date(Date.now() + 30 * 864e5).toISOString().split('T')[0]
-
-  // Wrap stats in try/catch — some tables (supervision, grievances, timesheets, payroll)
-  // may not exist in all DB environments yet; default to 0 if they error.
-  const safe = async <T,>(fn: () => Promise<T>, fallback: T): Promise<T> => {
-    try { return await fn() } catch { return fallback }
-  }
-
-  const zero = [{ total: 0 }]
-
-  const [
-    [{ total: totalEmployees }],
-    [{ total: redScreenings }],
-    [{ total: overdueSupervision }],
-    [{ total: openGrievances }],
-    [{ total: pendingTimesheets }],
-    [{ total: pendingPayroll }],
-    recentActivity,
-  ] = await Promise.all([
-    safe(() => db.select({ total: count() })
-      .from(employees)
-      .where(and(eq(employees.tenantId, tid), eq(employees.isActive, true))), zero),
-
-    safe(() => db.select({ total: count() })
-      .from(screeningRecords)
-      .where(and(
-        eq(screeningRecords.tenantId, tid),
-        sql`${screeningRecords.expiryDate} <= ${in30}`,
-        ne(screeningRecords.status, 'green' as const),
-      )), zero),
-
-    safe(() => db.select({ total: count() })
-      .from(supervisionRecords)
-      .where(and(
-        eq(supervisionRecords.tenantId, tid),
-        eq(supervisionRecords.status, 'scheduled'),
-        lt(supervisionRecords.scheduledDate, today),
-      )), zero),
-
-    safe(() => db.select({ total: count() })
-      .from(grievances)
-      .where(and(
-        eq(grievances.tenantId, tid),
-        ne(grievances.status, 'closed'),
-      )), zero),
-
-    safe(() => db.select({ total: count() })
-      .from(timesheets)
-      .where(and(eq(timesheets.tenantId, tid), eq(timesheets.status, 'pending'))), zero),
-
-    safe(() => db.select({ total: count() })
-      .from(payrollRecords)
-      .where(and(eq(payrollRecords.tenantId, tid), eq(payrollRecords.status, 'pending'))), zero),
-
-    safe(() => db.select({
-      id:        auditLogs.id,
-      action:    auditLogs.action,
-      resource:  auditLogs.resource,
-      createdAt: auditLogs.createdAt,
-      userEmail: users.email,
-    })
-      .from(auditLogs)
-      .leftJoin(users, eq(auditLogs.userId, users.id))
-      .where(eq(auditLogs.tenantId, tid))
-      .orderBy(sql`${auditLogs.createdAt} desc`)
-      .limit(8), []),
-  ])
-
-  const tenantName   = tenantRow.name
-  const primaryColor = tenantRow.primaryColor ?? '#6d28d9'
-  const userEmail    = session.email ?? ''
-  const firstName    = userEmail.split('@')[0]
-    .replace(/[._-]/g, ' ')
-    .replace(/\b\w/g, (c: string) => c.toUpperCase())
-
-  const stats = [
-    { label: 'Active Employees',     value: totalEmployees,    icon: '👥', color: 'text-blue-400',   href: '/tenant/employee-management' },
-    { label: 'Pending Timesheets',   value: pendingTimesheets, icon: '⏱',  color: 'text-purple-400', href: '/tenant/rostering' },
-    { label: 'Compliance Alerts',    value: redScreenings,     icon: '🔒', color: 'text-amber-400',  href: '/tenant/compliance' },
-    { label: 'Open Grievances',      value: openGrievances,    icon: '⚖️',  color: 'text-red-400',    href: '/tenant/grievances' },
-    { label: 'Overdue Supervisions', value: overdueSupervision,icon: '👁',  color: 'text-orange-400', href: '/tenant/supervision' },
-    { label: 'Payroll Pending',      value: pendingPayroll,    icon: '💰', color: 'text-green-400',  href: '/tenant/payroll' },
-  ]
+  const hasAlerts = data && (
+    data.compliance.redCount > 0 ||
+    data.incidents.openCritical > 0 ||
+    data.documents.expiredActive > 0
+  )
 
   return (
-    <div className="space-y-7 max-w-6xl">
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
 
       {/* Welcome banner */}
       <div
         className="rounded-2xl p-6 text-white relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}99)` }}
+        style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}aa)` }}
       >
         <div className="relative z-10">
           <p className="text-sm font-medium opacity-80">{greeting()},</p>
-          <h1 className="text-2xl font-bold mt-0.5">{firstName} 👋</h1>
-          <p className="text-sm opacity-70 mt-1">{tenantName} · HR Portal</p>
+          <h1 className="text-2xl font-bold mt-0.5">{userName || '…'} 👋</h1>
+          <p className="text-sm opacity-70 mt-1">{tenantName || 'HRMS'} · HR Portal</p>
         </div>
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-white" />
         <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full opacity-10 bg-white" />
-      </div>
-
-      {/* Live stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        {stats.map(s => (
-          <Link key={s.label} href={s.href}
-            className="bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-4 transition group">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">{s.icon}</span>
-              <p className="text-xs text-gray-500 group-hover:text-gray-400 transition">{s.label}</p>
-            </div>
-            <p className={`text-3xl font-bold ${s.color}`}>{Number(s.value)}</p>
-          </Link>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Module shortcuts */}
-        <div className="lg:col-span-2 space-y-3">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Modules</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {MODULE_SHORTCUTS.map(m => (
-              <Link key={m.key} href={`/tenant/${m.key}`}
-                className="bg-gray-900 border border-gray-800 hover:border-gray-700 hover:bg-gray-800/50 rounded-xl p-3.5 transition group">
-                <span className="text-xl">{m.icon}</span>
-                <p className="text-sm font-semibold text-white mt-2 group-hover:text-purple-300 transition">{m.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{m.desc}</p>
-              </Link>
-            ))}
-          </div>
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          <button onClick={loadDashboard}
+            className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white/80 transition">
+            ↻ Refresh
+          </button>
         </div>
+      </div>
 
-        {/* Right column */}
-        <div className="space-y-4">
+      {/* Alert banner */}
+      {hasAlerts && (
+        <div className="bg-red-950/40 border border-red-700/60 rounded-2xl px-5 py-4 flex flex-wrap gap-4 items-center">
+          <p className="text-sm font-semibold text-red-300 shrink-0">🚨 Attention required</p>
+          {data!.compliance.redCount > 0 && (
+            <Link href="/tenant/employees" className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2">
+              {data!.compliance.redCount} employee{data!.compliance.redCount > 1 ? 's' : ''} — red compliance
+            </Link>
+          )}
+          {data!.incidents.openCritical > 0 && (
+            <Link href="/tenant/whs" className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2">
+              {data!.incidents.openCritical} critical WHS incident{data!.incidents.openCritical > 1 ? 's' : ''}
+            </Link>
+          )}
+          {data!.documents.expiredActive > 0 && (
+            <Link href="/tenant/documents" className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2">
+              {data!.documents.expiredActive} expired document{data!.documents.expiredActive > 1 ? 's' : ''}
+            </Link>
+          )}
+        </div>
+      )}
 
-          {/* Quick actions */}
-          <div>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Quick Actions</h2>
-            <div className="space-y-2">
-              {QUICK_ACTIONS.map((a, i) => (
-                <Link key={a.href} href={a.href}
-                  className={`flex items-center px-4 py-2.5 rounded-xl border text-sm font-medium transition ${ACTION_COLOUR[i]}`}>
-                  {a.label}
-                </Link>
+      {loading && !data && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array(8).fill(0).map((_, i) => (
+            <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 h-28 animate-pulse" />
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
+          <p className="text-gray-500 text-sm">
+            Could not load live stats ({error}). You may not have manager-level access.
+          </p>
+        </div>
+      )}
+
+      {data && (
+        <>
+          {/* ── Headcount stats ── */}
+          <section>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">👥 Workforce</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[
+                { label: 'Total', value: data.headcount.total, color: 'text-white', href: '/tenant/employees' },
+                { label: 'Active', value: data.headcount.active, color: 'text-green-400', href: '/tenant/employees' },
+                { label: 'New This Month', value: data.headcount.newThisMonth, color: 'text-purple-400' },
+                { label: 'Leaving This Month', value: data.headcount.leavingThisMonth, color: data.headcount.leavingThisMonth > 0 ? 'text-amber-400' : 'text-gray-600' },
+                { label: 'Amber Compliance', value: data.compliance.amberCount, color: data.compliance.amberCount > 0 ? 'text-amber-400' : 'text-gray-600', href: '/tenant/employees' },
+                { label: 'Red Compliance', value: data.compliance.redCount, color: data.compliance.redCount > 0 ? 'text-red-400' : 'text-gray-600', href: '/tenant/employees' },
+              ].map(s => (
+                <div key={s.label} className={`bg-gray-900 border rounded-2xl p-5 ${data.compliance.redCount > 0 && s.label === 'Red Compliance' ? 'border-red-800/50' : 'border-gray-800'}`}>
+                  {s.href ? (
+                    <Link href={s.href} className="block">
+                      <p className="text-xs text-gray-500">{s.label}</p>
+                      <p className={`text-3xl font-bold mt-1.5 ${s.color}`}>{s.value}</p>
+                    </Link>
+                  ) : (
+                    <>
+                      <p className="text-xs text-gray-500">{s.label}</p>
+                      <p className={`text-3xl font-bold mt-1.5 ${s.color}`}>{s.value}</p>
+                    </>
+                  )}
+                </div>
               ))}
             </div>
+          </section>
+
+          {/* ── Workforce breakdown ── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+              <h3 className="text-sm font-semibold text-white">By Employment Type</h3>
+              {data.headcount.byEmploymentType.length === 0
+                ? <p className="text-sm text-gray-600">No data yet</p>
+                : <MiniBar items={data.headcount.byEmploymentType.map(e => ({
+                    label: EMP_TYPE_LABEL[e.type] ?? e.type,
+                    value: e.count,
+                    color: EMP_TYPE_COLOR[e.type] ?? '#64748b',
+                  }))} />
+              }
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+              <h3 className="text-sm font-semibold text-white">By Entity</h3>
+              {data.headcount.byEntity.length === 0
+                ? <p className="text-sm text-gray-600">No entity data yet — set entity on employee profiles</p>
+                : <>
+                    <MiniBar items={data.headcount.byEntity.map((e, i) => ({
+                      label: e.name, value: e.count, color: ENTITY_COLORS[i % ENTITY_COLORS.length],
+                    }))} />
+                    <div className="flex flex-wrap gap-3 pt-2 border-t border-gray-800">
+                      {data.headcount.byEntity.map((e, i) => (
+                        <div key={e.name} className="flex items-center gap-1.5 text-xs text-gray-400">
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: ENTITY_COLORS[i % ENTITY_COLORS.length] }} />
+                          {e.name} <span className="text-white font-medium">{e.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+              }
+            </div>
           </div>
 
-          {/* Recent activity */}
-          <div>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recent Activity</h2>
-            <div className="bg-gray-900 border border-gray-800 rounded-xl divide-y divide-gray-800/60 overflow-hidden">
-              {recentActivity.length === 0 ? (
-                <div className="px-4 py-6 text-center">
-                  <p className="text-gray-600 text-sm">No activity yet</p>
+          {/* ── Payroll ── */}
+          <section>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">💰 Payroll</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-white">Last Pay Run</h3>
+                  <Link href="/tenant/payroll" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
                 </div>
-              ) : recentActivity.map(a => (
-                <div key={a.id} className="px-4 py-3">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className={`text-xs font-semibold uppercase ${ACTION_LABEL_COLOUR[a.action] ?? 'text-gray-400'}`}>
-                      {a.action}
-                    </span>
-                    <span className="text-xs text-gray-400 truncate">{a.resource}</span>
+                {data.payroll.lastRunPeriodEnd ? (
+                  <>
+                    <p className="text-xs text-gray-500">
+                      {fmtDate(data.payroll.lastRunPeriodStart)} → {fmtDate(data.payroll.lastRunPeriodEnd)}
+                      <span className="ml-2 text-gray-600">· {data.payroll.lastRunCount} employee{data.payroll.lastRunCount !== 1 ? 's' : ''}</span>
+                    </p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { label: 'Gross', value: data.payroll.lastRunGross, color: 'text-white' },
+                        { label: 'Net',   value: data.payroll.lastRunNet,   color: 'text-green-400' },
+                        { label: 'Super', value: data.payroll.lastRunSuper, color: 'text-purple-400' },
+                      ].map(s => (
+                        <div key={s.label} className="bg-gray-800/60 rounded-xl px-3 py-3">
+                          <p className="text-xs text-gray-500">{s.label}</p>
+                          <p className={`text-sm font-bold mt-0.5 ${s.color}`}>{fmt(s.value)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="py-6 text-center text-gray-600 text-sm">No pay runs yet</div>
+                )}
+              </div>
+
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+                <h3 className="text-sm font-semibold text-white">Year to Date — {new Date().getFullYear()}</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: 'Gross', value: data.payroll.ytdGross, color: 'text-white' },
+                    { label: 'Net',   value: data.payroll.ytdNet,   color: 'text-green-400' },
+                    { label: 'Super', value: data.payroll.ytdSuper, color: 'text-purple-400' },
+                  ].map(s => (
+                    <div key={s.label} className="bg-gray-800/60 rounded-xl px-3 py-3">
+                      <p className="text-xs text-gray-500">{s.label}</p>
+                      <p className={`text-sm font-bold mt-0.5 ${s.color}`}>{fmt(s.value)}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-600">All pay runs from 1 Jan {new Date().getFullYear()}</p>
+              </div>
+            </div>
+          </section>
+
+          {/* ── Leave / Holidays / Documents / WHS ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">🏖 Leave</h3>
+                <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
+              </div>
+              <div className="space-y-2.5">
+                {[
+                  { label: 'Pending approval',     value: data.leave.pendingCount,          alert: data.leave.pendingCount > 0 },
+                  { label: 'Approved this month',  value: `${data.leave.approvedDaysThisMonth}d` },
+                  { label: 'Approved YTD',          value: `${data.leave.approvedDaysThisYear}d` },
+                ].map(r => (
+                  <div key={r.label} className="flex justify-between items-center">
+                    <span className="text-xs text-gray-500">{r.label}</span>
+                    <span className={`text-sm font-bold ${'alert' in r && r.alert ? 'text-yellow-400' : 'text-white'}`}>{r.value}</span>
                   </div>
-                  <p className="text-xs text-gray-600 mt-0.5 truncate">
-                    {a.userEmail ?? 'System'} · {a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-AU') : ''}
-                  </p>
+                ))}
+              </div>
+              {data.leave.pendingCount > 0 && (
+                <Link href="/tenant/leave"
+                  className="block w-full text-center py-2 bg-yellow-900/30 border border-yellow-700/50 text-yellow-400 text-xs rounded-lg hover:bg-yellow-900/50 transition">
+                  Review {data.leave.pendingCount} pending
+                </Link>
+              )}
+            </div>
+
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">📅 Holidays</h3>
+                <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
+              </div>
+              {data.holidays.upcoming.length === 0
+                ? <p className="text-xs text-gray-600">No upcoming holidays on record</p>
+                : <div className="space-y-2.5">
+                    {data.holidays.upcoming.map(h => (
+                      <div key={h.date + h.name} className="flex justify-between gap-2">
+                        <div>
+                          <p className="text-xs text-white font-medium leading-tight">{h.name}</p>
+                          <p className="text-xs text-gray-600">{fmtHolidayDate(h.date)}</p>
+                        </div>
+                        <span className="text-xs text-purple-400 shrink-0 font-medium">{daysUntil(h.date)}</span>
+                      </div>
+                    ))}
+                  </div>
+              }
+            </div>
+
+            <div className={`bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.documents.expiredActive > 0 ? 'border-red-700/40' : 'border-gray-800'}`}>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">📄 Documents</h3>
+                <Link href="/tenant/documents" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-500">Expiring in 30 days</span>
+                  <span className={`text-sm font-bold ${data.documents.expiringIn30Days > 0 ? 'text-amber-400' : 'text-gray-600'}`}>{data.documents.expiringIn30Days}</span>
                 </div>
-              ))}
-              <Link href="/tenant/audit-logs"
-                className="block px-4 py-2.5 text-xs text-purple-400 hover:text-purple-300 text-center transition">
-                View all activity →
-              </Link>
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-500">Already expired</span>
+                  <span className={`text-sm font-bold ${data.documents.expiredActive > 0 ? 'text-red-400' : 'text-gray-600'}`}>{data.documents.expiredActive}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={`bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.incidents.openCritical > 0 ? 'border-red-700/40' : 'border-gray-800'}`}>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">⚠️ WHS</h3>
+                <Link href="/tenant/whs" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-500">Open incidents</span>
+                  <span className={`text-sm font-bold ${data.incidents.open > 0 ? 'text-amber-400' : 'text-gray-600'}`}>{data.incidents.open}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-500">Critical open</span>
+                  <span className={`text-sm font-bold ${data.incidents.openCritical > 0 ? 'text-red-400' : 'text-gray-600'}`}>{data.incidents.openCritical}</span>
+                </div>
+              </div>
+              {data.incidents.openCritical > 0 && (
+                <Link href="/tenant/whs"
+                  className="block w-full text-center py-2 bg-red-900/20 border border-red-700/40 text-red-400 text-xs rounded-lg hover:bg-red-900/30 transition">
+                  View critical incidents
+                </Link>
+              )}
             </div>
           </div>
+        </>
+      )}
 
+      {/* ── Module shortcuts ── (always shown) */}
+      <section>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">🧭 Modules</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {MODULE_SHORTCUTS.map(m => (
+            <Link key={m.key} href={`/tenant/${m.key}`}
+              className="bg-gray-900 border border-gray-800 hover:border-purple-700/50 hover:bg-gray-800 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition group">
+              <span className="text-2xl">{m.icon}</span>
+              <span className="text-xs text-gray-400 group-hover:text-white font-medium transition">{m.label}</span>
+            </Link>
+          ))}
         </div>
-      </div>
+      </section>
+
     </div>
   )
 }
