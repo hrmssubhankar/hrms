@@ -4,15 +4,17 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const NAV = [
-  { href: '/super-admin',             label: '🏠 Dashboard',    exact: true },
-  { href: '/super-admin/clients',     label: '🏢 Clients' },
-  { href: '/super-admin/billing',     label: '💳 Billing' },
-  { href: '/super-admin/modules',     label: '🧩 Modules' },
-  { href: '/super-admin/audit-logs',  label: '📋 Audit Logs' },
-  { href: '/super-admin/announcements', label: '📢 Announcements' },
-  { href: '/super-admin/system',      label: '🖥️  System Health' },
-  { href: '/super-admin/admins',      label: '👤 Admins' },
-  { href: '/super-admin/settings',    label: '⚙️  Settings' },
+  { href: '/super-admin',                  label: '🏠 Dashboard',       exact: true },
+  { href: '/super-admin/clients',          label: '🏢 Clients' },
+  { href: '/super-admin/intake',           label: '📋 Intake Form' },
+  { href: '/super-admin/cost-estimation',  label: '💰 Cost Estimation' },
+  { href: '/super-admin/billing',          label: '💳 Billing' },
+  { href: '/super-admin/modules',          label: '🧩 Modules' },
+  { href: '/super-admin/audit-logs',       label: '🗂️  Audit Logs' },
+  { href: '/super-admin/announcements',    label: '📢 Announcements' },
+  { href: '/super-admin/system',           label: '🖥️  System Health' },
+  { href: '/super-admin/admins',           label: '👤 Admins' },
+  { href: '/super-admin/settings',         label: '⚙️  Settings' },
 ]
 
 export default function AdminSidebar() {
