@@ -7,14 +7,14 @@ import { jwtVerify } from 'jose'
  * Works in two modes:
  *
  * A) Separate-project mode (current approach):
- *    Each Vercel project sets NEXT_PUBLIC_TENANT_SLUG:
+ *    Each Vercel project sets NEXT_PUBLIC_TENANT_SLUG (NEXT_PUBLIC_ required — used in login page client component):
  *      superadmin-hrms  →  NEXT_PUBLIC_TENANT_SLUG=admin
  *      yahwehcare-hrms  →  NEXT_PUBLIC_TENANT_SLUG=yahweh-care
  *      yahwehpc-hrms    →  NEXT_PUBLIC_TENANT_SLUG=yahweh-property-care
  *
  * B) Subdomain mode (future, with a custom domain):
  *    superadmin.yourdomain.com, yahwehcare.yourdomain.com, etc.
- *    Set NEXT_PUBLIC_ROOT_DOMAIN=yourdomain.com in Vercel.
+ *    Set ROOT_DOMAIN=yourdomain.com in Vercel (server-side only, no NEXT_PUBLIC_ prefix).
  */
 
 const SESSION_COOKIE = 'hrms_session'
@@ -54,7 +54,7 @@ async function verifySession(token: string) {
 
 function extractSubdomain(hostname: string): string | null {
   const host       = hostname.split(':')[0]
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? ''
+  const rootDomain = process.env.ROOT_DOMAIN ?? ''
 
   if (rootDomain) {
     if (host === rootDomain) return null

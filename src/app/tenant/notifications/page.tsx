@@ -160,7 +160,7 @@ export default function NotificationsPage() {
     }
   ]
 }`}</pre>
-        <p className="text-xs text-gray-400 mt-2">Also add <code>RESEND_API_KEY</code> and <code>NEXT_PUBLIC_APP_URL</code> to your Vercel environment variables.</p>
+        <p className="text-xs text-gray-400 mt-2">Also add <code>RESEND_API_KEY</code>, <code>RESEND_FROM</code>, and <code>APP_URL</code> to your Vercel environment variables.</p>
       </div>
 
       {/* In-app Notifications */}

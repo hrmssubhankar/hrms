@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       .sign(secret)
 
     // Return the token and redirect URL — the client will set the cookie
-    const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/tenant/dashboard`
+    const redirectTo = `${process.env.APP_URL ?? ''}/tenant/dashboard`
 
     return NextResponse.json({
       token,

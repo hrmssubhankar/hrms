@@ -41,7 +41,7 @@ export async function GET() {
   }
 
   // Environment
-  const envChecks = ['DATABASE_URL', 'JWT_SECRET', 'NEXT_PUBLIC_APP_URL']
+  const envChecks = ['DATABASE_URL', 'JWT_SECRET', 'APP_URL', 'RESEND_API_KEY', 'BLOB_READ_WRITE_TOKEN']
   const missingEnv = envChecks.filter(k => !process.env[k])
   checks.environment = {
     status: missingEnv.length === 0 ? 'ok' : 'warn',
@@ -63,7 +63,7 @@ export async function GET() {
       nodeVersion:  process.version,
       nextVersion:  '15.x',
       environment:  process.env.NODE_ENV ?? 'unknown',
-      appUrl:       process.env.NEXT_PUBLIC_APP_URL ?? 'not set',
+      appUrl:       process.env.APP_URL ?? 'not set',
     },
   })
 }

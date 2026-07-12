@@ -56,7 +56,7 @@ export async function getTenantEmailCtx(tenantId: string): Promise<TenantEmailCt
   const s      = (tenant?.settings    ?? {}) as Record<string, any>
   const email  = (s.email             ?? {}) as Record<string, string>
   const notif  = (s.notifications     ?? {}) as Record<string, boolean>
-  const loginUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+  const loginUrl = process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
 
   // Build from address — "Yahweh Care HR <hr@yahwehcare.com.au>" or null (use Resend default)
   const fromAddress = email.fromEmail
@@ -120,6 +120,6 @@ export type PlatformEmailCtx = {
 
 export function getPlatformEmailCtx(): PlatformEmailCtx {
   return {
-    loginUrl: process.env.NEXT_PUBLIC_APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`,
+    loginUrl: process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`,
   }
 }

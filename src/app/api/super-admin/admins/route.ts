@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       .returning({ id: superAdmins.id, email: superAdmins.email, name: superAdmins.name, isActive: superAdmins.isActive, createdAt: superAdmins.createdAt })
 
     // Send invite email
-    const loginUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+    const loginUrl = process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
     const tmpl = superAdminInviteEmail({ recipientName: name, adminEmail: email, tempPassword: password, loginUrl: `${loginUrl}/super-admin` })
     sendEmail({ to: email, ...tmpl }).catch(console.error)
 
