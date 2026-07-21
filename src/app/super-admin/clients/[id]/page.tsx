@@ -50,9 +50,10 @@ function EditClientInner() {
   const [theme, setTheme] = useState({
     accentColor: '#7c3aed', fontFamily: 'Inter', borderRadius: '8px', sidebarDark: true,
   })
-  const [logoUrl,      setLogoUrl]      = useState<string>('')
-  const [logoUploading, setLogoUploading] = useState(false)
-  const [originalTier, setOriginalTier] = useState('enterprise')
+  const [logoUrl,        setLogoUrl]        = useState<string>('')
+  const [logoUploading,  setLogoUploading]  = useState(false)
+  const [deploymentUrl,  setDeploymentUrl]  = useState<string>('')
+  const [originalTier,   setOriginalTier]   = useState('enterprise')
   const [loading,      setLoading]      = useState(true)
   const [saving,       setSaving]       = useState(false)
   const [applyingTier, setApplyingTier] = useState(false)
@@ -72,6 +73,7 @@ function EditClientInner() {
         setOriginalTier(tier)
         setLogoUrl(t.logoUrl ?? '')
         const s = typeof t.settings === 'string' ? JSON.parse(t.settings) : (t.settings ?? {})
+        setDeploymentUrl(s.deploymentUrl ?? '')
         setTheme({
           accentColor:  s.accentColor  ?? '#7c3aed',
           fontFamily:   s.fontFamily   ?? 'Inter',
@@ -273,6 +275,27 @@ function EditClientInner() {
                 </label>
               ))}
             </div>
+          </div>
+
+          {/* Deployment URL */}
+          <div className="rounded-lg bg-gray-800/60 border border-gray-700 px-4 py-3">
+            <p className="text-xs font-medium text-gray-400 mb-1">Vercel Deployment URL</p>
+            {deploymentUrl ? (
+              <div className="flex items-center gap-2">
+                <a href={deploymentUrl} target="_blank" rel="noopener noreferrer"
+                  className="text-sm text-purple-400 hover:text-purple-300 truncate flex-1 underline underline-offset-2">
+                  {deploymentUrl}
+                </a>
+                <a href={`${deploymentUrl}/login`} target="_blank" rel="noopener noreferrer"
+                  className="shrink-0 text-xs border border-purple-700 text-purple-300 hover:bg-purple-900/30 px-2.5 py-1 rounded-lg transition">
+                  Open Portal →
+                </a>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">
+                Not yet deployed — set <code className="text-gray-400">VERCEL_API_TOKEN</code> + <code className="text-gray-400">VERCEL_TEAM_ID</code> in env vars to auto-create on next client add.
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-2">
