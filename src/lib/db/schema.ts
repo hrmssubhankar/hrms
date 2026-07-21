@@ -772,6 +772,126 @@ export const publicHolidays = pgTable('public_holidays', {
   uniqueIdx:  uniqueIndex('ph_unique').on(t.tenantId, t.date, t.name),
 }))
 
+// ──────────────────────────────────────────────
+// Module 15 — Offer Letters & Acceptance Tracking
+// ──────────────────────────────────────────────
+
+export const offerLetters = pgTable('offer_letters', {
+  id:               uuid('id').primaryKey().defaultRandom(),
+  tenantId:         uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  // Candidate (pre-hire — may not have an employee record yet)
+  candidateName:    varchar('candidate_name', { length: 255 }).notNull(),
+  candidateEmail:   varchar('candidate_email', { length: 255 }).notNull(),
+  // Position
+  position:         varchar('position', { length: 255 }).notNull(),
+  department:       varchar('department', { length: 255 }),
+  employmentType:   varchar('employment_type', { length: 50 }).notNull().default('full_time'),
+  startDate:        date('start_date'),
+  salaryAmount:     integer('salary_amount'),  // annual gross in dollars
+  salaryCycle:      varchar('salary_cycle', { length: 20 }).notNull().default('annual'),
+  // Template content (markdown/plain text — rendered into PDF)
+  templateContent:  text('template_content'),
+  pdfUrl:           text('pdf_url'),
+  // Status lifecycle: draft → sent → accepted | rejected | expired | withdrawn
+  status:           varchar('status', { length: 50 }).notNull().default('draft'),
+  sentAt:           timestamp('sent_at'),
+  acceptedAt:       timestamp('accepted_at'),
+  rejectedAt:       timestamp('rejected_at'),
+  expiresAt:        timestamp('expires_at'),
+  // One-time token for candidate self-service accept/reject link (TODO: email via Resend)
+  acceptanceToken:  text('acceptance_token'),
+  // Optional links
+  recruitmentId:    uuid('recruitment_id'),
+  employeeId:       uuid('employee_id').references(() => employees.id),
+  createdBy:        varchar('created_by', { length: 255 }),
+  notes:            text('notes'),
+  createdAt:        timestamp('created_at').notNull().defaultNow(),
+  updatedAt:        timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:  index('offer_letters_tenant_idx').on(t.tenantId),
+  statusIdx:  index('offer_letters_status_idx').on(t.status),
+  emailIdx:   index('offer_letters_email_idx').on(t.candidateEmail),
+}))
+
+export const offerLetterEvents = pgTable('offer_letter_events', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  offerId:     uuid('offer_id').notNull().references(() => offerLetters.id, { onDelete: 'cascade' }),
+  // Event types: created | sent | viewed | accepted | rejected | expired | withdrawn | pdf_generated | note_added
+  event:       varchar('event', { length: 100 }).notNull(),
+  note:        text('note'),
+  performedBy: varchar('performed_by', { length: 255 }),
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  offerIdx:  index('offer_events_offer_idx').on(t.offerId),
+}))
+
+// ──────────────────────────────────────────────
+// Module 16 — Promotion Cases
+// ──────────────────────────────────────────────
+
+export const promotionRequests = pgTable('promotion_requests', {
+  id:              uuid('id').primaryKey().defaultRandom(),
+  tenantId:        uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  employeeId:      uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  // Raised by (manager / HR)
+  raisedById:      varchar('raised_by_id', { length: 255 }),
+  raisedByName:    varchar('raised_by_name', { length: 255 }),
+  // Current position snapshot
+  currentTitle:    varchar('current_title', { length: 255 }),
+  currentSalary:   integer('current_salary'),
+  // Proposed
+  proposedTitle:   varchar('proposed_title', { length: 255 }).notNull(),
+  proposedSalary:  integer('proposed_salary'),
+  effectiveDate:   date('effective_date'),
+  // Case details
+  justification:   text('justification').notNull(),
+  // Status lifecycle: pending → under_review → approved | rejected → implemented
+  status:          varchar('status', { length: 50 }).notNull().default('pending'),
+  reviewedBy:      varchar('reviewed_by', { length: 255 }),
+  reviewedAt:      timestamp('reviewed_at'),
+  reviewNotes:     text('review_notes'),
+  implementedAt:   timestamp('implemented_at'),
+  createdAt:       timestamp('created_at').notNull().defaultNow(),
+  updatedAt:       timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:    index('promotions_tenant_idx').on(t.tenantId),
+  employeeIdx:  index('promotions_employee_idx').on(t.employeeId),
+  statusIdx:    index('promotions_status_idx').on(t.status),
+}))
+
+export const promotionEvents = pgTable('promotion_events', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  promotionId:  uuid('promotion_id').notNull().references(() => promotionRequests.id, { onDelete: 'cascade' }),
+  // Event types: raised | submitted_for_review | approved | rejected | implemented | note_added | salary_updated
+  event:        varchar('event', { length: 100 }).notNull(),
+  note:         text('note'),
+  performedBy:  varchar('performed_by', { length: 255 }),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  promotionIdx: index('promotion_events_promo_idx').on(t.promotionId),
+}))
+
+// ──────────────────────────────────────────────
+// Module 19 — Separation Event History
+// (extends existing separationRecords)
+// ──────────────────────────────────────────────
+
+export const separationEvents = pgTable('separation_events', {
+  id:            uuid('id').primaryKey().defaultRandom(),
+  tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  separationId:  uuid('separation_id').notNull().references(() => separationRecords.id, { onDelete: 'cascade' }),
+  // Event types: initiated | notice_received | exit_interview_scheduled | exit_interview_done
+  //              assets_returned | access_revoked | completed | note_added | document_uploaded
+  event:         varchar('event', { length: 100 }).notNull(),
+  note:          text('note'),
+  performedBy:   varchar('performed_by', { length: 255 }),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  sepIdx: index('separation_events_sep_idx').on(t.separationId),
+}))
+
 export const announcementPriorityEnum = pgEnum('announcement_priority', ['info', 'warning', 'critical'])
 
 export const platformAnnouncements = pgTable('platform_announcements', {

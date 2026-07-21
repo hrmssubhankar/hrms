@@ -11,6 +11,7 @@ type SeparationRecord = {
   employeeFirstName: string | null; employeeLastName: string | null
   employeeEmail: string | null; employeeStartDate: string | null; employeeEntityName: string | null
 }
+type SeparationEvent = { id: string; event: string; note: string | null; performedBy: string | null; createdAt: string }
 type Stats = { total: number; pending: number; active: number; completed: number; resignation: number; termination: number }
 type Employee = { id: string; firstName: string; lastName: string }
 
@@ -45,6 +46,9 @@ export default function SeparationPage() {
     employeeId: '', type: 'resignation', reason: '', noticeDate: '', lastWorkingDay: '',
   })
   const [interviewFields, setInterviewFields] = useState<Record<string, { at: string; notes: string }>>({})
+  const [sepEvents,   setSepEvents]   = useState<Record<string, SeparationEvent[]>>({})
+  const [noteFields,  setNoteFields]  = useState<Record<string, string>>({})
+  const [savingNote,  setSavingNote]  = useState<string | null>(null)
 
   const load = useCallback(async (st = filterStatus, t = filterType) => {
     setLoading(true)
@@ -77,11 +81,31 @@ export default function SeparationPage() {
   }
 
   async function patch(id: string, updates: Record<string, unknown>) {
-    await fetch('/api/tenant/separation', {
+    await fetch(`/api/tenant/separation/${id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, ...updates }),
+      body: JSON.stringify(updates),
     })
     load()
+    loadEvents(id)
+  }
+
+  async function loadEvents(id: string) {
+    const res  = await fetch(`/api/tenant/separation/${id}`)
+    const data = await res.json()
+    setSepEvents(prev => ({ ...prev, [id]: data.events ?? [] }))
+  }
+
+  async function addNote(id: string) {
+    const note = noteFields[id]?.trim()
+    if (!note) return
+    setSavingNote(id)
+    await fetch(`/api/tenant/separation/${id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _note: note }),
+    })
+    setNoteFields(prev => ({ ...prev, [id]: '' }))
+    setSavingNote(null)
+    loadEvents(id)
   }
 
   async function saveInterview(id: string) {
@@ -205,7 +229,7 @@ export default function SeparationPage() {
               <div key={r.id} className={`bg-gray-900 border rounded-xl overflow-hidden ${
                 r.status === 'completed' ? 'border-green-900' : r.type === 'termination' ? 'border-red-900/50' : 'border-gray-800'
               }`}>
-                <div className="flex items-center gap-4 px-5 py-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : r.id)}>
+                <div className="flex items-center gap-4 px-5 py-4 cursor-pointer" onClick={() => { const next = isOpen ? null : r.id; setExpanded(next); if (next) loadEvents(next) }}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="text-white font-medium text-sm">
@@ -357,6 +381,62 @@ export default function SeparationPage() {
                         </div>
                       </div>
                     )}
+
+                    {/* ── Event History ─────────────────────────────── */}
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">History & Notes</p>
+
+                      {/* Add note */}
+                      <div className="flex gap-2 mb-4">
+                        <input
+                          value={noteFields[r.id] ?? ''}
+                          onChange={e => setNoteFields(prev => ({ ...prev, [r.id]: e.target.value }))}
+                          placeholder="Add a note or comment…"
+                          className={INPUT} />
+                        <button
+                          disabled={savingNote === r.id || !noteFields[r.id]?.trim()}
+                          onClick={() => addNote(r.id)}
+                          className="shrink-0 px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition">
+                          Add
+                        </button>
+                      </div>
+
+                      {/* Timeline */}
+                      {(sepEvents[r.id] ?? []).length === 0 ? (
+                        <p className="text-xs text-gray-600 text-center py-3">No events recorded yet.</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {(sepEvents[r.id] ?? []).map((ev, i, arr) => (
+                            <div key={ev.id} className="flex gap-3 items-start">
+                              <div className="flex flex-col items-center shrink-0">
+                                <div className="w-7 h-7 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-xs">
+                                  {ev.event === 'initiated'                ? '🚀'
+                                   : ev.event === 'notice_received'        ? '📨'
+                                   : ev.event === 'exit_interview_scheduled' ? '📅'
+                                   : ev.event === 'exit_interview_done'    ? '🎤'
+                                   : ev.event === 'assets_returned'        ? '📦'
+                                   : ev.event === 'access_revoked'         ? '🔒'
+                                   : ev.event === 'completed'              ? '✅'
+                                   : ev.event === 'checklist_completed'    ? '☑️'
+                                   : '💬'}
+                                </div>
+                                {i < arr.length - 1 && <div className="w-px h-3 bg-gray-700 mt-1" />}
+                              </div>
+                              <div className="flex-1 pb-1">
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="text-xs font-medium text-white capitalize">{ev.event.replace(/_/g, ' ')}</p>
+                                  <p className="text-xs text-gray-600 shrink-0">
+                                    {new Date(ev.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}
+                                  </p>
+                                </div>
+                                {ev.note        && <p className="text-xs text-gray-400 mt-0.5">{ev.note}</p>}
+                                {ev.performedBy && <p className="text-xs text-gray-600 mt-0.5">by {ev.performedBy}</p>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

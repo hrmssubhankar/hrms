@@ -31,15 +31,17 @@ const navGroups = [
   {
     label: 'Talent',
     items: [
-      { href: '/workforce',   icon: '🏗️', label: 'Workforce Planning' },
-      { href: '/recruitment', icon: '🧲', label: 'Recruitment' },
-      { href: '/contracting', icon: '✍️', label: 'Contracting' },
+      { href: '/workforce',     icon: '🏗️', label: 'Workforce Planning' },
+      { href: '/recruitment',   icon: '🧲', label: 'Recruitment' },
+      { href: '/contracting',   icon: '✍️', label: 'Contracting' },
+      { href: '/offer-letters', icon: '📄', label: 'Offer Letters' },
     ],
   },
   {
     label: 'Performance',
     items: [
       { href: '/performance', icon: '📈', label: 'Performance' },
+      { href: '/promotions',  icon: '🎯', label: 'Promotions' },
     ],
   },
   {
