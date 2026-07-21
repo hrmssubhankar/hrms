@@ -126,9 +126,81 @@ export async function POST(req: NextRequest) {
       adminUser = u
     }
 
+    // ── Auto-create Vercel project for this tenant ─────────────────────────
+    let deploymentUrl = body.deploymentUrl ?? null
+    const vercelToken  = process.env.VERCEL_API_TOKEN
+    const vercelTeamId = process.env.VERCEL_TEAM_ID
+
+    if (vercelToken && !deploymentUrl) {
+      try {
+        const projectName = `${tenant.slug}-hrmsapp`
+        const baseUrl = process.env.APP_URL ?? 'https://yahweh-hrms-dusky.vercel.app'
+
+        // Create project
+        const createRes = await fetch(
+          `https://api.vercel.com/v10/projects${vercelTeamId ? `?teamId=${vercelTeamId}` : ''}`,
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${vercelToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name:      projectName,
+              framework: 'nextjs',
+              gitRepository: { type: 'github', repo: 'hrmssubhankar/hrms' },
+            }),
+          },
+        )
+        const project = await createRes.json()
+
+        if (project.id) {
+          // Set environment variables
+          const envVars = [
+            { key: 'NEXT_PUBLIC_TENANT_SLUG', value: tenant.slug,   target: ['production'] },
+            { key: 'DATABASE_URL',            value: process.env.DATABASE_URL ?? '', target: ['production'] },
+            { key: 'JWT_SECRET',              value: process.env.JWT_SECRET   ?? '', target: ['production'] },
+            { key: 'APP_URL',                 value: `https://${projectName}.vercel.app`, target: ['production'] },
+            { key: 'NEXT_PUBLIC_APP_URL',     value: `https://${projectName}.vercel.app`, target: ['production'] },
+            { key: 'BLOB_READ_WRITE_TOKEN',   value: process.env.BLOB_READ_WRITE_TOKEN ?? '', target: ['production'] },
+          ]
+
+          await fetch(
+            `https://api.vercel.com/v10/projects/${project.id}/env${vercelTeamId ? `?teamId=${vercelTeamId}` : ''}`,
+            {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${vercelToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify(envVars),
+            },
+          )
+
+          // Trigger deployment
+          await fetch(
+            `https://api.vercel.com/v13/deployments${vercelTeamId ? `?teamId=${vercelTeamId}` : ''}`,
+            {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${vercelToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: projectName, project: project.id, target: 'production' }),
+            },
+          )
+
+          deploymentUrl = `https://${projectName}.vercel.app`
+
+          // Store deployment URL in tenant settings
+          await db.update(tenants)
+            .set({ settings: { ...settingsPayload, deploymentUrl, vercelProjectId: project.id } })
+            .where(eq(tenants.id, tenant.id))
+        }
+      } catch (vercelErr) {
+        console.error('Vercel auto-create error (non-fatal):', vercelErr)
+      }
+    } else if (deploymentUrl) {
+      // Caller supplied a manual URL — store it
+      await db.update(tenants)
+        .set({ settings: { ...settingsPayload, deploymentUrl } })
+        .where(eq(tenants.id, tenant.id))
+    }
+
     // Send welcome email to tenant admin
     if (adminEmail && adminUser) {
-      const loginUrl = process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+      const loginUrl = deploymentUrl ?? process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
       const tmpl = newTenantOnboardedEmail({
         recipientName: adminEmail.split('@')[0],
         orgName:       name,
@@ -140,7 +212,7 @@ export async function POST(req: NextRequest) {
       sendEmail({ to: adminEmail, ...tmpl }).catch(console.error)
     }
 
-    return NextResponse.json({ tenant, adminUser }, { status: 201 })
+    return NextResponse.json({ tenant, adminUser, deploymentUrl }, { status: 201 })
   } catch (error: any) {
     if (error?.message?.includes('unique')) {
       return NextResponse.json({ error: 'A client with this slug already exists' }, { status: 409 })

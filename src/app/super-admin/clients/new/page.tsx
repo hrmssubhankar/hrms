@@ -24,6 +24,7 @@ export default function NewClientPage() {
     // Organisation
     name:               '',
     slug:               '',
+    vercelProjectName:  '',
     legalName:          '',
     registrationNumber: '',
     industry:           '',
@@ -61,11 +62,13 @@ export default function NewClientPage() {
   }
 
   function handleName(v: string) {
+    const slug = v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     setForm(f => ({
       ...f,
-      name:     v,
-      legalName: f.legalName || v,
-      slug:     v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+      name:              v,
+      legalName:         f.legalName || v,
+      slug,
+      vercelProjectName: f.vercelProjectName || `${slug}-hrmsapp`,
     }))
   }
 
@@ -98,6 +101,9 @@ export default function NewClientPage() {
         primaryColor: form.primaryColor,
         adminEmail:   form.adminEmail || undefined,
         adminPassword:form.adminPassword || undefined,
+        deploymentUrl: form.vercelProjectName
+          ? `https://${form.vercelProjectName}.vercel.app`
+          : undefined,
         settings: {
           country:   form.country,
           currency:  form.currency,
@@ -173,15 +179,39 @@ export default function NewClientPage() {
             <div>
               <label className={LABEL}>URL Slug *</label>
               <input required value={form.slug}
-                onChange={e => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                onChange={e => {
+                  const slug = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                  setForm(f => ({ ...f, slug, vercelProjectName: `${slug}-hrmsapp` }))
+                }}
                 placeholder="yahweh-care" className={INPUT} />
-              <p className="text-xs text-gray-500 mt-1">Portal: <span className="text-purple-400">{form.slug || 'slug'}.yourdomain.com</span></p>
+              <p className="text-xs text-gray-500 mt-1">Used for login routing</p>
             </div>
             <div>
               <label className={LABEL}>ABN / Company Reg. Number</label>
               <input value={form.registrationNumber} onChange={e => set('registrationNumber', e.target.value)}
                 placeholder="12 345 678 901" className={INPUT} />
             </div>
+          </div>
+
+          {/* Vercel deployment subdomain */}
+          <div>
+            <label className={LABEL}>Vercel Project / Subdomain</label>
+            <div className="flex items-center gap-2">
+              <input
+                value={form.vercelProjectName}
+                onChange={e => set('vercelProjectName', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                placeholder={`${form.slug || 'slug'}-hrmsapp`}
+                className={INPUT}
+              />
+              <span className="text-xs text-gray-500 whitespace-nowrap">.vercel.app</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Tenant URL:{' '}
+              <span className="text-purple-400">
+                https://{form.vercelProjectName || `${form.slug || 'slug'}-hrmsapp`}.vercel.app
+              </span>
+              {' '}— auto-created if Vercel API token is configured.
+            </p>
           </div>
 
           <div className={GRID2}>
