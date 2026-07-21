@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { superAdmins, users, tenants } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { signToken, verifyToken } from '@/lib/auth/jwt'
+import { signToken, signTempToken, verifyToken } from '@/lib/auth/jwt'
 import { sessionCookieOptions } from '@/lib/auth/session'
 import bcrypt from 'bcryptjs'
 
@@ -93,14 +93,22 @@ export async function POST(req: NextRequest) {
       .set({ lastLoginAt: new Date() })
       .where(eq(users.id, user.id))
 
-    const token = await signToken({
+    const jwtPayload = {
       sub:        user.id,
       email:      user.email,
-      role:       'tenant_user',
+      role:       'tenant_user' as const,
       tenantId:   tenant.id,
       tenantSlug: tenant.slug,
-      userRole:   user.role,   // actual DB role: director, hr_officer, etc.
-    })
+      userRole:   user.role,
+    }
+
+    // ── 2FA gate ─────────────────────────────────────────────────────────────
+    if (user.totpEnabled) {
+      const tempToken = await signTempToken(jwtPayload)
+      return NextResponse.json({ requires2FA: true, tempToken })
+    }
+
+    const token = await signToken(jwtPayload)
 
     const res = NextResponse.json({ ok: true, role: 'tenant_user', redirectTo: '/tenant/dashboard' })
     res.cookies.set(sessionCookieOptions(token))

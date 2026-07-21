@@ -8,6 +8,7 @@ export type JWTPayload = {
   tenantSlug?: string
   name?: string
   userRole?: string  // tenant user's actual DB role (director, hr_officer, etc.)
+  phase?: 'totp'     // present only in short-lived 2FA challenge tokens
 }
 
 function getSecret() {
@@ -20,6 +21,19 @@ export async function signToken(payload: JWTPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('8h')
+    .sign(getSecret())
+}
+
+/**
+ * Short-lived token for the 2FA challenge step (5 minutes).
+ * Contains phase: 'totp' so the challenge route can distinguish it
+ * from a full session token.
+ */
+export async function signTempToken(payload: Omit<JWTPayload, 'phase'>): Promise<string> {
+  return new SignJWT({ ...payload, phase: 'totp' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('5m')
     .sign(getSecret())
 }
 
