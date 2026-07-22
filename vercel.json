@@ -8,8 +8,17 @@
     {
       "path": "/api/tenant/notifications/send",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/daily",
+      "schedule": "0 1 * * *"
     }
   ],
+  "functions": {
+    "src/app/api/cron/daily/route.ts": {
+      "maxDuration": 60
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",

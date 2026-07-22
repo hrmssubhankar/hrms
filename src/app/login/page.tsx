@@ -198,6 +198,14 @@ function LoginForm() {
             >
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
+
+            {!isSuperAdmin && (
+              <p className="text-center text-xs text-gray-400">
+                <a href="/forgot-password" className="hover:underline" style={{ color: accentColor }}>
+                  Forgot your password?
+                </a>
+              </p>
+            )}
           </form>
         ) : (
           /* 2FA challenge step */

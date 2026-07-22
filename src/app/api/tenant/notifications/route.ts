@@ -21,7 +21,7 @@ export async function GET() {
         id:        notifications.id,
         type:      notifications.type,
         title:     notifications.title,
-        message:   notifications.body,
+        body:      notifications.body,
         isRead:    notifications.isRead,
         link:      notifications.link,
         createdAt: notifications.createdAt,
