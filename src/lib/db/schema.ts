@@ -429,6 +429,7 @@ export const performanceReviews = pgTable('performance_reviews', {
   developmentPlan: text('development_plan'),
   outcome:         varchar('outcome', { length: 100 }), // confirmed, extended, pip, terminated
   createdAt:       timestamp('created_at').notNull().defaultNow(),
+  updatedAt:       timestamp('updated_at').notNull().defaultNow(),
 })
 
 // ──────────────────────────────────────────────
@@ -890,6 +891,33 @@ export const separationEvents = pgTable('separation_events', {
   createdAt:     timestamp('created_at').notNull().defaultNow(),
 }, (t) => ({
   sepIdx: index('separation_events_sep_idx').on(t.separationId),
+}))
+
+// ──────────────────────────────────────────────
+// Module 17b — Performance Goals
+// (linked to performanceReviews above)
+// ──────────────────────────────────────────────
+
+export const performanceGoals = pgTable('performance_goals', {
+  id:            uuid('id').primaryKey().defaultRandom(),
+  tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  employeeId:    uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  reviewId:      uuid('review_id').references(() => performanceReviews.id, { onDelete: 'set null' }),
+  title:         varchar('title', { length: 255 }).notNull(),
+  description:   text('description'),
+  category:      varchar('category', { length: 100 }),
+  targetDate:    date('target_date'),
+  status:        varchar('status', { length: 50 }).notNull().default('active'),
+  progress:      integer('progress').notNull().default(0),
+  selfRating:    integer('self_rating'),
+  managerRating: integer('manager_rating'),
+  managerNote:   text('manager_note'),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+  updatedAt:     timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('perf_goals_tenant_idx').on(t.tenantId),
+  employeeIdx: index('perf_goals_employee_idx').on(t.employeeId),
+  reviewIdx:   index('perf_goals_review_idx').on(t.reviewId),
 }))
 
 export const announcementPriorityEnum = pgEnum('announcement_priority', ['info', 'warning', 'critical'])
