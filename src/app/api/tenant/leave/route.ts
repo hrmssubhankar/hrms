@@ -4,6 +4,8 @@ import { leaveRequests, employees } from '@/lib/db/schema'
 import { eq, and, desc, gte, lte } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 import { hasPermission } from '@/lib/auth/permissions'
+import { getTenantEmailCtx, getTenantRoleEmails, fireEmail } from '@/lib/email/emailHelper'
+import { genericNotificationEmail } from '@/lib/email/templates'
 
 export const dynamic = 'force-dynamic'
 
@@ -138,6 +140,31 @@ export async function POST(req: NextRequest) {
     })
     .returning()
 
+  // Notify managers with leave:approve about new request
+  ;(async () => {
+    try {
+      const ctx = await getTenantEmailCtx(session.tenantId)
+      if (!ctx.notify.emailPayroll) return
+      const [emp] = await db
+        .select({ firstName: employees.firstName, lastName: employees.lastName })
+        .from(employees)
+        .where(eq(employees.id, created.employeeId))
+      const managerEmails = await getTenantRoleEmails(session.tenantId, ['director', 'hr_officer', 'operations_manager', 'team_leader'])
+      if (!managerEmails.length || !emp) return
+      const tmpl = genericNotificationEmail({
+        recipientName: 'HR Team',
+        orgName:       ctx.orgName,
+        logoUrl:       ctx.logoUrl,
+        primaryColor:  ctx.primaryColor,
+        title:         'New leave request pending approval',
+        message:       `${emp.firstName} ${emp.lastName} has submitted a ${created.leaveType} leave request from ${created.startDate} to ${created.endDate} (${created.totalDays} day${created.totalDays === 1 ? '' : 's'}).${created.reason ? ` Reason: ${created.reason}` : ''}`,
+        ctaLabel: 'Review leave request',
+        ctaUrl:   `${ctx.loginUrl}/tenant/leave`,
+      })
+      fireEmail(ctx, { to: managerEmails, ...tmpl })
+    } catch { /* non-blocking */ }
+  })()
+
   return NextResponse.json({ request: created }, { status: 201 })
 }
 
@@ -178,6 +205,35 @@ export async function PATCH(req: NextRequest) {
         updatedAt:  new Date(),
       })
       .where(eq(leaveRequests.id, id))
+
+    // Fire email notification to employee
+    ;(async () => {
+      try {
+        const [emp] = await db
+          .select({ firstName: employees.firstName, lastName: employees.lastName, email: employees.email })
+          .from(employees)
+          .where(eq(employees.id, existing.employeeId))
+        if (!emp?.email) return
+        const ctx = await getTenantEmailCtx(session.tenantId)
+        if (!ctx.notify.emailPayroll) return   // reuse general flag
+        const approved = action === 'approve'
+        const tmpl = genericNotificationEmail({
+          recipientName: `${emp.firstName} ${emp.lastName}`,
+          orgName:       ctx.orgName,
+          logoUrl:       ctx.logoUrl,
+          primaryColor:  ctx.primaryColor,
+          title:         approved ? 'Leave request approved ✅' : 'Leave request not approved',
+          message:       approved
+            ? `Your leave request (${existing.leaveType}, ${existing.startDate} to ${existing.endDate}) has been approved.${reviewNote ? ` Note from manager: ${reviewNote}` : ''}`
+            : `Your leave request (${existing.leaveType}, ${existing.startDate} to ${existing.endDate}) was not approved.${reviewNote ? ` Reason: ${reviewNote}` : ' Please contact HR for more information.'}`,
+          ctaLabel: 'View leave portal',
+          ctaUrl:   `${ctx.loginUrl}/tenant/leave`,
+        })
+        fireEmail(ctx, { to: emp.email, ...tmpl })
+      } catch { /* non-blocking */ }
+    })()
+
+    // Notify HR managers on new pending request (POST path handled below)
     return NextResponse.json({ ok: true })
   }
 

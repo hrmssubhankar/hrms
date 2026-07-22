@@ -4,6 +4,8 @@ import { tenants, tenantModules, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth/session'
 import bcrypt from 'bcryptjs'
+import { sendEmail } from '@/lib/email/resend'
+import { newTenantOnboardedEmail } from '@/lib/email/templates'
 
 // POST /api/super-admin/intake
 // Creates a client from a completed intake form.
@@ -119,8 +121,16 @@ export async function POST(req: NextRequest) {
       }).returning({ id: users.id, email: users.email })
       adminUser = user
 
-      // TODO: Send welcome email when Resend is configured
-      // await sendWelcomeEmail({ to: adminEmail, orgName: tradingName, loginUrl, tempPassword: adminPassword })
+      const loginUrl = process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+      const tmpl = newTenantOnboardedEmail({
+        recipientName: contactName ?? adminEmail,
+        orgName:       tradingName,
+        tier,
+        loginUrl,
+        adminEmail,
+        tempPassword:  adminPassword,
+      })
+      sendEmail({ to: adminEmail, ...tmpl }).catch(console.error)
     }
 
     return NextResponse.json({
