@@ -68,9 +68,9 @@ export default function CompliancePage() {
       {/* Tab bar */}
       <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit">
         {([
-          { key: 'screening', label: '🔍 Screening',   desc: 'Module 6' },
-          { key: 'tracking',  label: '✅ Tracking',    desc: 'Module 8' },
-          { key: 'lock',      label: '🔒 Lock',        desc: 'Module 7' },
+          { key: 'screening', label: 'Screening',   desc: 'Module 6' },
+          { key: 'tracking',  label: 'Tracking',    desc: 'Module 8' },
+          { key: 'lock',      label: 'Lock',        desc: 'Module 7' },
         ] as const).map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
@@ -147,9 +147,9 @@ function ScreeningTab() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: 'Total Checks',   value: stats.total,    color: 'text-white' },
-          { label: '✓ Verified',     value: stats.green,    color: 'text-green-400' },
-          { label: '⚠ Expiring <30d', value: stats.expiring, color: 'text-amber-400' },
-          { label: '✕ Expired/Red',  value: stats.red + stats.expired, color: 'text-red-400' },
+          { label: 'Verified',     value: stats.green,    color: 'text-green-400' },
+          { label: 'Expiring <30d', value: stats.expiring, color: 'text-amber-400' },
+          { label: 'Expired/Red',  value: stats.red + stats.expired, color: 'text-red-400' },
         ].map(s => (
           <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-xs text-gray-400">{s.label}</p>
@@ -226,7 +226,7 @@ function ScreeningTab() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
           {records.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-3xl mb-2">🔍</p>
+              <p className="text-3xl mb-2"></p>
               <p className="text-gray-400 text-sm">No screening records. Add the first check above.</p>
             </div>
           ) : (
@@ -352,9 +352,9 @@ function TrackingTab() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: 'Total',   value: stats.total,   color: 'text-white' },
-          { label: '✓ Green', value: stats.green,   color: 'text-green-400' },
-          { label: '⚠ Amber', value: stats.amber,   color: 'text-amber-400' },
-          { label: '✕ Red',   value: stats.red,     color: 'text-red-400' },
+          { label: 'Green', value: stats.green,   color: 'text-green-400' },
+          { label: 'Amber', value: stats.amber,   color: 'text-amber-400' },
+          { label: 'Red',   value: stats.red,     color: 'text-red-400' },
         ].map(s => (
           <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-xs text-gray-400">{s.label}</p>
@@ -406,7 +406,7 @@ function TrackingTab() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
           {records.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-3xl mb-2">✅</p>
+              <p className="text-3xl mb-2"></p>
               <p className="text-gray-400 text-sm">No compliance tracking items yet.</p>
             </div>
           ) : (
@@ -512,7 +512,7 @@ function LockTab() {
   return (
     <div className="space-y-5">
       <div className="bg-amber-950 border border-amber-800 rounded-xl p-4 text-sm text-amber-300">
-        ⚠️ Compliance Lock exceptions allow non-compliant employees to temporarily work while gaps are resolved. Each exception requires a reason and expiry date and is logged for audit purposes.
+        ️ Compliance Lock exceptions allow non-compliant employees to temporarily work while gaps are resolved. Each exception requires a reason and expiry date and is logged for audit purposes.
       </div>
 
       <div className="flex justify-end">
@@ -595,7 +595,7 @@ function LockTab() {
 
           {records.length === 0 && (
             <div className="bg-gray-900 border border-gray-800 rounded-xl py-12 text-center">
-              <p className="text-3xl mb-2">🔒</p>
+              <p className="text-3xl mb-2"></p>
               <p className="text-gray-400 text-sm">No lock exceptions on record.</p>
             </div>
           )}

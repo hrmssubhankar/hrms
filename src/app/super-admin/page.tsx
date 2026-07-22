@@ -112,15 +112,15 @@ export default async function SuperAdminDashboard() {
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
-              { label: '➕ Add Client',     href: '/super-admin/clients/new',   desc: 'Onboard a new organisation' },
-              { label: '🏢 Clients',        href: '/super-admin/clients',       desc: 'View, edit or deactivate' },
-              { label: '💳 Billing',        href: '/super-admin/billing',       desc: 'Subscriptions & revenue' },
-              { label: '🧩 Modules',        href: '/super-admin/modules',       desc: 'Cross-tenant module usage' },
-              { label: '📋 Audit Logs',     href: '/super-admin/audit-logs',    desc: 'Platform-wide event log' },
-              { label: '📢 Announcements',  href: '/super-admin/announcements', desc: 'Broadcast to tenants' },
-              { label: '🖥️  System Health', href: '/super-admin/system',        desc: 'DB status & infra checks' },
-              { label: '👤 Admins',         href: '/super-admin/admins',        desc: 'Super admin accounts' },
-              { label: '⚙️  Settings',       href: '/super-admin/settings',      desc: 'Email, security, maintenance' },
+              { label: 'Add Client',     href: '/super-admin/clients/new',   desc: 'Onboard a new organisation' },
+              { label: 'Clients',        href: '/super-admin/clients',       desc: 'View, edit or deactivate' },
+              { label: 'Billing',        href: '/super-admin/billing',       desc: 'Subscriptions & revenue' },
+              { label: 'Modules',        href: '/super-admin/modules',       desc: 'Cross-tenant module usage' },
+              { label: 'Audit Logs',     href: '/super-admin/audit-logs',    desc: 'Platform-wide event log' },
+              { label: 'Announcements',  href: '/super-admin/announcements', desc: 'Broadcast to tenants' },
+              { label: '️  System Health', href: '/super-admin/system',        desc: 'DB status & infra checks' },
+              { label: 'Admins',         href: '/super-admin/admins',        desc: 'Super admin accounts' },
+              { label: '️  Settings',       href: '/super-admin/settings',      desc: 'Email, security, maintenance' },
             ].map((a) => (
               <Link
                 key={a.href}
@@ -161,7 +161,7 @@ export default async function SuperAdminDashboard() {
                             key={step.label}
                             className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-900/50 text-green-400' : 'bg-gray-800 text-gray-500'}`}
                           >
-                            {step.done ? '✓' : '○'} {step.label}
+                            {step.done ? '' : '○'} {step.label}
                           </span>
                         ))}
                       </div>
@@ -192,7 +192,7 @@ export default async function SuperAdminDashboard() {
           <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
             {d.recentLogs.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <div className="text-3xl mb-2">📋</div>
+                <div className="text-3xl mb-2"></div>
                 <p className="text-xs text-gray-500">No audit events yet</p>
               </div>
             ) : d.recentLogs.map((log: any) => (

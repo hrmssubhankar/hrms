@@ -30,8 +30,8 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const EVENT_ICON: Record<string, string> = {
-  raised:'🙋', submitted_for_review:'📋', approved:'✅', rejected:'❌',
-  implemented:'🎉', note_added:'💬', updated:'✏️', salary_updated:'💰',
+  raised:'', submitted_for_review:'', approved:'', rejected:'',
+  implemented:'', note_added:'', updated:'️', salary_updated:'',
 }
 
 const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
@@ -178,7 +178,11 @@ export default function PromotionsPage() {
           {loading ? <p className="text-gray-500 text-sm text-center py-8">Loading…</p>
           : promotions.length === 0 ? (
             <div className="text-center py-12 text-gray-600">
-              <p className="text-4xl mb-2">📈</p>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
               <p className="text-sm">No promotion cases yet.</p>
             </div>
           ) : promotions.map(p => (
@@ -205,7 +209,11 @@ export default function PromotionsPage() {
         <div className="lg:col-span-3">
           {!selected ? (
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-10 text-center">
-              <p className="text-4xl mb-3">📈</p>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
               <p className="text-gray-500 text-sm">Select a case to view details, approve, or reject</p>
             </div>
           ) : (
@@ -267,7 +275,7 @@ export default function PromotionsPage() {
                 {selected.status === 'pending' && (
                   <button onClick={() => action('under_review')}
                     className="w-full py-2.5 bg-blue-700 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition">
-                    📋 Submit for Review
+                    Submit for Review
                   </button>
                 )}
                 {selected.status === 'under_review' && (
@@ -277,11 +285,11 @@ export default function PromotionsPage() {
                     <div className="flex gap-2">
                       <button onClick={() => action('approved', reviewNote)}
                         className="flex-1 py-2.5 bg-green-700 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition">
-                        ✅ Approve
+                        Approve
                       </button>
                       <button onClick={() => action('rejected', reviewNote)}
                         className="flex-1 py-2.5 bg-red-700 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition">
-                        ❌ Reject
+                        Reject
                       </button>
                     </div>
                   </div>
@@ -289,7 +297,7 @@ export default function PromotionsPage() {
                 {selected.status === 'approved' && (
                   <button onClick={() => action('implemented')}
                     className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition">
-                    🎉 Mark as Implemented
+                    Mark as Implemented
                   </button>
                 )}
               </div>
@@ -319,7 +327,7 @@ export default function PromotionsPage() {
                       <div key={ev.id} className="flex gap-3 items-start">
                         <div className="flex flex-col items-center shrink-0">
                           <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-sm">
-                            {EVENT_ICON[ev.event] ?? '📌'}
+                            {EVENT_ICON[ev.event] ?? ''}
                           </div>
                           {i < events.length-1 && <div className="w-px h-4 bg-gray-700 mt-1" />}
                         </div>

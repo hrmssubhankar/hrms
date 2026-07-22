@@ -155,12 +155,12 @@ export default function RecruitmentPage() {
       <div className="flex border-b border-gray-800 gap-4">
         <button onClick={() => setTab('jobs')}
           className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${tab === 'jobs' ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
-          🔍 Job Requisitions
+          Job Requisitions
         </button>
         {selectedReq && (
           <button onClick={() => setTab('pipeline')}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${tab === 'pipeline' ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
-            📋 Pipeline — {selectedReq.title}
+            Pipeline — {selectedReq.title}
           </button>
         )}
       </div>
@@ -233,7 +233,11 @@ export default function RecruitmentPage() {
           {tab === 'jobs' && (
             requisitions.length === 0 ? (
               <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-                <p className="text-4xl mb-3">🔍</p>
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
                 <p className="text-gray-300 font-medium">No requisitions yet</p>
                 <p className="text-gray-500 text-sm mt-1">Create a job requisition to begin hiring.</p>
               </div>
@@ -281,7 +285,11 @@ export default function RecruitmentPage() {
           {tab === 'pipeline' && selectedReq && (
             applications.length === 0 ? (
               <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-                <p className="text-4xl mb-3">📋</p>
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
                 <p className="text-gray-300 font-medium">No candidates in pipeline</p>
                 <p className="text-gray-500 text-sm mt-1">Add candidates to begin tracking applications.</p>
               </div>

@@ -37,10 +37,10 @@ export default function PlatformSettingsPage() {
   }
 
   const SECTIONS: { key: Section; label: string; icon: string }[] = [
-    { key: 'general',     label: 'General',     icon: '⚙️' },
-    { key: 'email',       label: 'Email / SMTP', icon: '✉️' },
-    { key: 'security',    label: 'Security',     icon: '🔐' },
-    { key: 'maintenance', label: 'Maintenance',  icon: '🔧' },
+    { key: 'general',     label: 'General',     icon: '️' },
+    { key: 'email',       label: 'Email / SMTP', icon: '️' },
+    { key: 'security',    label: 'Security',     icon: '' },
+    { key: 'maintenance', label: 'Maintenance',  icon: '' },
   ]
 
   return (
@@ -93,9 +93,9 @@ export default function PlatformSettingsPage() {
                   onChange={e => setDefaultTier(e.target.value)}
                   className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
                 >
-                  <option value="starter">🟢 Starter (11 modules)</option>
-                  <option value="professional">🔵 Professional (20 modules)</option>
-                  <option value="enterprise">🟣 Enterprise (28 modules)</option>
+                  <option value="starter">Starter (11 modules)</option>
+                  <option value="professional">Professional (20 modules)</option>
+                  <option value="enterprise">Enterprise (28 modules)</option>
                 </select>
               </Field>
               <Field label="Max Users Per Tenant" hint="Hard limit per tenant across all roles">
@@ -174,7 +174,7 @@ export default function PlatformSettingsPage() {
               <h2 className="text-base font-semibold text-white border-b border-gray-800 pb-3">Maintenance Mode</h2>
               {maintenanceMode && (
                 <div className="bg-red-900/30 border border-red-700 rounded-lg p-3 text-sm text-red-300">
-                  ⚠️ Maintenance mode is ON. All tenant users see the maintenance message below. Super admins can still log in.
+                  ️ Maintenance mode is ON. All tenant users see the maintenance message below. Super admins can still log in.
                 </div>
               )}
               <div className="flex items-center justify-between py-2">

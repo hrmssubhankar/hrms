@@ -146,7 +146,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-200 text-center max-w-md">
-          <div className="text-5xl mb-4">⚠️</div>
+          <div className="text-5xl mb-4">️</div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Link unavailable</h1>
           <p className="text-sm text-gray-500">{error}</p>
         </div>
@@ -162,7 +162,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
     return (
       <PageShell offer={offer} color={color}>
         <div className="text-center py-8">
-          <div className="text-6xl mb-4">✅</div>
+          <div className="text-6xl mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Offer accepted!</h2>
           <p className="text-gray-500 text-sm leading-relaxed">
             Thank you, <strong>{offer.candidateName}</strong>. You've accepted your {offer.type} offer
@@ -183,7 +183,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
     return (
       <PageShell offer={offer} color={color}>
         <div className="text-center py-8">
-          <div className="text-6xl mb-4">🙏</div>
+          <div className="text-6xl mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Offer declined</h2>
           <p className="text-gray-500 text-sm">
             Thank you for letting us know, <strong>{offer.candidateName}</strong>. The HR team has been notified.
@@ -215,7 +215,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
                 onClick={() => setSigMode(m)}
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${sigMode === m ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                {m === 'draw' ? '✍️ Draw' : '⌨️ Type'}
+                {m === 'draw' ? '️ Draw' : '⌨️ Type'}
               </button>
             ))}
           </div>
@@ -280,7 +280,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
               className="flex-1 py-3 rounded-xl text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
               style={{ background: color }}
             >
-              {submitting ? 'Submitting…' : 'Accept offer ✓'}
+              {submitting ? 'Submitting…' : 'Accept offer '}
             </button>
           </div>
         </div>
@@ -310,7 +310,11 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
           </div>
         ) : (
           <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-10 text-center">
-            <p className="text-4xl mb-3">📄</p>
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
             <p className="text-sm text-gray-500">
               Your offer letter is ready. Click <strong>Review & Sign</strong> to proceed.
             </p>

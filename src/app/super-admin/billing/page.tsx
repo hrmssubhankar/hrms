@@ -14,7 +14,7 @@ type Client = {
 
 const TIER_CONFIG = {
   starter: {
-    label:    '🟢 Starter',
+    label:    'Starter',
     modules:  11,
     color:    'bg-green-900/30 text-green-300 border-green-800',
     badge:    'bg-green-900 text-green-200',
@@ -22,7 +22,7 @@ const TIER_CONFIG = {
     features: 'Core + Compliance (11 modules)',
   },
   professional: {
-    label:    '🔵 Professional',
+    label:    'Professional',
     modules:  20,
     color:    'bg-blue-900/30 text-blue-300 border-blue-800',
     badge:    'bg-blue-900 text-blue-200',
@@ -30,7 +30,7 @@ const TIER_CONFIG = {
     features: '+ Talent, Learning, Performance, Safety (20 modules)',
   },
   enterprise: {
-    label:    '🟣 Enterprise',
+    label:    'Enterprise',
     modules:  28,
     color:    'bg-purple-900/30 text-purple-300 border-purple-800',
     badge:    'bg-purple-900 text-purple-200',

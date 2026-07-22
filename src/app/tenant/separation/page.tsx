@@ -16,12 +16,12 @@ type Stats = { total: number; pending: number; active: number; completed: number
 type Employee = { id: string; firstName: string; lastName: string }
 
 const SEP_TYPES = [
-  { value: 'resignation',    label: '✉️  Resignation' },
-  { value: 'termination',    label: '🚫 Termination' },
-  { value: 'redundancy',     label: '📦 Redundancy' },
-  { value: 'contract_end',   label: '📅 Contract End' },
-  { value: 'retirement',     label: '🏖 Retirement' },
-  { value: 'abandonment',    label: '🏃 Abandonment' },
+  { value: 'resignation',    label: '️  Resignation' },
+  { value: 'termination',    label: 'Termination' },
+  { value: 'redundancy',     label: 'Redundancy' },
+  { value: 'contract_end',   label: 'Contract End' },
+  { value: 'retirement',     label: 'Retirement' },
+  { value: 'abandonment',    label: 'Abandonment' },
 ]
 
 const STATUS_STYLE: Record<string, string> = {
@@ -186,7 +186,7 @@ export default function SeparationPage() {
           </div>
           {form.type === 'termination' && (
             <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
-              ⚠️ Termination — ensure proper documentation and HR sign-off before proceeding. Seek legal advice if required.
+              ️ Termination — ensure proper documentation and HR sign-off before proceeding. Seek legal advice if required.
             </div>
           )}
           <button type="submit" disabled={saving}
@@ -215,7 +215,11 @@ export default function SeparationPage() {
       {/* Records */}
       {loading ? <div className="text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-          <p className="text-4xl mb-3">🚪</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No separation records</p>
           <p className="text-gray-500 text-sm mt-1">Initiate a separation to begin the offboarding process.</p>
         </div>
@@ -324,15 +328,15 @@ export default function SeparationPage() {
                               <p className={`text-sm font-medium ${item.done ? 'text-green-300 line-through' : 'text-gray-200'}`}>{item.label}</p>
                               <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
                             </div>
-                            {item.done && <span className="ml-auto text-green-400 text-sm">✓</span>}
+                            {item.done && <span className="ml-auto text-green-400 text-sm"></span>}
                           </label>
                         ))}
                       </div>
                       {r.assetsReturned && r.systemAccessRevoked && !r.checklistComplete && (
-                        <p className="text-xs text-green-400 mt-2">✓ Both items complete — offboarding will auto-close</p>
+                        <p className="text-xs text-green-400 mt-2">Both items complete — offboarding will auto-close</p>
                       )}
                       {r.checklistComplete && (
-                        <p className="text-xs text-green-400 mt-2">✓ Offboarding checklist complete</p>
+                        <p className="text-xs text-green-400 mt-2">Offboarding checklist complete</p>
                       )}
                     </div>
 
@@ -374,7 +378,7 @@ export default function SeparationPage() {
                     {/* Completion badge */}
                     {r.status === 'completed' && (
                       <div className="bg-green-950/40 border border-green-800/50 rounded-lg p-3 flex items-center gap-3">
-                        <span className="text-2xl">✅</span>
+                        <span className="text-2xl"></span>
                         <div>
                           <p className="text-sm font-semibold text-green-300">Offboarding Complete</p>
                           <p className="text-xs text-gray-400">All checklist items confirmed. Employee has been fully offboarded.</p>
@@ -410,15 +414,15 @@ export default function SeparationPage() {
                             <div key={ev.id} className="flex gap-3 items-start">
                               <div className="flex flex-col items-center shrink-0">
                                 <div className="w-7 h-7 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-xs">
-                                  {ev.event === 'initiated'                ? '🚀'
-                                   : ev.event === 'notice_received'        ? '📨'
-                                   : ev.event === 'exit_interview_scheduled' ? '📅'
-                                   : ev.event === 'exit_interview_done'    ? '🎤'
-                                   : ev.event === 'assets_returned'        ? '📦'
-                                   : ev.event === 'access_revoked'         ? '🔒'
-                                   : ev.event === 'completed'              ? '✅'
-                                   : ev.event === 'checklist_completed'    ? '☑️'
-                                   : '💬'}
+                                  {ev.event === 'initiated'                ? ''
+                                   : ev.event === 'notice_received'        ? ''
+                                   : ev.event === 'exit_interview_scheduled' ? ''
+                                   : ev.event === 'exit_interview_done'    ? ''
+                                   : ev.event === 'assets_returned'        ? ''
+                                   : ev.event === 'access_revoked'         ? ''
+                                   : ev.event === 'completed'              ? ''
+                                   : ev.event === 'checklist_completed'    ? '️'
+                                   : ''}
                                 </div>
                                 {i < arr.length - 1 && <div className="w-px h-3 bg-gray-700 mt-1" />}
                               </div>

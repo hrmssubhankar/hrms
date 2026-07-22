@@ -60,7 +60,7 @@ function ResetForm() {
   if (status === 'done') {
     return (
       <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center shadow-sm">
-        <div className="text-4xl mb-3">✅</div>
+        <div className="text-4xl mb-3"></div>
         <h2 className="text-lg font-semibold text-gray-900 mb-2">Password updated!</h2>
         <p className="text-sm text-gray-500">Redirecting you to sign in…</p>
       </div>
@@ -114,7 +114,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="w-12 h-12 rounded-xl bg-brand-600 flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-xl">🔐</span>
+            <span className="text-white text-xl"></span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Set new password</h1>
           <p className="text-sm text-gray-500 mt-1">Choose a strong password for your account.</p>

@@ -240,7 +240,7 @@ export default function EmployeeProfilePage() {
   if (loading) return <div className="flex items-center justify-center py-20 text-gray-400 text-sm">Loading…</div>
   if (!emp)    return (
     <div className="flex flex-col items-center justify-center py-20 gap-3">
-      <span className="text-5xl">🔍</span>
+      <span className="text-5xl"></span>
       <p className="text-gray-500">Employee not found</p>
       <Link href="/tenant/employee-management" className="text-sm text-blue-500">← Back to Employees</Link>
     </div>
@@ -275,7 +275,7 @@ export default function EmployeeProfilePage() {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{fullName}</h1>
               {emp.ndisWorker && (
                 <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
-                  🛡 NDIS Worker
+                  NDIS Worker
                 </span>
               )}
             </div>
@@ -315,7 +315,7 @@ export default function EmployeeProfilePage() {
               className="px-4 py-2 rounded-xl text-sm font-semibold text-white text-center"
               style={{ background: 'var(--primary)' }}
             >
-              ✏️ Edit
+              ️ Edit
             </Link>
             <button
               onClick={toggleActive}
@@ -385,7 +385,7 @@ export default function EmployeeProfilePage() {
             <Row label="Start Date"          value={fmt(emp.startDate)} />
             <Row label="Probation End"    value={emp.probationEndDate ? fmt(emp.probationEndDate) : '—'} />
             {emp.endDate && <Row label="End Date" value={fmt(emp.endDate)} />}
-            <Row label="NDIS Worker"      value={emp.ndisWorker ? '✅ Yes' : 'No'} />
+            <Row label="NDIS Worker"      value={emp.ndisWorker ? 'Yes' : 'No'} />
           </div>
         )}
 
@@ -450,7 +450,7 @@ export default function EmployeeProfilePage() {
 
                   {contactError && (
                     <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 px-3 py-2 text-sm text-red-700 dark:text-red-300">
-                      ⚠ {contactError}
+                      {contactError}
                     </div>
                   )}
 
@@ -474,7 +474,7 @@ export default function EmployeeProfilePage() {
               <p className="text-sm text-gray-400 py-4">Loading…</p>
             ) : contacts.length === 0 ? (
               <div className="text-center py-10 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                <p className="text-3xl mb-2">📞</p>
+                <p className="text-3xl mb-2"></p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">No emergency contacts added yet</p>
                 <button onClick={openAddContact} className="mt-3 text-sm font-medium text-blue-500 hover:text-blue-700">
                   + Add first contact
@@ -501,19 +501,19 @@ export default function EmployeeProfilePage() {
                         )}
                       </div>
                       <div className="flex flex-wrap gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {c.phone && <span>📞 {c.phone}</span>}
-                        {c.email && <span>✉ {c.email}</span>}
+                        {c.phone && <span>{c.phone}</span>}
+                        {c.email && <span>{c.email}</span>}
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
-                      <button onClick={() => openEditContact(c)} className="text-xs text-gray-400 hover:text-blue-500 transition px-1" title="Edit">✏</button>
+                      <button onClick={() => openEditContact(c)} className="text-xs text-gray-400 hover:text-blue-500 transition px-1" title="Edit"></button>
                       <button
                         onClick={() => deleteContact(c.id)}
                         disabled={deletingContact === c.id}
                         className="text-xs text-gray-400 hover:text-red-500 disabled:opacity-40 transition px-1"
                         title="Delete"
                       >
-                        {deletingContact === c.id ? '…' : '🗑'}
+                        {deletingContact === c.id ? '…' : ''}
                       </button>
                     </div>
                   </div>
@@ -556,7 +556,7 @@ export default function EmployeeProfilePage() {
                 <p className="text-sm text-gray-400">Loading…</p>
               ) : screening.length === 0 ? (
                 <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-6 text-center">
-                  <p className="text-3xl mb-2">🔒</p>
+                  <p className="text-3xl mb-2"></p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">No screening records yet</p>
                   <a href="/tenant/compliance" className="mt-2 inline-block text-xs text-blue-500 hover:underline">
                     Add via Compliance module →
@@ -608,7 +608,7 @@ export default function EmployeeProfilePage() {
               <p className="text-sm text-gray-400">Loading…</p>
             ) : docs.length === 0 ? (
               <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-6 text-center">
-                <p className="text-3xl mb-2">📄</p>
+                <p className="text-3xl mb-2"></p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">No documents uploaded for this employee</p>
               </div>
             ) : (
@@ -624,7 +624,7 @@ export default function EmployeeProfilePage() {
                   return (
                     <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                       <span className="text-2xl shrink-0">
-                        {doc.mimeType?.includes('pdf') ? '📄' : doc.mimeType?.includes('image') ? '🖼' : '📎'}
+                        {doc.mimeType?.includes('pdf') ? '' : doc.mimeType?.includes('image') ? '' : ''}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{doc.title}</p>
@@ -657,7 +657,7 @@ export default function EmployeeProfilePage() {
 
         {tab === 'Training' && (
           <div className="text-center py-10">
-            <span className="text-4xl">📚</span>
+            <span className="text-4xl"></span>
             <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
               Training records will appear here once the Training &amp; Development module is enabled.
             </p>

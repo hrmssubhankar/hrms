@@ -85,9 +85,9 @@ export default function TenantSettingsPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('tab') === 'integrations') setTab('integrations')
-    if (params.get('xero_success')) setXeroMsg('✓ Xero connected successfully!')
+    if (params.get('xero_success')) setXeroMsg('Xero connected successfully!')
     if (params.get('xero_error'))   setXeroMsg(`Xero error: ${params.get('xero_error')}`)
-    if (params.get('myob_success')) setMyobMsg('✓ MYOB connected successfully!')
+    if (params.get('myob_success')) setMyobMsg('MYOB connected successfully!')
     if (params.get('myob_error'))   setMyobMsg(`MYOB error: ${params.get('myob_error')}`)
 
     setXeroLoading(true)
@@ -208,7 +208,7 @@ export default function TenantSettingsPage() {
 
       {saved && (
         <div className="bg-green-900/40 border border-green-700 rounded-lg px-4 py-2.5 text-sm text-green-300">
-          ✓ Settings saved — changes take effect on next page load
+          Settings saved — changes take effect on next page load
         </div>
       )}
       {error && (
@@ -218,11 +218,11 @@ export default function TenantSettingsPage() {
       {/* Tab nav */}
       <div className="flex border-b border-gray-800">
         {([
-          { id: 'branding',      label: '🎨 Branding' },
-          { id: 'domain',        label: '🌐 Domain' },
-          { id: 'email',         label: '✉️ Email' },
-          { id: 'notifications', label: '🔔 Notifications' },
-          { id: 'integrations',  label: '🔗 Integrations' },
+          { id: 'branding',      label: 'Branding' },
+          { id: 'domain',        label: 'Domain' },
+          { id: 'email',         label: 'Email' },
+          { id: 'notifications', label: 'Notifications' },
+          { id: 'integrations',  label: 'Integrations' },
         ] as { id: Tab; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === t.id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
@@ -270,7 +270,7 @@ export default function TenantSettingsPage() {
                       disabled={logoUploading}
                       className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 disabled:opacity-60 text-white text-sm px-4 py-2.5 rounded-lg transition"
                     >
-                      {logoUploading ? '⏳ Uploading…' : '📁 Upload Logo'}
+                      {logoUploading ? '⏳ Uploading…' : 'Upload Logo'}
                     </button>
                     {logoUrl && (
                       <button onClick={removeLogo}
@@ -469,7 +469,7 @@ export default function TenantSettingsPage() {
 
               {/* Employee Lifecycle */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">👤 Employee Lifecycle</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Employee Lifecycle</p>
                 <div className="space-y-3">
                   {[
                     { key: 'emailWelcome',    label: 'User invitation welcome',    desc: 'Send login credentials when a new portal user is invited' },
@@ -488,7 +488,7 @@ export default function TenantSettingsPage() {
 
               {/* Compliance & Documents */}
               <div className="border-t border-gray-800 pt-5">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">📋 Compliance & Documents</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Compliance & Documents</p>
                 <div className="space-y-3">
                   {[
                     { key: 'emailDocExpiry',  label: 'Document expiry alerts (to employee)', desc: 'Notify employee when their compliance document is expiring or has expired' },
@@ -506,7 +506,7 @@ export default function TenantSettingsPage() {
 
               {/* Payroll & Contracts */}
               <div className="border-t border-gray-800 pt-5">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">💰 Payroll & Contracts</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Payroll & Contracts</p>
                 <div className="space-y-3">
                   {[
                     { key: 'emailPayroll',   label: 'Payslip notifications',   desc: 'Email employee when their pay run is marked as paid' },
@@ -524,7 +524,7 @@ export default function TenantSettingsPage() {
 
               {/* HR Processes */}
               <div className="border-t border-gray-800 pt-5">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">⚖️ HR Processes</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">HR Processes</p>
                 <div className="space-y-3">
                   {[
                     { key: 'emailGrievance',  label: 'Grievance alerts',           desc: 'Confirm to lodger; alert HR when a grievance is submitted or resolved' },
@@ -543,7 +543,7 @@ export default function TenantSettingsPage() {
 
               {/* Development */}
               <div className="border-t border-gray-800 pt-5">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">📈 Development & Training</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Development & Training</p>
                 <div className="space-y-3">
                   {[
                     { key: 'emailPerformance', label: 'Performance review notifications', desc: 'Notify employee when review is scheduled or completed' },
@@ -561,7 +561,7 @@ export default function TenantSettingsPage() {
 
               {/* Culture */}
               <div className="border-t border-gray-800 pt-5">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">🌟 Culture & Recruitment</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Culture & Recruitment</p>
                 <div className="space-y-3">
                   {[
                     { key: 'emailRecognition', label: 'Recognition awards',       desc: 'Notify employee when they receive a recognition award' },
@@ -579,7 +579,7 @@ export default function TenantSettingsPage() {
 
               {/* Slack */}
               <div className="border-t border-gray-800 pt-5">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">💬 Slack Integration</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Slack Integration</p>
                 <label className={LABEL}>Incoming Webhook URL</label>
                 <input value={notif.slackWebhook ?? ''} placeholder="https://hooks.slack.com/services/..."
                   onChange={e => setSettings(s => ({ ...s, notifications: { ...s.notifications, slackWebhook: e.target.value } }))}
@@ -601,7 +601,7 @@ export default function TenantSettingsPage() {
             <div className="space-y-6">
 
               {xeroMsg && (
-                <div className={`rounded-lg px-4 py-2.5 text-sm border ${xeroMsg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+                <div className={`rounded-lg px-4 py-2.5 text-sm border ${xeroMsg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
                   {xeroMsg}
                 </div>
               )}
@@ -621,7 +621,7 @@ export default function TenantSettingsPage() {
                     <span className="text-xs text-gray-500">Checking…</span>
                   ) : xeroStatus?.connected ? (
                     <span className="text-xs px-2 py-1 rounded-full bg-green-900/40 border border-green-700 text-green-300">
-                      {xeroStatus.tokenExpired ? '⚠ Token expired' : '● Connected'}
+                      {xeroStatus.tokenExpired ? 'Token expired' : '● Connected'}
                     </span>
                   ) : (
                     <span className="text-xs px-2 py-1 rounded-full bg-gray-800 border border-gray-700 text-gray-400">Not connected</span>
@@ -643,7 +643,7 @@ export default function TenantSettingsPage() {
 
                 {xeroStatus?.tokenExpired && (
                   <div className="bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-2 text-xs text-amber-300">
-                    ⚠ Your Xero access token has expired. Reconnect to restore the integration.
+                    Your Xero access token has expired. Reconnect to restore the integration.
                   </div>
                 )}
 
@@ -664,7 +664,7 @@ export default function TenantSettingsPage() {
                       <>
                         <button onClick={connectXero} disabled={xeroConnecting}
                           className="px-4 py-2 rounded-lg text-sm font-medium border border-[#13B5EA] text-[#13B5EA] hover:bg-[#13B5EA]/10 transition disabled:opacity-60">
-                          {xeroConnecting ? 'Redirecting…' : '🔄 Reconnect Xero'}
+                          {xeroConnecting ? 'Redirecting…' : 'Reconnect Xero'}
                         </button>
                         <button onClick={disconnectXero} disabled={xeroDisconnecting}
                           className="px-4 py-2 rounded-lg text-sm font-medium border border-red-800 text-red-400 hover:bg-red-900/20 transition disabled:opacity-60">
@@ -674,7 +674,7 @@ export default function TenantSettingsPage() {
                     ) : (
                       <button onClick={connectXero} disabled={xeroConnecting}
                         className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#13B5EA] hover:bg-[#0da3d8] transition disabled:opacity-60">
-                        {xeroConnecting ? 'Redirecting to Xero…' : '🔗 Connect Xero'}
+                        {xeroConnecting ? 'Redirecting to Xero…' : 'Connect Xero'}
                       </button>
                     )}
                   </div>
@@ -683,7 +683,7 @@ export default function TenantSettingsPage() {
 
               {/* MYOB */}
               {myobMsg && (
-                <div className={`rounded-lg px-4 py-2.5 text-sm border ${myobMsg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+                <div className={`rounded-lg px-4 py-2.5 text-sm border ${myobMsg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
                   {myobMsg}
                 </div>
               )}
@@ -702,7 +702,7 @@ export default function TenantSettingsPage() {
                     <span className="text-xs text-gray-500">Checking…</span>
                   ) : myobStatus?.connected ? (
                     <span className="text-xs px-2 py-1 rounded-full bg-green-900/40 border border-green-700 text-green-300">
-                      {myobStatus.tokenExpired ? '⚠ Token expired' : '● Connected'}
+                      {myobStatus.tokenExpired ? 'Token expired' : '● Connected'}
                     </span>
                   ) : (
                     <span className="text-xs px-2 py-1 rounded-full bg-gray-800 border border-gray-700 text-gray-400">Not connected</span>
@@ -720,7 +720,7 @@ export default function TenantSettingsPage() {
 
                 {myobStatus?.tokenExpired && (
                   <div className="bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-2 text-xs text-amber-300">
-                    ⚠ Your MYOB access token has expired. Reconnect to restore the integration.
+                    Your MYOB access token has expired. Reconnect to restore the integration.
                   </div>
                 )}
 
@@ -741,7 +741,7 @@ export default function TenantSettingsPage() {
                       <>
                         <button onClick={connectMyob} disabled={myobConnecting}
                           className="px-4 py-2 rounded-lg text-sm font-medium border border-[#7B2D8B] text-[#c084e8] hover:bg-[#7B2D8B]/10 transition disabled:opacity-60">
-                          {myobConnecting ? 'Redirecting…' : '🔄 Reconnect MYOB'}
+                          {myobConnecting ? 'Redirecting…' : 'Reconnect MYOB'}
                         </button>
                         <button onClick={disconnectMyob} disabled={myobDisconnecting}
                           className="px-4 py-2 rounded-lg text-sm font-medium border border-red-800 text-red-400 hover:bg-red-900/20 transition disabled:opacity-60">
@@ -751,7 +751,7 @@ export default function TenantSettingsPage() {
                     ) : (
                       <button onClick={connectMyob} disabled={myobConnecting}
                         className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#7B2D8B] hover:bg-[#6a2578] transition disabled:opacity-60">
-                        {myobConnecting ? 'Redirecting to MYOB…' : '🔗 Connect MYOB'}
+                        {myobConnecting ? 'Redirecting to MYOB…' : 'Connect MYOB'}
                       </button>
                     )}
                   </div>

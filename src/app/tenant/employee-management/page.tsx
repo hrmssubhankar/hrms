@@ -57,14 +57,14 @@ EMP001,Jane,Smith,jane.smith@example.com,full_time,2026-01-15,,+61400000001,Yahw
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Import Employees</h2>
             <p className="text-xs text-gray-500 mt-0.5">Upload a CSV to bulk-add employees</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition">✕</button>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition"></button>
         </div>
 
         <div className="p-6 space-y-5">
           {status === 'done' && result ? (
             <>
               <div className="text-center py-4">
-                <div className="text-5xl mb-3">{result.imported > 0 ? '✅' : '⚠️'}</div>
+                <div className="text-5xl mb-3">{result.imported > 0 ? '' : '️'}</div>
                 <p className="text-lg font-bold text-gray-900 dark:text-white">Import complete</p>
                 <div className="flex justify-center gap-6 mt-3 text-sm">
                   <span className="text-green-600 font-semibold">{result.imported} imported</span>
@@ -111,13 +111,17 @@ EMP001,Jane,Smith,jane.smith@example.com,full_time,2026-01-15,,+61400000001,Yahw
                 />
                 {file ? (
                   <>
-                    <p className="text-2xl mb-2">📄</p>
+                    <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
                     <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{file.name}</p>
                     <p className="text-xs text-gray-400 mt-1">{(file.size / 1024).toFixed(1)} KB · Click to change</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-3xl mb-2">📁</p>
+                    <p className="text-3xl mb-2"></p>
                     <p className="text-sm text-gray-500">Click to select a CSV file</p>
                     <p className="text-xs text-gray-400 mt-1">Max 5 MB</p>
                   </>
@@ -245,7 +249,7 @@ export default function EmployeeManagementPage() {
               onClick={() => setShowImport(true)}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
             >
-              ↑ Import CSV
+              Import CSV
             </button>
             <Link
               href="/tenant/employee-management/new"
@@ -261,10 +265,10 @@ export default function EmployeeManagementPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Total',    value: employees.length, icon: '👥', cls: 'text-blue-600 dark:text-blue-400' },
-          { label: 'Active',   value: activeCount,       icon: '✅', cls: 'text-green-600 dark:text-green-400' },
+          { label: 'Total',    value: employees.length, icon: '', cls: 'text-blue-600 dark:text-blue-400' },
+          { label: 'Active',   value: activeCount,       icon: '', cls: 'text-green-600 dark:text-green-400' },
           { label: 'Inactive', value: inactiveCount,     icon: '⏸', cls: 'text-gray-500' },
-          { label: 'NDIS',     value: ndisCount,         icon: '🛡', cls: 'text-purple-600 dark:text-purple-400' },
+          { label: 'NDIS',     value: ndisCount,         icon: '', cls: 'text-purple-600 dark:text-purple-400' },
         ].map(s => (
           <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
@@ -317,7 +321,7 @@ export default function EmployeeManagementPage() {
           <div className="flex items-center justify-center py-16 text-gray-400 text-sm">Loading…</div>
         ) : employees.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <span className="text-5xl">👥</span>
+            <span className="text-5xl"></span>
             <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
               {search || status || empType ? 'No employees match your filters' : 'No employees yet'}
             </p>
@@ -367,7 +371,7 @@ export default function EmployeeManagementPage() {
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
                               {fullName}
-                              {emp.ndisWorker && <span className="ml-1.5 text-xs text-purple-500">🛡 NDIS</span>}
+                              {emp.ndisWorker && <span className="ml-1.5 text-xs text-purple-500">NDIS</span>}
                             </p>
                             <p className="text-xs text-gray-400">{emp.email}</p>
                           </div>

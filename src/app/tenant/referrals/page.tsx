@@ -116,7 +116,11 @@ export default function ReferralsPage() {
 
       {loading ? <p className="text-gray-400 text-sm">Loading…</p> : referrals.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-          <p className="text-4xl mb-3">🤝</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No referrals yet</p>
         </div>
       ) : (
@@ -127,7 +131,7 @@ export default function ReferralsPage() {
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-white font-medium text-sm">{r.referredName}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>{r.status}</span>
-                  {r.bonusPaidAt && <span className="text-xs text-green-400">✓ Bonus paid</span>}
+                  {r.bonusPaidAt && <span className="text-xs text-green-400">Bonus paid</span>}
                 </div>
                 <p className="text-xs text-gray-500">Referred by {r.referrerFirstName} {r.referrerLastName}
                   {r.bonusAmount && <span className="ml-2 text-purple-400">${Number(r.bonusAmount).toFixed(2)} bonus</span>}
@@ -143,13 +147,13 @@ export default function ReferralsPage() {
                 {r.status === 'screening' && (
                   <button onClick={() => advance(r.id, 'hired')}
                     className="text-xs bg-green-900/40 border border-green-800 text-green-300 hover:bg-green-900/60 px-2.5 py-1 rounded transition">
-                    ✓ Hired
+                    Hired
                   </button>
                 )}
                 {r.status === 'hired' && !r.bonusPaidAt && r.bonusAmount && (
                   <button onClick={() => payBonus(r.id)}
                     className="text-xs bg-amber-900/40 border border-amber-800 text-amber-300 hover:bg-amber-900/60 px-2.5 py-1 rounded transition">
-                    💰 Pay Bonus
+                    Pay Bonus
                   </button>
                 )}
               </div>

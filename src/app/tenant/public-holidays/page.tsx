@@ -24,7 +24,7 @@ const BLANK_FORM: FormState = { name: '', date: '', country: 'AU', state: '', is
 /** Converts a 2-letter ISO country code to its flag emoji */
 function countryFlag(cc: string): string {
   const upper = cc.toUpperCase().slice(0, 2)
-  if (upper.length < 2) return '🌏'
+  if (upper.length < 2) return ''
   const [a, b] = upper.split('')
   return String.fromCodePoint(
     0x1F1E6 + a.charCodeAt(0) - 65,
@@ -125,11 +125,11 @@ export default function PublicHolidaysPage() {
         body: JSON.stringify({ year, countryCode: tenantCountry }),
       })
       const d = await res.json()
-      if (!res.ok) { setImportMsg(`⚠ ${d.error}`); return }
-      setImportMsg(`✓ Imported ${d.imported} holiday(s) for ${d.year} · ${d.skipped} already existed.`)
+      if (!res.ok) { setImportMsg(`${d.error}`); return }
+      setImportMsg(`Imported ${d.imported} holiday(s) for ${d.year} · ${d.skipped} already existed.`)
       load(year)
     } catch {
-      setImportMsg('⚠ Import failed — check connection.')
+      setImportMsg('Import failed — check connection.')
     } finally {
       setImporting(false)
     }
@@ -232,7 +232,7 @@ export default function PublicHolidaysPage() {
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
               title={`Auto-import ${year} public holidays from Nager.Date for ${tenantCountry}`}
             >
-              {importing ? 'Importing…' : `⬇ Import ${year}`}
+              {importing ? 'Importing…' : `Import ${year}`}
             </button>
           )}
 
@@ -249,7 +249,7 @@ export default function PublicHolidaysPage() {
       </div>
 
       {importMsg && (
-        <div className={`rounded-lg px-4 py-2.5 text-sm border ${importMsg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-amber-900/40 border-amber-700 text-amber-300'}`}>
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${importMsg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-amber-900/40 border-amber-700 text-amber-300'}`}>
           {importMsg}
         </div>
       )}
@@ -257,7 +257,7 @@ export default function PublicHolidaysPage() {
       {/* Next holiday banner */}
       {nextHoliday && year === currentYear && (
         <div className="bg-purple-900/30 border border-purple-700 rounded-xl px-5 py-4 flex items-center gap-4">
-          <span className="text-3xl">🎉</span>
+          <span className="text-3xl"></span>
           <div>
             <p className="text-xs text-purple-400 font-medium uppercase tracking-wider">Next Public Holiday</p>
             <p className="text-white font-semibold">{nextHoliday.name}</p>
@@ -349,7 +349,7 @@ export default function PublicHolidaysPage() {
 
             {formError && (
               <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
-                ⚠ {formError}
+                {formError}
               </div>
             )}
 
@@ -378,7 +378,11 @@ export default function PublicHolidaysPage() {
         <div className="text-center py-16 text-gray-500">Loading…</div>
       ) : holidays.length === 0 ? (
         <div className="text-center py-16 bg-gray-800/50 rounded-2xl border border-gray-700">
-          <p className="text-4xl mb-3">📅</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-400 font-medium">No public holidays found for {year}</p>
           {canManage && (
             <button onClick={openAdd} className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg">
@@ -431,7 +435,7 @@ export default function PublicHolidaysPage() {
                             <p className={`font-medium ${isPast ? 'text-gray-600' : 'text-white'}`}>{h.name}</p>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               <span className="text-xs px-2 py-0.5 rounded-full bg-green-900/50 text-green-400 border border-green-800">
-                                🌏 {h.country}
+                                {h.country}
                               </span>
                               {h.isNational && (
                                 <span className="text-xs px-2 py-0.5 rounded-full bg-blue-900/50 text-blue-400 border border-blue-800">
@@ -449,7 +453,7 @@ export default function PublicHolidaysPage() {
                           {/* Countdown + manager actions */}
                           <div className="flex items-center gap-3 shrink-0">
                             <span className="text-xs">
-                              {isToday ? <span className="text-purple-300 font-semibold">Today 🎉</span>
+                              {isToday ? <span className="text-purple-300 font-semibold">Today </span>
                                 : isPast ? <span className="text-gray-600">Passed</span>
                                 : diff === 1 ? <span className="text-yellow-400">Tomorrow</span>
                                 : <span className="text-gray-500">{diff}d away</span>}
@@ -461,14 +465,14 @@ export default function PublicHolidaysPage() {
                                   onClick={() => openEdit(h)}
                                   className="text-xs text-gray-500 hover:text-purple-400 transition-colors px-1"
                                   title="Edit"
-                                >✏</button>
+                                ></button>
                                 <button
                                   onClick={() => deleteHoliday(h.id)}
                                   disabled={isBusy}
                                   className="text-xs text-gray-500 hover:text-red-400 disabled:opacity-40 transition-colors px-1"
                                   title="Delete"
                                 >
-                                  {isBusy ? '…' : '🗑'}
+                                  {isBusy ? '…' : ''}
                                 </button>
                               </>
                             )}

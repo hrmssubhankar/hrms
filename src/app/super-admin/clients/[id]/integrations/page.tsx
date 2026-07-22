@@ -51,7 +51,7 @@ export default function ClientIntegrationsPage() {
     const data = await res.json()
     if (res.ok) {
       setIntegrations(data.integrations ?? {})
-      setMsg(`✓ ${provider.name} ${enabled ? 'connected' : 'updated'} successfully`)
+      setMsg(`${provider.name} ${enabled ? 'connected' : 'updated'} successfully`)
       setConfiguring(null)
     } else {
       setMsg(`Error: ${data.error}`)
@@ -94,7 +94,7 @@ export default function ClientIntegrationsPage() {
       </div>
 
       {msg && (
-        <div className={`rounded-lg px-4 py-2.5 text-sm border ${msg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${msg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
           {msg}
         </div>
       )}
@@ -109,7 +109,7 @@ export default function ClientIntegrationsPage() {
       {/* Connected */}
       {connectedProviders.length > 0 && (
         <div>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">✅ Connected</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Connected</h2>
           <div className="space-y-3">
             {connectedProviders.map(p => {
               const cfg = integrations[p.id]
@@ -217,7 +217,7 @@ export default function ClientIntegrationsPage() {
                   </div>
                   <div className="flex gap-2 items-center">
                     <span className="text-xs px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700 text-gray-400">
-                      {p.authType === 'oauth2' ? '🔗 OAuth2' : p.authType === 'api_key' ? '🔑 API Key' : '📋 Manual'}
+                      {p.authType === 'oauth2' ? 'OAuth2' : p.authType === 'api_key' ? 'API Key' : 'Manual'}
                     </span>
                     <button onClick={() => { startConfig(p) }}
                       className="text-xs px-4 py-1.5 rounded-lg text-white font-medium transition hover:opacity-90"

@@ -12,15 +12,16 @@ type Notification = {
   createdAt: string
 }
 
-const TYPE_ICONS: Record<string, string> = {
-  leave:       '🏖',
-  compliance:  '🔒',
-  onboarding:  '🎉',
-  payroll:     '💰',
-  document:    '📄',
-  training:    '📚',
-  performance: '📈',
-  system:      '⚙️',
+// Colour dot per notification type (replaces emoji)
+const TYPE_COLOUR: Record<string, string> = {
+  leave:       'bg-sky-500',
+  compliance:  'bg-red-500',
+  onboarding:  'bg-green-500',
+  payroll:     'bg-amber-500',
+  document:    'bg-blue-500',
+  training:    'bg-purple-500',
+  performance: 'bg-indigo-500',
+  system:      'bg-gray-500',
 }
 
 export default function NotificationBell({ primaryColor }: { primaryColor: string }) {
@@ -109,7 +110,9 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
               <p className="px-4 py-6 text-sm text-gray-400 text-center">Loading…</p>
             ) : notifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <p className="text-2xl mb-1">🔔</p>
+                <svg className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
                 <p className="text-sm text-gray-400">No notifications yet</p>
               </div>
             ) : notifications.map(n => (
@@ -119,7 +122,7 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
                 className={`w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition ${!n.isRead ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}
               >
                 <div className="flex items-start gap-2.5">
-                  <span className="text-lg shrink-0 mt-0.5">{TYPE_ICONS[n.type] ?? '📌'}</span>
+                  <span className={`w-2 h-2 rounded-full shrink-0 mt-2 ${TYPE_COLOUR[n.type] ?? 'bg-gray-400'}`} />
                   <div className="min-w-0">
                     <p className={`text-sm leading-snug ${!n.isRead ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
                       {n.title}

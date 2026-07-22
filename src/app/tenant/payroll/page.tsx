@@ -127,7 +127,7 @@ export default function PayrollPage() {
       const d = await res.json()
       if (!res.ok) { setExportMsg(d.error ?? 'Export failed'); return }
       const { exported, skipped, errors } = d.summary
-      setExportMsg(`✓ Exported ${exported} record(s) to Xero${skipped > 0 ? ` · ${skipped} skipped` : ''}${errors > 0 ? ` · ${errors} error(s)` : ''}.`)
+      setExportMsg(`Exported ${exported} record(s) to Xero${skipped > 0 ? ` · ${skipped} skipped` : ''}${errors > 0 ? ` · ${errors} error(s)` : ''}.`)
       load()
     } catch { setExportMsg('Export failed — check connection.') }
     finally { setExporting(new Set()) }
@@ -149,7 +149,7 @@ export default function PayrollPage() {
       const d = await res.json()
       if (!res.ok) { setExportMsg(d.error ?? 'MYOB export failed'); return }
       const { exported, skipped, errors } = d.summary
-      setExportMsg(`✓ Exported ${exported} record(s) to MYOB${skipped > 0 ? ` · ${skipped} skipped` : ''}${errors > 0 ? ` · ${errors} error(s)` : ''}.`)
+      setExportMsg(`Exported ${exported} record(s) to MYOB${skipped > 0 ? ` · ${skipped} skipped` : ''}${errors > 0 ? ` · ${errors} error(s)` : ''}.`)
       load()
     } catch { setExportMsg('MYOB export failed — check connection.') }
     finally { setMyobExporting(new Set()) }
@@ -219,7 +219,7 @@ export default function PayrollPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">💰 Payroll</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payroll</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Australian PAYG · Super 11.5% · Medicare 2%</p>
         </div>
         <div className="flex items-center gap-3">
@@ -270,7 +270,7 @@ export default function PayrollPage() {
       </div>
 
       {exportMsg && (
-        <div className={`rounded-lg px-4 py-2.5 text-sm border ${exportMsg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-amber-900/40 border-amber-700 text-amber-300'}`}>
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${exportMsg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-amber-900/40 border-amber-700 text-amber-300'}`}>
           {exportMsg}
         </div>
       )}
@@ -321,7 +321,11 @@ export default function PayrollPage() {
                 <tr><td colSpan={9} className="px-4 py-10 text-center text-gray-400 text-sm">Loading…</td></tr>
               ) : records.length === 0 ? (
                 <tr><td colSpan={9} className="px-4 py-12 text-center">
-                  <p className="text-4xl mb-3">💰</p>
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
                   <p className="text-gray-500 dark:text-gray-400 text-sm">No pay runs yet — create your first one.</p>
                 </td></tr>
               ) : records.map(r => (
@@ -343,7 +347,7 @@ export default function PayrollPage() {
                     <div className="flex flex-wrap gap-1.5 justify-end items-center">
                       {r.exportedToXero ? (
                         <span className="text-xs px-2 py-0.5 rounded-full bg-[#13B5EA]/20 border border-[#13B5EA]/40 text-[#13B5EA]" title={r.exportedAt ? `Exported ${new Date(r.exportedAt).toLocaleDateString('en-AU')}` : 'Exported'}>
-                          ✓ Xero
+                          Xero
                         </span>
                       ) : (
                         (r.status === 'approved' || r.status === 'paid') && xeroStatus?.connected && (
@@ -381,7 +385,7 @@ export default function PayrollPage() {
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">New Pay Run</h2>
-              <button onClick={() => { setShowModal(false); setPreview(null) }} className="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl">✕</button>
+              <button onClick={() => { setShowModal(false); setPreview(null) }} className="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl"></button>
             </div>
             <div className="px-6 py-5 space-y-5">
               {error && <div className="bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-800 rounded-lg px-3 py-2 text-sm text-red-600 dark:text-red-300">{error}</div>}
@@ -425,7 +429,7 @@ export default function PayrollPage() {
                     <button key={t} onClick={() => setForm(f => ({ ...f, payType: t }))}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition border ${form.payType === t ? 'text-white border-transparent' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
                       style={form.payType === t ? { background: 'var(--primary)' } : {}}>
-                      {t === 'hourly' ? '⏱ Hourly' : '💼 Annual Salary'}
+                      {t === 'hourly' ? '⏱ Hourly' : 'Annual Salary'}
                     </button>
                   ))}
                 </div>
@@ -473,7 +477,7 @@ export default function PayrollPage() {
               <button onClick={handlePreview} disabled={previewing}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition disabled:opacity-60 hover:opacity-90"
                 style={{ background: 'var(--accent, #7c3aed)' }}>
-                {previewing ? 'Calculating…' : '🧮 Calculate Pay'}
+                {previewing ? 'Calculating…' : 'Calculate Pay'}
               </button>
 
               {preview && (
@@ -505,7 +509,7 @@ export default function PayrollPage() {
                   <button onClick={handleCreatePayRun} disabled={saving || !form.employeeId || !form.periodStart || !form.periodEnd}
                     className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition disabled:opacity-50 hover:opacity-90 mt-1"
                     style={{ background: 'var(--primary)' }}>
-                    {saving ? 'Saving…' : '✓ Confirm & Save Pay Run'}
+                    {saving ? 'Saving…' : 'Confirm & Save Pay Run'}
                   </button>
                   {(!form.employeeId || !form.periodStart || !form.periodEnd) && (
                     <p className="text-xs text-center text-yellow-500">Fill employee and pay period to save.</p>
@@ -523,7 +527,7 @@ export default function PayrollPage() {
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">Payslip</h2>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-white text-xl">✕</button>
+              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-white text-xl"></button>
             </div>
             <div className="px-6 py-5 space-y-3 text-sm">
               <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Employee</span><span className="font-medium text-gray-900 dark:text-white">{selected.employeeFirstName} {selected.employeeLastName}</span></div>

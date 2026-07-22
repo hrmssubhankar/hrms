@@ -188,14 +188,14 @@ export default function ClientsPage() {
                       <Link href={`/super-admin/clients/${c.id}`}         className="text-xs text-blue-400 hover:text-blue-300 font-medium">Edit</Link>
                       <Link href={`/super-admin/clients/${c.id}/users`}   className="text-xs text-green-400 hover:text-green-300 font-medium">Users</Link>
                       <Link href={`/super-admin/clients/${c.id}/modules`} className="text-xs text-purple-400 hover:text-purple-300 font-medium">Modules</Link>
-                      <Link href={`/super-admin/clients/${c.id}?tab=theme`} className="text-xs text-pink-400 hover:text-pink-300 font-medium">🎨 Theme</Link>
+                      <Link href={`/super-admin/clients/${c.id}?tab=theme`} className="text-xs text-pink-400 hover:text-pink-300 font-medium">Theme</Link>
                       <button
                         onClick={() => loginAsTenant(c.id, c.name)}
                         disabled={impersonating === c.id || !c.isActive}
                         className="text-xs text-yellow-400 hover:text-yellow-300 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
                         title={c.isActive ? 'Open this tenant\'s portal as an impersonated session' : 'Client is inactive'}
                       >
-                        {impersonating === c.id ? '…' : '🔑 Login as'}
+                        {impersonating === c.id ? '…' : 'Login as'}
                       </button>
                       <button
                         onClick={() => deleteClient(c.id, c.name)}

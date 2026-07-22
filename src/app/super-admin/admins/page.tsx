@@ -224,7 +224,7 @@ export default function AdminsPage() {
       </div>
 
       <div className="bg-amber-950 border border-amber-800 rounded-xl p-4 text-xs text-amber-300">
-        ⚠️ The last remaining admin cannot be deleted.
+        ️ The last remaining admin cannot be deleted.
       </div>
     </div>
   )

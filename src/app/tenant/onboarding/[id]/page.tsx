@@ -144,7 +144,7 @@ export default function OnboardingDetailPage() {
           </div>
         </div>
         <div className="flex gap-2 items-center">
-          {saved && <span className="text-xs text-green-400">Saved ✓</span>}
+          {saved && <span className="text-xs text-green-400">Saved </span>}
           <span className={`text-xs px-3 py-1 rounded-full border font-medium ${STATUS_STYLE[rec.status] ?? 'bg-gray-800 text-gray-300 border-gray-700'}`}>
             {rec.status === 'in_progress' ? 'In Progress' : rec.status.charAt(0).toUpperCase() + rec.status.slice(1)}
           </span>
@@ -190,7 +190,7 @@ export default function OnboardingDetailPage() {
                   i === stageIdx ? 'bg-purple-600 text-white ring-2 ring-purple-400' :
                   'bg-gray-700 text-gray-400'
                 }`}>
-                  {i < stageIdx ? '✓' : i + 1}
+                  {i < stageIdx ? '' : i + 1}
                 </div>
                 <p className="text-[10px] text-gray-400 text-center leading-tight">{label}</p>
               </div>
@@ -209,7 +209,7 @@ export default function OnboardingDetailPage() {
         )}
         {rec.status === 'completed' && rec.completedAt && (
           <p className="text-xs text-green-400 text-center">
-            ✓ Completed {new Date(rec.completedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
+            Completed {new Date(rec.completedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         )}
       </div>
@@ -236,7 +236,7 @@ export default function OnboardingDetailPage() {
                   <div className={`w-5 h-5 rounded flex items-center justify-center border-2 shrink-0 transition ${
                     item.done ? 'bg-purple-600 border-purple-600' : 'border-gray-600'
                   }`}>
-                    {item.done && <span className="text-white text-xs">✓</span>}
+                    {item.done && <span className="text-white text-xs"></span>}
                   </div>
                   <span className={`text-sm transition ${item.done ? 'line-through text-gray-500' : 'text-gray-200'}`}>
                     {item.task}

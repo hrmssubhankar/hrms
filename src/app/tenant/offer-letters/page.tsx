@@ -24,8 +24,8 @@ const STATUS_STYLE: Record<string, string> = {
 }
 
 const EVENT_ICON: Record<string, string> = {
-  created:'📝', sent:'📤', viewed:'👁', accepted:'✅', rejected:'❌',
-  expired:'⏰', withdrawn:'↩️', pdf_generated:'📄', note_added:'💬', updated:'✏️',
+  created:'', sent:'', viewed:'', accepted:'', rejected:'',
+  expired:'⏰', withdrawn:'↩️', pdf_generated:'', note_added:'', updated:'️',
 }
 
 const EMP_TYPES = [
@@ -236,7 +236,11 @@ export default function OfferLettersPage() {
             <p className="text-gray-500 text-sm text-center py-8">Loading…</p>
           ) : offers.length === 0 ? (
             <div className="text-center py-12 text-gray-600">
-              <p className="text-4xl mb-2">📄</p>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
               <p className="text-sm">No offer letters yet. Create your first one.</p>
             </div>
           ) : offers.map(o => (
@@ -259,7 +263,11 @@ export default function OfferLettersPage() {
         <div className="lg:col-span-3">
           {!selected ? (
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-10 text-center">
-              <p className="text-4xl mb-3">📋</p>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
               <p className="text-gray-500 text-sm">Select an offer letter to view details and history</p>
             </div>
           ) : (
@@ -299,23 +307,23 @@ export default function OfferLettersPage() {
                 <div className="flex flex-wrap gap-2">
                   <button onClick={printOffer}
                     className="flex-1 py-2 text-xs font-medium bg-blue-700 hover:bg-blue-600 text-white rounded-lg transition">
-                    🖨 Print / Download PDF
+                    Print / Download PDF
                   </button>
                   {selected.status === 'draft' && (
                     <button onClick={() => updateStatus('sent')}
                       className="flex-1 py-2 text-xs font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition">
-                      📤 Mark as Sent
+                      Mark as Sent
                     </button>
                   )}
                   {selected.status === 'sent' && (
                     <>
                       <button onClick={() => updateStatus('accepted')}
                         className="flex-1 py-2 text-xs font-medium bg-green-700 hover:bg-green-600 text-white rounded-lg transition">
-                        ✅ Mark Accepted
+                        Mark Accepted
                       </button>
                       <button onClick={() => updateStatus('rejected')}
                         className="flex-1 py-2 text-xs font-medium bg-red-700 hover:bg-red-600 text-white rounded-lg transition">
-                        ❌ Mark Rejected
+                        Mark Rejected
                       </button>
                     </>
                   )}
@@ -328,8 +336,7 @@ export default function OfferLettersPage() {
                   {selected.status === 'draft' && (
                     <button onClick={() => deleteOffer(selected.id)}
                       className="py-2 px-3 text-xs text-red-400 border border-red-800 hover:bg-red-900/30 rounded-lg transition">
-                      🗑
-                    </button>
+                      </button>
                   )}
                 </div>
               </div>
@@ -359,7 +366,7 @@ export default function OfferLettersPage() {
                       <div key={ev.id} className="flex gap-3 items-start">
                         <div className="flex flex-col items-center shrink-0">
                           <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-sm">
-                            {EVENT_ICON[ev.event] ?? '📌'}
+                            {EVENT_ICON[ev.event] ?? ''}
                           </div>
                           {i < events.length - 1 && <div className="w-px h-4 bg-gray-700 mt-1" />}
                         </div>

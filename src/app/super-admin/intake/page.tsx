@@ -130,7 +130,7 @@ export default function IntakePage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to create client')
-      setSuccess(`✓ Client "${form.tradingName}" created successfully!`)
+      setSuccess(`Client "${form.tradingName}" created successfully!`)
       setTimeout(() => router.push(`/super-admin/clients/${data.tenant.id}/modules`), 1500)
     } catch (err: any) {
       setError(err.message)
@@ -154,7 +154,7 @@ export default function IntakePage() {
         <div className="flex gap-2">
           <button onClick={downloadPrintable}
             className="px-3 py-2 text-xs border border-gray-700 text-gray-300 rounded-lg hover:text-white transition">
-            🖨 Print / PDF
+            Print / PDF
           </button>
           <button onClick={downloadJSON}
             className="px-3 py-2 text-xs border border-purple-700 text-purple-300 rounded-lg hover:bg-purple-900/20 transition">
@@ -165,7 +165,7 @@ export default function IntakePage() {
 
       {/* Tab */}
       <div className="flex border-b border-gray-800">
-        {([['fill', '📝 Fill Online'], ['upload', '📤 Upload Completed Form']] as [Tab, string][]).map(([id, label]) => (
+        {([['fill', 'Fill Online'], ['upload', 'Upload Completed Form']] as [Tab, string][]).map(([id, label]) => (
           <button key={id} onClick={() => setTab(id)}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
             {label}
@@ -178,7 +178,7 @@ export default function IntakePage() {
 
       {tab === 'upload' && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center space-y-4">
-          <div className="text-4xl">📤</div>
+          <div className="text-4xl"></div>
           <p className="text-white font-medium">Upload a completed intake form</p>
           <p className="text-gray-400 text-sm">
             Share the <strong>Download Form</strong> button above with the client.
@@ -197,7 +197,7 @@ export default function IntakePage() {
 
           {/* Organisation */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">🏢 Organisation</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Organisation</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Trading Name *</label>
                 <input required value={form.tradingName} onChange={e => { set('tradingName', e.target.value); if (!form.legalName) set('legalName', e.target.value) }}
@@ -223,7 +223,7 @@ export default function IntakePage() {
 
           {/* Region */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">🌍 Region & Address</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Region & Address</h2>
             <div className="grid grid-cols-3 gap-4">
               <div><label className={LABEL}>Country *</label>
                 <select value={form.country} onChange={e => handleCountry(e.target.value)} className={INPUT}>
@@ -251,7 +251,7 @@ export default function IntakePage() {
 
           {/* Contacts */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">👤 Primary Contact</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Primary Contact</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Full Name *</label>
                 <input required value={form.contactName} onChange={e => set('contactName', e.target.value)}
@@ -282,7 +282,7 @@ export default function IntakePage() {
           {/* Required Modules */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">🧩 Required Modules</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Required Modules</h2>
               <div className="flex gap-2 text-xs">
                 <button type="button" onClick={() => setForm(f => ({ ...f, selectedModules: MODULES_LIST.map(m => m.id) }))}
                   className="text-purple-400 hover:text-purple-300">Select All</button>
@@ -307,7 +307,7 @@ export default function IntakePage() {
 
           {/* Admin Account */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">🔑 Portal Admin Account</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Portal Admin Account</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Admin Email</label>
                 <input type="email" value={form.adminEmail} onChange={e => set('adminEmail', e.target.value)}
@@ -318,14 +318,14 @@ export default function IntakePage() {
             </div>
             {form.adminEmail && (
               <div className="bg-blue-950/40 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
-                ✉ A welcome email with login credentials will be sent to <strong>{form.adminEmail}</strong> once email integration is active.
+                A welcome email with login credentials will be sent to <strong>{form.adminEmail}</strong> once email integration is active.
               </div>
             )}
           </section>
 
           {/* Notes */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">📝 Internal Notes</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Internal Notes</h2>
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={3}
               placeholder="Any special requirements, SLA agreements, go-live dates…"
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none" />
@@ -334,7 +334,7 @@ export default function IntakePage() {
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={loading}
               className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition">
-              {loading ? 'Creating Client…' : '✓ Create Client & Send Welcome Email →'}
+              {loading ? 'Creating Client…' : 'Create Client & Send Welcome Email →'}
             </button>
             <button type="button" onClick={downloadJSON}
               className="border border-gray-700 text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition">
@@ -406,7 +406,7 @@ ${[
   'Grievances','Separation','Analytics','Benefits','Recognition',
   'Referrals','DEI','Engagement','Assets','Rostering','Payroll',
   'Leave Management','Public Holidays'
-].map(m => `<div class="module">☐ ${m}</div>`).join('')}
+].map(m => `<div class="module">${m}</div>`).join('')}
 </div>
 
 <h2>Admin Portal Account</h2>

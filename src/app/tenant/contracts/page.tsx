@@ -14,11 +14,11 @@ type Stats = { total: number; draft: number; sent: number; signed: number }
 type Employee = { id: string; firstName: string; lastName: string }
 
 const CONTRACT_TYPES = [
-  { value: 'employment',  label: '👔 Permanent Employment' },
+  { value: 'employment',  label: 'Permanent Employment' },
   { value: 'casual',      label: '⏱ Casual Employment' },
-  { value: 'contractor',  label: '🔧 Independent Contractor' },
-  { value: 'traineeship', label: '🎓 Traineeship' },
-  { value: 'volunteer',   label: '🤝 Volunteer' },
+  { value: 'contractor',  label: 'Independent Contractor' },
+  { value: 'traineeship', label: 'Traineeship' },
+  { value: 'volunteer',   label: 'Volunteer' },
 ]
 
 const STATUS_STYLE: Record<string, string> = {
@@ -153,7 +153,11 @@ export default function ContractsPage() {
 
       {loading ? <div className="text-gray-400 text-sm">Loading…</div> : contracts.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-          <p className="text-4xl mb-3">📝</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No contracts yet</p>
           <p className="text-gray-500 text-sm mt-1">Create a contract to begin the employment documentation process.</p>
         </div>
@@ -195,18 +199,18 @@ export default function ContractsPage() {
                         {c.status === 'draft' && (
                           <button onClick={() => patch(c.id, { status: 'sent' })}
                             className="text-xs bg-blue-900/40 border border-blue-800 text-blue-300 hover:bg-blue-900/60 px-3 py-1.5 rounded-lg transition">
-                            📤 Mark as Sent
+                            Mark as Sent
                           </button>
                         )}
                         {c.status === 'sent' && (
                           <button onClick={() => patch(c.id, { status: 'signed' })}
                             className="text-xs bg-green-900/40 border border-green-800 text-green-300 hover:bg-green-900/60 px-3 py-1.5 rounded-lg transition">
-                            ✅ Mark as Signed
+                            Mark as Signed
                           </button>
                         )}
                         <button onClick={() => patch(c.id, { status: 'void' })}
                           className="text-xs bg-gray-800 border border-gray-700 text-gray-400 hover:border-red-700 hover:text-red-400 px-3 py-1.5 rounded-lg transition">
-                          🚫 Void
+                          Void
                         </button>
                       </div>
                     )}
@@ -261,7 +265,7 @@ export default function ContractsPage() {
                     {/* Signed info */}
                     {c.status === 'signed' && (
                       <div className="bg-green-950/40 border border-green-800/50 rounded-lg p-3 flex items-center gap-3">
-                        <span className="text-xl">✅</span>
+                        <span className="text-xl"></span>
                         <div>
                           <p className="text-sm font-semibold text-green-300">Contract Executed</p>
                           {c.signedAt && <p className="text-xs text-gray-400">Signed {new Date(c.signedAt).toLocaleDateString('en-AU')}</p>}

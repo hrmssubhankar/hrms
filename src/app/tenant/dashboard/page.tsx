@@ -84,18 +84,18 @@ const EMP_TYPE_COLOR: Record<string, string> = {
 const ENTITY_COLORS = ['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ef4444']
 
 const MODULE_SHORTCUTS = [
-  { key: 'employee-management', icon: '👥', label: 'Employees', desc: 'View & manage staff' },
-  { key: 'leave',           icon: '🏖', label: 'Leave',       desc: 'Requests & balances' },
-  { key: 'payroll',         icon: '💰', label: 'Payroll',     desc: 'Pay runs & exports' },
-  { key: 'documents',       icon: '📄', label: 'Documents',   desc: 'Upload & manage docs' },
-  { key: 'whs',             icon: '⚠️', label: 'WHS',         desc: 'Incidents & hazards' },
-  { key: 'public-holidays', icon: '📅', label: 'Holidays',    desc: 'Public holiday calendar' },
-  { key: 'training',        icon: '📚', label: 'Training',    desc: 'Courses & records' },
-  { key: 'recruitment',     icon: '🔍', label: 'Recruitment', desc: 'Jobs & candidates' },
-  { key: 'rostering',       icon: '🕐', label: 'Rostering',   desc: 'Shifts & timesheets' },
-  { key: 'onboarding',      icon: '🎉', label: 'Onboarding',  desc: 'New starter checklist' },
-  { key: 'settings',        icon: '⚙',  label: 'Settings',    desc: 'Tenant configuration' },
-  { key: 'audit-logs',      icon: '📋', label: 'Audit Log',   desc: 'System activity' },
+  { key: 'employee-management', icon: '', label: 'Employees', desc: 'View & manage staff' },
+  { key: 'leave',           icon: '', label: 'Leave',       desc: 'Requests & balances' },
+  { key: 'payroll',         icon: '', label: 'Payroll',     desc: 'Pay runs & exports' },
+  { key: 'documents',       icon: '', label: 'Documents',   desc: 'Upload & manage docs' },
+  { key: 'whs',             icon: '️', label: 'WHS',         desc: 'Incidents & hazards' },
+  { key: 'public-holidays', icon: '', label: 'Holidays',    desc: 'Public holiday calendar' },
+  { key: 'training',        icon: '', label: 'Training',    desc: 'Courses & records' },
+  { key: 'recruitment',     icon: '', label: 'Recruitment', desc: 'Jobs & candidates' },
+  { key: 'rostering',       icon: '', label: 'Rostering',   desc: 'Shifts & timesheets' },
+  { key: 'onboarding',      icon: '', label: 'Onboarding',  desc: 'New starter checklist' },
+  { key: 'settings',        icon: '',  label: 'Settings',    desc: 'Tenant configuration' },
+  { key: 'audit-logs',      icon: '', label: 'Audit Log',   desc: 'System activity' },
 ]
 
 // ── Mini bar chart ────────────────────────────────────────────────────────────
@@ -168,7 +168,7 @@ export default function DashboardPage() {
       >
         <div className="relative z-10">
           <p className="text-sm font-medium opacity-80">{greeting()},</p>
-          <h1 className="text-2xl font-bold mt-0.5">{userName || '…'} 👋</h1>
+          <h1 className="text-2xl font-bold mt-0.5">{userName || '…'} </h1>
           <p className="text-sm opacity-70 mt-1">{tenantName || 'HRMS'} · HR Portal</p>
         </div>
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-white" />
@@ -184,7 +184,7 @@ export default function DashboardPage() {
       {/* Alert banner */}
       {hasAlerts && (
         <div className="bg-red-950/40 border border-red-700/60 rounded-2xl px-5 py-4 flex flex-wrap gap-4 items-center">
-          <p className="text-sm font-semibold text-red-300 shrink-0">🚨 Attention required</p>
+          <p className="text-sm font-semibold text-red-300 shrink-0">Attention required</p>
           {data!.compliance.redCount > 0 && (
             <Link href="/tenant/employee-management" className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2">
               {data!.compliance.redCount} employee{data!.compliance.redCount > 1 ? 's' : ''} — red compliance
@@ -223,7 +223,7 @@ export default function DashboardPage() {
         <>
           {/* ── Headcount stats ── */}
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">👥 Workforce</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Workforce</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {[
                 { label: 'Total', value: data.headcount.total, color: 'text-white', href: '/tenant/employee-management' },
@@ -286,7 +286,7 @@ export default function DashboardPage() {
 
           {/* ── Payroll ── */}
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">💰 Payroll</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Payroll</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
@@ -341,7 +341,7 @@ export default function DashboardPage() {
 
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">🏖 Leave</h3>
+                <h3 className="text-sm font-semibold text-white">Leave</h3>
                 <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
               </div>
               <div className="space-y-2.5">
@@ -366,7 +366,7 @@ export default function DashboardPage() {
 
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">📅 Holidays</h3>
+                <h3 className="text-sm font-semibold text-white">Holidays</h3>
                 <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
               </div>
               {data.holidays.upcoming.length === 0
@@ -387,7 +387,7 @@ export default function DashboardPage() {
 
             <div className={`bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.documents.expiredActive > 0 ? 'border-red-700/40' : 'border-gray-800'}`}>
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">📄 Documents</h3>
+                <h3 className="text-sm font-semibold text-white">Documents</h3>
                 <Link href="/tenant/documents" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
               </div>
               <div className="space-y-2.5">
@@ -404,7 +404,7 @@ export default function DashboardPage() {
 
             <div className={`bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.incidents.openCritical > 0 ? 'border-red-700/40' : 'border-gray-800'}`}>
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">⚠️ WHS</h3>
+                <h3 className="text-sm font-semibold text-white">️ WHS</h3>
                 <Link href="/tenant/whs" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
               </div>
               <div className="space-y-2.5">
@@ -430,7 +430,7 @@ export default function DashboardPage() {
 
       {/* ── Module shortcuts ── (always shown) */}
       <section>
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">🧭 Modules</h2>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Modules</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {MODULE_SHORTCUTS.map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}

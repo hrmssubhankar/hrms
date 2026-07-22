@@ -67,15 +67,15 @@ const EXPIRY_REQUIRED_CATS = new Set([
 ])
 
 const MIME_ICON: Record<string, string> = {
-  'application/pdf':  '📄',
-  'image/png':        '🖼',
-  'image/jpeg':       '🖼',
-  'application/msword': '📝',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '📝',
-  'application/vnd.ms-excel': '📊',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '📊',
+  'application/pdf':  '',
+  'image/png':        '',
+  'image/jpeg':       '',
+  'application/msword': '',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '',
+  'application/vnd.ms-excel': '',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '',
 }
-const mimeIcon = (m: string | null) => m ? (MIME_ICON[m] ?? '📁') : '📁'
+const mimeIcon = (m: string | null) => m ? (MIME_ICON[m] ?? '') : ''
 
 function fmtSize(bytes: number | null) {
   if (!bytes) return ''
@@ -200,14 +200,14 @@ export default function DocumentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">📄 Document Management</h1>
+          <h1 className="text-2xl font-bold text-white">Document Management</h1>
           <p className="text-sm text-gray-400 mt-0.5">Centralised register with expiry tracking and Vercel Blob storage</p>
         </div>
         <button
           onClick={() => { setShowForm(v => !v) }}
           className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
         >
-          {showForm ? '✕ Cancel' : '+ Add Document'}
+          {showForm ? 'Cancel' : '+ Add Document'}
         </button>
       </div>
 
@@ -230,7 +230,7 @@ export default function DocumentsPage() {
       {/* Expired alert */}
       {expiredActiveDocs.length > 0 && (
         <div className="bg-red-950/40 border border-red-700/60 rounded-2xl px-5 py-4 space-y-2">
-          <p className="text-sm font-semibold text-red-300">🚨 {expiredActiveDocs.length} document{expiredActiveDocs.length > 1 ? 's' : ''} are expired but still marked active</p>
+          <p className="text-sm font-semibold text-red-300">{expiredActiveDocs.length} document{expiredActiveDocs.length > 1 ? 's' : ''} are expired but still marked active</p>
           <div className="flex flex-wrap gap-2">
             {expiredActiveDocs.slice(0, 5).map(d => (
               <span key={d.id} className="text-xs bg-red-900/40 border border-red-800 text-red-300 px-2.5 py-1 rounded-full">
@@ -246,7 +246,7 @@ export default function DocumentsPage() {
       {/* Expiring soon alert */}
       {expiringDocs.length > 0 && (
         <div className="bg-amber-950/30 border border-amber-700/50 rounded-2xl px-5 py-4 space-y-2">
-          <p className="text-sm font-semibold text-amber-300">⚠️ {expiringDocs.length} document{expiringDocs.length > 1 ? 's' : ''} expiring within 30 days</p>
+          <p className="text-sm font-semibold text-amber-300">️ {expiringDocs.length} document{expiringDocs.length > 1 ? 's' : ''} expiring within 30 days</p>
           <div className="flex flex-wrap gap-2">
             {expiringDocs.map(d => {
               const days = daysUntilExpiry(d.expiryDate!)
@@ -363,7 +363,11 @@ export default function DocumentsPage() {
         <div className="text-center py-12 text-gray-500">Loading…</div>
       ) : filtered.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl py-16 text-center">
-          <p className="text-4xl mb-3">📄</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No documents found</p>
           <p className="text-sm text-gray-600 mt-1">
             {filterCat || filterStat ? 'Try clearing filters' : 'Add a document to build your compliance register'}
@@ -418,7 +422,7 @@ export default function DocumentsPage() {
                     {d.expiryDate ? (
                       <span title={fmtDate(d.expiryDate)}>
                         {fmtDate(d.expiryDate)}
-                        {d.expiryDate < today && ' ⚠'}
+                        {d.expiryDate < today && ' '}
                         {d.expiryDate >= today && d.expiryDate <= in30 && (
                           <span className="ml-1 text-amber-500">({daysUntilExpiry(d.expiryDate)}d)</span>
                         )}
@@ -430,7 +434,7 @@ export default function DocumentsPage() {
                       {d.status === 'pending_review' && (
                         <button onClick={() => updateStatus(d.id, 'active')}
                           className="text-xs bg-green-900/30 border border-green-800 text-green-300 hover:bg-green-900/50 px-2 py-1 rounded transition">
-                          ✓ Approve
+                          Approve
                         </button>
                       )}
                       {d.status === 'active' && (

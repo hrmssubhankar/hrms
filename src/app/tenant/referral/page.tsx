@@ -66,7 +66,11 @@ export default function ReferralPage() {
       <div className="flex-1 overflow-y-auto p-6">
         {loading ? <p className="text-sm text-gray-400">Loading…</p> : referrals.length===0 ? (
           <div className="text-center py-16 text-gray-400">
-            <p className="text-5xl mb-3">🤝</p>
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
             <p className="font-medium text-gray-600">No referrals yet</p>
             <p className="text-sm mt-1">Add a referral when an employee refers a candidate.</p>
           </div>

@@ -3,11 +3,11 @@
 import { useState, useCallback } from 'react'
 
 const REPORTS = [
-  { id:'headcount',  label:'Headcount',          icon:'👥', description:'All employees by type and status' },
-  { id:'leave',      label:'Leave Summary',       icon:'🏖️', description:'Leave requests in a date range' },
-  { id:'compliance', label:'Compliance / Checks', icon:'🔍', description:'Screening record status overview' },
-  { id:'turnover',   label:'Turnover / Exits',    icon:'🚪', description:'Separation and exit records' },
-  { id:'whs',        label:'WHS Incidents',       icon:'🦺', description:'Workplace safety incidents summary' },
+  { id:'headcount',  label:'Headcount',          icon:'', description:'All employees by type and status' },
+  { id:'leave',      label:'Leave Summary',       icon:'️', description:'Leave requests in a date range' },
+  { id:'compliance', label:'Compliance / Checks', icon:'', description:'Screening record status overview' },
+  { id:'turnover',   label:'Turnover / Exits',    icon:'', description:'Separation and exit records' },
+  { id:'whs',        label:'WHS Incidents',       icon:'', description:'Workplace safety incidents summary' },
 ]
 
 type ReportRow = Record<string, unknown>
@@ -150,7 +150,7 @@ export default function ReportsPage() {
                                 {row[c] instanceof Date
                                   ? (row[c] as Date).toLocaleDateString()
                                   : typeof row[c] === 'boolean'
-                                  ? row[c] ? '✓' : '—'
+                                  ? row[c] ? '' : '—'
                                   : String(row[c] ?? '—')}
                               </td>
                             ))}

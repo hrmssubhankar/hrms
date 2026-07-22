@@ -80,11 +80,11 @@ export default function LeaveSettingsPage() {
             className="text-gray-500 hover:text-white transition">
             ← Leave
           </Link>
-          <h1 className="text-2xl font-bold text-white">⚙ Leave Settings</h1>
+          <h1 className="text-2xl font-bold text-white">Leave Settings</h1>
         </div>
         <div className="flex items-center gap-3">
           {saved && (
-            <span className="text-sm text-green-400 font-medium">✓ Saved</span>
+            <span className="text-sm text-green-400 font-medium">Saved</span>
           )}
           <button
             onClick={save}
@@ -104,7 +104,7 @@ export default function LeaveSettingsPage() {
 
       {error && (
         <div className="bg-red-900/40 border border-red-700 rounded-xl px-4 py-3 text-sm text-red-300">
-          ⚠ {error}
+          {error}
         </div>
       )}
 

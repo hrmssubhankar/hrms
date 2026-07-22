@@ -66,11 +66,11 @@ export default function NotificationsPage() {
   const unread = notifications.filter(n => !n.isRead).length
 
   const TYPE_ICON: Record<string, string> = {
-    document_expiry: '📄',
-    payslip:         '💰',
-    onboarding:      '🎉',
-    compliance:      '🔒',
-    general:         '🔔',
+    document_expiry: '',
+    payslip:         '',
+    onboarding:      '',
+    compliance:      '',
+    general:         '',
   }
 
   return (
@@ -78,7 +78,7 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">🔔 Notifications</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {unread > 0 ? `${unread} unread` : 'All caught up'}
           </p>
@@ -93,7 +93,7 @@ export default function NotificationsPage() {
 
       {/* Email Alert Panel */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
-        <h2 className="font-semibold text-gray-900 dark:text-white mb-1">📧 Document Expiry Alerts</h2>
+        <h2 className="font-semibold text-gray-900 dark:text-white mb-1">Document Expiry Alerts</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Scan for compliance documents expiring soon and email employees + compliance managers.
         </p>
@@ -113,7 +113,7 @@ export default function NotificationsPage() {
         {result && (
           <div className={`rounded-xl p-4 mb-4 border ${result.sent > 0 ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
             <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-              {result.sent > 0 ? '✅ Alerts sent' : 'ℹ️ Scan complete'}
+              {result.sent > 0 ? 'Alerts sent' : 'ℹ️ Scan complete'}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-300">
               Scanned <strong>{result.scanned}</strong> expiring document{result.scanned !== 1 ? 's' : ''} ·
@@ -123,14 +123,14 @@ export default function NotificationsPage() {
             {result.details.sent.length > 0 && (
               <ul className="mt-2 space-y-0.5">
                 {result.details.sent.map((s, i) => (
-                  <li key={i} className="text-xs text-gray-500 dark:text-gray-400">✓ {s}</li>
+                  <li key={i} className="text-xs text-gray-500 dark:text-gray-400">{s}</li>
                 ))}
               </ul>
             )}
             {result.details.failed.length > 0 && (
               <ul className="mt-2 space-y-0.5">
                 {result.details.failed.map((s, i) => (
-                  <li key={i} className="text-xs text-red-400">✗ {s}</li>
+                  <li key={i} className="text-xs text-red-400">{s}</li>
                 ))}
               </ul>
             )}
@@ -140,11 +140,11 @@ export default function NotificationsPage() {
         <button onClick={runExpiryCheck} disabled={running}
           className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition disabled:opacity-60 hover:opacity-90"
           style={{ background: 'var(--primary)' }}>
-          {running ? 'Scanning & sending…' : `🔍 Run expiry check (${daysAhead} days)`}
+          {running ? 'Scanning & sending…' : `Run expiry check (${daysAhead} days)`}
         </button>
 
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-          💡 To automate this daily, add <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">vercel.json</code> with a cron job — see setup guide below.
+          To automate this daily, add <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">vercel.json</code> with a cron job — see setup guide below.
         </p>
       </div>
 
@@ -173,7 +173,7 @@ export default function NotificationsPage() {
           <div className="px-5 py-10 text-center text-gray-400 text-sm">Loading…</div>
         ) : notifications.length === 0 ? (
           <div className="px-5 py-12 text-center">
-            <p className="text-3xl mb-2">🔔</p>
+            <p className="text-3xl mb-2"></p>
             <p className="text-gray-500 dark:text-gray-400 text-sm">No notifications yet.</p>
           </div>
         ) : (
@@ -181,7 +181,7 @@ export default function NotificationsPage() {
             {notifications.map(n => (
               <li key={n.id}
                 className={`flex gap-3 px-5 py-4 transition ${!n.isRead ? 'bg-blue-50 dark:bg-blue-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/40'}`}>
-                <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[n.type] ?? '🔔'}</span>
+                <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[n.type] ?? ''}</span>
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium ${!n.isRead ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{n.title}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{n.message}</p>

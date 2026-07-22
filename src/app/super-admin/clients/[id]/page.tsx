@@ -5,9 +5,9 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const TIERS = [
-  { value: 'starter',      label: '🟢 Starter',      modules: 9,  desc: '9 modules — Core + Compliance' },
-  { value: 'professional', label: '🔵 Professional',  modules: 19, desc: '19 modules — + Learning, Talent, Safety' },
-  { value: 'enterprise',   label: '🟣 Enterprise',    modules: 28, desc: '28 modules — full platform' },
+  { value: 'starter',      label: 'Starter',      modules: 9,  desc: '9 modules — Core + Compliance' },
+  { value: 'professional', label: 'Professional',  modules: 19, desc: '19 modules — + Learning, Talent, Safety' },
+  { value: 'enterprise',   label: 'Enterprise',    modules: 28, desc: '28 modules — full platform' },
 ]
 
 const STARTER_MODULES    = [1,2,3,4,5,6,7,8,9]
@@ -186,15 +186,15 @@ function EditClientInner() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/super-admin/clients/${id}/users`}        className="text-xs border border-green-700 text-green-300 hover:bg-green-900/30 px-3 py-1.5 rounded-lg transition">👥 Users</Link>
-          <Link href={`/super-admin/clients/${id}/modules`}      className="text-xs border border-purple-700 text-purple-300 hover:bg-purple-900/30 px-3 py-1.5 rounded-lg transition">🧩 Modules</Link>
-          <Link href={`/super-admin/clients/${id}/integrations`} className="text-xs border border-blue-700 text-blue-300 hover:bg-blue-900/30 px-3 py-1.5 rounded-lg transition">🔗 Integrations</Link>
+          <Link href={`/super-admin/clients/${id}/users`}        className="text-xs border border-green-700 text-green-300 hover:bg-green-900/30 px-3 py-1.5 rounded-lg transition">Users</Link>
+          <Link href={`/super-admin/clients/${id}/modules`}      className="text-xs border border-purple-700 text-purple-300 hover:bg-purple-900/30 px-3 py-1.5 rounded-lg transition">Modules</Link>
+          <Link href={`/super-admin/clients/${id}/integrations`} className="text-xs border border-blue-700 text-blue-300 hover:bg-blue-900/30 px-3 py-1.5 rounded-lg transition">Integrations</Link>
         </div>
       </div>
 
       {/* Alerts */}
       {error   && <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
-      {success && <div className="bg-green-900/50 border border-green-700 rounded-lg p-3 text-sm text-green-300">✓ {success}</div>}
+      {success && <div className="bg-green-900/50 border border-green-700 rounded-lg p-3 text-sm text-green-300">{success}</div>}
 
       {/* Tier-change banner */}
       {tierChanged && (
@@ -213,9 +213,9 @@ function EditClientInner() {
       {/* Tabs */}
       <div className="flex border-b border-gray-800">
         {([
-          { id: 'general',  label: '⚙️ General' },
-          { id: 'branding', label: '🖼 Logo & Branding' },
-          { id: 'theme',    label: '🎨 Theme & Colours' },
+          { id: 'general',  label: '️ General' },
+          { id: 'branding', label: 'Logo & Branding' },
+          { id: 'theme',    label: 'Theme & Colours' },
         ] as { id: 'general'|'branding'|'theme'; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${activeTab === t.id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
@@ -323,7 +323,7 @@ function EditClientInner() {
                 {logoUrl ? (
                   <img src={logoUrl} alt="Logo" className="max-h-full max-w-full object-contain p-2" />
                 ) : (
-                  <span className="text-3xl text-gray-600">🖼</span>
+                  <span className="text-3xl text-gray-600"></span>
                 )}
               </div>
               <div className="space-y-2 flex-1">
@@ -331,7 +331,7 @@ function EditClientInner() {
                   className="hidden" onChange={handleLogoFile} />
                 <button onClick={() => fileRef.current?.click()} disabled={logoUploading}
                   className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 disabled:opacity-60 text-white text-sm px-4 py-2.5 rounded-lg transition">
-                  {logoUploading ? '⏳ Uploading…' : '📁 Upload Logo'}
+                  {logoUploading ? '⏳ Uploading…' : 'Upload Logo'}
                 </button>
                 {logoUrl && (
                   <button onClick={removeLogo}
@@ -522,7 +522,7 @@ function EditClientInner() {
 
           <button onClick={saveTheme} disabled={saving}
             className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-            {saving ? 'Saving…' : '✓ Save Theme — applies immediately to tenant portal'}
+            {saving ? 'Saving…' : 'Save Theme — applies immediately to tenant portal'}
           </button>
         </div>
       )}

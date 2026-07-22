@@ -130,7 +130,7 @@ export default function CompetencyPage() {
         {(['library', 'assessments'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === t ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
-            {t === 'library' ? `📚 Framework (${competencies.length})` : `✅ Assessments (${assessments.length})`}
+            {t === 'library' ? `Framework (${competencies.length})` : `Assessments (${assessments.length})`}
           </button>
         ))}
       </div>
@@ -192,8 +192,8 @@ export default function CompetencyPage() {
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Outcome *</label>
               <select required value={assForm.outcome} onChange={e => setAssForm(f => ({ ...f, outcome: e.target.value }))} className={INPUT}>
-                <option value="competent">✅ Competent</option>
-                <option value="not_yet_competent">❌ Not Yet Competent</option>
+                <option value="competent">Competent</option>
+                <option value="not_yet_competent">Not Yet Competent</option>
               </select>
             </div>
             <div>
@@ -227,7 +227,11 @@ export default function CompetencyPage() {
           {tab === 'library' && (
             Object.keys(grouped).length === 0 ? (
               <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-                <p className="text-4xl mb-3">🎯</p>
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
                 <p className="text-gray-300 font-medium">No competencies defined</p>
                 <p className="text-gray-500 text-sm mt-1">Add your competency framework to begin assessments.</p>
               </div>
@@ -269,7 +273,11 @@ export default function CompetencyPage() {
 
               {assessments.length === 0 ? (
                 <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-                  <p className="text-4xl mb-3">✅</p>
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
                   <p className="text-gray-300 font-medium">No assessments recorded</p>
                 </div>
               ) : (
@@ -296,7 +304,7 @@ export default function CompetencyPage() {
                             <td className="px-4 py-3">
                               {a.outcome ? (
                                 <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${OUTCOME_STYLE[a.outcome] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
-                                  {a.outcome === 'competent' ? '✅ Competent' : '❌ Not Yet'}
+                                  {a.outcome === 'competent' ? 'Competent' : 'Not Yet'}
                                 </span>
                               ) : <span className="text-gray-600">Pending</span>}
                             </td>

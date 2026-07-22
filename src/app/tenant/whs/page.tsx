@@ -14,12 +14,12 @@ type Stats = { total: number; open: number; investigating: number; closed: numbe
 type Employee = { id: string; firstName: string; lastName: string }
 
 const INCIDENT_TYPES = [
-  { value: 'injury',            label: '🤕 Injury' },
-  { value: 'near_miss',         label: '⚠️  Near Miss' },
-  { value: 'hazard',            label: '🔶 Hazard' },
-  { value: 'unsafe_condition',  label: '🏚 Unsafe Condition' },
-  { value: 'property_damage',   label: '💥 Property Damage' },
-  { value: 'environmental',     label: '🌿 Environmental' },
+  { value: 'injury',            label: 'Injury' },
+  { value: 'near_miss',         label: '️  Near Miss' },
+  { value: 'hazard',            label: 'Hazard' },
+  { value: 'unsafe_condition',  label: 'Unsafe Condition' },
+  { value: 'property_damage',   label: 'Property Damage' },
+  { value: 'environmental',     label: 'Environmental' },
 ]
 
 const SEVERITIES = [
@@ -197,7 +197,7 @@ export default function WhsPage() {
           </div>
           {form.severity === 'critical' && (
             <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
-              ⚠️ Critical incident — notify SafeWork Australia / state WHS regulator as required by law.
+              ️ Critical incident — notify SafeWork Australia / state WHS regulator as required by law.
             </div>
           )}
           <button type="submit" disabled={saving}
@@ -229,7 +229,11 @@ export default function WhsPage() {
       {/* Incident list */}
       {loading ? <div className="text-gray-400 text-sm">Loading…</div> : incidents.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-          <p className="text-4xl mb-3">🦺</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No incidents recorded</p>
           <p className="text-gray-500 text-sm mt-1">Use the "Report Incident" button to log a new event.</p>
         </div>
@@ -261,7 +265,7 @@ export default function WhsPage() {
                     </div>
                     <p className="text-gray-400 text-xs truncate">{inc.description}</p>
                     <p className="text-gray-600 text-xs mt-0.5">
-                      {inc.location && `📍 ${inc.location} · `}
+                      {inc.location && `${inc.location} · `}
                       {new Date(inc.occurredAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
                       {(inc.employeeFirstName) && ` · ${inc.employeeFirstName} ${inc.employeeLastName}`}
                     </p>
@@ -280,13 +284,13 @@ export default function WhsPage() {
                       {inc.status !== 'investigating' && (
                         <button onClick={() => updateStatus(inc.id, 'investigating')}
                           className="text-xs border border-amber-800 text-amber-300 hover:bg-amber-900/30 px-3 py-1.5 rounded-lg transition">
-                          🔍 Investigating
+                          Investigating
                         </button>
                       )}
                       {inc.status !== 'closed' && (
                         <button onClick={() => updateStatus(inc.id, 'closed')}
                           className="text-xs border border-green-800 text-green-300 hover:bg-green-900/30 px-3 py-1.5 rounded-lg transition">
-                          ✓ Close
+                          Close
                         </button>
                       )}
                       {inc.status === 'closed' && (
@@ -308,7 +312,7 @@ export default function WhsPage() {
                               <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition ${
                                 a.done ? 'bg-green-600 border-green-600' : 'border-gray-600 group-hover:border-gray-400'
                               }`}>
-                                {a.done && <span className="text-white text-xs">✓</span>}
+                                {a.done && <span className="text-white text-xs"></span>}
                               </div>
                               <span className={a.done ? 'line-through text-gray-500' : 'text-gray-300'}>{a.action}</span>
                             </li>

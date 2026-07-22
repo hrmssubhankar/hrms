@@ -175,7 +175,7 @@ export default function AuditLogsPage() {
               ) : logs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
-                    <div className="text-4xl mb-2">📋</div>
+                    <div className="text-4xl mb-2"></div>
                     No audit events found
                   </td>
                 </tr>

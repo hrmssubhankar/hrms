@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
 
       {/* ── Headcount ── */}
       <section>
-        <SectionHeader title="Headcount" icon="👥" />
+        <SectionHeader title="Headcount" icon="" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <StatCard label="Total Active" value={headcount.total} color="text-white" />
           <StatCard label="New (30 days)" value={headcount.newLast30} color="text-green-400" />
@@ -123,7 +123,7 @@ export default function AnalyticsPage() {
 
       {/* ── Compliance ── */}
       <section>
-        <SectionHeader title="Compliance & Screening" icon="🔒" />
+        <SectionHeader title="Compliance & Screening" icon="" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard label="Screening Records" value={compliance.screeningTotal} />
           <StatCard label="Verified" value={compliance.screeningVerified} color="text-green-400" />
@@ -138,7 +138,7 @@ export default function AnalyticsPage() {
 
       {/* ── Training ── */}
       <section>
-        <SectionHeader title="Training & LMS" icon="📚" />
+        <SectionHeader title="Training & LMS" icon="" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <StatCard label="Total Enrolments" value={training.total} />
           <StatCard label="Completed" value={training.completed} color="text-green-400" />
@@ -162,7 +162,7 @@ export default function AnalyticsPage() {
       {/* ── WHS + Grievances side-by-side ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section>
-          <SectionHeader title="Work Health & Safety" icon="🦺" />
+          <SectionHeader title="Work Health & Safety" icon="" />
           <div className="grid grid-cols-2 gap-3">
             <StatCard label="Total Incidents" value={whs.total} />
             <StatCard label="Last 30 Days" value={whs.last30} color="text-amber-400" />
@@ -173,7 +173,7 @@ export default function AnalyticsPage() {
         </section>
 
         <section>
-          <SectionHeader title="Grievances & Investigations" icon="⚖️" />
+          <SectionHeader title="Grievances & Investigations" icon="️" />
           <div className="grid grid-cols-2 gap-3">
             <StatCard label="Total" value={grievances.total} />
             <StatCard label="Open" value={grievances.open}
@@ -195,7 +195,7 @@ export default function AnalyticsPage() {
       {/* ── Performance + Turnover ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section>
-          <SectionHeader title="Performance Reviews" icon="📈" />
+          <SectionHeader title="Performance Reviews" icon="" />
           <div className="grid grid-cols-2 gap-3">
             <StatCard label="Total Reviews" value={performance.total} />
             <StatCard label="Completed" value={performance.completed} color="text-green-400" />
@@ -208,7 +208,7 @@ export default function AnalyticsPage() {
         </section>
 
         <section>
-          <SectionHeader title="Turnover (90 days)" icon="🚪" />
+          <SectionHeader title="Turnover (90 days)" icon="" />
           <div className="grid grid-cols-2 gap-3">
             <StatCard label="Separations" value={turnover.total90days} color="text-amber-400" />
             <StatCard label="Turnover Rate" value={`${turnover.turnoverRate}%`}
@@ -221,7 +221,7 @@ export default function AnalyticsPage() {
 
       {/* ── Supervision ── */}
       <section>
-        <SectionHeader title="Supervision" icon="👁" />
+        <SectionHeader title="Supervision" icon="" />
         <div className="grid grid-cols-2 gap-3">
           <StatCard label="Overdue Sessions" value={supervision.overdue}
             color={supervision.overdue > 0 ? 'text-red-400' : 'text-gray-400'}

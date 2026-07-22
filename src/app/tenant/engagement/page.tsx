@@ -9,11 +9,11 @@ type Employee = { id: string; firstName: string; lastName: string }
 const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 const SURVEY_TYPES = [
-  { value: 'new_starter_30', label: '🌱 New Starter 30-day' },
-  { value: 'probation_90',   label: '📋 Probation 90-day' },
-  { value: 'annual',         label: '📅 Annual Engagement' },
-  { value: 'pulse',          label: '⚡ Pulse Check' },
-  { value: 'exit',           label: '🚪 Exit Survey' },
+  { value: 'new_starter_30', label: 'New Starter 30-day' },
+  { value: 'probation_90',   label: 'Probation 90-day' },
+  { value: 'annual',         label: 'Annual Engagement' },
+  { value: 'pulse',          label: 'Pulse Check' },
+  { value: 'exit',           label: 'Exit Survey' },
 ]
 
 export default function EngagementPage() {
@@ -105,7 +105,11 @@ export default function EngagementPage() {
 
       {loading ? <p className="text-gray-400 text-sm">Loading…</p> : surveys.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-          <p className="text-4xl mb-3">💬</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No surveys yet</p>
         </div>
       ) : (
@@ -117,7 +121,7 @@ export default function EngagementPage() {
                   <p className="text-white font-medium">{s.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {SURVEY_TYPES.find(t => t.value === s.type)?.label ?? s.type ?? 'General'}
-                    {s.isAnonymous && ' · 🔒 Anonymous'}
+                    {s.isAnonymous && ' · Anonymous'}
                   </p>
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full border shrink-0 ${s.isActive ? 'bg-green-900/50 text-green-300 border-green-800' : 'bg-gray-800 text-gray-500 border-gray-700'}`}>
@@ -184,7 +188,7 @@ export default function EngagementPage() {
             {responses.map(r => (
               <div key={r.id} className="bg-gray-800/50 rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-1">
-                  {selected.isAnonymous ? '🔒 Anonymous' : `${r.employeeFirstName} ${r.employeeLastName}`}
+                  {selected.isAnonymous ? 'Anonymous' : `${r.employeeFirstName} ${r.employeeLastName}`}
                   <span className="ml-2">{new Date(r.submittedAt).toLocaleDateString('en-AU')}</span>
                 </p>
                 <p className="text-sm text-gray-300">

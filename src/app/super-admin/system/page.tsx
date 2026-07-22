@@ -23,9 +23,9 @@ const STATUS_STYLES = {
 }
 
 const CHECK_LABELS: Record<string, string> = {
-  database:    '🗄️  Database',
-  auditLog:    '📋 Audit Log',
-  environment: '🔐 Environment',
+  database:    '️  Database',
+  auditLog:    'Audit Log',
+  environment: 'Environment',
 }
 
 export default function SystemHealthPage() {

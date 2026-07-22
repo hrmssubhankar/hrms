@@ -16,8 +16,8 @@ type Announcement = {
 
 const PRIORITY_STYLES = {
   info:     { badge: 'bg-blue-900 text-blue-200',   icon: 'ℹ️',  border: 'border-blue-800' },
-  warning:  { badge: 'bg-yellow-900 text-yellow-200', icon: '⚠️',  border: 'border-yellow-800' },
-  critical: { badge: 'bg-red-900 text-red-200',      icon: '🚨', border: 'border-red-800' },
+  warning:  { badge: 'bg-yellow-900 text-yellow-200', icon: '️',  border: 'border-yellow-800' },
+  critical: { badge: 'bg-red-900 text-red-200',      icon: '', border: 'border-red-800' },
 }
 
 export default function AnnouncementsPage() {
@@ -118,8 +118,8 @@ export default function AnnouncementsPage() {
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
               >
                 <option value="info">ℹ️ Info</option>
-                <option value="warning">⚠️ Warning</option>
-                <option value="critical">🚨 Critical</option>
+                <option value="warning">️ Warning</option>
+                <option value="critical">Critical</option>
               </select>
             </div>
             <div>
@@ -148,7 +148,7 @@ export default function AnnouncementsPage() {
               disabled={saving || !form.title || !form.body}
               className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium px-5 py-2 rounded-lg transition"
             >
-              {saving ? 'Sending…' : '📢 Publish Announcement'}
+              {saving ? 'Sending…' : 'Publish Announcement'}
             </button>
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function AnnouncementsPage() {
         <div className="text-gray-400 text-sm">Loading…</div>
       ) : announcements.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
-          <div className="text-5xl mb-3">📢</div>
+          <div className="text-5xl mb-3"></div>
           <p className="text-gray-400">No announcements yet</p>
           <p className="text-gray-600 text-sm mt-1">Create one to broadcast a message to all tenants</p>
         </div>

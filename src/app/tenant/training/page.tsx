@@ -48,8 +48,8 @@ export default function TrainingPage() {
 
       <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit">
         {([
-          { key: 'library', label: '📚 Course Library' },
-          { key: 'records', label: '📋 Training Records' },
+          { key: 'library', label: 'Course Library' },
+          { key: 'records', label: 'Training Records' },
         ] as const).map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
@@ -228,7 +228,11 @@ function LibraryTab() {
       {/* Course grid */}
       {loading ? <div className="text-gray-400 text-sm">Loading…</div> : courseList.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-          <p className="text-4xl mb-3">📚</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No courses yet</p>
           <p className="text-gray-500 text-sm mt-1">Create your first course to get started.</p>
         </div>
@@ -344,7 +348,11 @@ function RecordsTab() {
       {/* Table */}
       {loading ? <div className="text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-          <p className="text-4xl mb-3">📋</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No training records</p>
           <p className="text-gray-500 text-sm mt-1">Enrol employees in a course from the Course Library tab.</p>
         </div>
@@ -391,7 +399,7 @@ function RecordsTab() {
                       {r.expiryDate ? (
                         <span className={expired ? 'text-red-400 font-medium' : expiryWarn ? 'text-amber-400' : 'text-gray-400'}>
                           {new Date(r.expiryDate).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}
-                          {expired    && ' ✕'}
+                          {expired    && ' '}
                           {expiryWarn && !expired && ` (${days}d)`}
                         </span>
                       ) : '—'}
@@ -400,7 +408,7 @@ function RecordsTab() {
                       {r.status !== 'completed' && (
                         <button onClick={() => markComplete(r.id)} disabled={updating === r.id}
                           className="text-xs text-green-400 hover:text-green-300 border border-green-900 px-2.5 py-1 rounded-lg transition font-medium">
-                          {updating === r.id ? '…' : '✓ Complete'}
+                          {updating === r.id ? '…' : 'Complete'}
                         </button>
                       )}
                       {r.status === 'completed' && (

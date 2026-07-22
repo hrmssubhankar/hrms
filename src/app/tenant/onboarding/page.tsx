@@ -117,7 +117,7 @@ export default function OnboardingPage() {
         <div className="text-gray-400 text-sm">Loading…</div>
       ) : records.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
-          <div className="text-4xl mb-3">🎉</div>
+          <div className="text-4xl mb-3"></div>
           <p className="text-gray-300 font-medium">No onboarding records yet</p>
           <p className="text-gray-500 text-sm mt-1">Start onboarding a new employee to get going.</p>
           <Link href="/tenant/onboarding/new"

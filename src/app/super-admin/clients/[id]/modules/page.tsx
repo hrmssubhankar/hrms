@@ -57,9 +57,9 @@ const TIER_DEFAULTS: Record<string, number[]> = {
 }
 
 function tierBadge(mod: typeof ALL_MODULES[0]) {
-  if (mod.starterOn)      return <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-900/60 text-green-300 border border-green-700">🟢 Starter</span>
-  if (mod.proOn)          return <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700">🔵 Pro</span>
-  if (mod.enterpriseOn)   return <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-700">🟣 Enterprise</span>
+  if (mod.starterOn)      return <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-900/60 text-green-300 border border-green-700">Starter</span>
+  if (mod.proOn)          return <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700">Pro</span>
+  if (mod.enterpriseOn)   return <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-700">Enterprise</span>
   return null
 }
 
@@ -164,7 +164,7 @@ export default function ModulesPage() {
             disabled={saving}
             className="text-xs bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white px-3 py-1.5 rounded-lg transition"
           >
-            {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Changes'}
+            {saving ? 'Saving…' : saved ? 'Saved' : 'Save Changes'}
           </button>
         </div>
       </div>
@@ -172,10 +172,10 @@ export default function ModulesPage() {
       {/* Tier legend */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-wrap gap-4 text-xs text-gray-400">
         <span className="font-semibold text-gray-300">Tier includes:</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />🟢 Starter — modules 01–09</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" />🔵 Professional — modules 01–19</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500" />🟣 Enterprise — all 28 modules</span>
-        <span className="flex items-center gap-1.5"><span className="text-gray-500">🔒</span> Core modules always on</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />Starter — modules 01–09</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" />Professional — modules 01–19</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500" />Enterprise — all 28 modules</span>
+        <span className="flex items-center gap-1.5"><span className="text-gray-500"></span> Core modules always on</span>
       </div>
 
       {/* Search */}
@@ -236,7 +236,7 @@ export default function ModulesPage() {
                         <span className="text-xs font-mono text-gray-500 shrink-0 w-6">{num}</span>
                         <span className={`text-sm ${enabled ? 'text-white' : 'text-gray-400'}`}>{mod.name}</span>
                         <span className="shrink-0">{tierBadge(mod)}</span>
-                        {locked && <span className="text-gray-600 text-xs shrink-0">🔒 always on</span>}
+                        {locked && <span className="text-gray-600 text-xs shrink-0">always on</span>}
                       </div>
 
                       <button
@@ -265,7 +265,7 @@ export default function ModulesPage() {
           disabled={saving}
           className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition"
         >
-          {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Changes'}
+          {saving ? 'Saving…' : saved ? 'Saved' : 'Save Changes'}
         </button>
         <button
           onClick={() => saveModules(true)}

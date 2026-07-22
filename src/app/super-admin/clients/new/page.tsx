@@ -8,9 +8,9 @@ import {
 } from '@/lib/integrations/payroll'
 
 const TIERS = [
-  { value: 'starter',      label: '🟢 Starter',      modules: 11,  price: 57,  desc: 'Core + Compliance — 11 modules' },
-  { value: 'professional', label: '🔵 Professional',  modules: 20, price: 120, desc: '+ Talent, Learning, Performance, Safety — 20 modules' },
-  { value: 'enterprise',   label: '🟣 Enterprise',    modules: 30, price: 217, desc: 'All 30 modules — full platform' },
+  { value: 'starter',      label: 'Starter',      modules: 11,  price: 57,  desc: 'Core + Compliance — 11 modules' },
+  { value: 'professional', label: 'Professional',  modules: 20, price: 120, desc: '+ Talent, Learning, Performance, Safety — 20 modules' },
+  { value: 'enterprise',   label: 'Enterprise',    modules: 30, price: 217, desc: 'All 30 modules — full platform' },
 ]
 
 const INPUT  = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
@@ -235,7 +235,7 @@ export default function NewClientPage() {
 
         {/* ── Country / Currency / Timezone ── */}
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">🌍 Region & Currency</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Region & Currency</h2>
 
           <div className={GRID2}>
             <div>
@@ -288,7 +288,7 @@ export default function NewClientPage() {
 
         {/* ── Primary Contact ── */}
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">👤 Primary Contact</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Primary Contact</h2>
 
           <div className={GRID2}>
             <div>
@@ -371,7 +371,7 @@ export default function NewClientPage() {
             </div>
           </div>
           <div className="bg-gray-800/60 border border-gray-700 rounded-lg px-4 py-3 text-xs text-gray-400">
-            💡 Logo upload is available after creation via <strong className="text-gray-300">Edit Client → Logo & Branding</strong>
+            Logo upload is available after creation via <strong className="text-gray-300">Edit Client → Logo & Branding</strong>
           </div>
         </section>
 
@@ -396,7 +396,7 @@ export default function NewClientPage() {
 
           {form.adminEmail && form.adminPassword && (
             <div className="bg-blue-950/50 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
-              ✓ A Director account will be created for <strong>{form.adminEmail}</strong>.
+              A Director account will be created for <strong>{form.adminEmail}</strong>.
               A welcome email with login details will be sent once email integration is active.
             </div>
           )}

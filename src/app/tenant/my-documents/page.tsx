@@ -42,11 +42,11 @@ const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> 
 }
 
 const MIME_ICON: Record<string, string> = {
-  'application/pdf':  '📄', 'image/png': '🖼', 'image/jpeg': '🖼',
-  'application/msword': '📝',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '📝',
+  'application/pdf':  '', 'image/png': '', 'image/jpeg': '',
+  'application/msword': '',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '',
 }
-const mimeIcon = (m: string | null) => m ? (MIME_ICON[m] ?? '📁') : '📁'
+const mimeIcon = (m: string | null) => m ? (MIME_ICON[m] ?? '') : ''
 
 function fmtDate(d: string | null) {
   if (!d) return null
@@ -150,7 +150,7 @@ export default function MyDocumentsPage() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">📂 My Documents</h1>
+          <h1 className="text-2xl font-bold text-white">My Documents</h1>
           <p className="text-sm text-gray-400 mt-0.5">Upload personal compliance documents for HR review</p>
         </div>
         {linked && (
@@ -158,7 +158,7 @@ export default function MyDocumentsPage() {
             onClick={() => { setShowForm(v => !v); setSaveError(null) }}
             className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
-            {showForm ? '✕ Cancel' : '+ Upload Document'}
+            {showForm ? 'Cancel' : '+ Upload Document'}
           </button>
         )}
       </div>
@@ -166,7 +166,11 @@ export default function MyDocumentsPage() {
       {/* Not linked state */}
       {!loading && !linked && (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center space-y-3">
-          <p className="text-5xl">🔗</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">Account not linked to an employee record</p>
           <p className="text-sm text-gray-500">Contact HR to link your account before uploading documents.</p>
         </div>
@@ -176,7 +180,7 @@ export default function MyDocumentsPage() {
       {linked && (
         <div className="bg-blue-950/30 border border-blue-800/40 rounded-xl px-4 py-3">
           <p className="text-xs text-blue-300">
-            📋 Documents you upload are sent to <strong>Pending Review</strong>. HR will activate them once verified.
+            Documents you upload are sent to <strong>Pending Review</strong>. HR will activate them once verified.
             Expiry dates trigger alerts to HR before they lapse.
           </p>
         </div>
@@ -232,7 +236,7 @@ export default function MyDocumentsPage() {
           </div>
           {saveError && (
             <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-sm text-red-300">
-              ⚠ {saveError}
+              {saveError}
             </div>
           )}
           <div className="flex gap-3">
@@ -252,7 +256,11 @@ export default function MyDocumentsPage() {
         <div className="text-center py-12 text-gray-500">Loading…</div>
       ) : linked && docs.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl py-14 text-center space-y-3">
-          <p className="text-5xl">📂</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No documents yet</p>
           <p className="text-sm text-gray-500">Upload your compliance documents to keep HR informed of your certifications.</p>
         </div>
@@ -261,12 +269,12 @@ export default function MyDocumentsPage() {
 
           {/* Expired */}
           {expiredDocs.length > 0 && (
-            <DocSection title="🔴 Expired" docs={expiredDocs} />
+            <DocSection title="Expired" docs={expiredDocs} />
           )}
 
           {/* Expiring soon */}
           {expiringDocs.length > 0 && (
-            <DocSection title="⚠️ Expiring Soon" docs={expiringDocs} />
+            <DocSection title="️ Expiring Soon" docs={expiringDocs} />
           )}
 
           {/* Pending review */}
@@ -276,12 +284,12 @@ export default function MyDocumentsPage() {
 
           {/* Active */}
           {activeDocs.length > 0 && (
-            <DocSection title="✅ Active" docs={activeDocs} />
+            <DocSection title="Active" docs={activeDocs} />
           )}
 
           {/* Archived */}
           {archivedDocs.length > 0 && (
-            <DocSection title="🗄 Archived" docs={archivedDocs} />
+            <DocSection title="Archived" docs={archivedDocs} />
           )}
         </div>
       ) : null}

@@ -13,13 +13,13 @@ type Stats = { total: number; new: number; active: number; closed: number; criti
 type Employee = { id: string; firstName: string; lastName: string }
 
 const TYPES = [
-  { value: 'grievance',         label: '⚖️  Grievance' },
-  { value: 'misconduct',        label: '🚫 Misconduct' },
-  { value: 'bullying',          label: '😰 Bullying / Harassment' },
-  { value: 'safety',            label: '🦺 Safety Concern' },
-  { value: 'discrimination',    label: '🚷 Discrimination' },
-  { value: 'fraud',             label: '💸 Fraud / Theft' },
-  { value: 'ndis_safeguarding', label: '🛡 NDIS Safeguarding' },
+  { value: 'grievance',         label: 'Grievance' },
+  { value: 'misconduct',        label: 'Misconduct' },
+  { value: 'bullying',          label: 'Bullying / Harassment' },
+  { value: 'safety',            label: 'Safety (WHS) Concern' },
+  { value: 'discrimination',    label: 'Discrimination' },
+  { value: 'fraud',             label: 'Fraud / Theft' },
+  { value: 'ndis_safeguarding', label: 'NDIS Safeguarding' },
 ]
 
 const RISK_RATINGS = [
@@ -179,7 +179,7 @@ export default function GrievancesPage() {
                 }}
                 className={INPUT}>
                 <option value="">— Select —</option>
-                <option value="__anon__">🔒 Anonymous</option>
+                <option value="__anon__">Anonymous</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
@@ -202,12 +202,12 @@ export default function GrievancesPage() {
 
           {form.type === 'ndis_safeguarding' && (
             <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
-              🛡 NDIS Safeguarding — this may require mandatory reporting to the NDIS Quality and Safeguards Commission. Escalate immediately per your reporting obligations.
+              NDIS Safeguarding — this may require mandatory reporting to the NDIS Quality and Safeguards Commission. Escalate immediately per your reporting obligations.
             </div>
           )}
           {form.riskRating === 'critical' && (
             <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
-              ⚠️ Critical risk — stand-down of subject may be required pending investigation. Seek legal advice.
+              ️ Critical risk — stand-down of subject may be required pending investigation. Seek legal advice.
             </div>
           )}
 
@@ -235,7 +235,11 @@ export default function GrievancesPage() {
       {/* Records */}
       {loading ? <div className="text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
-          <p className="text-4xl mb-3">⚖️</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <p className="text-gray-300 font-medium">No grievances on record</p>
           <p className="text-gray-500 text-sm mt-1">Lodge a concern or report to begin an investigation.</p>
         </div>
@@ -265,7 +269,7 @@ export default function GrievancesPage() {
                       <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[g.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                         {STATUS_FLOW.find(s => s.value === g.status)?.label ?? g.status}
                       </span>
-                      {g.isAnonymous && <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">🔒 Anonymous</span>}
+                      {g.isAnonymous && <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">Anonymous</span>}
                     </div>
                     <p className="text-gray-400 text-xs truncate">{g.description}</p>
                     {g.subjectFirstName && (
@@ -320,7 +324,7 @@ export default function GrievancesPage() {
                               className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-green-600" />
                             <button onClick={() => close(g.id)}
                               className="text-xs bg-green-900/40 border border-green-800 text-green-300 hover:bg-green-900/60 px-3 py-1.5 rounded-lg transition whitespace-nowrap">
-                              ✓ Close
+                              Close
                             </button>
                           </div>
                         )}

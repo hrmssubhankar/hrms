@@ -139,7 +139,7 @@ function LoginForm() {
               className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-white text-2xl font-bold shadow-lg"
               style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` }}
             >
-              {isSuperAdmin ? '★' : (branding.name[0]?.toUpperCase() ?? 'H')}
+              {isSuperAdmin ? '' : (branding.name[0]?.toUpperCase() ?? 'H')}
             </div>
           )}
 
@@ -214,7 +214,11 @@ function LoginForm() {
             className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4 shadow-xl"
           >
             <div className="text-center pb-1">
-              <p className="text-2xl mb-2">🔐</p>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
               <p className="text-sm font-semibold text-gray-800 dark:text-white">Two-Factor Verification</p>
               <p className="text-xs text-gray-500 mt-1">Enter the 6-digit code from your authenticator app.</p>
             </div>

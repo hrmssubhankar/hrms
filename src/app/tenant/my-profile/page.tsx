@@ -75,7 +75,7 @@ function TwoFactorSection() {
     })
     const data = await res.json()
     if (!res.ok) { setMsg2fa(data.error ?? 'Verification failed'); setBusy(false); return }
-    setMsg2fa('✓ 2FA enabled successfully.')
+    setMsg2fa('2FA enabled successfully.')
     setStep('idle'); setEnabled(true); setCode(''); setQrCode(''); setSecret('')
     setBusy(false)
   }
@@ -104,12 +104,12 @@ function TwoFactorSection() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Two-Factor Authentication</h2>
         <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${enabled ? 'bg-green-900/40 text-green-300 border-green-800' : 'bg-gray-800 text-gray-500 border-gray-700'}`}>
-          {enabled ? '🔐 Enabled' : 'Disabled'}
+          {enabled ? 'Enabled' : 'Disabled'}
         </span>
       </div>
 
       {msg2fa && (
-        <div className={`mb-4 rounded-lg px-4 py-2.5 text-sm border ${msg2fa.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+        <div className={`mb-4 rounded-lg px-4 py-2.5 text-sm border ${msg2fa.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
           {msg2fa}
         </div>
       )}
@@ -240,7 +240,7 @@ export default function MyProfilePage() {
       const data = await res.json()
       if (!res.ok) { setMsg(data.error ?? 'Save failed'); return }
       setProfile(prev => prev ? { ...prev, ...data.profile } : prev)
-      setMsg('✓ Profile updated successfully.')
+      setMsg('Profile updated successfully.')
       setEditing(false)
     } catch {
       setMsg('Save failed — please try again.')
@@ -258,7 +258,7 @@ export default function MyProfilePage() {
     return (
       <div className="flex items-center justify-center h-64 text-gray-400">
         <div className="text-center">
-          <div className="text-4xl mb-3 animate-pulse">👤</div>
+          <div className="text-4xl mb-3 animate-pulse"></div>
           <p className="text-sm">Loading your profile…</p>
         </div>
       </div>
@@ -269,7 +269,11 @@ export default function MyProfilePage() {
     return (
       <div className="p-6 max-w-2xl mx-auto">
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center">
-          <p className="text-5xl mb-4">🔗</p>
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
           <h2 className="text-lg font-semibold text-white mb-2">Profile Not Linked</h2>
           <p className="text-gray-400 text-sm">
             Your user account has not yet been linked to an employee profile.
@@ -317,13 +321,13 @@ export default function MyProfilePage() {
             onClick={() => { setEditing(true); setMsg('') }}
             className="px-4 py-2 rounded-lg text-sm font-medium border border-purple-600 text-purple-400 hover:bg-purple-900/20 transition"
           >
-            ✏ Edit Contact Info
+             Edit Contact Info
           </button>
         )}
       </div>
 
       {msg && (
-        <div className={`rounded-lg px-4 py-2.5 text-sm border ${msg.startsWith('✓') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${msg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
           {msg}
         </div>
       )}
@@ -409,8 +413,8 @@ export default function MyProfilePage() {
                 </div>
                 {c.relationship && <p className="text-xs text-gray-500 mb-1">{c.relationship}</p>}
                 <div className="flex gap-4 text-xs text-gray-400">
-                  {c.phone && <span>📞 {c.phone}</span>}
-                  {c.email && <span>✉ {c.email}</span>}
+                  {c.phone && <span>{c.phone}</span>}
+                  {c.email && <span>{c.email}</span>}
                 </div>
               </div>
             ))}

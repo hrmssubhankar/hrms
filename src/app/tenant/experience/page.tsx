@@ -58,7 +58,7 @@ export default function ExperiencePage() {
                 const label = next >= 12 ? `${next/12} year${next/12>1?'s':''}` : `${next} months`
                 return (
                   <div key={e.id} className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
-                    <span className="text-2xl">🎉</span>
+                    <span className="text-2xl"></span>
                     <div>
                       <p className="text-sm font-medium text-gray-900">{e.firstName} {e.lastName}</p>
                       <p className="text-xs text-amber-700">{label} milestone approaching!</p>
@@ -96,8 +96,7 @@ export default function ExperiencePage() {
                     <td className="px-5 py-3">
                       {lastMilestone ? (
                         <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                          {lastMilestone>=12 ? `${lastMilestone/12}yr` : `${lastMilestone}mo`} ✓
-                        </span>
+                          {lastMilestone>=12 ? `${lastMilestone/12}yr` : `${lastMilestone}mo`} </span>
                       ) : <span className="text-xs text-gray-400">—</span>}
                     </td>
                   </tr>

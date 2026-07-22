@@ -225,7 +225,7 @@ export default function CostEstimationPage() {
 
                   {client.headcount === 0 && (
                     <p className="text-xs text-amber-400 mt-3 bg-amber-900/20 border border-amber-800/40 rounded px-3 py-2">
-                      ⚠ Headcount not set — costs shown as per-seat. Update the client profile to see total estimates.
+                      Headcount not set — costs shown as per-seat. Update the client profile to see total estimates.
                     </p>
                   )}
                 </div>

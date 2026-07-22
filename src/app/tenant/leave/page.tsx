@@ -280,7 +280,7 @@ export default function LeavePage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">🏖 Leave Management</h1>
+          <h1 className="text-2xl font-bold text-white">Leave Management</h1>
           <p className="text-sm text-gray-400 mt-0.5">
             {canApprove ? 'Review team leave requests, balances and calendar' : 'Submit and track your leave'}
           </p>
@@ -289,7 +289,7 @@ export default function LeavePage() {
           {canApprove && (
             <Link href="/tenant/leave/settings"
               className="px-3 py-2 rounded-lg text-xs border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition">
-              ⚙ Leave Settings
+              Leave Settings
             </Link>
           )}
           <button
@@ -310,9 +310,9 @@ export default function LeavePage() {
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-800">
         {([
-          { id: 'requests', label: '📋 Requests' },
-          { id: 'balances', label: '⚖ Balances' },
-          { id: 'calendar', label: '📅 Calendar' },
+          { id: 'requests', label: 'Requests' },
+          { id: 'balances', label: 'Balances' },
+          { id: 'calendar', label: 'Calendar' },
         ] as { id: Tab; label: string }[]).map(t => (
           <button
             key={t.id}
@@ -377,7 +377,11 @@ export default function LeavePage() {
             <div className="text-center py-12 text-gray-500">Loading…</div>
           ) : requests.length === 0 ? (
             <div className="text-center py-16 bg-gray-800/50 rounded-2xl border border-gray-700">
-              <p className="text-4xl mb-3">🏖</p>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
               <p className="text-gray-400 font-medium">No leave requests found</p>
               <p className="text-sm text-gray-600 mt-1">
                 {canApprove ? 'No requests match your filters' : 'Submit your first leave request above'}
@@ -456,11 +460,11 @@ export default function LeavePage() {
                             <div className="flex gap-3">
                               <button onClick={() => review(r.id, 'approve')} disabled={isBusy}
                                 className="flex-1 py-2 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
-                                {isBusy ? '…' : '✓ Approve'}
+                                {isBusy ? '…' : 'Approve'}
                               </button>
                               <button onClick={() => review(r.id, 'reject')} disabled={isBusy}
                                 className="flex-1 py-2 bg-red-800 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
-                                {isBusy ? '…' : '✗ Reject'}
+                                {isBusy ? '…' : 'Reject'}
                               </button>
                             </div>
                           </div>
@@ -514,7 +518,11 @@ export default function LeavePage() {
 
           {!balLinked ? (
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center">
-              <p className="text-5xl mb-4">🔗</p>
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
               <p className="text-gray-400">Your account is not linked to an employee record. Contact HR.</p>
             </div>
           ) : loadingBal ? (
@@ -760,7 +768,7 @@ export default function LeavePage() {
                 {overlappingHolidays.length > 0 && (
                   <div className="mt-1.5 space-y-0.5">
                     <p className="text-xs text-amber-400 font-medium">
-                      🗓 Public holiday{overlappingHolidays.length > 1 ? 's' : ''} in this period:
+                      Public holiday{overlappingHolidays.length > 1 ? 's' : ''} in this period:
                     </p>
                     {overlappingHolidays.map(h => (
                       <p key={h.date} className="text-xs text-amber-300 pl-2">
@@ -782,7 +790,7 @@ export default function LeavePage() {
 
             {formError && (
               <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-sm text-red-300">
-                ⚠ {formError}
+                {formError}
               </div>
             )}
 
