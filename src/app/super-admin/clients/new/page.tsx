@@ -160,7 +160,7 @@ export default function NewClientPage() {
 
         {/* ── Organisation ── */}
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Organisation Details</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Organisation Details</h2>
 
           <div className={GRID2}>
             <div>
@@ -184,7 +184,7 @@ export default function NewClientPage() {
                   setForm(f => ({ ...f, slug, vercelProjectName: `${slug}-hrmsapp` }))
                 }}
                 placeholder="yahweh-care" className={INPUT} />
-              <p className="text-xs text-gray-500 mt-1">Used for login routing</p>
+              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Used for login routing</p>
             </div>
             <div>
               <label className={LABEL}>ABN / Company Reg. Number</label>
@@ -203,9 +203,9 @@ export default function NewClientPage() {
                 placeholder={`${form.slug || 'slug'}-hrmsapp`}
                 className={INPUT}
               />
-              <span className="text-xs text-gray-500 whitespace-nowrap">.vercel.app</span>
+              <span className="text-xs text-gray-500 whitespace-nowrap dark:text-gray-400">.vercel.app</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
               Tenant URL:{' '}
               <span className="text-purple-400">
                 https://{form.vercelProjectName || `${form.slug || 'slug'}-hrmsapp`}.vercel.app
@@ -235,7 +235,7 @@ export default function NewClientPage() {
 
         {/* ── Country / Currency / Timezone ── */}
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Region & Currency</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Region & Currency</h2>
 
           <div className={GRID2}>
             <div>
@@ -250,7 +250,7 @@ export default function NewClientPage() {
               <label className={LABEL}>Currency</label>
               <input readOnly value={`${form.currency} (${currencySymbol})`}
                 className={`${INPUT} cursor-not-allowed opacity-70`} />
-              <p className="text-xs text-gray-500 mt-1">Auto-set from country</p>
+              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Auto-set from country</p>
             </div>
           </div>
 
@@ -288,7 +288,7 @@ export default function NewClientPage() {
 
         {/* ── Primary Contact ── */}
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Primary Contact</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Primary Contact</h2>
 
           <div className={GRID2}>
             <div>
@@ -316,7 +316,7 @@ export default function NewClientPage() {
           </div>
 
           <div className="border-t border-gray-800 pt-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Billing Contact <span className="font-normal normal-case text-gray-600">(leave blank to use primary contact)</span></p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Billing Contact <span className="font-normal normal-case text-gray-600 dark:text-gray-400">(leave blank to use primary contact)</span></p>
             <div className={GRID2}>
               <div>
                 <label className={LABEL}>Billing Email</label>
@@ -334,7 +334,7 @@ export default function NewClientPage() {
 
         {/* ── Subscription Tier ── */}
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Subscription Tier *</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Subscription Tier *</h2>
           {TIERS.map(t => (
             <label key={t.value} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
               form.tier === t.value ? 'border-purple-500 bg-purple-900/30' : 'border-gray-700 hover:border-gray-600'
@@ -356,7 +356,7 @@ export default function NewClientPage() {
 
         {/* ── Branding ── */}
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Branding</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Branding</h2>
           <div>
             <label className={LABEL}>Brand Primary Colour</label>
             <div className="flex items-center gap-3">
@@ -378,8 +378,8 @@ export default function NewClientPage() {
         {/* ── Admin Account ── */}
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
           <div>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin Account (optional)</h2>
-            <p className="text-xs text-gray-500 mt-1">Creates a Director-level login for the client portal immediately.</p>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Admin Account (optional)</h2>
+            <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Creates a Director-level login for the client portal immediately.</p>
           </div>
           <div className={GRID2}>
             <div>

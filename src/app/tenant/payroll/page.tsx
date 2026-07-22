@@ -499,7 +499,7 @@ export default function PayrollPage() {
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-purple-400">Employer Super (11.5%)</span>
-                      <span className="text-purple-300 font-medium">{fmt(preview.superContribution)} <span className="text-xs text-gray-500">(on top)</span></span>
+                      <span className="text-purple-300 font-medium">{fmt(preview.superContribution)} <span className="text-xs text-gray-500 dark:text-gray-400">(on top)</span></span>
                     </div>
                     <div className="flex justify-between text-xs text-gray-400">
                       <span>Annualised gross / Effective tax rate</span>

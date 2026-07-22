@@ -241,7 +241,7 @@ export default function EmployeeProfilePage() {
   if (!emp)    return (
     <div className="flex flex-col items-center justify-center py-20 gap-3">
       <span className="text-5xl"></span>
-      <p className="text-gray-500">Employee not found</p>
+      <p className="text-gray-500 dark:text-gray-400">Employee not found</p>
       <Link href="/tenant/employee-management" className="text-sm text-blue-500">← Back to Employees</Link>
     </div>
   )

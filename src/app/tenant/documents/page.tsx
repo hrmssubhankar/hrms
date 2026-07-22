@@ -221,7 +221,7 @@ export default function DocumentsPage() {
           { label: 'Expired',        value: stats.expired,       color: stats.expired > 0 ? 'text-red-400' : 'text-gray-600' },
         ].map(s => (
           <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-500">{s.label}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -360,7 +360,7 @@ export default function DocumentsPage() {
 
       {/* Document list */}
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading…</div>
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
       ) : filtered.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl py-16 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
@@ -369,7 +369,7 @@ export default function DocumentsPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No documents found</p>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-gray-600 mt-1 dark:text-gray-400">
             {filterCat || filterStat ? 'Try clearing filters' : 'Add a document to build your compliance register'}
           </p>
         </div>
@@ -378,12 +378,12 @@ export default function DocumentsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-800">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Document</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Expiry</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Document</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Category</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Employee</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Expiry</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/60">
@@ -398,7 +398,7 @@ export default function DocumentsPage() {
                           {d.title}
                         </a>
                         {d.fileName && (
-                          <p className="text-xs text-gray-600">{d.fileName} {fmtSize(d.fileSizeBytes)}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{d.fileName} {fmtSize(d.fileSizeBytes)}</p>
                         )}
                       </div>
                     </div>
@@ -411,7 +411,7 @@ export default function DocumentsPage() {
                   <td className="px-4 py-3 text-xs text-gray-400">
                     {d.employeeFirstName
                       ? `${d.employeeFirstName} ${d.employeeLastName}`
-                      : <span className="text-gray-600">Org-wide</span>}
+                      : <span className="text-gray-600 dark:text-gray-400">Org-wide</span>}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[d.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
@@ -469,7 +469,7 @@ export default function DocumentsPage() {
             </tbody>
           </table>
           <div className="px-4 py-3 border-t border-gray-800">
-            <p className="text-xs text-gray-600">{filtered.length} document{filtered.length !== 1 ? 's' : ''} shown</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">{filtered.length} document{filtered.length !== 1 ? 's' : ''} shown</p>
           </div>
         </div>
       )}

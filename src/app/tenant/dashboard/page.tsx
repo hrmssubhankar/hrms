@@ -105,7 +105,7 @@ function MiniBar({ items }: { items: { label: string; value: number; color: stri
     <div className="space-y-2.5">
       {items.map(item => (
         <div key={item.label} className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 w-28 shrink-0 truncate">{item.label}</span>
+          <span className="text-xs text-gray-500 w-28 shrink-0 truncate dark:text-gray-400">{item.label}</span>
           <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all"
@@ -171,8 +171,8 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold mt-0.5">{userName || '…'} </h1>
           <p className="text-sm opacity-70 mt-1">{tenantName || 'HRMS'} · HR Portal</p>
         </div>
-        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-white" />
-        <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full opacity-10 bg-white" />
+        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-white dark:bg-gray-900" />
+        <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full opacity-10 bg-white dark:bg-gray-900" />
         <div className="absolute top-4 right-4 z-10 flex gap-2">
           <button onClick={loadDashboard}
             className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white/80 transition">
@@ -213,7 +213,7 @@ export default function DashboardPage() {
 
       {error && (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm dark:text-gray-400">
             Could not load live stats ({error}). You may not have manager-level access.
           </p>
         </div>
@@ -223,7 +223,7 @@ export default function DashboardPage() {
         <>
           {/* ── Headcount stats ── */}
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Workforce</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Workforce</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {[
                 { label: 'Total', value: data.headcount.total, color: 'text-white', href: '/tenant/employee-management' },
@@ -236,12 +236,12 @@ export default function DashboardPage() {
                 <div key={s.label} className={`bg-gray-900 border rounded-2xl p-5 ${data.compliance.redCount > 0 && s.label === 'Red Compliance' ? 'border-red-800/50' : 'border-gray-800'}`}>
                   {s.href ? (
                     <Link href={s.href} className="block">
-                      <p className="text-xs text-gray-500">{s.label}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                       <p className={`text-3xl font-bold mt-1.5 ${s.color}`}>{s.value}</p>
                     </Link>
                   ) : (
                     <>
-                      <p className="text-xs text-gray-500">{s.label}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                       <p className={`text-3xl font-bold mt-1.5 ${s.color}`}>{s.value}</p>
                     </>
                   )}
@@ -255,7 +255,7 @@ export default function DashboardPage() {
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white">By Employment Type</h3>
               {data.headcount.byEmploymentType.length === 0
-                ? <p className="text-sm text-gray-600">No data yet</p>
+                ? <p className="text-sm text-gray-600 dark:text-gray-400">No data yet</p>
                 : <MiniBar items={data.headcount.byEmploymentType.map(e => ({
                     label: EMP_TYPE_LABEL[e.type] ?? e.type,
                     value: e.count,
@@ -266,7 +266,7 @@ export default function DashboardPage() {
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white">By Entity</h3>
               {data.headcount.byEntity.length === 0
-                ? <p className="text-sm text-gray-600">No entity data yet — set entity on employee profiles</p>
+                ? <p className="text-sm text-gray-600 dark:text-gray-400">No entity data yet — set entity on employee profiles</p>
                 : <>
                     <MiniBar items={data.headcount.byEntity.map((e, i) => ({
                       label: e.name, value: e.count, color: ENTITY_COLORS[i % ENTITY_COLORS.length],
@@ -286,7 +286,7 @@ export default function DashboardPage() {
 
           {/* ── Payroll ── */}
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Payroll</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Payroll</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
@@ -295,9 +295,9 @@ export default function DashboardPage() {
                 </div>
                 {data.payroll.lastRunPeriodEnd ? (
                   <>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {fmtDate(data.payroll.lastRunPeriodStart)} → {fmtDate(data.payroll.lastRunPeriodEnd)}
-                      <span className="ml-2 text-gray-600">· {data.payroll.lastRunCount} employee{data.payroll.lastRunCount !== 1 ? 's' : ''}</span>
+                      <span className="ml-2 text-gray-600 dark:text-gray-400">· {data.payroll.lastRunCount} employee{data.payroll.lastRunCount !== 1 ? 's' : ''}</span>
                     </p>
                     <div className="grid grid-cols-3 gap-3">
                       {[
@@ -306,14 +306,14 @@ export default function DashboardPage() {
                         { label: 'Super', value: data.payroll.lastRunSuper, color: 'text-purple-400' },
                       ].map(s => (
                         <div key={s.label} className="bg-gray-800/60 rounded-xl px-3 py-3">
-                          <p className="text-xs text-gray-500">{s.label}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                           <p className={`text-sm font-bold mt-0.5 ${s.color}`}>{fmt(s.value)}</p>
                         </div>
                       ))}
                     </div>
                   </>
                 ) : (
-                  <div className="py-6 text-center text-gray-600 text-sm">No pay runs yet</div>
+                  <div className="py-6 text-center text-gray-600 text-sm dark:text-gray-400">No pay runs yet</div>
                 )}
               </div>
 
@@ -326,12 +326,12 @@ export default function DashboardPage() {
                     { label: 'Super', value: data.payroll.ytdSuper, color: 'text-purple-400' },
                   ].map(s => (
                     <div key={s.label} className="bg-gray-800/60 rounded-xl px-3 py-3">
-                      <p className="text-xs text-gray-500">{s.label}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                       <p className={`text-sm font-bold mt-0.5 ${s.color}`}>{fmt(s.value)}</p>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-600">All pay runs from 1 Jan {new Date().getFullYear()}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">All pay runs from 1 Jan {new Date().getFullYear()}</p>
               </div>
             </div>
           </section>
@@ -351,7 +351,7 @@ export default function DashboardPage() {
                   { label: 'Approved YTD',          value: `${data.leave.approvedDaysThisYear}d` },
                 ].map(r => (
                   <div key={r.label} className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">{r.label}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{r.label}</span>
                     <span className={`text-sm font-bold ${'alert' in r && r.alert ? 'text-yellow-400' : 'text-white'}`}>{r.value}</span>
                   </div>
                 ))}
@@ -370,13 +370,13 @@ export default function DashboardPage() {
                 <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
               </div>
               {data.holidays.upcoming.length === 0
-                ? <p className="text-xs text-gray-600">No upcoming holidays on record</p>
+                ? <p className="text-xs text-gray-600 dark:text-gray-400">No upcoming holidays on record</p>
                 : <div className="space-y-2.5">
                     {data.holidays.upcoming.map(h => (
                       <div key={h.date + h.name} className="flex justify-between gap-2">
                         <div>
                           <p className="text-xs text-white font-medium leading-tight">{h.name}</p>
-                          <p className="text-xs text-gray-600">{fmtHolidayDate(h.date)}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{fmtHolidayDate(h.date)}</p>
                         </div>
                         <span className="text-xs text-purple-400 shrink-0 font-medium">{daysUntil(h.date)}</span>
                       </div>
@@ -392,11 +392,11 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-2.5">
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-500">Expiring in 30 days</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Expiring in 30 days</span>
                   <span className={`text-sm font-bold ${data.documents.expiringIn30Days > 0 ? 'text-amber-400' : 'text-gray-600'}`}>{data.documents.expiringIn30Days}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-500">Already expired</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Already expired</span>
                   <span className={`text-sm font-bold ${data.documents.expiredActive > 0 ? 'text-red-400' : 'text-gray-600'}`}>{data.documents.expiredActive}</span>
                 </div>
               </div>
@@ -409,11 +409,11 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-2.5">
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-500">Open incidents</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Open incidents</span>
                   <span className={`text-sm font-bold ${data.incidents.open > 0 ? 'text-amber-400' : 'text-gray-600'}`}>{data.incidents.open}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-xs text-gray-500">Critical open</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Critical open</span>
                   <span className={`text-sm font-bold ${data.incidents.openCritical > 0 ? 'text-red-400' : 'text-gray-600'}`}>{data.incidents.openCritical}</span>
                 </div>
               </div>
@@ -430,7 +430,7 @@ export default function DashboardPage() {
 
       {/* ── Module shortcuts ── (always shown) */}
       <section>
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Modules</h2>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Modules</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {MODULE_SHORTCUTS.map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}

@@ -250,7 +250,7 @@ function ScreeningTab() {
                     <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
                       <td className="px-5 py-3.5">
                         <p className="text-white font-medium text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
-                        <p className="text-gray-500 text-xs">{r.employeeEmail}</p>
+                        <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                       </td>
                       <td className="px-5 py-3.5">
                         <span className="text-gray-300 text-sm">{r.checkType}</span>
@@ -426,7 +426,7 @@ function TrackingTab() {
                   <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
                     <td className="px-5 py-3.5">
                       <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
-                      <p className="text-gray-500 text-xs">{r.employeeEmail}</p>
+                      <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                     </td>
                     <td className="px-5 py-3.5 text-gray-300">{r.itemType}</td>
                     <td className="px-5 py-3.5">
@@ -438,7 +438,7 @@ function TrackingTab() {
                     <td className="px-5 py-3.5 text-gray-400 text-xs">
                       {r.dueDate ? new Date(r.dueDate).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}
                     </td>
-                    <td className="px-5 py-3.5 text-gray-500 text-xs">
+                    <td className="px-5 py-3.5 text-gray-500 text-xs dark:text-gray-400">
                       {r.lastCheckedAt ? new Date(r.lastCheckedAt).toLocaleDateString('en-AU') : '—'}
                     </td>
                     <td className="px-5 py-3.5">
@@ -554,7 +554,7 @@ function LockTab() {
         <div className="space-y-4">
           {active.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Active Exceptions ({active.length})</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Active Exceptions ({active.length})</p>
               <div className="bg-gray-900 border border-amber-800/50 rounded-xl overflow-hidden">
                 {active.map(r => (
                   <div key={r.id} className="flex items-center gap-4 px-5 py-4 border-b border-gray-800/50 last:border-0">
@@ -564,7 +564,7 @@ function LockTab() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs text-amber-300">Expires {new Date(r.expiresAt).toLocaleDateString('en-AU')}</p>
-                      <p className="text-xs text-gray-500">Approved {new Date(r.approvedAt).toLocaleDateString('en-AU')}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Approved {new Date(r.approvedAt).toLocaleDateString('en-AU')}</p>
                     </div>
                     <button onClick={() => revoke(r.id)}
                       className="text-xs text-red-400 hover:text-red-300 border border-red-800 px-2.5 py-1 rounded-lg transition">
@@ -578,15 +578,15 @@ function LockTab() {
 
           {inactive.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Expired / Revoked</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Expired / Revoked</p>
               <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden opacity-60">
                 {inactive.slice(0,5).map(r => (
                   <div key={r.id} className="flex items-center gap-4 px-5 py-3 border-b border-gray-800/50 last:border-0">
                     <div className="flex-1">
                       <p className="text-gray-300 text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
-                      <p className="text-gray-500 text-xs">{r.reason}</p>
+                      <p className="text-gray-500 text-xs dark:text-gray-400">{r.reason}</p>
                     </div>
-                    <p className="text-xs text-gray-500">Expired {new Date(r.expiresAt).toLocaleDateString('en-AU')}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Expired {new Date(r.expiresAt).toLocaleDateString('en-AU')}</p>
                   </div>
                 ))}
               </div>

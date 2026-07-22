@@ -109,7 +109,7 @@ export default async function SuperAdminDashboard() {
 
         {/* Quick actions */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</h2>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
               { label: 'Add Client',     href: '/super-admin/clients/new',   desc: 'Onboard a new organisation' },
@@ -128,7 +128,7 @@ export default async function SuperAdminDashboard() {
                 className="block bg-gray-900 border border-gray-800 hover:border-purple-700 rounded-xl p-4 transition group"
               >
                 <p className="text-sm font-semibold text-white group-hover:text-purple-300 transition">{a.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{a.desc}</p>
+                <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{a.desc}</p>
               </Link>
             ))}
           </div>
@@ -137,7 +137,7 @@ export default async function SuperAdminDashboard() {
           {d.clients.length > 0 && (
             <div className="mt-2">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Client Setup Status</h2>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Client Setup Status</h2>
                 <Link href="/super-admin/clients" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
               </div>
               <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -175,7 +175,7 @@ export default async function SuperAdminDashboard() {
                         />
                       </div>
                     </div>
-                    <Link href={`/super-admin/clients/${c.id}`} className="text-xs text-gray-500 hover:text-purple-400 transition shrink-0">→</Link>
+                    <Link href={`/super-admin/clients/${c.id}`} className="text-xs text-gray-500 hover:text-purple-400 transition shrink-0 dark:text-gray-400">→</Link>
                   </div>
                 ))}
               </div>
@@ -186,25 +186,25 @@ export default async function SuperAdminDashboard() {
         {/* Recent audit activity */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Recent Activity</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Recent Activity</h2>
             <Link href="/super-admin/audit-logs" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
             {d.recentLogs.length === 0 ? (
               <div className="px-4 py-8 text-center">
                 <div className="text-3xl mb-2"></div>
-                <p className="text-xs text-gray-500">No audit events yet</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">No audit events yet</p>
               </div>
             ) : d.recentLogs.map((log: any) => (
               <div key={log.id} className="px-4 py-3 border-b border-gray-800/50 last:border-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <span className={`text-xs font-semibold ${actionColor(log.action)}`}>{log.action}</span>
-                    <span className="text-xs text-gray-500 ml-1">·</span>
+                    <span className="text-xs text-gray-500 ml-1 dark:text-gray-400">·</span>
                     <span className="text-xs text-gray-400 ml-1 truncate">{log.resource}</span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 mt-0.5">
+                <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">
                   {log.tenantName ?? 'Platform'} · {new Date(log.createdAt).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -222,7 +222,7 @@ function StatCard({ label, value, color, sub }: { label: string; value: string |
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
       <p className="text-xs text-gray-400 mb-2">{label}</p>
       <p className={`text-3xl font-bold ${color}`}>{value}</p>
-      <p className="text-xs text-gray-500 mt-1">{sub}</p>
+      <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{sub}</p>
     </div>
   )
 }

@@ -132,14 +132,14 @@ export default function BenefitsPage() {
                 </div>
                 {b.description && <p className="text-xs text-gray-400">{b.description}</p>}
                 {(b.startDate || b.endDate) && (
-                  <p className="text-xs text-gray-600 mt-0.5">
+                  <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">
                     {b.startDate && new Date(b.startDate + 'T00:00:00').toLocaleDateString('en-AU')}
                     {b.endDate && ` → ${new Date(b.endDate + 'T00:00:00').toLocaleDateString('en-AU')}`}
                   </p>
                 )}
               </div>
               <button onClick={() => remove(b.id)}
-                className="text-xs text-gray-600 hover:text-red-400 transition px-2 py-1 rounded border border-transparent hover:border-red-800">
+                className="text-xs text-gray-600 hover:text-red-400 transition px-2 py-1 rounded border border-transparent hover:border-red-800 dark:text-gray-400">
                 Remove
               </button>
             </div>

@@ -216,14 +216,14 @@ export default function OnboardingDetailPage() {
 
       {/* Checklist by category */}
       <div className="space-y-4">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Onboarding Checklist</h2>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Onboarding Checklist</h2>
         {Object.entries(grouped).map(([category, items]) => (
           <div key={category} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
             <div className="px-4 py-2.5 border-b border-gray-800 flex items-center justify-between">
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${CATEGORY_COLOR[category] ?? 'bg-gray-700 text-gray-300'}`}>
                 {category.charAt(0).toUpperCase() + category.slice(1)}
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {items.filter(t => t.done).length}/{items.length}
               </span>
             </div>
@@ -251,7 +251,7 @@ export default function OnboardingDetailPage() {
       {/* Notes */}
       {rec.notes && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Notes</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Notes</p>
           <p className="text-sm text-gray-300 whitespace-pre-wrap">{rec.notes}</p>
         </div>
       )}

@@ -136,7 +136,7 @@ export default function ModulesPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={`/super-admin/clients/${id}`} className="text-gray-500 hover:text-gray-300 text-sm transition">← Edit Client</Link>
+            <Link href={`/super-admin/clients/${id}`} className="text-gray-500 hover:text-gray-300 text-sm transition dark:text-gray-400">← Edit Client</Link>
           </div>
           <h1 className="text-2xl font-bold text-white">Module Configuration</h1>
           <p className="text-gray-400 text-sm mt-1">
@@ -147,7 +147,7 @@ export default function ModulesPage() {
             }`}>{tenantTier}</span>
             {' · '}
             <span className="text-white font-semibold">{enabledCount}</span>
-            <span className="text-gray-500"> / 28 modules enabled</span>
+            <span className="text-gray-500 dark:text-gray-400"> / 28 modules enabled</span>
           </p>
         </div>
 
@@ -175,7 +175,7 @@ export default function ModulesPage() {
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />Starter — modules 01–09</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" />Professional — modules 01–19</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500" />Enterprise — all 28 modules</span>
-        <span className="flex items-center gap-1.5"><span className="text-gray-500"></span> Core modules always on</span>
+        <span className="flex items-center gap-1.5"><span className="text-gray-500 dark:text-gray-400"></span> Core modules always on</span>
       </div>
 
       {/* Search */}
@@ -213,7 +213,7 @@ export default function ModulesPage() {
                       onClick={() => setCategoryAll(category, true)}
                       className="text-xs text-green-400 hover:text-green-300 transition"
                     >All On</button>
-                    <span className="text-gray-700">|</span>
+                    <span className="text-gray-700 dark:text-gray-300">|</span>
                     <button
                       onClick={() => setCategoryAll(category, false)}
                       className="text-xs text-red-400 hover:text-red-300 transition"
@@ -233,10 +233,10 @@ export default function ModulesPage() {
                   return (
                     <div key={mod.id} className={`flex items-center justify-between px-5 py-3 transition ${!locked && !enabled ? 'opacity-60' : ''} hover:bg-gray-800/20`}>
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-xs font-mono text-gray-500 shrink-0 w-6">{num}</span>
+                        <span className="text-xs font-mono text-gray-500 shrink-0 w-6 dark:text-gray-400">{num}</span>
                         <span className={`text-sm ${enabled ? 'text-white' : 'text-gray-400'}`}>{mod.name}</span>
                         <span className="shrink-0">{tierBadge(mod)}</span>
-                        {locked && <span className="text-gray-600 text-xs shrink-0">always on</span>}
+                        {locked && <span className="text-gray-600 text-xs shrink-0 dark:text-gray-400">always on</span>}
                       </div>
 
                       <button
@@ -247,7 +247,7 @@ export default function ModulesPage() {
                           enabled ? 'bg-purple-600' : 'bg-gray-700'
                         } ${locked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                       >
-                        <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                        <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform  dark:bg-gray-900${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
                       </button>
                     </div>
                   )

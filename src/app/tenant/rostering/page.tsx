@@ -175,7 +175,7 @@ function ShiftModal({
           {error && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">{error}</p>}
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Employee *</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Employee *</label>
             <select value={form.employeeId} onChange={f('employeeId')} required
               className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
               <option value="">Select employee…</option>
@@ -186,7 +186,7 @@ function ShiftModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">NDIS Participant</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">NDIS Participant</label>
             <select value={form.participantId} onChange={f('participantId')}
               className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
               <option value="">No participant linked</option>
@@ -200,12 +200,12 @@ function ShiftModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Date *</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Date *</label>
               <input type="date" value={form.date} onChange={f('date')} required
                 className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Shift Type</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Shift Type</label>
               <select value={form.shiftType} onChange={f('shiftType')}
                 className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
                 <option value="standard">Standard</option>
@@ -218,7 +218,7 @@ function ShiftModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Start</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Start</label>
               <div className="flex gap-1">
                 <select value={form.startHour} onChange={f('startHour')}
                   className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
@@ -232,7 +232,7 @@ function ShiftModal({
               </div>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">End</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">End</label>
               <div className="flex gap-1">
                 <select value={form.endHour} onChange={f('endHour')}
                   className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
@@ -249,19 +249,19 @@ function ShiftModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Location</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Location</label>
               <input type="text" value={form.location} onChange={f('location')} placeholder="Site / address"
                 className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Client Site</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Client Site</label>
               <input type="text" value={form.clientSite} onChange={f('clientSite')} placeholder="Property name"
                 className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none" />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Notes</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Notes</label>
             <textarea value={form.notes} onChange={f('notes')} rows={2} placeholder="Care instructions, special notes…"
               className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none resize-none" />
           </div>
@@ -436,13 +436,13 @@ export default function RosteringPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
             <button onClick={() => setWeekStart(w => addDays(w, -7))}
-              className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm">←</button>
+              className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm dark:text-gray-400">←</button>
             <button onClick={() => setWeekStart(getMondayOf(new Date()))}
               className="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 border-x border-gray-200 dark:border-gray-700 transition">
               Today
             </button>
             <button onClick={() => setWeekStart(w => addDays(w, 7))}
-              className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm">→</button>
+              className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm dark:text-gray-400">→</button>
           </div>
           <PermissionGate permission="rostering:write">
             <>

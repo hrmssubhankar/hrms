@@ -233,9 +233,9 @@ export default function OfferLettersPage() {
         {/* List */}
         <div className="lg:col-span-2 space-y-2">
           {loading ? (
-            <p className="text-gray-500 text-sm text-center py-8">Loading…</p>
+            <p className="text-gray-500 text-sm text-center py-8 dark:text-gray-400">Loading…</p>
           ) : offers.length === 0 ? (
-            <div className="text-center py-12 text-gray-600">
+            <div className="text-center py-12 text-gray-600 dark:text-gray-400">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -253,8 +253,8 @@ export default function OfferLettersPage() {
                 </span>
               </div>
               <p className="text-xs text-gray-400 truncate">{o.position}{o.department ? ` · ${o.department}` : ''}</p>
-              <p className="text-xs text-gray-500 mt-1">{o.candidateEmail}</p>
-              <p className="text-xs text-gray-600 mt-1">{fmt(o.createdAt)}{o.salaryAmount ? ` · $${o.salaryAmount.toLocaleString()} p/a` : ''}</p>
+              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{o.candidateEmail}</p>
+              <p className="text-xs text-gray-600 mt-1 dark:text-gray-400">{fmt(o.createdAt)}{o.salaryAmount ? ` · $${o.salaryAmount.toLocaleString()} p/a` : ''}</p>
             </div>
           ))}
         </div>
@@ -268,7 +268,7 @@ export default function OfferLettersPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-              <p className="text-gray-500 text-sm">Select an offer letter to view details and history</p>
+              <p className="text-gray-500 text-sm dark:text-gray-400">Select an offer letter to view details and history</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -297,7 +297,7 @@ export default function OfferLettersPage() {
                     { label:'Rejected',        value: fmt(selected.rejectedAt) },
                   ].map(r => (
                     <div key={r.label} className="bg-gray-800/60 rounded-lg p-2.5">
-                      <p className="text-xs text-gray-500">{r.label}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{r.label}</p>
                       <p className="text-white text-xs font-medium mt-0.5">{r.value}</p>
                     </div>
                   ))}
@@ -359,7 +359,7 @@ export default function OfferLettersPage() {
               <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">History</p>
                 {events.length === 0 ? (
-                  <p className="text-gray-600 text-sm text-center py-4">No events yet</p>
+                  <p className="text-gray-600 text-sm text-center py-4 dark:text-gray-400">No events yet</p>
                 ) : (
                   <div className="space-y-3">
                     {events.map((ev, i) => (
@@ -373,10 +373,10 @@ export default function OfferLettersPage() {
                         <div className="flex-1 pb-1">
                           <div className="flex items-center justify-between gap-2">
                             <p className="text-xs font-medium text-white capitalize">{ev.event.replace(/_/g,' ')}</p>
-                            <p className="text-xs text-gray-600 shrink-0">{fmt(ev.createdAt)}</p>
+                            <p className="text-xs text-gray-600 shrink-0 dark:text-gray-400">{fmt(ev.createdAt)}</p>
                           </div>
                           {ev.note && <p className="text-xs text-gray-400 mt-0.5">{ev.note}</p>}
-                          {ev.performedBy && <p className="text-xs text-gray-600 mt-0.5">by {ev.performedBy}</p>}
+                          {ev.performedBy && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">by {ev.performedBy}</p>}
                         </div>
                       </div>
                     ))}

@@ -342,7 +342,7 @@ export default function LeavePage() {
               { label: 'Days Approved',value: stats.totalDaysApproved, color: 'text-purple-400' },
             ].map(s => (
               <div key={s.label} className="bg-gray-800 border border-gray-700 rounded-xl p-4">
-                <p className="text-xs text-gray-500">{s.label}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                 <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
               </div>
             ))}
@@ -374,7 +374,7 @@ export default function LeavePage() {
 
           {/* Request list */}
           {loadingReqs ? (
-            <div className="text-center py-12 text-gray-500">Loading…</div>
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
           ) : requests.length === 0 ? (
             <div className="text-center py-16 bg-gray-800/50 rounded-2xl border border-gray-700">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
@@ -383,7 +383,7 @@ export default function LeavePage() {
                 </svg>
               </div>
               <p className="text-gray-400 font-medium">No leave requests found</p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 mt-1 dark:text-gray-400">
                 {canApprove ? 'No requests match your filters' : 'Submit your first leave request above'}
               </p>
             </div>
@@ -408,7 +408,7 @@ export default function LeavePage() {
                           )}
                           <span className="text-xs text-gray-400">{typeLabel[r.leaveType] ?? r.leaveType}</span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                           {fmt(r.startDate)} → {fmt(r.endDate)}
                           <span className="ml-2 text-purple-400">{r.totalDays}d</span>
                         </p>
@@ -417,7 +417,7 @@ export default function LeavePage() {
                         <span className={`text-xs px-2.5 py-1 rounded-full border font-medium capitalize ${STATUS_STYLE[r.status] ?? 'text-gray-400'}`}>
                           {r.status}
                         </span>
-                        <span className="text-gray-600 text-xs">{isExpanded ? '▲' : '▼'}</span>
+                        <span className="text-gray-600 text-xs dark:text-gray-400">{isExpanded ? '▲' : '▼'}</span>
                       </div>
                     </button>
 
@@ -425,24 +425,24 @@ export default function LeavePage() {
                       <div className="px-5 pb-5 border-t border-gray-700 pt-4 space-y-4">
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                           <div>
-                            <p className="text-xs text-gray-500">Requested on</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Requested on</p>
                             <p className="text-white">{fmt(r.createdAt)}</p>
                           </div>
                           {r.reason && (
                             <div className="col-span-2">
-                              <p className="text-xs text-gray-500">Reason</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Reason</p>
                               <p className="text-gray-300">{r.reason}</p>
                             </div>
                           )}
                           {r.reviewedAt && (
                             <div>
-                              <p className="text-xs text-gray-500">Reviewed on</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Reviewed on</p>
                               <p className="text-white">{fmt(r.reviewedAt)}</p>
                             </div>
                           )}
                           {r.reviewNote && (
                             <div className="col-span-2">
-                              <p className="text-xs text-gray-500">Review note</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Review note</p>
                               <p className="text-gray-300">{r.reviewNote}</p>
                             </div>
                           )}
@@ -526,9 +526,9 @@ export default function LeavePage() {
               <p className="text-gray-400">Your account is not linked to an employee record. Contact HR.</p>
             </div>
           ) : loadingBal ? (
-            <div className="text-center py-12 text-gray-500">Calculating balances…</div>
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">Calculating balances…</div>
           ) : balances.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">No leave types configured.</div>
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">No leave types configured.</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {balances.map(b => {
@@ -546,27 +546,27 @@ export default function LeavePage() {
                       <span className="text-2xl">{b.emoji}</span>
                       <div>
                         <p className="text-sm font-semibold text-white">{b.label}</p>
-                        {b.accrualNote && <p className="text-xs text-gray-600 mt-0.5">{b.accrualNote}</p>}
+                        {b.accrualNote && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{b.accrualNote}</p>}
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div className="bg-gray-800/60 rounded-lg px-3 py-2">
-                        <p className="text-xs text-gray-500">Entitlement</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Entitlement</p>
                         <p className="font-semibold text-white">
                           {b.entitlement == null || b.entitlement >= 999 ? '∞' : `${b.entitlement}d`}
                         </p>
                       </div>
                       <div className="bg-gray-800/60 rounded-lg px-3 py-2">
-                        <p className="text-xs text-gray-500">Taken</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Taken</p>
                         <p className="font-semibold text-white">{b.taken}d</p>
                       </div>
                       <div className="bg-gray-800/60 rounded-lg px-3 py-2">
-                        <p className="text-xs text-gray-500">Pending</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Pending</p>
                         <p className="font-semibold text-yellow-400">{b.pending}d</p>
                       </div>
                       <div className="bg-gray-800/60 rounded-lg px-3 py-2">
-                        <p className="text-xs text-gray-500">Remaining</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Remaining</p>
                         <p className={`font-semibold ${remainingColor}`}>
                           {b.remaining == null ? '∞' : `${b.remaining}d`}
                         </p>
@@ -575,7 +575,7 @@ export default function LeavePage() {
 
                     {pct != null && (
                       <div>
-                        <div className="flex justify-between text-xs text-gray-600 mb-1">
+                        <div className="flex justify-between text-xs text-gray-600 mb-1 dark:text-gray-400">
                           <span>Used</span><span>{pct}%</span>
                         </div>
                         <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
@@ -638,13 +638,13 @@ export default function LeavePage() {
           )}
 
           {loadingCal ? (
-            <div className="text-center py-12 text-gray-500">Loading calendar…</div>
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading calendar…</div>
           ) : (
             <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
               {/* Weekday headers */}
               <div className="grid grid-cols-7 border-b border-gray-800">
                 {WEEKDAYS.map(d => (
-                  <div key={d} className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div key={d} className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     {d}
                   </div>
                 ))}
@@ -691,7 +691,7 @@ export default function LeavePage() {
                               </div>
                             ))}
                             {dayEvents.length > 3 && (
-                              <p className="text-[10px] text-gray-600">+{dayEvents.length - 3} more</p>
+                              <p className="text-[10px] text-gray-600 dark:text-gray-400">+{dayEvents.length - 3} more</p>
                             )}
                           </div>
                         </>
@@ -704,7 +704,7 @@ export default function LeavePage() {
           )}
 
           {calEvents.length === 0 && !loadingCal && (
-            <p className="text-center text-sm text-gray-600 py-4">No approved or pending leave in {MONTHS[calMonth - 1]} {calYear}.</p>
+            <p className="text-center text-sm text-gray-600 py-4 dark:text-gray-400">No approved or pending leave in {MONTHS[calMonth - 1]} {calYear}.</p>
           )}
         </div>
       )}
@@ -717,7 +717,7 @@ export default function LeavePage() {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">New Leave Request</h2>
               <button type="button" onClick={() => { setShowForm(false); setFormError(null) }}
-                className="text-gray-500 hover:text-white text-2xl leading-none">×</button>
+                className="text-gray-500 hover:text-white text-2xl leading-none dark:text-gray-400">×</button>
             </div>
 
             {canApprove && (

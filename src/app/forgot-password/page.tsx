@@ -27,21 +27,21 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 dark:bg-gray-800">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="w-12 h-12 rounded-xl bg-brand-600 flex items-center justify-center mx-auto mb-4">
             <span className="text-white text-xl"></span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Forgot your password?</h1>
-          <p className="text-sm text-gray-500 mt-1">Enter your email and we'll send a reset link.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Forgot your password?</h1>
+          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">Enter your email and we'll send a reset link.</p>
         </div>
 
         {status === 'sent' ? (
-          <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center shadow-sm dark:bg-gray-900 dark:border-gray-700">
             <div className="text-4xl mb-3"></div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Check your email</h2>
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2 dark:text-white">Check your email</h2>
+            <p className="text-sm text-gray-500 leading-relaxed dark:text-gray-400">
               If an account exists for <strong>{email}</strong>, you'll receive a reset link shortly.
               The link expires in 1 hour.
             </p>
@@ -50,9 +50,9 @@ export default function ForgotPasswordPage() {
             </Link>
           </div>
         ) : (
-          <form onSubmit={submit} className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm space-y-4">
+          <form onSubmit={submit} className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm space-y-4 dark:bg-gray-900 dark:border-gray-700">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Email address</label>
               <input
                 type="email"
                 required
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@organisation.com"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600"
               />
             </div>
 
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
               {status === 'loading' ? 'Sending…' : 'Send reset link'}
             </button>
 
-            <p className="text-center text-sm text-gray-500">
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
               <Link href="/login" className="text-brand-600 hover:underline">Back to sign in</Link>
             </p>
           </form>

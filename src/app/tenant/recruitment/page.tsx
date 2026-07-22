@@ -239,7 +239,7 @@ export default function RecruitmentPage() {
                 </svg>
               </div>
                 <p className="text-gray-300 font-medium">No requisitions yet</p>
-                <p className="text-gray-500 text-sm mt-1">Create a job requisition to begin hiring.</p>
+                <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create a job requisition to begin hiring.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -253,7 +253,7 @@ export default function RecruitmentPage() {
                         </span>
                       </div>
                       {r.description && <p className="text-sm text-gray-400 line-clamp-2 mt-0.5">{r.description}</p>}
-                      <p className="text-xs text-gray-600 mt-2">
+                      <p className="text-xs text-gray-600 mt-2 dark:text-gray-400">
                         Created {new Date(r.createdAt).toLocaleDateString('en-AU')} · {r.applicationCount} application{r.applicationCount !== 1 ? 's' : ''} · {r.hiredCount} hired
                       </p>
                     </div>
@@ -291,7 +291,7 @@ export default function RecruitmentPage() {
                 </svg>
               </div>
                 <p className="text-gray-300 font-medium">No candidates in pipeline</p>
-                <p className="text-gray-500 text-sm mt-1">Add candidates to begin tracking applications.</p>
+                <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Add candidates to begin tracking applications.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -305,9 +305,9 @@ export default function RecruitmentPage() {
                             {appLabel(a.status)}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500">{a.candidateEmail}</p>
-                        {a.candidateSource && <p className="text-xs text-gray-600 mt-0.5">Source: {a.candidateSource}</p>}
-                        {a.notes && <p className="text-xs text-gray-500 mt-1 italic">{a.notes}</p>}
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{a.candidateEmail}</p>
+                        {a.candidateSource && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">Source: {a.candidateSource}</p>}
+                        {a.notes && <p className="text-xs text-gray-500 mt-1 italic dark:text-gray-400">{a.notes}</p>}
                       </div>
                       {/* Status pipeline */}
                       <div className="flex flex-wrap gap-1 shrink-0">

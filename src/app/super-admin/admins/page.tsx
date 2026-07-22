@@ -165,7 +165,7 @@ export default function AdminsPage() {
           <tbody>
             {admins.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-10 text-center text-gray-500 text-sm">
+                <td colSpan={5} className="px-5 py-10 text-center text-gray-500 text-sm dark:text-gray-400">
                   No super admins found.{' '}
                   <button onClick={() => setShowForm(true)} className="text-purple-400 hover:underline">Add the first one →</button>
                 </td>
@@ -214,7 +214,7 @@ export default function AdminsPage() {
                       Delete
                     </button>
                   ) : (
-                    <span className="text-xs text-gray-600">Last admin</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Last admin</span>
                   )}
                 </td>
               </tr>

@@ -116,7 +116,7 @@ export default function WorkforcePlanningPage() {
             <thead>
               <tr className="border-b border-gray-800 text-left">
                 {['Role / Department','Planned','Current','Vacancies','Target Date','Status',''].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -125,7 +125,7 @@ export default function WorkforcePlanningPage() {
                 <tr key={p.id} className="hover:bg-gray-800/30">
                   <td className="px-4 py-3">
                     <p className="text-gray-200">{p.positionTitle ?? 'General'}</p>
-                    {p.departmentName && <p className="text-xs text-gray-500">{p.departmentName}</p>}
+                    {p.departmentName && <p className="text-xs text-gray-500 dark:text-gray-400">{p.departmentName}</p>}
                   </td>
                   <td className="px-4 py-3 text-gray-300">{p.plannedCount}</td>
                   <td className="px-4 py-3 text-green-400">{p.currentCount}</td>

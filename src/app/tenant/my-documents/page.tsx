@@ -172,7 +172,7 @@ export default function MyDocumentsPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">Account not linked to an employee record</p>
-          <p className="text-sm text-gray-500">Contact HR to link your account before uploading documents.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Contact HR to link your account before uploading documents.</p>
         </div>
       )}
 
@@ -253,7 +253,7 @@ export default function MyDocumentsPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading…</div>
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
       ) : linked && docs.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-2xl py-14 text-center space-y-3">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
@@ -262,7 +262,7 @@ export default function MyDocumentsPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No documents yet</p>
-          <p className="text-sm text-gray-500">Upload your compliance documents to keep HR informed of your certifications.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Upload your compliance documents to keep HR informed of your certifications.</p>
         </div>
       ) : linked ? (
         <div className="space-y-6">
@@ -303,8 +303,8 @@ function DocSection({ title, docs, note }: { title: string; docs: MyDoc[]; note?
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <h2 className="text-sm font-semibold text-white">{title}</h2>
-        <span className="text-xs text-gray-600">({docs.length})</span>
-        {note && <span className="text-xs text-gray-500 ml-1">— {note}</span>}
+        <span className="text-xs text-gray-600 dark:text-gray-400">({docs.length})</span>
+        {note && <span className="text-xs text-gray-500 ml-1 dark:text-gray-400">— {note}</span>}
       </div>
       <div className="grid gap-3">
         {docs.map(d => {
@@ -323,7 +323,7 @@ function DocSection({ title, docs, note }: { title: string; docs: MyDoc[]; note?
                     {ss?.label ?? d.status}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                   {d.category}
                   {d.fileName && <span className="ml-2">· {d.fileName} {fmtSize(d.fileSizeBytes)}</span>}
                 </p>
@@ -332,9 +332,9 @@ function DocSection({ title, docs, note }: { title: string; docs: MyDoc[]; note?
                     {badge.text}
                   </span>
                 )}
-                {d.notes && <p className="text-xs text-gray-600 mt-1 italic">{d.notes}</p>}
+                {d.notes && <p className="text-xs text-gray-600 mt-1 italic dark:text-gray-400">{d.notes}</p>}
               </div>
-              <div className="text-xs text-gray-600 shrink-0">
+              <div className="text-xs text-gray-600 shrink-0 dark:text-gray-400">
                 {new Date(d.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
               </div>
             </div>

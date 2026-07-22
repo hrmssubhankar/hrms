@@ -65,10 +65,10 @@ export default function CompetencyPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between dark:bg-gray-900 dark:border-gray-700">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Competency & Skills</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Skill matrix and competency assessments per employee</p>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Competency & Skills</h1>
+          <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">Skill matrix and competency assessments per employee</p>
         </div>
         <div className="flex gap-2">
           {tab === 'library' && (
@@ -81,7 +81,7 @@ export default function CompetencyPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 bg-white px-6">
+      <div className="flex border-b border-gray-200 bg-white px-6 dark:bg-gray-900 dark:border-gray-700">
         {(['matrix','library'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition capitalize ${tab===t ? 'border-brand-500 text-brand-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
@@ -94,8 +94,8 @@ export default function CompetencyPage() {
         {tab === 'matrix' && (
           <div className="space-y-4">
             <div className="max-w-sm">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Select Employee</label>
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={selectedEmp} onChange={e => setSelectedEmp(e.target.value)}>
+              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Select Employee</label>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={selectedEmp} onChange={e => setSelectedEmp(e.target.value)}>
                 <option value="">Choose employee…</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
@@ -115,10 +115,10 @@ export default function CompetencyPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {assessments.map(a => (
-                    <div key={a.id} className="border border-gray-200 rounded-xl p-4 space-y-2">
+                    <div key={a.id} className="border border-gray-200 rounded-xl p-4 space-y-2 dark:border-gray-700">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{a.competencyName}</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">{a.competencyName}</p>
                           {a.competencyCategory && <p className="text-xs text-gray-400 capitalize">{a.competencyCategory}</p>}
                         </div>
                         {a.outcome && (
@@ -127,9 +127,9 @@ export default function CompetencyPage() {
                           </span>
                         )}
                       </div>
-                      {a.assessedAt && <p className="text-xs text-gray-500">Assessed: {new Date(a.assessedAt).toLocaleDateString()}</p>}
+                      {a.assessedAt && <p className="text-xs text-gray-500 dark:text-gray-400">Assessed: {new Date(a.assessedAt).toLocaleDateString()}</p>}
                       {a.expiryDate && <p className="text-xs text-orange-600">Expires: {new Date(a.expiryDate).toLocaleDateString()}</p>}
-                      {a.evidence && <p className="text-xs text-gray-500 truncate">{a.evidence}</p>}
+                      {a.evidence && <p className="text-xs text-gray-500 truncate dark:text-gray-400">{a.evidence}</p>}
                     </div>
                   ))}
                 </div>
@@ -155,9 +155,9 @@ export default function CompetencyPage() {
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">{cat ?? 'Uncategorised'}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {competencies.filter(c => c.category === cat).map(c => (
-                      <div key={c.id} className="border border-gray-200 rounded-lg p-4">
-                        <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                        {c.description && <p className="text-xs text-gray-500 mt-1">{c.description}</p>}
+                      <div key={c.id} className="border border-gray-200 rounded-lg p-4 dark:border-gray-700">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{c.name}</p>
+                        {c.description && <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{c.description}</p>}
                       </div>
                     ))}
                   </div>
@@ -171,15 +171,15 @@ export default function CompetencyPage() {
       {/* Add competency modal */}
       {showAddComp && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Competency</h3>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 dark:bg-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-white">Add Competency</h3>
             <div className="space-y-3">
-              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Name *" value={compForm.name} onChange={e => setCompForm(f => ({...f, name:e.target.value}))} />
-              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Category (e.g. Clinical, Safety)" value={compForm.category} onChange={e => setCompForm(f => ({...f, category:e.target.value}))} />
-              <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" rows={2} placeholder="Description" value={compForm.description} onChange={e => setCompForm(f => ({...f, description:e.target.value}))} />
+              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Name *" value={compForm.name} onChange={e => setCompForm(f => ({...f, name:e.target.value}))} />
+              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Category (e.g. Clinical, Safety)" value={compForm.category} onChange={e => setCompForm(f => ({...f, category:e.target.value}))} />
+              <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none dark:border-gray-700" rows={2} placeholder="Description" value={compForm.description} onChange={e => setCompForm(f => ({...f, description:e.target.value}))} />
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowAddComp(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600">Cancel</button>
+              <button onClick={() => setShowAddComp(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 dark:text-gray-400 dark:border-gray-700">Cancel</button>
               <button onClick={addCompetency} disabled={saving || !compForm.name} className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">{saving ? 'Adding…' : 'Add'}</button>
             </div>
           </div>
@@ -189,27 +189,27 @@ export default function CompetencyPage() {
       {/* Record assessment modal */}
       {showAssess && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Record Assessment</h3>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 dark:bg-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-white">Record Assessment</h3>
             <div className="space-y-3">
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={assessForm.competencyId} onChange={e => setAssessForm(f => ({...f, competencyId:e.target.value}))}>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={assessForm.competencyId} onChange={e => setAssessForm(f => ({...f, competencyId:e.target.value}))}>
                 <option value="">Select competency *</option>
                 {competencies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={assessForm.outcome} onChange={e => setAssessForm(f => ({...f, outcome:e.target.value}))}>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={assessForm.outcome} onChange={e => setAssessForm(f => ({...f, outcome:e.target.value}))}>
                 <option value="competent">Competent</option>
                 <option value="not_yet_competent">Not Yet Competent</option>
               </select>
               <div className="grid grid-cols-2 gap-2">
-                <div><label className="text-xs text-gray-500 mb-1 block">Assessed Date</label>
-                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={assessForm.assessedAt} onChange={e => setAssessForm(f => ({...f, assessedAt:e.target.value}))} /></div>
-                <div><label className="text-xs text-gray-500 mb-1 block">Expiry Date</label>
-                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={assessForm.expiryDate} onChange={e => setAssessForm(f => ({...f, expiryDate:e.target.value}))} /></div>
+                <div><label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">Assessed Date</label>
+                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={assessForm.assessedAt} onChange={e => setAssessForm(f => ({...f, assessedAt:e.target.value}))} /></div>
+                <div><label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">Expiry Date</label>
+                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={assessForm.expiryDate} onChange={e => setAssessForm(f => ({...f, expiryDate:e.target.value}))} /></div>
               </div>
-              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Evidence reference" value={assessForm.evidence} onChange={e => setAssessForm(f => ({...f, evidence:e.target.value}))} />
+              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Evidence reference" value={assessForm.evidence} onChange={e => setAssessForm(f => ({...f, evidence:e.target.value}))} />
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowAssess(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600">Cancel</button>
+              <button onClick={() => setShowAssess(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 dark:text-gray-400 dark:border-gray-700">Cancel</button>
               <button onClick={addAssessment} disabled={saving || !assessForm.competencyId} className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">{saving ? 'Saving…' : 'Record'}</button>
             </div>
           </div>

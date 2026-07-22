@@ -235,7 +235,7 @@ export default function WhsPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No incidents recorded</p>
-          <p className="text-gray-500 text-sm mt-1">Use the "Report Incident" button to log a new event.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Use the "Report Incident" button to log a new event.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -264,13 +264,13 @@ export default function WhsPage() {
                       </span>
                     </div>
                     <p className="text-gray-400 text-xs truncate">{inc.description}</p>
-                    <p className="text-gray-600 text-xs mt-0.5">
+                    <p className="text-gray-600 text-xs mt-0.5 dark:text-gray-400">
                       {inc.location && `${inc.location} · `}
                       {new Date(inc.occurredAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
                       {(inc.employeeFirstName) && ` · ${inc.employeeFirstName} ${inc.employeeLastName}`}
                     </p>
                   </div>
-                  <span className="text-gray-500 text-xs shrink-0">{isOpen ? '▲' : '▼'}</span>
+                  <span className="text-gray-500 text-xs shrink-0 dark:text-gray-400">{isOpen ? '▲' : '▼'}</span>
                 </div>
 
                 {/* Expanded detail */}
@@ -280,7 +280,7 @@ export default function WhsPage() {
 
                     {/* Status actions */}
                     <div className="flex gap-2 flex-wrap">
-                      <span className="text-xs text-gray-500 self-center">Move to:</span>
+                      <span className="text-xs text-gray-500 self-center dark:text-gray-400">Move to:</span>
                       {inc.status !== 'investigating' && (
                         <button onClick={() => updateStatus(inc.id, 'investigating')}
                           className="text-xs border border-amber-800 text-amber-300 hover:bg-amber-900/30 px-3 py-1.5 rounded-lg transition">
@@ -303,7 +303,7 @@ export default function WhsPage() {
 
                     {/* Corrective actions */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Corrective Actions</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Corrective Actions</p>
                       {inc.correctiveActions.length > 0 && (
                         <ul className="space-y-1 mb-2">
                           {inc.correctiveActions.map(a => (

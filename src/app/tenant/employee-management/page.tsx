@@ -55,9 +55,9 @@ EMP001,Jane,Smith,jane.smith@example.com,full_time,2026-01-15,,+61400000001,Yahw
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Import Employees</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Upload a CSV to bulk-add employees</p>
+            <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Upload a CSV to bulk-add employees</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition"></button>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition dark:text-gray-400"></button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -122,7 +122,7 @@ EMP001,Jane,Smith,jane.smith@example.com,full_time,2026-01-15,,+61400000001,Yahw
                 ) : (
                   <>
                     <p className="text-3xl mb-2"></p>
-                    <p className="text-sm text-gray-500">Click to select a CSV file</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Click to select a CSV file</p>
                     <p className="text-xs text-gray-400 mt-1">Max 5 MB</p>
                   </>
                 )}
@@ -284,7 +284,7 @@ export default function EmployeeManagementPage() {
           placeholder="Search name, email, emp #…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:border-blue-400"
+          className="flex-1 min-w-[200px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:border-blue-400 dark:placeholder-gray-500"
         />
         <select
           value={status}
@@ -308,7 +308,7 @@ export default function EmployeeManagementPage() {
         {(search || status || empType) && (
           <button
             onClick={() => { setSearch(''); setStatus(''); setEmpType('') }}
-            className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+            className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition dark:text-gray-400"
           >
             Clear
           </button>
@@ -359,7 +359,7 @@ export default function EmployeeManagementPage() {
                       onClick={() => router.push(`/tenant/employee-management/${emp.id}`)}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition"
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-gray-500">{emp.employeeNumber}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{emp.employeeNumber}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div
@@ -395,7 +395,7 @@ export default function EmployeeManagementPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex w-2 h-2 rounded-full ${emp.isActive ? 'bg-green-500' : 'bg-gray-300'}`} />
-                        <span className="ml-1.5 text-xs text-gray-500">{emp.isActive ? 'Active' : 'Inactive'}</span>
+                        <span className="ml-1.5 text-xs text-gray-500 dark:text-gray-400">{emp.isActive ? 'Active' : 'Inactive'}</span>
                       </td>
                       <td className="px-4 py-3">
                         <Link

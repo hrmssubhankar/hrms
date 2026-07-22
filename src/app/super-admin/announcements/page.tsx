@@ -161,7 +161,7 @@ export default function AnnouncementsPage() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
           <div className="text-5xl mb-3"></div>
           <p className="text-gray-400">No announcements yet</p>
-          <p className="text-gray-600 text-sm mt-1">Create one to broadcast a message to all tenants</p>
+          <p className="text-gray-600 text-sm mt-1 dark:text-gray-400">Create one to broadcast a message to all tenants</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -182,12 +182,12 @@ export default function AnnouncementsPage() {
                         {!ann.isActive && (
                           <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">Inactive</span>
                         )}
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           → {ann.targetTenants === 'all' ? 'All tenants' : ann.targetTenants}
                         </span>
                       </div>
                       <p className="text-sm text-gray-300">{ann.body}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                         <span>By {ann.createdBy}</span>
                         <span>{new Date(ann.createdAt).toLocaleString('en-AU')}</span>
                         {ann.expiresAt && <span>Expires {new Date(ann.expiresAt).toLocaleDateString('en-AU')}</span>}

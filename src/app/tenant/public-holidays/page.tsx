@@ -282,7 +282,7 @@ export default function PublicHolidaysPage() {
               <h2 className="text-lg font-semibold text-white">
                 {editing ? 'Edit Holiday' : 'Add Public Holiday'}
               </h2>
-              <button type="button" onClick={() => setShowForm(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+              <button type="button" onClick={() => setShowForm(false)} className="text-gray-500 hover:text-white text-xl leading-none dark:text-gray-400">×</button>
             </div>
 
             <div>
@@ -375,7 +375,7 @@ export default function PublicHolidaysPage() {
 
       {/* Holiday list */}
       {loading ? (
-        <div className="text-center py-16 text-gray-500">Loading…</div>
+        <div className="text-center py-16 text-gray-500 dark:text-gray-400">Loading…</div>
       ) : holidays.length === 0 ? (
         <div className="text-center py-16 bg-gray-800/50 rounded-2xl border border-gray-700">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
@@ -419,13 +419,13 @@ export default function PublicHolidaysPage() {
                         >
                           {/* Date block */}
                           <div className="text-center w-14 shrink-0">
-                            <p className="text-xs text-gray-500 uppercase">
+                            <p className="text-xs text-gray-500 uppercase dark:text-gray-400">
                               {new Date(h.date + 'T00:00:00').toLocaleDateString('en-AU', { month: 'short' })}
                             </p>
                             <p className={`text-2xl font-bold leading-none ${isToday ? 'text-purple-300' : isPast ? 'text-gray-600' : 'text-white'}`}>
                               {new Date(h.date + 'T00:00:00').getDate()}
                             </p>
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                               {new Date(h.date + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short' })}
                             </p>
                           </div>
@@ -454,22 +454,22 @@ export default function PublicHolidaysPage() {
                           <div className="flex items-center gap-3 shrink-0">
                             <span className="text-xs">
                               {isToday ? <span className="text-purple-300 font-semibold">Today </span>
-                                : isPast ? <span className="text-gray-600">Passed</span>
+                                : isPast ? <span className="text-gray-600 dark:text-gray-400">Passed</span>
                                 : diff === 1 ? <span className="text-yellow-400">Tomorrow</span>
-                                : <span className="text-gray-500">{diff}d away</span>}
+                                : <span className="text-gray-500 dark:text-gray-400">{diff}d away</span>}
                             </span>
 
                             {canManage && (
                               <>
                                 <button
                                   onClick={() => openEdit(h)}
-                                  className="text-xs text-gray-500 hover:text-purple-400 transition-colors px-1"
+                                  className="text-xs text-gray-500 hover:text-purple-400 transition-colors px-1 dark:text-gray-400"
                                   title="Edit"
                                 ></button>
                                 <button
                                   onClick={() => deleteHoliday(h.id)}
                                   disabled={isBusy}
-                                  className="text-xs text-gray-500 hover:text-red-400 disabled:opacity-40 transition-colors px-1"
+                                  className="text-xs text-gray-500 hover:text-red-400 disabled:opacity-40 transition-colors px-1 dark:text-gray-400"
                                   title="Delete"
                                 >
                                   {isBusy ? '…' : ''}
@@ -487,7 +487,7 @@ export default function PublicHolidaysPage() {
         </div>
       )}
 
-      <p className="text-xs text-gray-600 pt-2">
+      <p className="text-xs text-gray-600 pt-2 dark:text-gray-400">
         {canManage
           ? 'Add, edit or remove holidays as needed. Changes apply immediately to all employees.'
           : 'Dates reflect national observed holidays. Some states may observe additional or substituted dates.'}

@@ -132,7 +132,7 @@ export default function RolesPage() {
       {/* Role breakdown */}
       {Object.keys(roleCounts).length > 0 && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Breakdown by Role</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Breakdown by Role</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(roleCounts).map(([role, count]) => (
               <span key={role} className={`text-xs px-3 py-1 rounded-full border ${ROLE_STYLE[role] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
@@ -173,7 +173,7 @@ export default function RolesPage() {
                   ↺
                 </button>
               </div>
-              <p className="text-xs text-gray-600 mt-1">Share this password with the user — they should change it after first login.</p>
+              <p className="text-xs text-gray-600 mt-1 dark:text-gray-400">Share this password with the user — they should change it after first login.</p>
             </div>
           </div>
           <button type="submit" disabled={saving}
@@ -199,7 +199,7 @@ export default function RolesPage() {
             <thead>
               <tr className="border-b border-gray-800">
                 {['Email', 'Role', '2FA', 'Last Login', 'Status', ''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -223,7 +223,7 @@ export default function RolesPage() {
                           <button onClick={() => changeRole(u.id, editRole)}
                             className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded transition"></button>
                           <button onClick={() => setEditId(null)}
-                            className="text-xs text-gray-500 hover:text-white px-1"></button>
+                            className="text-xs text-gray-500 hover:text-white px-1 dark:text-gray-400"></button>
                         </div>
                       ) : (
                         <button onClick={() => { setEditId(u.id); setEditRole(u.role) }}
@@ -238,7 +238,7 @@ export default function RolesPage() {
                       {u.totpEnabled ? 'On' : 'Off'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
+                  <td className="px-4 py-3 text-gray-500 text-xs dark:text-gray-400">
                     {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('en-AU') : 'Never'}
                   </td>
                   <td className="px-4 py-3">

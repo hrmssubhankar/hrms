@@ -67,12 +67,12 @@ export default function DEIPage() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <p className="text-xs text-gray-400">Indigenous / TSI</p>
           <p className="text-2xl font-bold text-amber-400 mt-1">{summary.indigenous}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{pct(summary.indigenous)} of workforce</p>
+          <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{pct(summary.indigenous)} of workforce</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <p className="text-xs text-gray-400">Disability</p>
           <p className="text-2xl font-bold text-blue-400 mt-1">{summary.disability}</p>
-          <p className="text-xs text-gray-500 mt-0.5">{pct(summary.disability)} of workforce</p>
+          <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{pct(summary.disability)} of workforce</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
           <p className="text-xs text-gray-400">Need Adjustments</p>
@@ -83,12 +83,12 @@ export default function DEIPage() {
       {/* Gender breakdown */}
       {Object.keys(summary.byGender).length > 0 && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Gender</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Gender</p>
           <div className="flex flex-wrap gap-3">
             {Object.entries(summary.byGender).map(([g, n]) => (
               <div key={g} className="bg-gray-800 rounded-lg px-4 py-2">
                 <p className="text-gray-300 text-sm font-medium">{g}</p>
-                <p className="text-white text-lg font-bold">{n} <span className="text-xs text-gray-500">{pct(n)}</span></p>
+                <p className="text-white text-lg font-bold">{n} <span className="text-xs text-gray-500 dark:text-gray-400">{pct(n)}</span></p>
               </div>
             ))}
           </div>
@@ -97,7 +97,7 @@ export default function DEIPage() {
 
       {showForm && (
         <form onSubmit={save} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
-          <p className="text-xs text-gray-500 bg-gray-800 rounded-lg p-3">
+          <p className="text-xs text-gray-500 bg-gray-800 rounded-lg p-3 dark:text-gray-400">
             This information is self-reported and confidential. It is used only for aggregate reporting to support DEI initiatives.
           </p>
           <div>
@@ -153,7 +153,7 @@ export default function DEIPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No DEI data on record</p>
-          <p className="text-gray-500 text-sm mt-1">Encourage employees to self-report to support DEI reporting.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Encourage employees to self-report to support DEI reporting.</p>
         </div>
       ) : (
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -161,7 +161,7 @@ export default function DEIPage() {
             <thead>
               <tr className="border-b border-gray-800 text-left">
                 {['Employee','Gender','Indigenous','Disability','Adjustments'].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -170,8 +170,8 @@ export default function DEIPage() {
                 <tr key={r.id} className="hover:bg-gray-800/30">
                   <td className="px-4 py-3 text-gray-200">{r.employeeFirstName} {r.employeeLastName}</td>
                   <td className="px-4 py-3 text-gray-400">{r.gender ?? '—'}</td>
-                  <td className="px-4 py-3">{r.indigenousStatus ? <span className="text-amber-400">Yes</span> : <span className="text-gray-600">—</span>}</td>
-                  <td className="px-4 py-3">{r.disabilityStatus ? <span className="text-blue-400">Yes</span> : <span className="text-gray-600">—</span>}</td>
+                  <td className="px-4 py-3">{r.indigenousStatus ? <span className="text-amber-400">Yes</span> : <span className="text-gray-600 dark:text-gray-400">—</span>}</td>
+                  <td className="px-4 py-3">{r.disabilityStatus ? <span className="text-blue-400">Yes</span> : <span className="text-gray-600 dark:text-gray-400">—</span>}</td>
                   <td className="px-4 py-3 text-gray-400 text-xs max-w-xs truncate">{r.adjustmentsRequired ?? '—'}</td>
                 </tr>
               ))}

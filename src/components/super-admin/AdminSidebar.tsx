@@ -33,7 +33,7 @@ export default function AdminSidebar() {
       <div className="px-5 py-5 border-b border-gray-800">
         <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mb-1">Super Admin</p>
         <p className="text-base font-semibold text-white tracking-tight">HRMS</p>
-        <p className="text-xs text-gray-500">Platform Control</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Platform Control</p>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -56,7 +56,7 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="px-4 py-3 border-t border-gray-800 text-xs text-gray-600">
+      <div className="px-4 py-3 border-t border-gray-800 text-xs text-gray-600 dark:text-gray-400">
         HRMS Platform v1.0
       </div>
     </aside>

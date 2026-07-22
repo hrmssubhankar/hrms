@@ -103,7 +103,7 @@ export default function AuditLogsPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No audit entries found</p>
-          <p className="text-gray-500 text-sm mt-1">Entries appear as users interact with the system.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Entries appear as users interact with the system.</p>
         </div>
       ) : (
         <>
@@ -111,12 +111,12 @@ export default function AuditLogsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-800 text-left">
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Timestamp</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Resource</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">IP</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-8"></th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Timestamp</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">User</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Action</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Resource</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">IP</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-8 dark:text-gray-400"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/60">
@@ -141,10 +141,10 @@ export default function AuditLogsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <p className="text-gray-300 text-xs">{log.resource}</p>
-                          {log.resourceId && <p className="text-gray-600 text-xs font-mono">{log.resourceId.slice(0,8)}…</p>}
+                          {log.resourceId && <p className="text-gray-600 text-xs font-mono dark:text-gray-400">{log.resourceId.slice(0,8)}…</p>}
                         </td>
-                        <td className="px-4 py-3 text-gray-500 text-xs font-mono">{log.ipAddress ?? '—'}</td>
-                        <td className="px-4 py-3 text-gray-600 text-xs">
+                        <td className="px-4 py-3 text-gray-500 text-xs font-mono dark:text-gray-400">{log.ipAddress ?? '—'}</td>
+                        <td className="px-4 py-3 text-gray-600 text-xs dark:text-gray-400">
                           {hasDetails ? (isOpen ? '▲' : '▼') : ''}
                         </td>
                       </tr>
@@ -181,7 +181,7 @@ export default function AuditLogsPage() {
 
           {/* Pagination */}
           <div className="flex gap-3 justify-between items-center">
-            <span className="text-xs text-gray-500">Showing {logs.length} entries · Page {page + 1}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Showing {logs.length} entries · Page {page + 1}</span>
             <div className="flex gap-2">
               <button disabled={page === 0}
                 onClick={() => { const p = page - 1; setPage(p); load(filterResource, filterAction, filterSince, p) }}

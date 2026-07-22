@@ -210,7 +210,7 @@ function LibraryTab() {
                 </label>
               ))}
             </div>
-            <p className="text-xs text-gray-500">{enrollIds.length} employee{enrollIds.length !== 1 ? 's' : ''} selected</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{enrollIds.length} employee{enrollIds.length !== 1 ? 's' : ''} selected</p>
             <div className="flex gap-2">
               <button onClick={enrol} disabled={enrolling || !enrollIds.length}
                 className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm py-2 rounded-lg transition">
@@ -234,7 +234,7 @@ function LibraryTab() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No courses yet</p>
-          <p className="text-gray-500 text-sm mt-1">Create your first course to get started.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create your first course to get started.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -254,10 +254,10 @@ function LibraryTab() {
                 </div>
               </div>
               {c.description && (
-                <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{c.description}</p>
+                <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 dark:text-gray-400">{c.description}</p>
               )}
               <div className="flex items-center justify-between pt-1 mt-auto">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
                   {c.validityMonths ? `Expires every ${c.validityMonths}mo` : 'No expiry'}
                 </span>
                 <div className="flex gap-2">
@@ -266,7 +266,7 @@ function LibraryTab() {
                     + Enrol
                   </button>
                   <button onClick={() => archiveCourse(c.id)}
-                    className="text-xs text-gray-500 hover:text-red-400 border border-gray-800 px-2.5 py-1.5 rounded-lg transition">
+                    className="text-xs text-gray-500 hover:text-red-400 border border-gray-800 px-2.5 py-1.5 rounded-lg transition dark:text-gray-400">
                     Archive
                   </button>
                 </div>
@@ -354,7 +354,7 @@ function RecordsTab() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No training records</p>
-          <p className="text-gray-500 text-sm mt-1">Enrol employees in a course from the Course Library tab.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Enrol employees in a course from the Course Library tab.</p>
         </div>
       ) : (
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -378,12 +378,12 @@ function RecordsTab() {
                   <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
                     <td className="px-5 py-3.5">
                       <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
-                      <p className="text-gray-500 text-xs">{r.employeeEmail}</p>
+                      <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                     </td>
                     <td className="px-5 py-3.5">
                       <p className="text-gray-200 text-sm">{r.courseTitle}</p>
                       <div className="flex items-center gap-1 mt-0.5">
-                        {r.courseCategory && <span className="text-xs text-gray-500">{r.courseCategory}</span>}
+                        {r.courseCategory && <span className="text-xs text-gray-500 dark:text-gray-400">{r.courseCategory}</span>}
                         {r.courseMandatory && <span className="text-xs bg-red-900/40 text-red-400 px-1.5 rounded">Mandatory</span>}
                       </div>
                     </td>
@@ -412,7 +412,7 @@ function RecordsTab() {
                         </button>
                       )}
                       {r.status === 'completed' && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {r.completedAt ? new Date(r.completedAt).toLocaleDateString('en-AU') : 'Done'}
                         </span>
                       )}

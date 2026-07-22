@@ -149,7 +149,7 @@ export default function AssetsPage() {
                   <thead>
                     <tr className="border-b border-gray-800">
                       {['Asset','Category','Serial','Status',''].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -158,7 +158,7 @@ export default function AssetsPage() {
                       <tr key={a.id} className="hover:bg-gray-800/30">
                         <td className="px-4 py-3 text-gray-200">{a.name}</td>
                         <td className="px-4 py-3 text-gray-400 text-xs">{a.category}</td>
-                        <td className="px-4 py-3 text-gray-500 text-xs font-mono">{a.serialNumber ?? '—'}</td>
+                        <td className="px-4 py-3 text-gray-500 text-xs font-mono dark:text-gray-400">{a.serialNumber ?? '—'}</td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[a.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                             {a.status}
@@ -213,9 +213,9 @@ export default function AssetsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-white font-medium text-sm">{asset?.name ?? 'Unknown'}</span>
-                        <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">{asset?.category}</span>
+                        <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">{asset?.category}</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                         → {a.employeeFirstName} {a.employeeLastName} · Issued {new Date(a.issuedAt).toLocaleDateString('en-AU')}
                       </p>
                     </div>
@@ -228,7 +228,7 @@ export default function AssetsPage() {
               })}
               {assignments.filter(a => !a.returnedAt).length === 0 && (
                 <div className="bg-gray-900 border border-gray-800 rounded-xl py-10 text-center">
-                  <p className="text-gray-500 text-sm">No active assignments</p>
+                  <p className="text-gray-500 text-sm dark:text-gray-400">No active assignments</p>
                 </div>
               )}
             </div>

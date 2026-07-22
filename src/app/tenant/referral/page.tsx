@@ -49,17 +49,17 @@ export default function ReferralPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between dark:bg-gray-900 dark:border-gray-700">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Referral Program</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Track employee referrals and bonus payments</p>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Referral Program</h1>
+          <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">Track employee referrals and bonus payments</p>
         </div>
         <button onClick={()=>setShowCreate(true)} className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700">+ Add Referral</button>
       </div>
 
-      <div className="px-6 py-3 bg-gray-50 border-b border-gray-100 flex gap-6">
+      <div className="px-6 py-3 bg-gray-50 border-b border-gray-100 flex gap-6 dark:bg-gray-800 dark:border-gray-800">
         {[{label:'Total',value:stats.total,cls:'text-gray-900'},{label:'Pending',value:stats.pending,cls:'text-blue-600'},{label:'Hired',value:stats.hired,cls:'text-green-600'},{label:'Bonus Paid',value:stats.paid,cls:'text-purple-600'}].map(s=>(
-          <div key={s.label} className="text-center"><p className={`text-xl font-bold ${s.cls}`}>{s.value}</p><p className="text-xs text-gray-500">{s.label}</p></div>
+          <div key={s.label} className="text-center"><p className={`text-xl font-bold ${s.cls}`}>{s.value}</p><p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p></div>
         ))}
       </div>
 
@@ -71,23 +71,23 @@ export default function ReferralPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-            <p className="font-medium text-gray-600">No referrals yet</p>
+            <p className="font-medium text-gray-600 dark:text-gray-400">No referrals yet</p>
             <p className="text-sm mt-1">Add a referral when an employee refers a candidate.</p>
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden dark:bg-gray-900 dark:border-gray-700">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-gray-100 bg-gray-50">
+              <thead><tr className="border-b border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-800">
                 {['Referred By','Candidate','Status','Bonus','Submitted','Actions'].map(h=>(
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">{h}</th>
                 ))}
               </tr></thead>
               <tbody>
                 {referrals.map(r=>(
-                  <tr key={r.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">{r.referrerFirstName} {r.referrerLastName}</td>
+                  <tr key={r.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800">
+                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{r.referrerFirstName} {r.referrerLastName}</td>
                     <td className="px-4 py-3">
-                      <p className="text-gray-900">{r.referredName}</p>
+                      <p className="text-gray-900 dark:text-white">{r.referredName}</p>
                       {r.referredEmail && <p className="text-xs text-gray-400">{r.referredEmail}</p>}
                     </td>
                     <td className="px-4 py-3">
@@ -109,7 +109,7 @@ export default function ReferralPage() {
                     </td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{new Date(r.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
-                      {r.notes && <p className="text-xs text-gray-500 max-w-xs truncate">{r.notes}</p>}
+                      {r.notes && <p className="text-xs text-gray-500 max-w-xs truncate dark:text-gray-400">{r.notes}</p>}
                     </td>
                   </tr>
                 ))}
@@ -121,19 +121,19 @@ export default function ReferralPage() {
 
       {showCreate && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Referral</h3>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 dark:bg-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-white">Add Referral</h3>
             <div className="space-y-3">
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={form.referrerId} onChange={e=>setForm(f=>({...f,referrerId:e.target.value}))}>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={form.referrerId} onChange={e=>setForm(f=>({...f,referrerId:e.target.value}))}>
                 <option value="">Referred by (employee) *</option>
                 {employees.map(e=><option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
-              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Candidate name *" value={form.referredName} onChange={e=>setForm(f=>({...f,referredName:e.target.value}))}/>
-              <input type="email" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Candidate email" value={form.referredEmail} onChange={e=>setForm(f=>({...f,referredEmail:e.target.value}))}/>
-              <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" rows={2} placeholder="Notes" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
+              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Candidate name *" value={form.referredName} onChange={e=>setForm(f=>({...f,referredName:e.target.value}))}/>
+              <input type="email" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Candidate email" value={form.referredEmail} onChange={e=>setForm(f=>({...f,referredEmail:e.target.value}))}/>
+              <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none dark:border-gray-700" rows={2} placeholder="Notes" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={()=>setShowCreate(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600">Cancel</button>
+              <button onClick={()=>setShowCreate(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 dark:text-gray-400 dark:border-gray-700">Cancel</button>
               <button onClick={create} disabled={saving||!form.referrerId||!form.referredName} className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">{saving?'Adding…':'Add'}</button>
             </div>
           </div>

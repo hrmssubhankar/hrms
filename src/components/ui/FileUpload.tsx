@@ -196,13 +196,13 @@ export default function FileUpload({
           </div>
         ) : (
           <div className="space-y-2 flex flex-col items-center">
-            <svg className="w-8 h-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="w-8 h-8 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
             <p className="text-sm text-gray-300">
               {dragging ? 'Drop file here' : 'Click or drag & drop'}
             </p>
-            <p className="text-xs text-gray-500">PDF, Word, Excel, images · max 25 MB</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">PDF, Word, Excel, images · max 25 MB</p>
           </div>
         )}
       </div>

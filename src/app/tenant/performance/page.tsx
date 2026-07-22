@@ -174,7 +174,7 @@ export default function PerformancePage() {
 
             {/* KPI Ratings */}
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">KPI Ratings (1–5)</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">KPI Ratings (1–5)</p>
               {editing.kpis.map((kpi, i) => (
                 <div key={kpi.id} className="bg-gray-800 rounded-lg p-3 space-y-2">
                   <p className="text-sm font-medium text-white">{kpi.area}</p>
@@ -282,7 +282,7 @@ export default function PerformancePage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No reviews scheduled</p>
-          <p className="text-gray-500 text-sm mt-1">Schedule a review for an employee to get started.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Schedule a review for an employee to get started.</p>
         </div>
       ) : (
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -303,7 +303,7 @@ export default function PerformancePage() {
                 <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
                   <td className="px-5 py-3.5">
                     <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
-                    <p className="text-gray-500 text-xs">{r.employeeEmail}</p>
+                    <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                   </td>
                   <td className="px-5 py-3.5 text-gray-300 text-sm">
                     {REVIEW_TYPES.find(t => t.value === r.type)?.label ?? r.type}
@@ -320,7 +320,7 @@ export default function PerformancePage() {
                     {r.overallRating ? (
                       <div className="flex items-center gap-2">
                         <span className="text-white font-semibold">{Number(r.overallRating).toFixed(1)}</span>
-                        <span className="text-xs text-gray-500">/5</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">/5</span>
                       </div>
                     ) : '—'}
                   </td>
@@ -339,7 +339,7 @@ export default function PerformancePage() {
                         Complete →
                       </button>
                     ) : (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
                         {r.completedAt ? new Date(r.completedAt).toLocaleDateString('en-AU') : 'Done'}
                       </span>
                     )}

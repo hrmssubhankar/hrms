@@ -241,7 +241,7 @@ export default function GrievancesPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No grievances on record</p>
-          <p className="text-gray-500 text-sm mt-1">Lodge a concern or report to begin an investigation.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Lodge a concern or report to begin an investigation.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -269,16 +269,16 @@ export default function GrievancesPage() {
                       <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[g.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                         {STATUS_FLOW.find(s => s.value === g.status)?.label ?? g.status}
                       </span>
-                      {g.isAnonymous && <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">Anonymous</span>}
+                      {g.isAnonymous && <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">Anonymous</span>}
                     </div>
                     <p className="text-gray-400 text-xs truncate">{g.description}</p>
                     {g.subjectFirstName && (
-                      <p className="text-gray-600 text-xs mt-0.5">Subject: {g.subjectFirstName} {g.subjectLastName}</p>
+                      <p className="text-gray-600 text-xs mt-0.5 dark:text-gray-400">Subject: {g.subjectFirstName} {g.subjectLastName}</p>
                     )}
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs text-gray-500">{new Date(g.createdAt).toLocaleDateString('en-AU')}</p>
-                    <p className="text-xs text-gray-600 mt-0.5">{isOpen ? '▲' : '▼'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(g.createdAt).toLocaleDateString('en-AU')}</p>
+                    <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{isOpen ? '▲' : '▼'}</p>
                   </div>
                 </div>
 
@@ -288,7 +288,7 @@ export default function GrievancesPage() {
 
                     {/* Stage timeline */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Investigation Stage</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Investigation Stage</p>
                       <div className="flex items-center gap-0.5">
                         {STATUS_FLOW.map((s, i) => (
                           <div key={s.value} className="flex items-center flex-1">
@@ -300,9 +300,9 @@ export default function GrievancesPage() {
                         ))}
                       </div>
                       <div className="flex justify-between mt-1">
-                        <span className="text-xs text-gray-600">New</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">New</span>
                         <span className="text-xs text-purple-400">{STATUS_FLOW.find(s => s.value === g.status)?.label}</span>
-                        <span className="text-xs text-gray-600">Closed</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Closed</span>
                       </div>
                     </div>
 
@@ -335,7 +335,7 @@ export default function GrievancesPage() {
                       <div className="bg-green-950/40 border border-green-800/50 rounded-lg p-3">
                         <p className="text-xs font-semibold text-green-400 mb-1">Outcome</p>
                         <p className="text-sm text-gray-300">{g.outcome}</p>
-                        {g.closedAt && <p className="text-xs text-gray-500 mt-1">Closed {new Date(g.closedAt).toLocaleDateString('en-AU')}</p>}
+                        {g.closedAt && <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Closed {new Date(g.closedAt).toLocaleDateString('en-AU')}</p>}
                       </div>
                     )}
                   </div>

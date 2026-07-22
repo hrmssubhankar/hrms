@@ -118,7 +118,7 @@ export default function NewOnboardingPage() {
                 <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>
               ))}
           </select>
-          <p className="text-xs text-gray-500 mt-1">Assign an existing employee as their onboarding buddy.</p>
+          <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Assign an existing employee as their onboarding buddy.</p>
         </div>
 
         {/* Notes */}

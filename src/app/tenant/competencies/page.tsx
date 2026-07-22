@@ -233,13 +233,13 @@ export default function CompetencyPage() {
                 </svg>
               </div>
                 <p className="text-gray-300 font-medium">No competencies defined</p>
-                <p className="text-gray-500 text-sm mt-1">Add your competency framework to begin assessments.</p>
+                <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Add your competency framework to begin assessments.</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {Object.entries(grouped).map(([cat, comps]) => (
                   <div key={cat}>
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">{cat}</h3>
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1 dark:text-gray-400">{cat}</h3>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                       {comps.map(c => {
                         const compAss = assessments.filter(a => a.competencyId === c.id)
@@ -248,9 +248,9 @@ export default function CompetencyPage() {
                           <div key={c.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
                             <div className="flex items-start justify-between gap-2">
                               <p className="text-sm font-medium text-white">{c.name}</p>
-                              <span className="text-xs text-gray-500 shrink-0">{pass}/{compAss.length} competent</span>
+                              <span className="text-xs text-gray-500 shrink-0 dark:text-gray-400">{pass}/{compAss.length} competent</span>
                             </div>
-                            {c.description && <p className="text-xs text-gray-500 mt-1">{c.description}</p>}
+                            {c.description && <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{c.description}</p>}
                           </div>
                         )
                       })}
@@ -285,12 +285,12 @@ export default function CompetencyPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-gray-800 text-left">
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Competency</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Outcome</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Assessed</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Expiry</th>
-                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Assessor</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Employee</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Competency</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Outcome</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Assessed</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Expiry</th>
+                        <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Assessor</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-800">
@@ -306,7 +306,7 @@ export default function CompetencyPage() {
                                 <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${OUTCOME_STYLE[a.outcome] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                                   {a.outcome === 'competent' ? 'Competent' : 'Not Yet'}
                                 </span>
-                              ) : <span className="text-gray-600">Pending</span>}
+                              ) : <span className="text-gray-600 dark:text-gray-400">Pending</span>}
                             </td>
                             <td className="px-4 py-3 text-gray-400 text-xs">
                               {a.assessedAt ? new Date(a.assessedAt).toLocaleDateString('en-AU') : '—'}
@@ -314,7 +314,7 @@ export default function CompetencyPage() {
                             <td className={`px-4 py-3 text-xs font-medium ${expColor(a.expiryDate)}`}>
                               {a.expiryDate ? new Date(a.expiryDate + 'T00:00:00').toLocaleDateString('en-AU') : '—'}
                             </td>
-                            <td className="px-4 py-3 text-gray-500 text-xs">
+                            <td className="px-4 py-3 text-gray-500 text-xs dark:text-gray-400">
                               {a.assessorFirstName ? `${a.assessorFirstName} ${a.assessorLastName}` : '—'}
                             </td>
                           </tr>

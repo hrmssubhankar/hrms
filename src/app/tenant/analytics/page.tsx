@@ -28,7 +28,7 @@ function StatCard({ label, value, sub, color = 'text-white', alert = false }: {
     <div className={`bg-gray-900 border rounded-xl p-4 ${alert ? 'border-red-800' : 'border-gray-800'}`}>
       <p className="text-xs text-gray-400">{label}</p>
       <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
-      {sub && <p className="text-xs text-gray-500 mt-0.5">{sub}</p>}
+      {sub && <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{sub}</p>}
     </div>
   )
 }
@@ -89,7 +89,7 @@ export default function AnalyticsPage() {
 
         {/* Employment type breakdown */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Employment Type</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Employment Type</p>
           <div className="space-y-2.5">
             {[
               { label: 'Full Time',   value: headcount.fullTime,   color: 'bg-purple-600' },
@@ -231,7 +231,7 @@ export default function AnalyticsPage() {
         </div>
       </section>
 
-      <p className="text-xs text-gray-600 pb-4">
+      <p className="text-xs text-gray-600 pb-4 dark:text-gray-400">
         Data refreshes on page load. Figures reflect current database state as of {new Date().toLocaleDateString('en-AU')}.
       </p>
     </div>

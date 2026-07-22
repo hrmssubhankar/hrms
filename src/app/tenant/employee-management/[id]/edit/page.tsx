@@ -163,7 +163,7 @@ export default function EditEmployeePage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Employee</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Update employee details below</p>
+          <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">Update employee details below</p>
         </div>
       </div>
 
@@ -279,7 +279,7 @@ export default function EditEmployeePage() {
             style={{ width: 40, height: 22, background: form.ndisWorker ? '#9333ea' : '#d1d5db' }}
           >
             <span
-              className="absolute top-0.5 left-0.5 bg-white rounded-full shadow transition-transform"
+              className="absolute top-0.5 left-0.5 bg-white rounded-full shadow transition-transform dark:bg-gray-900"
               style={{ width: 18, height: 18, transform: form.ndisWorker ? 'translateX(18px)' : 'translateX(0)' }}
             />
           </div>

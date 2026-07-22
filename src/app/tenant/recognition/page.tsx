@@ -107,7 +107,7 @@ export default function RecognitionPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No recognitions yet</p>
-          <p className="text-gray-500 text-sm mt-1">Start celebrating your team's achievements.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Start celebrating your team's achievements.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -119,12 +119,12 @@ export default function RecognitionPage() {
                 </div>
                 <div>
                   <p className="text-white font-medium">{r.recipientFirstName} {r.recipientLastName}</p>
-                  <p className="text-xs text-gray-500">{REC_TYPES.find(t => t.value === r.type)?.label ?? r.type}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{REC_TYPES.find(t => t.value === r.type)?.label ?? r.type}</p>
                 </div>
                 {r.period && <span className="ml-auto text-xs text-purple-400 bg-purple-900/30 px-2 py-0.5 rounded-full">{r.period}</span>}
               </div>
               {r.reason && <p className="text-sm text-gray-300 leading-relaxed">"{r.reason}"</p>}
-              <p className="text-xs text-gray-600 mt-3">{new Date(r.createdAt).toLocaleDateString('en-AU')}</p>
+              <p className="text-xs text-gray-600 mt-3 dark:text-gray-400">{new Date(r.createdAt).toLocaleDateString('en-AU')}</p>
             </div>
           ))}
         </div>

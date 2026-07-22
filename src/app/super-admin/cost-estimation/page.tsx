@@ -74,9 +74,9 @@ export default function CostEstimationPage() {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500">Total portfolio (monthly)</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Total portfolio (monthly)</p>
           <p className="text-lg font-bold text-purple-300">{fmtAUD(totalMonthlyAUD)}</p>
-          <p className="text-xs text-gray-500">{fmtAUD(totalAnnualAUD)} / year</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{fmtAUD(totalAnnualAUD)} / year</p>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export default function CostEstimationPage() {
           <option value="headcount">Sort: Headcount ↓</option>
           <option value="name">Sort: Name A–Z</option>
         </select>
-        <p className="text-xs text-gray-500 ml-auto">{filtered.length} client{filtered.length !== 1 ? 's' : ''}</p>
+        <p className="text-xs text-gray-500 ml-auto dark:text-gray-400">{filtered.length} client{filtered.length !== 1 ? 's' : ''}</p>
       </div>
 
       {/* Client list */}
@@ -140,32 +140,32 @@ export default function CostEstimationPage() {
                     </span>
                     <span className="text-xs px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 capitalize">{client.tier}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{client.countryName} · {client.currency} · {client.headcount || '—'} staff · {client.enabledModules} modules</p>
+                  <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{client.countryName} · {client.currency} · {client.headcount || '—'} staff · {client.enabledModules} modules</p>
                 </div>
 
                 {/* Per seat */}
                 <div className="text-right hidden sm:block">
-                  <p className="text-xs text-gray-500">Per seat / month</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Per seat / month</p>
                   <p className="text-sm font-semibold text-white">{fmt(client.perSeatMonthlyCurr, client.symbol)}</p>
-                  {!sameAUD && <p className="text-xs text-gray-600">{fmtAUD(client.perSeatMonthlyAUD)} AUD</p>}
+                  {!sameAUD && <p className="text-xs text-gray-600 dark:text-gray-400">{fmtAUD(client.perSeatMonthlyAUD)} AUD</p>}
                 </div>
 
                 {/* Monthly */}
                 <div className="text-right hidden md:block">
-                  <p className="text-xs text-gray-500">Monthly</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Monthly</p>
                   <p className="text-sm font-semibold text-purple-300">{fmt(client.totalMonthlyCurr, client.symbol)}</p>
-                  {!sameAUD && <p className="text-xs text-gray-600">{fmtAUD(client.totalMonthlyAUD)}</p>}
+                  {!sameAUD && <p className="text-xs text-gray-600 dark:text-gray-400">{fmtAUD(client.totalMonthlyAUD)}</p>}
                 </div>
 
                 {/* Annual */}
                 <div className="text-right">
-                  <p className="text-xs text-gray-500">Annual</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Annual</p>
                   <p className="text-base font-bold text-white">{fmt(client.totalAnnualCurr, client.symbol)}</p>
-                  {!sameAUD && <p className="text-xs text-gray-600">{fmtAUD(client.totalAnnualAUD)}</p>}
+                  {!sameAUD && <p className="text-xs text-gray-600 dark:text-gray-400">{fmtAUD(client.totalAnnualAUD)}</p>}
                 </div>
 
                 {/* Expand toggle */}
-                <div className="text-gray-500 text-xs ml-2">
+                <div className="text-gray-500 text-xs ml-2 dark:text-gray-400">
                   {isExp ? '▲' : '▼'}
                 </div>
               </div>
@@ -182,7 +182,7 @@ export default function CostEstimationPage() {
                   </div>
 
                   {client.moduleBreakdown.length === 0 ? (
-                    <p className="text-xs text-gray-500">No modules enabled yet.</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">No modules enabled yet.</p>
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                       {client.moduleBreakdown
@@ -205,19 +205,19 @@ export default function CostEstimationPage() {
                   {client.headcount > 0 && (
                     <div className="mt-4 flex gap-6 text-xs border-t border-gray-800 pt-3">
                       <div>
-                        <span className="text-gray-500">Headcount: </span>
+                        <span className="text-gray-500 dark:text-gray-400">Headcount: </span>
                         <span className="text-white font-semibold">{client.headcount}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Per seat/mo: </span>
+                        <span className="text-gray-500 dark:text-gray-400">Per seat/mo: </span>
                         <span className="text-white font-semibold">{fmt(client.perSeatMonthlyCurr, client.symbol)}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Monthly total: </span>
+                        <span className="text-gray-500 dark:text-gray-400">Monthly total: </span>
                         <span className="text-purple-300 font-semibold">{fmt(client.totalMonthlyCurr, client.symbol)}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Annual total: </span>
+                        <span className="text-gray-500 dark:text-gray-400">Annual total: </span>
                         <span className="text-white font-bold">{fmt(client.totalAnnualCurr, client.symbol)}</span>
                       </div>
                     </div>
@@ -241,7 +241,7 @@ export default function CostEstimationPage() {
         </div>
       )}
 
-      <p className="text-xs text-gray-600 mt-4">
+      <p className="text-xs text-gray-600 mt-4 dark:text-gray-400">
         * Estimates based on per-module pricing in local currency using AUD base rates. Actual invoicing may vary.
         Currency conversion rates are approximate.
       </p>

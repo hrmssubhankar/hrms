@@ -87,7 +87,7 @@ function RejectModal({ onConfirm, onClose }: {
           <h3 className="font-bold text-gray-900 dark:text-white">Reject Timesheet</h3>
         </div>
         <div className="p-6 space-y-3">
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 dark:text-gray-400">
             Reason *
           </label>
           <textarea
@@ -203,7 +203,7 @@ function ClockCard({ onAction }: { onAction: () => void }) {
           {status === 'clocked_in' ? (
             <>
               <p className="text-3xl font-mono font-bold text-green-700 dark:text-green-400">{elapsed}</p>
-              <p className="text-sm text-gray-500 mt-1">Started {fmtTime(clockInTime)}</p>
+              <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">Started {fmtTime(clockInTime)}</p>
             </>
           ) : (
             <p className="text-xl font-semibold text-gray-700 dark:text-gray-300">Not clocked in</p>
@@ -215,7 +215,7 @@ function ClockCard({ onAction }: { onAction: () => void }) {
           <div className="flex flex-col gap-2 min-w-[200px]">
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-xs text-gray-500">Break (mins)</label>
+                <label className="text-xs text-gray-500 dark:text-gray-400">Break (mins)</label>
                 <input type="number" min="0" value={breakMins} onChange={e => setBreakMins(e.target.value)}
                   className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none" />
               </div>
@@ -387,13 +387,13 @@ export default function TimesheetsPage() {
           {/* Week nav */}
           <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
             <button onClick={() => setWeekStart(w => addDays(w, -7))}
-              className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm">←</button>
+              className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm dark:text-gray-400">←</button>
             <button onClick={() => setWeekStart(getMondayOf(new Date()))}
               className="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 border-x border-gray-200 dark:border-gray-700 transition">
               This week
             </button>
             <button onClick={() => setWeekStart(w => addDays(w, 7))}
-              className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm">→</button>
+              className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm dark:text-gray-400">→</button>
           </div>
           {/* Status filter */}
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
@@ -473,7 +473,7 @@ export default function TimesheetsPage() {
               {isManager && (
                 <tfoot>
                   <tr className="bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
-                    <td colSpan={5} className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <td colSpan={5} className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                       Total
                     </td>
                     <td className="px-4 py-2 text-sm font-bold text-gray-800 dark:text-gray-200 text-right">

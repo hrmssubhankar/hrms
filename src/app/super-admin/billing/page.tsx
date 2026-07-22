@@ -74,24 +74,24 @@ export default function BillingPage() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <p className="text-xs text-gray-400 mb-2">Monthly Revenue</p>
           <p className="text-3xl font-bold text-green-400">${totalMRR.toLocaleString()}</p>
-          <p className="text-xs text-gray-500 mt-1">AUD / month</p>
+          <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / month</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <p className="text-xs text-gray-400 mb-2">Active Subscriptions</p>
           <p className="text-3xl font-bold text-white">{activeClients.length}</p>
-          <p className="text-xs text-gray-500 mt-1">of {clients.length} total</p>
+          <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">of {clients.length} total</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <p className="text-xs text-gray-400 mb-2">Avg Revenue / Client</p>
           <p className="text-3xl font-bold text-purple-400">
             ${activeClients.length ? Math.round(totalMRR / activeClients.length) : 0}
           </p>
-          <p className="text-xs text-gray-500 mt-1">AUD / month</p>
+          <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / month</p>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <p className="text-xs text-gray-400 mb-2">Annual Run Rate</p>
           <p className="text-3xl font-bold text-blue-400">${(totalMRR * 12).toLocaleString()}</p>
-          <p className="text-xs text-gray-500 mt-1">AUD / year</p>
+          <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / year</p>
         </div>
       </div>
 
@@ -138,16 +138,16 @@ export default function BillingPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-500">Loading…</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400">Loading…</td></tr>
               ) : clients.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-500">No clients yet</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400">No clients yet</td></tr>
               ) : clients.map(client => {
                 const cfg = TIER_CONFIG[client.tier as keyof typeof TIER_CONFIG] ?? TIER_CONFIG.starter
                 return (
                   <tr key={client.id} className="border-b border-gray-800/50 hover:bg-gray-800/20 transition">
                     <td className="px-4 py-3">
                       <p className="font-medium text-white">{client.name}</p>
-                      <p className="text-xs text-gray-500">{client.slug}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{client.slug}</p>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${cfg.badge}`}>
@@ -163,7 +163,7 @@ export default function BillingPage() {
                         <span className="text-xs bg-red-900 text-red-300 px-2 py-0.5 rounded-full">Suspended</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">
+                    <td className="px-4 py-3 text-gray-500 text-xs dark:text-gray-400">
                       {new Date(client.createdAt).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-4 py-3">

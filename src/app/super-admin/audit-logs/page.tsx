@@ -170,11 +170,11 @@ export default function AuditLogsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">Loading…</td>
+                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500 dark:text-gray-400">Loading…</td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
                     <div className="text-4xl mb-2"></div>
                     No audit events found
                   </td>
@@ -194,8 +194,8 @@ export default function AuditLogsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-300 text-xs font-mono">{log.resource}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs font-mono">{log.ipAddress ?? '—'}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">
+                    <td className="px-4 py-3 text-gray-500 text-xs font-mono dark:text-gray-400">{log.ipAddress ?? '—'}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs dark:text-gray-400">
                       {(log.oldValues || log.newValues) ? (
                         <span className="text-purple-400">{expanded === log.id ? '▲ hide' : '▼ show'}</span>
                       ) : '—'}
@@ -233,7 +233,7 @@ export default function AuditLogsPage() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800">
-          <span className="text-xs text-gray-500">Page {page} · 50 rows per page</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">Page {page} · 50 rows per page</span>
           <div className="flex gap-2">
             <button
               onClick={() => load(page - 1)}

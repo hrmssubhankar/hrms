@@ -77,14 +77,14 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col overflow-y-auto">
+    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col overflow-y-auto dark:bg-gray-900 dark:border-gray-700">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
         <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
           <span className="text-white text-sm font-bold">Y</span>
         </div>
         <div>
-          <p className="text-sm font-semibold text-gray-900">HRMS</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">HRMS</p>
           <p className="text-xs text-gray-400">Enterprise Edition</p>
         </div>
       </div>
@@ -121,7 +121,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-gray-100">
+      <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800">
         <p className="text-xs text-gray-400 text-center">v1.0 · 28 Modules</p>
       </div>
     </aside>

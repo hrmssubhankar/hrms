@@ -116,7 +116,7 @@ function TwoFactorSection() {
 
       {step === 'idle' && (
         <>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-500 mb-4 dark:text-gray-400">
             {enabled
               ? 'Your account is protected with an authenticator app (Google Authenticator, Authy, etc.).'
               : 'Add an extra layer of security. You\'ll need an authenticator app (Google Authenticator, Authy, etc.).'}
@@ -139,12 +139,12 @@ function TwoFactorSection() {
         <div className="space-y-4">
           <p className="text-sm text-gray-400">Scan this QR code with your authenticator app, then enter the 6-digit code below.</p>
           <div className="flex justify-center">
-            <div className="bg-white p-3 rounded-xl inline-block">
+            <div className="bg-white p-3 rounded-xl inline-block dark:bg-gray-900">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qrCode} alt="TOTP QR Code" width={180} height={180} />
             </div>
           </div>
-          <p className="text-xs text-gray-600 text-center">
+          <p className="text-xs text-gray-600 text-center dark:text-gray-400">
             Can&apos;t scan? Enter the secret manually: <code className="text-purple-400 font-mono">{secret}</code>
           </p>
           <input
@@ -363,7 +363,7 @@ export default function MyProfilePage() {
               </button>
             </div>
           </form>
-          <p className="text-xs text-gray-600 mt-3">
+          <p className="text-xs text-gray-600 mt-3 dark:text-gray-400">
             Name, employment type, salary, and start date are managed by HR and cannot be self-updated.
           </p>
         </div>
@@ -372,24 +372,24 @@ export default function MyProfilePage() {
       {/* Personal Information */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Personal Information</h2>
-        <div className={ROW}><span className="text-gray-500 text-sm">Full Name</span><span className="text-white text-sm font-medium">{profile.firstName} {profile.lastName}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm">Preferred Name</span><span className="text-white text-sm">{profile.preferredName || '—'}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm">Email</span><span className="text-white text-sm">{profile.email}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm">Phone</span><span className="text-white text-sm">{profile.phone || '—'}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm">Address</span><span className="text-white text-sm text-right max-w-xs">{profile.address || '—'}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Full Name</span><span className="text-white text-sm font-medium">{profile.firstName} {profile.lastName}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Preferred Name</span><span className="text-white text-sm">{profile.preferredName || '—'}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Email</span><span className="text-white text-sm">{profile.email}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Phone</span><span className="text-white text-sm">{profile.phone || '—'}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Address</span><span className="text-white text-sm text-right max-w-xs">{profile.address || '—'}</span></div>
         {profile.dateOfBirth && (
-          <div className={ROW}><span className="text-gray-500 text-sm">Date of Birth</span><span className="text-white text-sm">{fmt(profile.dateOfBirth)}</span></div>
+          <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Date of Birth</span><span className="text-white text-sm">{fmt(profile.dateOfBirth)}</span></div>
         )}
       </div>
 
       {/* Employment Details */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Employment Details</h2>
-        <div className={ROW}><span className="text-gray-500 text-sm">Employee Number</span><span className="text-white text-sm font-mono">#{profile.employeeNumber}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm">Organisation</span><span className="text-white text-sm">{profile.entityName || '—'}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm">Employment Type</span><span className="text-white text-sm">{employmentTypeLabel[profile.employmentType] ?? profile.employmentType}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm">Start Date</span><span className="text-white text-sm">{fmt(profile.startDate)}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm">Status</span>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employee Number</span><span className="text-white text-sm font-mono">#{profile.employeeNumber}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Organisation</span><span className="text-white text-sm">{profile.entityName || '—'}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employment Type</span><span className="text-white text-sm">{employmentTypeLabel[profile.employmentType] ?? profile.employmentType}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Start Date</span><span className="text-white text-sm">{fmt(profile.startDate)}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Status</span>
           <span className={`text-sm px-2 py-0.5 rounded-full border ${profile.isActive ? 'bg-green-900/40 text-green-300 border-green-800' : 'bg-red-900/40 text-red-300 border-red-800'}`}>
             {profile.isActive ? 'Active' : 'Inactive'}
           </span>
@@ -400,7 +400,7 @@ export default function MyProfilePage() {
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Emergency Contacts</h2>
         {contacts.length === 0 ? (
-          <p className="text-gray-600 text-sm text-center py-4">No emergency contacts on file. Contact HR to add them.</p>
+          <p className="text-gray-600 text-sm text-center py-4 dark:text-gray-400">No emergency contacts on file. Contact HR to add them.</p>
         ) : (
           <div className="space-y-4">
             {contacts.map(c => (
@@ -411,7 +411,7 @@ export default function MyProfilePage() {
                     <span className="text-xs px-2 py-0.5 rounded-full bg-purple-900/40 border border-purple-700 text-purple-300">Primary</span>
                   )}
                 </div>
-                {c.relationship && <p className="text-xs text-gray-500 mb-1">{c.relationship}</p>}
+                {c.relationship && <p className="text-xs text-gray-500 mb-1 dark:text-gray-400">{c.relationship}</p>}
                 <div className="flex gap-4 text-xs text-gray-400">
                   {c.phone && <span>{c.phone}</span>}
                   {c.email && <span>{c.email}</span>}

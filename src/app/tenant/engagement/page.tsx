@@ -119,7 +119,7 @@ export default function EngagementPage() {
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div>
                   <p className="text-white font-medium">{s.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                     {SURVEY_TYPES.find(t => t.value === s.type)?.label ?? s.type ?? 'General'}
                     {s.isAnonymous && ' · Anonymous'}
                   </p>
@@ -187,7 +187,7 @@ export default function EngagementPage() {
           <div className="space-y-3 max-h-80 overflow-y-auto">
             {responses.map(r => (
               <div key={r.id} className="bg-gray-800/50 rounded-lg p-3">
-                <p className="text-xs text-gray-500 mb-1">
+                <p className="text-xs text-gray-500 mb-1 dark:text-gray-400">
                   {selected.isAnonymous ? 'Anonymous' : `${r.employeeFirstName} ${r.employeeLastName}`}
                   <span className="ml-2">{new Date(r.submittedAt).toLocaleDateString('en-AU')}</span>
                 </p>

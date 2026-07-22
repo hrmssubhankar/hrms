@@ -46,10 +46,10 @@ function ResetForm() {
 
   if (!valid) {
     return (
-      <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center shadow-sm dark:bg-gray-900 dark:border-gray-700">
         <div className="text-4xl mb-3">⏰</div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Link expired or invalid</h2>
-        <p className="text-sm text-gray-500">This reset link has expired or already been used.</p>
+        <h2 className="text-lg font-semibold text-gray-900 mb-2 dark:text-white">Link expired or invalid</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">This reset link has expired or already been used.</p>
         <Link href="/forgot-password" className="mt-5 inline-block text-sm text-brand-600 hover:underline font-medium">
           Request a new reset link →
         </Link>
@@ -59,18 +59,18 @@ function ResetForm() {
 
   if (status === 'done') {
     return (
-      <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center shadow-sm dark:bg-gray-900 dark:border-gray-700">
         <div className="text-4xl mb-3"></div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Password updated!</h2>
-        <p className="text-sm text-gray-500">Redirecting you to sign in…</p>
+        <h2 className="text-lg font-semibold text-gray-900 mb-2 dark:text-white">Password updated!</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting you to sign in…</p>
       </div>
     )
   }
 
   return (
-    <form onSubmit={submit} className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm space-y-4">
+    <form onSubmit={submit} className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm space-y-4 dark:bg-gray-900 dark:border-gray-700">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">New password</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">New password</label>
         <input
           type="password"
           required
@@ -79,11 +79,11 @@ function ResetForm() {
           value={password}
           onChange={e => setPassword(e.target.value)}
           placeholder="Min. 8 characters"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Confirm new password</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Confirm new password</label>
         <input
           type="password"
           required
@@ -91,7 +91,7 @@ function ResetForm() {
           value={confirm}
           onChange={e => setConfirm(e.target.value)}
           placeholder="Repeat password"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-600"
         />
       </div>
 
@@ -110,19 +110,19 @@ function ResetForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 dark:bg-gray-800">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="w-12 h-12 rounded-xl bg-brand-600 flex items-center justify-center mx-auto mb-4">
             <span className="text-white text-xl"></span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Set new password</h1>
-          <p className="text-sm text-gray-500 mt-1">Choose a strong password for your account.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Set new password</h1>
+          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">Choose a strong password for your account.</p>
         </div>
         <Suspense fallback={<div className="text-center text-sm text-gray-400">Loading…</div>}>
           <ResetForm />
         </Suspense>
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-gray-500 mt-4 dark:text-gray-400">
           <Link href="/login" className="text-brand-600 hover:underline">Back to sign in</Link>
         </p>
       </div>

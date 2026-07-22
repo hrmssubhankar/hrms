@@ -159,7 +159,7 @@ export default function ContractsPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No contracts yet</p>
-          <p className="text-gray-500 text-sm mt-1">Create a contract to begin the employment documentation process.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create a contract to begin the employment documentation process.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -181,13 +181,13 @@ export default function ContractsPage() {
                         {c.status.charAt(0).toUpperCase() + c.status.slice(1)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500">{c.employeeEmail}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{c.employeeEmail}</p>
                   </div>
                   <div className="text-right shrink-0">
                     {c.signedAt && <p className="text-xs text-green-400">Signed {new Date(c.signedAt).toLocaleDateString('en-AU')}</p>}
                     {c.sentAt && !c.signedAt && <p className="text-xs text-blue-400">Sent {new Date(c.sentAt).toLocaleDateString('en-AU')}</p>}
-                    {!c.sentAt && <p className="text-xs text-gray-600">{new Date(c.createdAt).toLocaleDateString('en-AU')}</p>}
-                    <p className="text-xs text-gray-600 mt-0.5">{isOpen ? '▲' : '▼'}</p>
+                    {!c.sentAt && <p className="text-xs text-gray-600 dark:text-gray-400">{new Date(c.createdAt).toLocaleDateString('en-AU')}</p>}
+                    <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{isOpen ? '▲' : '▼'}</p>
                   </div>
                 </div>
 
@@ -217,7 +217,7 @@ export default function ContractsPage() {
 
                     {/* Document upload / link */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Contract Document</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Contract Document</p>
                       <FileUpload
                         accept=".pdf,.doc,.docx"
                         currentUrl={c.pdfUrl}
@@ -229,7 +229,7 @@ export default function ContractsPage() {
                     {/* Signed PDF upload */}
                     {(c.status === 'signed' || c.signedPdfUrl) && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Signed Copy</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Signed Copy</p>
                         <FileUpload
                           accept=".pdf"
                           currentUrl={c.signedPdfUrl}
@@ -241,7 +241,7 @@ export default function ContractsPage() {
 
                     {/* Tax & super */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tax & Superannuation</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Tax & Superannuation</p>
                       <div className="grid grid-cols-2 gap-3">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input type="checkbox"

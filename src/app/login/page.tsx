@@ -220,7 +220,7 @@ function LoginForm() {
                 </svg>
               </div>
               <p className="text-sm font-semibold text-gray-800 dark:text-white">Two-Factor Verification</p>
-              <p className="text-xs text-gray-500 mt-1">Enter the 6-digit code from your authenticator app.</p>
+              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Enter the 6-digit code from your authenticator app.</p>
             </div>
 
             {error && (
@@ -254,7 +254,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => { setStep('password'); setError(''); setTotpCode(''); setTempToken('') }}
-              className="w-full py-2 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+              className="w-full py-2 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition dark:text-gray-400"
             >
               ← Back to login
             </button>

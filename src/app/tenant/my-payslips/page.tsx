@@ -108,15 +108,15 @@ export default function MyPayslipsPage() {
       {payslips.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-500">Total Pay Runs</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Total Pay Runs</p>
             <p className="text-xl font-bold text-white mt-0.5">{payslips.length}</p>
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-500">Net Received (Paid)</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Net Received (Paid)</p>
             <p className="text-xl font-bold text-green-400 mt-0.5">{fmt(totalPaid)}</p>
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-500">Super Accumulated</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Super Accumulated</p>
             <p className="text-xl font-bold text-purple-400 mt-0.5">{fmt(totalSuper)}</p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function MyPayslipsPage() {
                 </svg>
               </div>
           <p className="text-gray-400 font-medium">No payslips yet</p>
-          <p className="text-sm text-gray-600 mt-1">Your pay runs will appear here once they are processed.</p>
+          <p className="text-sm text-gray-600 mt-1 dark:text-gray-400">Your pay runs will appear here once they are processed.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -152,19 +152,19 @@ export default function MyPayslipsPage() {
                       <p className="text-sm font-medium text-white">
                         {fmtDate(p.periodStart)} → {fmtDate(p.periodEnd)}
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5">Created {fmtDate(p.createdAt)}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Created {fmtDate(p.createdAt)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
                     <div className="text-right">
                       <p className="text-sm font-bold text-green-400">{fmt(p.netPay)}</p>
-                      <p className="text-xs text-gray-500">net pay</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">net pay</p>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[p.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                       {p.status}
                     </span>
                     <svg
-                      className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                      className={`w-4 h-4 text-gray-500 transition-transform  dark:text-gray-400${isOpen ? 'rotate-180' : ''}`}
                       fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -177,19 +177,19 @@ export default function MyPayslipsPage() {
                   <div className="border-t border-gray-800 px-5 py-4 space-y-2">
                     <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Gross Pay</span>
+                        <span className="text-gray-500 dark:text-gray-400">Gross Pay</span>
                         <span className="text-white font-mono">{fmt(p.grossPay)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">PAYG Withholding</span>
+                        <span className="text-gray-500 dark:text-gray-400">PAYG Withholding</span>
                         <span className="text-red-400 font-mono">-{fmt(p.paygWithholding)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Medicare Levy</span>
+                        <span className="text-gray-500 dark:text-gray-400">Medicare Levy</span>
                         <span className="text-orange-400 font-mono">-{fmt(p.medicareLevy)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Superannuation</span>
+                        <span className="text-gray-500 dark:text-gray-400">Superannuation</span>
                         <span className="text-purple-400 font-mono">{fmt(p.superContribution)}</span>
                       </div>
                     </div>
@@ -209,7 +209,7 @@ export default function MyPayslipsPage() {
       )}
 
       {payslips.length > 0 && (
-        <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-4 text-xs text-gray-500">
+        <div className="bg-gray-800/40 border border-gray-800 rounded-xl p-4 text-xs text-gray-500 dark:text-gray-400">
           <p className="font-medium text-gray-400 mb-1">Year-to-Date Summary (Paid runs)</p>
           <div className="flex gap-6">
             <span>Gross: <span className="text-white">{fmt(totalGross)}</span></span>

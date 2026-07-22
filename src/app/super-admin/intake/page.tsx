@@ -197,7 +197,7 @@ export default function IntakePage() {
 
           {/* Organisation */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Organisation</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Organisation</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Trading Name *</label>
                 <input required value={form.tradingName} onChange={e => { set('tradingName', e.target.value); if (!form.legalName) set('legalName', e.target.value) }}
@@ -223,7 +223,7 @@ export default function IntakePage() {
 
           {/* Region */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Region & Address</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Region & Address</h2>
             <div className="grid grid-cols-3 gap-4">
               <div><label className={LABEL}>Country *</label>
                 <select value={form.country} onChange={e => handleCountry(e.target.value)} className={INPUT}>
@@ -251,7 +251,7 @@ export default function IntakePage() {
 
           {/* Contacts */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Primary Contact</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Primary Contact</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Full Name *</label>
                 <input required value={form.contactName} onChange={e => set('contactName', e.target.value)}
@@ -267,7 +267,7 @@ export default function IntakePage() {
                   placeholder="+61 400 000 000" className={INPUT} /></div>
             </div>
             <div className="border-t border-gray-800 pt-4">
-              <p className="text-xs text-gray-500 mb-3">Billing Contact (leave blank to use above)</p>
+              <p className="text-xs text-gray-500 mb-3 dark:text-gray-400">Billing Contact (leave blank to use above)</p>
               <div className="grid grid-cols-2 gap-4">
                 <div><label className={LABEL}>Billing Email</label>
                   <input type="email" value={form.billingEmail} onChange={e => set('billingEmail', e.target.value)}
@@ -282,11 +282,11 @@ export default function IntakePage() {
           {/* Required Modules */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Required Modules</h2>
+              <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Required Modules</h2>
               <div className="flex gap-2 text-xs">
                 <button type="button" onClick={() => setForm(f => ({ ...f, selectedModules: MODULES_LIST.map(m => m.id) }))}
                   className="text-purple-400 hover:text-purple-300">Select All</button>
-                <span className="text-gray-600">·</span>
+                <span className="text-gray-600 dark:text-gray-400">·</span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, selectedModules: [] }))}
                   className="text-gray-400 hover:text-gray-300">Clear</button>
               </div>
@@ -302,12 +302,12 @@ export default function IntakePage() {
                 </label>
               ))}
             </div>
-            <p className="text-xs text-gray-500">{form.selectedModules.length} of {MODULES_LIST.length} modules selected</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{form.selectedModules.length} of {MODULES_LIST.length} modules selected</p>
           </section>
 
           {/* Admin Account */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Portal Admin Account</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Portal Admin Account</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Admin Email</label>
                 <input type="email" value={form.adminEmail} onChange={e => set('adminEmail', e.target.value)}
@@ -325,7 +325,7 @@ export default function IntakePage() {
 
           {/* Notes */}
           <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Internal Notes</h2>
+            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Internal Notes</h2>
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={3}
               placeholder="Any special requirements, SLA agreements, go-live dates…"
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none" />

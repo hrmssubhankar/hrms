@@ -133,7 +133,7 @@ export default function ReferralsPage() {
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>{r.status}</span>
                   {r.bonusPaidAt && <span className="text-xs text-green-400">Bonus paid</span>}
                 </div>
-                <p className="text-xs text-gray-500">Referred by {r.referrerFirstName} {r.referrerLastName}
+                <p className="text-xs text-gray-500 dark:text-gray-400">Referred by {r.referrerFirstName} {r.referrerLastName}
                   {r.bonusAmount && <span className="ml-2 text-purple-400">${Number(r.bonusAmount).toFixed(2)} bonus</span>}
                 </p>
               </div>

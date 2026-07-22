@@ -236,14 +236,14 @@ function EditClientInner() {
             </div>
             <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
               className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${form.isActive ? 'bg-green-600' : 'bg-gray-700'}`}>
-              <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform ${form.isActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform  dark:bg-gray-900${form.isActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
           </div>
 
           <div>
             <label className={LABEL}>Organisation Name</label>
             <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={INPUT} />
-            <p className="text-xs text-gray-500 mt-1">This name appears on the client login page and throughout their portal.</p>
+            <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">This name appears on the client login page and throughout their portal.</p>
           </div>
 
           <div>
@@ -251,7 +251,7 @@ function EditClientInner() {
             <input required value={form.slug}
               onChange={e => setForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))}
               className={INPUT} />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
               Portal URL: <span className="text-purple-400">{form.slug}.yourdomain.com</span>
             </p>
           </div>
@@ -271,7 +271,7 @@ function EditClientInner() {
                     </div>
                     <p className="text-xs text-gray-400 mt-0.5">{t.desc}</p>
                   </div>
-                  {originalTier === t.value && <span className="text-xs text-gray-500 shrink-0 mt-0.5">current</span>}
+                  {originalTier === t.value && <span className="text-xs text-gray-500 shrink-0 mt-0.5 dark:text-gray-400">current</span>}
                 </label>
               ))}
             </div>
@@ -292,7 +292,7 @@ function EditClientInner() {
                 </a>
               </div>
             ) : (
-              <p className="text-sm text-gray-500 italic">
+              <p className="text-sm text-gray-500 italic dark:text-gray-400">
                 Not yet deployed — set <code className="text-gray-400">VERCEL_API_TOKEN</code> + <code className="text-gray-400">VERCEL_TEAM_ID</code> in env vars to auto-create on next client add.
               </p>
             )}
@@ -323,7 +323,7 @@ function EditClientInner() {
                 {logoUrl ? (
                   <img src={logoUrl} alt="Logo" className="max-h-full max-w-full object-contain p-2" />
                 ) : (
-                  <span className="text-3xl text-gray-600"></span>
+                  <span className="text-3xl text-gray-600 dark:text-gray-400"></span>
                 )}
               </div>
               <div className="space-y-2 flex-1">
@@ -339,7 +339,7 @@ function EditClientInner() {
                     Remove Logo
                   </button>
                 )}
-                <p className="text-xs text-gray-500">PNG, JPG, SVG or WebP · max 512 KB · Recommended: 200×60px on transparent background</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, SVG or WebP · max 512 KB · Recommended: 200×60px on transparent background</p>
               </div>
             </div>
           </div>
@@ -348,12 +348,12 @@ function EditClientInner() {
           <div>
             <label className={LABEL}>Portal Display Name</label>
             <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={INPUT} />
-            <p className="text-xs text-gray-500 mt-1">Shown on login page, browser tab, and portal header.</p>
+            <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Shown on login page, browser tab, and portal header.</p>
           </div>
 
           {/* Live preview */}
           <div className="rounded-xl overflow-hidden border border-gray-700">
-            <div className="bg-gray-800 px-3 py-2 text-xs text-gray-500 font-medium">Login page preview</div>
+            <div className="bg-gray-800 px-3 py-2 text-xs text-gray-500 font-medium dark:text-gray-400">Login page preview</div>
             <div className="bg-gray-950 flex items-center justify-center py-8 px-4">
               <div className="w-64 space-y-3 text-center">
                 {logoUrl ? (
@@ -430,7 +430,7 @@ function EditClientInner() {
                     onChange={e => setForm(f => ({ ...f, primaryColor: e.target.value }))}
                     className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Sidebar, header accent, buttons</p>
+                <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Sidebar, header accent, buttons</p>
               </div>
               <div>
                 <label className={LABEL}>Accent Colour</label>
@@ -442,7 +442,7 @@ function EditClientInner() {
                     onChange={e => setTheme(t => ({ ...t, accentColor: e.target.value }))}
                     className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Badges, highlights, secondary elements</p>
+                <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Badges, highlights, secondary elements</p>
               </div>
             </div>
 
@@ -478,17 +478,17 @@ function EditClientInner() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-300">Dark Sidebar</p>
-                <p className="text-xs text-gray-500">Use dark background for sidebar navigation</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Use dark background for sidebar navigation</p>
               </div>
               <button onClick={() => setTheme(t => ({ ...t, sidebarDark: !t.sidebarDark }))}
                 className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${theme.sidebarDark ? 'bg-purple-600' : 'bg-gray-700'}`}>
-                <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform ${theme.sidebarDark ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform  dark:bg-gray-900${theme.sidebarDark ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </button>
             </div>
 
             {/* Live mini-preview */}
             <div className="rounded-xl overflow-hidden border border-gray-700" style={{ fontFamily: theme.fontFamily }}>
-              <div className="bg-gray-800 px-3 py-1.5 text-xs text-gray-500">Live preview</div>
+              <div className="bg-gray-800 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">Live preview</div>
               <div className="flex h-48">
                 <div className="w-32 flex flex-col text-white text-xs" style={{ background: theme.sidebarDark ? '#111827' : form.primaryColor }}>
                   <div className="px-3 py-2.5 border-b border-white/10 font-bold truncate" style={{ borderRadius: theme.borderRadius }}>
@@ -509,12 +509,12 @@ function EditClientInner() {
                     ))}
                   </div>
                   <div className="text-xs text-gray-400">Recent Activity</div>
-                  <div className="bg-gray-900 rounded p-2 text-xs text-gray-500" style={{ borderRadius: theme.borderRadius }}>John Smith — Leave Approved</div>
+                  <div className="bg-gray-900 rounded p-2 text-xs text-gray-500 dark:text-gray-400" style={{ borderRadius: theme.borderRadius }}>John Smith — Leave Approved</div>
                   <button className="text-xs text-white px-3 py-1 font-medium"
                     style={{ background: form.primaryColor, borderRadius: theme.borderRadius }}>+ Add Employee</button>
                 </div>
               </div>
-              <div className="bg-gray-900 border-t border-gray-800 px-3 py-1.5 text-xs text-gray-500">
+              <div className="bg-gray-900 border-t border-gray-800 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">
                 {theme.fontFamily} · radius {theme.borderRadius} · {theme.sidebarDark ? 'dark' : 'colour'} sidebar
               </div>
             </div>

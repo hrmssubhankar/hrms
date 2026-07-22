@@ -52,15 +52,15 @@ export default function ReportsPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="px-6 py-4 border-b border-gray-200 bg-white">
-        <h1 className="text-xl font-semibold text-gray-900">Reports</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Generate and export HR reports</p>
+      <div className="px-6 py-4 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Reports</h1>
+        <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">Generate and export HR reports</p>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 border-r border-gray-200 bg-white flex flex-col">
-          <div className="p-4 border-b border-gray-100">
+        <div className="w-64 border-r border-gray-200 bg-white flex flex-col dark:bg-gray-900 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-800">
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Report Type</p>
             <div className="space-y-1">
               {REPORTS.map(r => (
@@ -75,12 +75,12 @@ export default function ReportsPage() {
           <div className="p-4 space-y-3">
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Date Range</p>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">From</label>
-              <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
+              <label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">From</label>
+              <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs text-gray-500 mb-1 block">To</label>
-              <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={dateTo} onChange={e => setDateTo(e.target.value)} />
+              <label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">To</label>
+              <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={dateTo} onChange={e => setDateTo(e.target.value)} />
             </div>
             <button onClick={run} disabled={loading}
               className="w-full py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50">
@@ -90,13 +90,13 @@ export default function ReportsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-gray-50">
+        <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           {!ran ? (
             <div className="flex items-center justify-center h-full text-center p-8">
               <div>
                 <p className="text-5xl mb-4">{report.icon}</p>
-                <h2 className="text-lg font-semibold text-gray-900">{report.label}</h2>
-                <p className="text-sm text-gray-500 mt-1 mb-6">{report.description}</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{report.label}</h2>
+                <p className="text-sm text-gray-500 mt-1 mb-6 dark:text-gray-400">{report.description}</p>
                 <button onClick={run} className="px-6 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700">Run Report</button>
               </div>
             </div>
@@ -108,9 +108,9 @@ export default function ReportsPage() {
               {Object.keys(summary).length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   {Object.entries(summary).map(([k, v]) => (
-                    <div key={k} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                      <p className="text-2xl font-bold text-gray-900">{v}</p>
-                      <p className="text-xs text-gray-500 capitalize mt-0.5">{k.replace(/([A-Z])/g,' $1').toLowerCase()}</p>
+                    <div key={k} className="bg-white rounded-xl border border-gray-200 p-4 text-center dark:bg-gray-900 dark:border-gray-700">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{v}</p>
+                      <p className="text-xs text-gray-500 capitalize mt-0.5 dark:text-gray-400">{k.replace(/([A-Z])/g,' $1').toLowerCase()}</p>
                     </div>
                   ))}
                 </div>
@@ -118,25 +118,25 @@ export default function ReportsPage() {
 
               {/* Export + row count */}
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600"><span className="font-medium">{data.length}</span> records</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400"><span className="font-medium">{data.length}</span> records</p>
                 <button onClick={() => downloadCsv(data, `${selected}-report.csv`)}
                   disabled={data.length === 0}
-                  className="px-4 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                  className="px-4 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700">
                   ⬇ Export CSV
                 </button>
               </div>
 
               {/* Table */}
               {data.length === 0 ? (
-                <div className="bg-white rounded-xl border border-gray-200 py-12 text-center text-gray-400 text-sm">No data for this period</div>
+                <div className="bg-white rounded-xl border border-gray-200 py-12 text-center text-gray-400 text-sm dark:bg-gray-900 dark:border-gray-700">No data for this period</div>
               ) : (
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden dark:bg-gray-900 dark:border-gray-700">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-gray-100 bg-gray-50">
+                        <tr className="border-b border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-800">
                           {columns.map(c => (
-                            <th key={c} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
+                            <th key={c} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap dark:text-gray-400">
                               {c.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase())}
                             </th>
                           ))}
@@ -144,9 +144,9 @@ export default function ReportsPage() {
                       </thead>
                       <tbody>
                         {data.map((row, i) => (
-                          <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                          <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800">
                             {columns.map(c => (
-                              <td key={c} className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                              <td key={c} className="px-4 py-3 text-gray-700 whitespace-nowrap dark:text-gray-300">
                                 {row[c] instanceof Date
                                   ? (row[c] as Date).toLocaleDateString()
                                   : typeof row[c] === 'boolean'

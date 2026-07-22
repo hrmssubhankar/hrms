@@ -162,7 +162,7 @@ export default function PlatformSettingsPage() {
               <div className="flex items-center justify-between py-2">
                 <div>
                   <p className="text-sm font-medium text-gray-200">Require 2FA for All Users</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Enforce TOTP authentication platform-wide (Google Authenticator)</p>
+                  <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Enforce TOTP authentication platform-wide (Google Authenticator)</p>
                 </div>
                 <Toggle value={require2FA} onChange={setRequire2FA} />
               </div>
@@ -180,7 +180,7 @@ export default function PlatformSettingsPage() {
               <div className="flex items-center justify-between py-2">
                 <div>
                   <p className="text-sm font-medium text-gray-200">Enable Maintenance Mode</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Blocks all tenant access while allowing super admin login</p>
+                  <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Blocks all tenant access while allowing super admin login</p>
                 </div>
                 <Toggle value={maintenanceMode} onChange={setMaintenanceMode} />
               </div>
@@ -221,7 +221,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   return (
     <div>
       <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
-      {hint && <p className="text-xs text-gray-500 mb-1.5">{hint}</p>}
+      {hint && <p className="text-xs text-gray-500 mb-1.5 dark:text-gray-400">{hint}</p>}
       {children}
     </div>
   )
@@ -250,7 +250,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
       onClick={() => onChange(!value)}
       className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${value ? 'bg-purple-600' : 'bg-gray-700'}`}
     >
-      <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform ${value ? 'translate-x-5' : 'translate-x-0.5'}`} />
+      <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform  dark:bg-gray-900${value ? 'translate-x-5' : 'translate-x-0.5'}`} />
     </button>
   )
 }

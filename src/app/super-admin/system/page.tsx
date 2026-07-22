@@ -102,7 +102,7 @@ export default function SystemHealthPage() {
               <p className="text-xs text-gray-400">{check.message}</p>
               {check.latencyMs !== undefined && (
                 <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1 dark:text-gray-400">
                     <span>Latency</span>
                     <span className={check.latencyMs < 300 ? 'text-green-400' : check.latencyMs < 1000 ? 'text-yellow-400' : 'text-red-400'}>
                       {check.latencyMs}ms
@@ -140,7 +140,7 @@ export default function SystemHealthPage() {
               { label: 'App URL',      value: data.platform.appUrl },
             ].map(row => (
               <div key={row.label} className="space-y-1">
-                <p className="text-xs text-gray-500">{row.label}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{row.label}</p>
                 <p className="text-sm text-gray-200 font-mono bg-gray-800 px-2 py-1 rounded truncate">{row.value}</p>
               </div>
             ))}
@@ -164,8 +164,8 @@ export default function SystemHealthPage() {
               <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${STATUS_STYLES[svc.status].dot}`} />
               <div>
                 <p className="text-sm font-medium text-gray-200">{svc.name}</p>
-                <p className="text-xs text-gray-500">{svc.role}</p>
-                <p className="text-xs text-gray-600 mt-0.5">{svc.tier}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{svc.role}</p>
+                <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{svc.tier}</p>
               </div>
             </div>
           ))}

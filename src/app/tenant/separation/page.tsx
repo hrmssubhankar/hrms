@@ -221,7 +221,7 @@ export default function SeparationPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No separation records</p>
-          <p className="text-gray-500 text-sm mt-1">Initiate a separation to begin the offboarding process.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Initiate a separation to begin the offboarding process.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -246,13 +246,13 @@ export default function SeparationPage() {
                         {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                       </span>
                     </div>
-                    {r.employeeEmail && <p className="text-xs text-gray-500">{r.employeeEmail}</p>}
+                    {r.employeeEmail && <p className="text-xs text-gray-500 dark:text-gray-400">{r.employeeEmail}</p>}
 
                     {/* Progress bar */}
                     {r.status !== 'completed' && (
                       <div className="mt-2">
                         <div className="flex justify-between mb-0.5">
-                          <span className="text-xs text-gray-500">Offboarding progress</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">Offboarding progress</span>
                           <span className={`text-xs font-medium ${pct === 100 ? 'text-green-400' : 'text-gray-400'}`}>{pct}%</span>
                         </div>
                         <div className="h-1.5 bg-gray-800 rounded-full">
@@ -266,7 +266,7 @@ export default function SeparationPage() {
                     {r.lastWorkingDay && (
                       <p className="text-xs text-amber-400 font-medium">LWD {new Date(r.lastWorkingDay).toLocaleDateString('en-AU')}</p>
                     )}
-                    <p className="text-xs text-gray-500 mt-0.5">{isOpen ? '▲' : '▼'}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{isOpen ? '▲' : '▼'}</p>
                   </div>
                 </div>
 
@@ -280,7 +280,7 @@ export default function SeparationPage() {
                         { label: 'Entity', value: r.employeeEntityName },
                       ].map(d => (
                         <div key={d.label} className="bg-gray-800/60 rounded-lg p-3">
-                          <p className="text-xs text-gray-500 mb-0.5">{d.label}</p>
+                          <p className="text-xs text-gray-500 mb-0.5 dark:text-gray-400">{d.label}</p>
                           <p className="text-sm text-gray-200">{d.value ? (d.value.includes('-') ? new Date(d.value).toLocaleDateString('en-AU') : d.value) : '—'}</p>
                         </div>
                       ))}
@@ -288,14 +288,14 @@ export default function SeparationPage() {
 
                     {r.reason && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Reason</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 dark:text-gray-400">Reason</p>
                         <p className="text-sm text-gray-300">{r.reason}</p>
                       </div>
                     )}
 
                     {/* Offboarding checklist */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Offboarding Checklist</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Offboarding Checklist</p>
                       <div className="space-y-2">
                         {[
                           {
@@ -326,7 +326,7 @@ export default function SeparationPage() {
                             />
                             <div>
                               <p className={`text-sm font-medium ${item.done ? 'text-green-300 line-through' : 'text-gray-200'}`}>{item.label}</p>
-                              <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                              <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{item.desc}</p>
                             </div>
                             {item.done && <span className="ml-auto text-green-400 text-sm"></span>}
                           </label>
@@ -342,10 +342,10 @@ export default function SeparationPage() {
 
                     {/* Exit interview */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Exit Interview</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Exit Interview</p>
                       {r.exitInterviewAt && r.status === 'completed' ? (
                         <div className="bg-gray-800/40 rounded-lg p-3 space-y-1">
-                          <p className="text-xs text-gray-500">Conducted {new Date(r.exitInterviewAt).toLocaleDateString('en-AU')}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Conducted {new Date(r.exitInterviewAt).toLocaleDateString('en-AU')}</p>
                           {r.exitInterviewNotes && <p className="text-sm text-gray-300">{r.exitInterviewNotes}</p>}
                         </div>
                       ) : (
@@ -388,7 +388,7 @@ export default function SeparationPage() {
 
                     {/* ── Event History ─────────────────────────────── */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">History & Notes</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">History & Notes</p>
 
                       {/* Add note */}
                       <div className="flex gap-2 mb-4">
@@ -407,7 +407,7 @@ export default function SeparationPage() {
 
                       {/* Timeline */}
                       {(sepEvents[r.id] ?? []).length === 0 ? (
-                        <p className="text-xs text-gray-600 text-center py-3">No events recorded yet.</p>
+                        <p className="text-xs text-gray-600 text-center py-3 dark:text-gray-400">No events recorded yet.</p>
                       ) : (
                         <div className="space-y-3">
                           {(sepEvents[r.id] ?? []).map((ev, i, arr) => (
@@ -429,12 +429,12 @@ export default function SeparationPage() {
                               <div className="flex-1 pb-1">
                                 <div className="flex items-center justify-between gap-2">
                                   <p className="text-xs font-medium text-white capitalize">{ev.event.replace(/_/g, ' ')}</p>
-                                  <p className="text-xs text-gray-600 shrink-0">
+                                  <p className="text-xs text-gray-600 shrink-0 dark:text-gray-400">
                                     {new Date(ev.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}
                                   </p>
                                 </div>
                                 {ev.note        && <p className="text-xs text-gray-400 mt-0.5">{ev.note}</p>}
-                                {ev.performedBy && <p className="text-xs text-gray-600 mt-0.5">by {ev.performedBy}</p>}
+                                {ev.performedBy && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">by {ev.performedBy}</p>}
                               </div>
                             </div>
                           ))}

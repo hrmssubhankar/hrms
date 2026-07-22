@@ -190,7 +190,7 @@ export default function SupervisionPage() {
                 </svg>
               </div>
           <p className="text-gray-300 font-medium">No supervision sessions</p>
-          <p className="text-gray-500 text-sm mt-1">Schedule a session to begin tracking.</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Schedule a session to begin tracking.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -209,14 +209,14 @@ export default function SupervisionPage() {
                       <span className="text-white font-medium text-sm">
                         {r.employeeFirstName} {r.employeeLastName}
                       </span>
-                      <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">
+                      <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">
                         {SUP_TYPES.find(t => t.value === r.type)?.label ?? r.type ?? 'Regular'}
                       </span>
                       <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                         {overdue ? '️ Overdue' : r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Supervisor: {supervisor ? `${supervisor.firstName} ${supervisor.lastName}` : '—'}
                     </p>
                   </div>
@@ -225,9 +225,9 @@ export default function SupervisionPage() {
                       {new Date(r.scheduledDate + 'T00:00:00').toLocaleDateString('en-AU')}
                     </p>
                     {r.actionItems.length > 0 && (
-                      <p className="text-xs text-gray-500 mt-0.5">{r.actionItems.length} action{r.actionItems.length !== 1 ? 's' : ''}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{r.actionItems.length} action{r.actionItems.length !== 1 ? 's' : ''}</p>
                     )}
-                    <p className="text-xs text-gray-600 mt-0.5">{isOpen ? '▲' : '▼'}</p>
+                    <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{isOpen ? '▲' : '▼'}</p>
                   </div>
                 </div>
 
@@ -235,16 +235,16 @@ export default function SupervisionPage() {
                   <div className="border-t border-gray-800 px-5 py-4 space-y-4">
                     {r.notes && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Session Notes</p>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 dark:text-gray-400">Session Notes</p>
                         <p className="text-sm text-gray-300 whitespace-pre-wrap">{r.notes}</p>
                       </div>
                     )}
 
                     {/* Action items */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Action Items</p>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Action Items</p>
                       {r.actionItems.length === 0 ? (
-                        <p className="text-xs text-gray-600 italic">No action items yet.</p>
+                        <p className="text-xs text-gray-600 italic dark:text-gray-400">No action items yet.</p>
                       ) : (
                         <ul className="space-y-1.5 mb-2">
                           {r.actionItems.map((item, i) => (
@@ -252,7 +252,7 @@ export default function SupervisionPage() {
                               <span className="text-purple-400 shrink-0">•</span>
                               <span className="flex-1">{item}</span>
                               {r.status !== 'completed' && (
-                                <button onClick={() => removeAction(r.id, r.actionItems, i)} className="text-gray-600 hover:text-red-400 text-xs"></button>
+                                <button onClick={() => removeAction(r.id, r.actionItems, i)} className="text-gray-600 hover:text-red-400 text-xs dark:text-gray-400"></button>
                               )}
                             </li>
                           ))}
@@ -282,7 +282,7 @@ export default function SupervisionPage() {
                           Mark Session Complete
                         </button>
                         {r.conductedAt && (
-                          <span className="ml-3 text-xs text-gray-500">
+                          <span className="ml-3 text-xs text-gray-500 dark:text-gray-400">
                             Conducted {new Date(r.conductedAt).toLocaleDateString('en-AU')}
                           </span>
                         )}

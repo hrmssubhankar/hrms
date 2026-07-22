@@ -123,7 +123,7 @@ export default function ClientsPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-gray-500">
+                  <td colSpan={6} className="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
                     No clients yet.{' '}
                     <Link href="/super-admin/clients/new" className="text-purple-400 hover:underline">Add one →</Link>
                   </td>
@@ -145,7 +145,7 @@ export default function ClientsPage() {
                       )}
                       <div>
                         <span className="font-medium text-white">{c.name}</span>
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                           Since {new Date(c.createdAt).toLocaleDateString('en-AU', { month: 'short', year: 'numeric' })}
                         </p>
                       </div>
@@ -153,7 +153,7 @@ export default function ClientsPage() {
                   </td>
                   <td className="px-5 py-3.5">
                     <code className="text-purple-300 text-xs">{c.slug}</code>
-                    <p className="text-gray-500 text-xs mt-0.5">{c.slug}.yourdomain.com</p>
+                    <p className="text-gray-500 text-xs mt-0.5 dark:text-gray-400">{c.slug}.yourdomain.com</p>
                   </td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${TIER_COLORS[c.tier] ?? TIER_COLORS.starter}`}>

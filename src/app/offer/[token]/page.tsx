@@ -136,7 +136,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center dark:bg-gray-800">
         <p className="text-gray-400 text-sm animate-pulse">Loading your offer…</p>
       </div>
     )
@@ -144,11 +144,11 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-200 text-center max-w-md">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 dark:bg-gray-800">
+        <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-200 text-center max-w-md dark:bg-gray-900 dark:border-gray-700">
           <div className="text-5xl mb-4">️</div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Link unavailable</h1>
-          <p className="text-sm text-gray-500">{error}</p>
+          <h1 className="text-xl font-bold text-gray-900 mb-2 dark:text-white">Link unavailable</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
         </div>
       </div>
     )
@@ -163,8 +163,8 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
       <PageShell offer={offer} color={color}>
         <div className="text-center py-8">
           <div className="text-6xl mb-4"></div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Offer accepted!</h2>
-          <p className="text-gray-500 text-sm leading-relaxed">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 dark:text-white">Offer accepted!</h2>
+          <p className="text-gray-500 text-sm leading-relaxed dark:text-gray-400">
             Thank you, <strong>{offer.candidateName}</strong>. You've accepted your {offer.type} offer
             {offer.orgName ? ` with ${offer.orgName}` : ''}.
             {offer.signedAt && (
@@ -184,8 +184,8 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
       <PageShell offer={offer} color={color}>
         <div className="text-center py-8">
           <div className="text-6xl mb-4"></div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Offer declined</h2>
-          <p className="text-gray-500 text-sm">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 dark:text-white">Offer declined</h2>
+          <p className="text-gray-500 text-sm dark:text-gray-400">
             Thank you for letting us know, <strong>{offer.candidateName}</strong>. The HR team has been notified.
           </p>
           <p className="mt-4 text-xs text-gray-400">You may close this window.</p>
@@ -201,14 +201,14 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
       <PageShell offer={offer} color={color}>
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Sign your offer</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Sign your offer</h2>
+            <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
               By signing, you confirm acceptance of the {offer.type} offer from {offer.orgName ?? 'the organisation'}.
             </p>
           </div>
 
           {/* Sig mode toggle */}
-          <div className="flex bg-gray-100 rounded-xl p-1 w-fit">
+          <div className="flex bg-gray-100 rounded-xl p-1 w-fit dark:bg-gray-800">
             {(['draw', 'type'] as const).map(m => (
               <button
                 key={m}
@@ -223,7 +223,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
           {sigMode === 'draw' ? (
             <div className="space-y-2">
               <p className="text-xs text-gray-400">Draw your signature in the box below:</p>
-              <div className="border-2 border-gray-200 rounded-xl overflow-hidden bg-white relative">
+              <div className="border-2 border-gray-200 rounded-xl overflow-hidden bg-white relative dark:bg-gray-900 dark:border-gray-700">
                 <canvas
                   ref={canvasRef}
                   width={560}
@@ -237,7 +237,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
                   onTouchMove={draw}
                   onTouchEnd={endDraw}
                 />
-                <div className="absolute bottom-2 left-3 right-3 border-t border-dashed border-gray-200 pointer-events-none" />
+                <div className="absolute bottom-2 left-3 right-3 border-t border-dashed border-gray-200 pointer-events-none dark:border-gray-700" />
                 <p className="absolute bottom-1.5 left-3 text-[10px] text-gray-300 pointer-events-none">Sign here</p>
               </div>
               <button onClick={clearCanvas} className="text-xs text-gray-400 hover:text-gray-600">Clear</button>
@@ -250,7 +250,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
                 value={typedSig}
                 onChange={e => setTypedSig(e.target.value)}
                 placeholder={offer.candidateName}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-2xl italic font-serif text-gray-800 focus:outline-none focus:border-blue-400"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-2xl italic font-serif text-gray-800 focus:outline-none focus:border-blue-400 dark:text-gray-100 dark:border-gray-700"
                 style={{ fontFamily: 'Georgia, serif' }}
               />
             </div>
@@ -263,7 +263,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
           <div className="flex gap-3">
             <button
               onClick={() => setStep('view')}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="flex-1 py-3 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition dark:text-gray-400 dark:border-gray-700"
             >
               ← Back
             </button>
@@ -294,14 +294,14 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
     <PageShell offer={offer} color={color}>
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Your offer letter</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your offer letter</h2>
+          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
             Please review the offer carefully before accepting or declining.
           </p>
         </div>
 
         {offer.pdfUrl ? (
-          <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50" style={{ height: 480 }}>
+          <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-800 dark:border-gray-700" style={{ height: 480 }}>
             <iframe
               src={offer.pdfUrl}
               className="w-full h-full"
@@ -309,13 +309,13 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
             />
           </div>
         ) : (
-          <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-10 text-center">
+          <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-10 text-center dark:bg-gray-800 dark:border-gray-700">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Your offer letter is ready. Click <strong>Review & Sign</strong> to proceed.
             </p>
           </div>
@@ -346,7 +346,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
 
 function PageShell({ offer, color, children }: { offer: OfferData; color: string; children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4 dark:bg-gray-800">
       <div className="w-full max-w-2xl space-y-6">
 
         {/* Header card */}
@@ -371,7 +371,7 @@ function PageShell({ offer, color, children }: { offer: OfferData; color: string
         </div>
 
         {/* Content card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 dark:bg-gray-900 dark:border-gray-800">
           {children}
         </div>
 
