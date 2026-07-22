@@ -588,19 +588,52 @@ export const referrals = pgTable('referrals', {
 // Module 27 — Rostering
 // ──────────────────────────────────────────────
 
-export const shifts = pgTable('shifts', {
+/** NDIS participants / service recipients linked to shifts */
+export const participants = pgTable('participants', {
   id:           uuid('id').primaryKey().defaultRandom(),
-  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id),
-  employeeId:   uuid('employee_id').notNull().references(() => employees.id),
-  startTime:    timestamp('start_time').notNull(),
-  endTime:      timestamp('end_time').notNull(),
-  location:     varchar('location', { length: 200 }),
-  clientSite:   varchar('client_site', { length: 200 }),
-  status:       varchar('status', { length: 50 }).notNull().default('scheduled'),
-  compliancePassed: boolean('compliance_passed').notNull().default(false),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  firstName:    varchar('first_name', { length: 100 }).notNull(),
+  lastName:     varchar('last_name', { length: 100 }).notNull(),
+  preferredName:varchar('preferred_name', { length: 100 }),
+  ndisNumber:   varchar('ndis_number', { length: 20 }),
+  dateOfBirth:  date('date_of_birth'),
+  address:      text('address'),
+  phone:        varchar('phone', { length: 20 }),
+  email:        varchar('email', { length: 255 }),
+  // Support details
+  supportLevel: varchar('support_level', { length: 100 }),  // e.g. daily_activities, community_participation
+  fundingBody:  varchar('funding_body', { length: 100 }).default('NDIS'),
+  planStartDate:date('plan_start_date'),
+  planEndDate:  date('plan_end_date'),
   notes:        text('notes'),
+  isActive:     boolean('is_active').notNull().default(true),
   createdAt:    timestamp('created_at').notNull().defaultNow(),
-})
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('participants_tenant_idx').on(t.tenantId),
+}))
+
+export const shifts = pgTable('shifts', {
+  id:            uuid('id').primaryKey().defaultRandom(),
+  tenantId:      uuid('tenant_id').notNull().references(() => tenants.id),
+  employeeId:    uuid('employee_id').notNull().references(() => employees.id),
+  participantId: uuid('participant_id').references(() => participants.id),
+  startTime:     timestamp('start_time').notNull(),
+  endTime:       timestamp('end_time').notNull(),
+  shiftType:     varchar('shift_type', { length: 100 }).default('standard'), // standard, sleepover, active_night, on_call
+  location:      varchar('location', { length: 200 }),
+  clientSite:    varchar('client_site', { length: 200 }),
+  status:        varchar('status', { length: 50 }).notNull().default('draft'), // draft, published, confirmed, completed, cancelled
+  publishedAt:   timestamp('published_at'),
+  compliancePassed: boolean('compliance_passed').notNull().default(false),
+  notes:         text('notes'),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+  updatedAt:     timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:  index('shifts_tenant_idx').on(t.tenantId),
+  empIdx:     index('shifts_employee_idx').on(t.employeeId),
+  timeIdx:    index('shifts_time_idx').on(t.startTime, t.endTime),
+}))
 
 export const timesheets = pgTable('timesheets', {
   id:            uuid('id').primaryKey().defaultRandom(),
@@ -609,11 +642,19 @@ export const timesheets = pgTable('timesheets', {
   shiftId:       uuid('shift_id').references(() => shifts.id),
   clockIn:       timestamp('clock_in'),
   clockOut:      timestamp('clock_out'),
+  breakMinutes:  integer('break_minutes').notNull().default(0),
   hoursWorked:   decimal('hours_worked', { precision: 5, scale: 2 }),
+  notes:         text('notes'),
   approvedBy:    uuid('approved_by'),
   approvedAt:    timestamp('approved_at'),
-  status:        varchar('status', { length: 50 }).notNull().default('pending'),
-})
+  rejectedReason:text('rejected_reason'),
+  status:        varchar('status', { length: 50 }).notNull().default('pending'), // pending, submitted, approved, rejected
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+  updatedAt:     timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('timesheets_tenant_idx').on(t.tenantId),
+  empIdx:    index('timesheets_employee_idx').on(t.employeeId),
+}))
 
 // ──────────────────────────────────────────────
 // Module 28 — Payroll

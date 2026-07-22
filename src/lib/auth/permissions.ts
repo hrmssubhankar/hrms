@@ -67,6 +67,10 @@ export type Permission =
   // Rostering
   | 'rostering:read'
   | 'rostering:write'
+  // Timesheets
+  | 'timesheets:read'
+  | 'timesheets:write'
+  | 'timesheets:approve'
   // Workforce Planning
   | 'workforce_planning:read'
   | 'workforce_planning:write'
@@ -121,6 +125,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'separation:read', 'separation:write',
     'supervision:read', 'supervision:write',
     'rostering:read', 'rostering:write',
+    'timesheets:read', 'timesheets:write', 'timesheets:approve',
     'workforce_planning:read', 'workforce_planning:write',
     'analytics:read',
     'benefits:read', 'benefits:write',
@@ -149,6 +154,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'grievances:read', 'grievances:write',
     'separation:read', 'separation:write',
     'supervision:read', 'supervision:write',
+    'rostering:read', 'rostering:write',
+    'timesheets:read', 'timesheets:write', 'timesheets:approve',
     'workforce_planning:read',
     'analytics:read',
     'benefits:read', 'benefits:write',
@@ -176,6 +183,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   operations_manager: [
     'employees:read',
     'rostering:read', 'rostering:write',
+    'timesheets:read', 'timesheets:write', 'timesheets:approve',
     'workforce_planning:read', 'workforce_planning:write',
     'assets:read', 'assets:write',
     'supervision:read', 'supervision:write',
@@ -192,6 +200,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'supervision:read', 'supervision:write',
     'performance:read', 'performance:write',
     'rostering:read', 'rostering:write',
+    'timesheets:read', 'timesheets:write', 'timesheets:approve',
     'training:read',
     'documents:read',
     'whs:read',
@@ -203,6 +212,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   payroll_officer: [
     'employees:read',
     'payroll:read', 'payroll:write',
+    'timesheets:read', 'timesheets:approve',
     'benefits:read', 'benefits:write',
     'documents:read',
     'analytics:read',
@@ -239,6 +249,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'benefits:read',
     'competencies:read',
     'leave:read', 'leave:write',
+    'rostering:read',   // view own schedule
+    'timesheets:read', 'timesheets:write',  // clock in/out, view own
   ],
 
   contractor: [
@@ -246,6 +258,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'training:read',
     'documents:read',
     'whs:read',
+    'rostering:read',
+    'timesheets:read', 'timesheets:write',
   ],
 }
 
