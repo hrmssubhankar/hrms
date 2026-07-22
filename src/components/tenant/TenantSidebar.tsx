@@ -81,7 +81,17 @@ export default function TenantSidebar({
   const pathname  = usePathname()
   const router    = useRouter()
   const [open, setOpen]     = useState(false)
+  const [isDark, setIsDark] = useState(false)
   const dropdownRef         = useRef<HTMLDivElement>(null)
+
+  // Detect dark mode and react to changes
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.classList.contains('dark'))
+    check()
+    const obs = new MutationObserver(check)
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
 
   useEffect(() => {
     function handle(e: MouseEvent) {
@@ -92,6 +102,13 @@ export default function TenantSidebar({
     document.addEventListener('mousedown', handle)
     return () => document.removeEventListener('mousedown', handle)
   }, [])
+
+  // Theme-aware sidebar colours
+  const bg          = isDark ? sidebarBg : '#ffffff'
+  const textColor   = isDark ? '#ffffff' : '#111827'
+  const dividerClr  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+  const hoverBg     = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'
+  const mutedText   = isDark ? 'rgba(255,255,255,0.40)' : 'rgba(0,0,0,0.40)'
 
   async function handleSignOut() {
     await fetch('/api/auth/logout', { method: 'POST' })
@@ -110,10 +127,13 @@ export default function TenantSidebar({
     return (
       <Link
         href={`/tenant/${navKey}`}
-        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition ${
-          active ? 'text-white font-medium' : 'text-white/60 hover:text-white hover:bg-white/10'
-        }`}
-        style={active ? { background: primaryColor } : {}}
+        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition"
+        style={active
+          ? { background: primaryColor, color: '#ffffff', fontWeight: 500 }
+          : { color: textColor, opacity: isDark ? 0.65 : 0.75 }
+        }
+        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = hoverBg; (e.currentTarget as HTMLElement).style.opacity = '1' } }}
+        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.opacity = isDark ? '0.65' : '0.75' } }}
       >
         <Icon name={icon} className="w-4 h-4 shrink-0" strokeWidth={active ? 2 : 1.75} />
         <span className="truncate">{cleanLabel(label)}</span>
@@ -122,9 +142,9 @@ export default function TenantSidebar({
   }
 
   return (
-    <aside className="w-64 flex flex-col shrink-0 select-none" style={{ background: sidebarBg, color: '#fff' }}>
+    <aside className="w-64 flex flex-col shrink-0 select-none transition-colors" style={{ background: bg, color: textColor }}>
       {/* Brand */}
-      <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="px-5 py-4" style={{ borderBottom: `1px solid ${dividerClr}` }}>
         {logoUrl ? (
           <img src={logoUrl} alt={tenantName} className="h-8 object-contain" />
         ) : (
@@ -137,7 +157,7 @@ export default function TenantSidebar({
             </div>
             <div>
               <p className="text-sm font-bold leading-tight tracking-tight">{tenantName}</p>
-              <p className="text-[11px] opacity-40 font-medium uppercase tracking-widest">HRMS</p>
+              <p className="text-[11px] font-medium uppercase tracking-widest" style={{ color: mutedText }}>HRMS</p>
             </div>
           </div>
         )}
@@ -152,8 +172,8 @@ export default function TenantSidebar({
         ))}
 
         {/* Self-Service */}
-        <div className="pt-3 mt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest opacity-30">
+        <div className="pt-3 mt-1" style={{ borderTop: `1px solid ${dividerClr}` }}>
+          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: mutedText }}>
             My Portal
           </p>
           {[
@@ -170,25 +190,28 @@ export default function TenantSidebar({
       <div
         ref={dropdownRef}
         className="relative px-3 pb-4 pt-3"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ borderTop: `1px solid ${dividerClr}` }}
       >
         {open && (
           <div
             className="absolute bottom-full left-3 right-3 mb-2 rounded-xl overflow-hidden shadow-2xl"
-            style={{ background: sidebarBg, border: '1px solid rgba(255,255,255,0.12)' }}
+            style={{ background: bg, border: `1px solid ${dividerClr}` }}
           >
             <Link
               href="/tenant/settings"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition"
+              className="flex items-center gap-2.5 px-4 py-3 text-sm transition"
+              style={{ color: textColor }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = hoverBg }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             >
               <Icon name="gear" className="w-4 h-4 shrink-0" />
               Settings
             </Link>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+            <div style={{ borderTop: `1px solid ${dividerClr}` }} />
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-300/90 hover:text-red-200 hover:bg-red-900/20 transition text-left"
+              className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition text-left"
             >
               <Icon name="logout" className="w-4 h-4 shrink-0" />
               Sign out
@@ -198,8 +221,10 @@ export default function TenantSidebar({
 
         <button
           onClick={() => setOpen(v => !v)}
-          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition hover:bg-white/10 text-left"
-          style={{ background: open ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)' }}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition text-left"
+          style={{ background: open ? hoverBg : `${hoverBg.replace('0.05', '0.03').replace('0.10', '0.07')}` }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = hoverBg }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = open ? hoverBg : 'transparent' }}
         >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
@@ -208,12 +233,12 @@ export default function TenantSidebar({
             {userInitial}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-white truncate">{userEmail}</p>
-            <p className="text-[11px] opacity-40">{ROLE_LABELS[userRole] ?? userRole}</p>
+            <p className="text-xs font-medium truncate" style={{ color: textColor }}>{userEmail}</p>
+            <p className="text-[11px]" style={{ color: mutedText }}>{ROLE_LABELS[userRole] ?? userRole}</p>
           </div>
           <svg
-            className="w-3.5 h-3.5 text-white/30 shrink-0 transition-transform"
-            style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            className="w-3.5 h-3.5 shrink-0 transition-transform"
+            style={{ color: mutedText, transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
             fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />

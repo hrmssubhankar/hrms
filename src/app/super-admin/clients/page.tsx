@@ -15,9 +15,9 @@ type Client = {
 }
 
 const TIER_COLORS: Record<string, string> = {
-  enterprise:   'bg-purple-900 text-purple-200',
-  professional: 'bg-blue-900 text-blue-200',
-  starter:      'bg-gray-700 text-gray-200',
+  enterprise:   'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200',
+  professional: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200',
+  starter:      'bg-gray-200 dark:bg-gray-700 text-gray-200',
 }
 
 export default function ClientsPage() {
@@ -85,7 +85,7 @@ export default function ClientsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Clients</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Clients</h1>
           <p className="text-gray-400 text-sm mt-1">{clients.length} client{clients.length !== 1 ? 's' : ''} · {clients.filter(c => c.isActive).length} active</p>
         </div>
         <Link
@@ -102,22 +102,22 @@ export default function ClientsPage() {
         placeholder="Search clients by name or slug…"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full max-w-sm bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+        className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
       />
 
       {loading ? (
         <div className="text-gray-400 text-sm">Loading clients…</div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-left">
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Client</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Slug / URL</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Tier</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Theme</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Actions</th>
+              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Client</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Slug / URL</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Tier</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Theme</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -129,12 +129,12 @@ export default function ClientsPage() {
                   </td>
                 </tr>
               ) : filtered.map((c, i) => (
-                <tr key={c.id} className={`border-b border-gray-800 hover:bg-gray-800/50 transition ${i % 2 === 0 ? '' : 'bg-gray-900/50'}`}>
+                <tr key={c.id} className={`border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:bg-gray-800/50 transition ${i % 2 === 0 ? '' : 'bg-white dark:bg-gray-900/50'}`}>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       {c.logoUrl ? (
                         <img src={c.logoUrl} alt={c.name}
-                          className="w-8 h-8 rounded-lg object-contain bg-gray-800 p-0.5 shrink-0" />
+                          className="w-8 h-8 rounded-lg object-contain bg-gray-100 dark:bg-gray-800 p-0.5 shrink-0" />
                       ) : (
                         <div
                           className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"

@@ -17,7 +17,7 @@ const TIER_CONFIG = {
     label:    'Starter',
     modules:  11,
     color:    'bg-green-900/30 text-green-300 border-green-800',
-    badge:    'bg-green-900 text-green-200',
+    badge:    'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200',
     price:    57,
     features: 'Core + Compliance (11 modules)',
   },
@@ -25,7 +25,7 @@ const TIER_CONFIG = {
     label:    'Professional',
     modules:  20,
     color:    'bg-blue-900/30 text-blue-300 border-blue-800',
-    badge:    'bg-blue-900 text-blue-200',
+    badge:    'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200',
     price:    120,
     features: '+ Talent, Learning, Performance, Safety (20 modules)',
   },
@@ -33,7 +33,7 @@ const TIER_CONFIG = {
     label:    'Enterprise',
     modules:  28,
     color:    'bg-purple-900/30 text-purple-300 border-purple-800',
-    badge:    'bg-purple-900 text-purple-200',
+    badge:    'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200',
     price:    217,
     features: 'All 28 modules',
   },
@@ -65,30 +65,30 @@ export default function BillingPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Billing & Subscriptions</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Billing & Subscriptions</h1>
         <p className="text-gray-400 text-sm mt-1">Per-tenant subscription status and tier overview</p>
       </div>
 
       {/* MRR Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
           <p className="text-xs text-gray-400 mb-2">Monthly Revenue</p>
           <p className="text-3xl font-bold text-green-400">${totalMRR.toLocaleString()}</p>
           <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / month</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
           <p className="text-xs text-gray-400 mb-2">Active Subscriptions</p>
-          <p className="text-3xl font-bold text-white">{activeClients.length}</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">{activeClients.length}</p>
           <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">of {clients.length} total</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
           <p className="text-xs text-gray-400 mb-2">Avg Revenue / Client</p>
           <p className="text-3xl font-bold text-purple-400">
             ${activeClients.length ? Math.round(totalMRR / activeClients.length) : 0}
           </p>
           <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / month</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
           <p className="text-xs text-gray-400 mb-2">Annual Run Rate</p>
           <p className="text-3xl font-bold text-blue-400">${(totalMRR * 12).toLocaleString()}</p>
           <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / year</p>
@@ -123,10 +123,10 @@ export default function BillingPage() {
       {/* Per-Tenant Table */}
       <div>
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Client Subscriptions</h2>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-gray-200 dark:border-gray-800">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Client</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tier</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Modules</th>
@@ -144,7 +144,7 @@ export default function BillingPage() {
               ) : clients.map(client => {
                 const cfg = TIER_CONFIG[client.tier as keyof typeof TIER_CONFIG] ?? TIER_CONFIG.starter
                 return (
-                  <tr key={client.id} className="border-b border-gray-800/50 hover:bg-gray-800/20 transition">
+                  <tr key={client.id} className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100 dark:bg-gray-800/20 transition">
                     <td className="px-4 py-3">
                       <p className="font-medium text-white">{client.name}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{client.slug}</p>
@@ -154,8 +154,8 @@ export default function BillingPage() {
                         {cfg.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-300">{cfg.modules}</td>
-                    <td className="px-4 py-3 text-gray-300 font-medium">${cfg.price} AUD</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{cfg.modules}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300 font-medium">${cfg.price} AUD</td>
                     <td className="px-4 py-3">
                       {client.isActive ? (
                         <span className="text-xs bg-green-900 text-green-300 px-2 py-0.5 rounded-full">Active</span>
@@ -180,7 +180,7 @@ export default function BillingPage() {
             </tbody>
             {!loading && clients.length > 0 && (
               <tfoot>
-                <tr className="border-t border-gray-700 bg-gray-800/30">
+                <tr className="border-t border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/30">
                   <td colSpan={3} className="px-4 py-3 text-xs text-gray-400 font-semibold">TOTAL (active clients)</td>
                   <td className="px-4 py-3 text-green-400 font-bold">${totalMRR} AUD/mo</td>
                   <td colSpan={3} />

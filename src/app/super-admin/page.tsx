@@ -85,7 +85,7 @@ export default async function SuperAdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Platform Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Dashboard</h1>
           <p className="text-gray-400 text-sm mt-1">Manage all client tenants and platform settings</p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default async function SuperAdminDashboard() {
       <div className="grid grid-cols-3 gap-4">
         <TierCard tier="Enterprise"   count={d.enterprise}   color="text-purple-400" bg="bg-purple-900/20 border-purple-800" />
         <TierCard tier="Professional" count={d.professional} color="text-blue-400"   bg="bg-blue-900/20 border-blue-800" />
-        <TierCard tier="Starter"      count={d.starter}      color="text-gray-300"   bg="bg-gray-800/40 border-gray-700" />
+        <TierCard tier="Starter"      count={d.starter}      color="text-gray-600 dark:text-gray-300"   bg="bg-gray-100 dark:bg-gray-800/40 border-gray-300 dark:border-gray-700" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -125,9 +125,9 @@ export default async function SuperAdminDashboard() {
               <Link
                 key={a.href}
                 href={a.href}
-                className="block bg-gray-900 border border-gray-800 hover:border-purple-700 rounded-xl p-4 transition group"
+                className="block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-purple-700 rounded-xl p-4 transition group"
               >
-                <p className="text-sm font-semibold text-white group-hover:text-purple-300 transition">{a.label}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-300 transition">{a.label}</p>
                 <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{a.desc}</p>
               </Link>
             ))}
@@ -140,9 +140,9 @@ export default async function SuperAdminDashboard() {
                 <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Client Setup Status</h2>
                 <Link href="/super-admin/clients" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
               </div>
-              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
                 {d.clients.map((c: any) => (
-                  <div key={c.id} className="flex items-center gap-4 px-4 py-3 border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
+                  <div key={c.id} className="flex items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:bg-gray-800/20 transition">
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
                       style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
@@ -159,7 +159,7 @@ export default async function SuperAdminDashboard() {
                         ].map((step) => (
                           <span
                             key={step.label}
-                            className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-900/50 text-green-400' : 'bg-gray-800 text-gray-500'}`}
+                            className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-900/50 text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}
                           >
                             {step.done ? '' : '○'} {step.label}
                           </span>
@@ -168,7 +168,7 @@ export default async function SuperAdminDashboard() {
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="text-xs text-gray-400">{c.onboardingScore}/{c.onboardingTotal}</p>
-                      <div className="w-16 bg-gray-800 rounded-full h-1.5 mt-1">
+                      <div className="w-16 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mt-1">
                         <div
                           className="h-1.5 rounded-full bg-purple-500"
                           style={{ width: `${(c.onboardingScore / c.onboardingTotal) * 100}%` }}
@@ -189,14 +189,14 @@ export default async function SuperAdminDashboard() {
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Recent Activity</h2>
             <Link href="/super-admin/audit-logs" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
             {d.recentLogs.length === 0 ? (
               <div className="px-4 py-8 text-center">
                 <div className="text-3xl mb-2"></div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">No audit events yet</p>
               </div>
             ) : d.recentLogs.map((log: any) => (
-              <div key={log.id} className="px-4 py-3 border-b border-gray-800/50 last:border-0">
+              <div key={log.id} className="px-4 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <span className={`text-xs font-semibold ${actionColor(log.action)}`}>{log.action}</span>
@@ -219,7 +219,7 @@ export default async function SuperAdminDashboard() {
 
 function StatCard({ label, value, color, sub }: { label: string; value: string | number; color: string; sub: string }) {
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
       <p className="text-xs text-gray-400 mb-2">{label}</p>
       <p className={`text-3xl font-bold ${color}`}>{value}</p>
       <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{sub}</p>
@@ -231,7 +231,7 @@ function TierCard({ tier, count, color, bg }: { tier: string; count: number; col
   return (
     <div className={`border rounded-xl p-4 ${bg}`}>
       <p className={`text-2xl font-bold ${color}`}>{count}</p>
-      <p className="text-sm text-gray-300 mt-1">{tier}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{tier}</p>
     </div>
   )
 }

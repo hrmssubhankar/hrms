@@ -15,7 +15,7 @@ type Announcement = {
 }
 
 const PRIORITY_STYLES = {
-  info:     { badge: 'bg-blue-900 text-blue-200',   icon: 'ℹ️',  border: 'border-blue-800' },
+  info:     { badge: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200',   icon: 'ℹ️',  border: 'border-blue-800' },
   warning:  { badge: 'bg-yellow-900 text-yellow-200', icon: '️',  border: 'border-yellow-800' },
   critical: { badge: 'bg-red-900 text-red-200',      icon: '', border: 'border-red-800' },
 }
@@ -75,7 +75,7 @@ export default function AnnouncementsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Platform Announcements</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Announcements</h1>
           <p className="text-gray-400 text-sm mt-1">Broadcast messages to all tenants or specific clients</p>
         </div>
         <button
@@ -88,7 +88,7 @@ export default function AnnouncementsPage() {
 
       {/* Create form */}
       {showForm && (
-        <div className="bg-gray-900 border border-purple-800 rounded-xl p-6 space-y-4">
+        <div className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-purple-300">New Announcement</h2>
           <div>
             <label className="text-xs text-gray-400 mb-1 block">Title *</label>
@@ -96,7 +96,7 @@ export default function AnnouncementsPage() {
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               placeholder="e.g. Scheduled Maintenance on 15 Aug"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
             />
           </div>
           <div>
@@ -106,7 +106,7 @@ export default function AnnouncementsPage() {
               onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
               rows={3}
               placeholder="Enter the message all tenants will see…"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"
+              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"
             />
           </div>
           <div className="grid grid-cols-3 gap-4">
@@ -115,7 +115,7 @@ export default function AnnouncementsPage() {
               <select
                 value={form.priority}
                 onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
               >
                 <option value="info">ℹ️ Info</option>
                 <option value="warning">️ Warning</option>
@@ -127,7 +127,7 @@ export default function AnnouncementsPage() {
               <select
                 value={form.targetTenants}
                 onChange={e => setForm(f => ({ ...f, targetTenants: e.target.value }))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
               >
                 <option value="all">All Tenants</option>
               </select>
@@ -138,7 +138,7 @@ export default function AnnouncementsPage() {
                 type="date"
                 value={form.expiresAt}
                 onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
               />
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function AnnouncementsPage() {
       {loading ? (
         <div className="text-gray-400 text-sm">Loading…</div>
       ) : announcements.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-12 text-center">
           <div className="text-5xl mb-3"></div>
           <p className="text-gray-400">No announcements yet</p>
           <p className="text-gray-600 text-sm mt-1 dark:text-gray-400">Create one to broadcast a message to all tenants</p>
@@ -170,23 +170,23 @@ export default function AnnouncementsPage() {
             return (
               <div
                 key={ann.id}
-                className={`bg-gray-900 border rounded-xl p-5 ${p.border} ${!ann.isActive ? 'opacity-50' : ''}`}
+                className={`bg-white dark:bg-gray-900 border rounded-xl p-5 ${p.border} ${!ann.isActive ? 'opacity-50' : ''}`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <span className="text-xl shrink-0 mt-0.5">{p.icon}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="font-semibold text-white">{ann.title}</span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{ann.title}</span>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${p.badge}`}>{ann.priority}</span>
                         {!ann.isActive && (
-                          <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">Inactive</span>
+                          <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">Inactive</span>
                         )}
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           → {ann.targetTenants === 'all' ? 'All tenants' : ann.targetTenants}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-300">{ann.body}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{ann.body}</p>
                       <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                         <span>By {ann.createdBy}</span>
                         <span>{new Date(ann.createdAt).toLocaleString('en-AU')}</span>

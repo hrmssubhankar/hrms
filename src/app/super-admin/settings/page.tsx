@@ -46,7 +46,7 @@ export default function PlatformSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Platform Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Settings</h1>
         <p className="text-gray-400 text-sm mt-1">Global configuration for the HRMS platform</p>
       </div>
 
@@ -66,7 +66,7 @@ export default function PlatformSettingsPage() {
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-left transition ${
                 activeSection === s.key
                   ? 'bg-purple-900/50 text-white border border-purple-700'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  : 'text-gray-400 hover:bg-gray-100 dark:bg-gray-800 hover:text-white'
               }`}
             >
               <span>{s.icon}</span>
@@ -76,11 +76,11 @@ export default function PlatformSettingsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6">
+        <div className="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-6">
 
           {activeSection === 'general' && (
             <>
-              <h2 className="text-base font-semibold text-white border-b border-gray-800 pb-3">General Settings</h2>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800 pb-3">General Settings</h2>
               <Field label="Platform Name" hint="Displayed in the browser tab and emails">
                 <Input value={platformName} onChange={setPlatformName} />
               </Field>
@@ -91,7 +91,7 @@ export default function PlatformSettingsPage() {
                 <select
                   value={defaultTier}
                   onChange={e => setDefaultTier(e.target.value)}
-                  className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
+                  className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
                 >
                   <option value="starter">Starter (11 modules)</option>
                   <option value="professional">Professional (20 modules)</option>
@@ -103,7 +103,7 @@ export default function PlatformSettingsPage() {
               </Field>
 
               {/* Platform info (read-only) */}
-              <div className="border-t border-gray-800 pt-4 space-y-2">
+              <div className="border-t border-gray-200 dark:border-gray-800 pt-4 space-y-2">
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Platform Info</h3>
                 <InfoRow label="Version"         value="v1.0.0" />
                 <InfoRow label="Framework"       value="Next.js 15 + .NET 8" />
@@ -117,7 +117,7 @@ export default function PlatformSettingsPage() {
 
           {activeSection === 'email' && (
             <>
-              <h2 className="text-base font-semibold text-white border-b border-gray-800 pb-3">Email / SMTP Configuration</h2>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800 pb-3">Email / SMTP Configuration</h2>
               <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
                 Brevo SMTP provides 300 emails/day (9,000/month) on the free tier — covering all HRMS notifications, reminders, and alerts.
               </div>
@@ -141,7 +141,7 @@ export default function PlatformSettingsPage() {
               </Field>
               <div className="pt-2">
                 <button
-                  className="text-xs bg-gray-800 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white px-4 py-2 rounded-lg transition"
+                  className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:border-gray-500 text-gray-600 dark:text-gray-300 hover:text-white px-4 py-2 rounded-lg transition"
                   onClick={() => alert('Test email sent (not wired in this UI demo)')}
                 >
                   Send Test Email
@@ -152,7 +152,7 @@ export default function PlatformSettingsPage() {
 
           {activeSection === 'security' && (
             <>
-              <h2 className="text-base font-semibold text-white border-b border-gray-800 pb-3">Security Settings</h2>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800 pb-3">Security Settings</h2>
               <Field label="Session Duration (hours)" hint="JWT expiry. Users re-authenticate after this period.">
                 <Input type="number" value={sessionHours} onChange={setSessionHours} />
               </Field>
@@ -171,7 +171,7 @@ export default function PlatformSettingsPage() {
 
           {activeSection === 'maintenance' && (
             <>
-              <h2 className="text-base font-semibold text-white border-b border-gray-800 pb-3">Maintenance Mode</h2>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800 pb-3">Maintenance Mode</h2>
               {maintenanceMode && (
                 <div className="bg-red-900/30 border border-red-700 rounded-lg p-3 text-sm text-red-300">
                   ️ Maintenance mode is ON. All tenant users see the maintenance message below. Super admins can still log in.
@@ -189,13 +189,13 @@ export default function PlatformSettingsPage() {
                   value={maintenanceMsg}
                   onChange={e => setMaintenanceMsg(e.target.value)}
                   rows={3}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"
+                  className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"
                 />
               </Field>
             </>
           )}
 
-          <div className="pt-2 border-t border-gray-800 flex gap-3">
+          <div className="pt-2 border-t border-gray-200 dark:border-gray-800 flex gap-3">
             <button
               onClick={handleSave}
               className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition"
@@ -204,7 +204,7 @@ export default function PlatformSettingsPage() {
             </button>
             <button
               onClick={() => setActiveSection(activeSection)}
-              className="border border-gray-700 text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition"
+              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition"
             >
               Cancel
             </button>
@@ -220,7 +220,7 @@ export default function PlatformSettingsPage() {
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">{label}</label>
       {hint && <p className="text-xs text-gray-500 mb-1.5 dark:text-gray-400">{hint}</p>}
       {children}
     </div>
@@ -238,7 +238,7 @@ function Input({
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+      className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
     />
   )
 }
@@ -248,7 +248,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
     <button
       type="button"
       onClick={() => onChange(!value)}
-      className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${value ? 'bg-purple-600' : 'bg-gray-700'}`}
+      className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${value ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-700'}`}
     >
       <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform  dark:bg-gray-900${value ? 'translate-x-5' : 'translate-x-0.5'}`} />
     </button>
@@ -259,7 +259,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-1.5 text-sm">
       <span className="text-gray-400">{label}</span>
-      <span className="text-gray-200 font-mono text-xs bg-gray-800 px-2 py-0.5 rounded">{value}</span>
+      <span className="text-gray-200 font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">{value}</span>
     </div>
   )
 }

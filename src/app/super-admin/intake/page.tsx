@@ -38,7 +38,7 @@ const MODULES_LIST = [
 
 type Tab = 'fill' | 'upload'
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL = 'block text-xs font-medium text-gray-400 mb-1'
 
 const INITIAL = {
@@ -146,14 +146,14 @@ export default function IntakePage() {
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Client Intake Form</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Client Intake Form</h1>
           <p className="text-gray-400 text-sm mt-1">
             Fill in online and submit, or download as JSON for the client to complete offline
           </p>
         </div>
         <div className="flex gap-2">
           <button onClick={downloadPrintable}
-            className="px-3 py-2 text-xs border border-gray-700 text-gray-300 rounded-lg hover:text-white transition">
+            className="px-3 py-2 text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:text-white transition">
             Print / PDF
           </button>
           <button onClick={downloadJSON}
@@ -164,10 +164,10 @@ export default function IntakePage() {
       </div>
 
       {/* Tab */}
-      <div className="flex border-b border-gray-800">
+      <div className="flex border-b border-gray-200 dark:border-gray-800">
         {([['fill', 'Fill Online'], ['upload', 'Upload Completed Form']] as [Tab, string][]).map(([id, label]) => (
           <button key={id} onClick={() => setTab(id)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-300'}`}>
             {label}
           </button>
         ))}
@@ -177,7 +177,7 @@ export default function IntakePage() {
       {error   && <div className="bg-red-900/40 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
 
       {tab === 'upload' && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center space-y-4">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center space-y-4">
           <div className="text-4xl"></div>
           <p className="text-white font-medium">Upload a completed intake form</p>
           <p className="text-gray-400 text-sm">
@@ -196,7 +196,7 @@ export default function IntakePage() {
         <form onSubmit={handleSubmit} className="space-y-6">
 
           {/* Organisation */}
-          <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <section className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Organisation</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Trading Name *</label>
@@ -222,7 +222,7 @@ export default function IntakePage() {
           </section>
 
           {/* Region */}
-          <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <section className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Region & Address</h2>
             <div className="grid grid-cols-3 gap-4">
               <div><label className={LABEL}>Country *</label>
@@ -250,7 +250,7 @@ export default function IntakePage() {
           </section>
 
           {/* Contacts */}
-          <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <section className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Primary Contact</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Full Name *</label>
@@ -266,7 +266,7 @@ export default function IntakePage() {
                 <input type="tel" value={form.contactPhone} onChange={e => set('contactPhone', e.target.value)}
                   placeholder="+61 400 000 000" className={INPUT} /></div>
             </div>
-            <div className="border-t border-gray-800 pt-4">
+            <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
               <p className="text-xs text-gray-500 mb-3 dark:text-gray-400">Billing Contact (leave blank to use above)</p>
               <div className="grid grid-cols-2 gap-4">
                 <div><label className={LABEL}>Billing Email</label>
@@ -280,7 +280,7 @@ export default function IntakePage() {
           </section>
 
           {/* Required Modules */}
-          <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <section className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Required Modules</h2>
               <div className="flex gap-2 text-xs">
@@ -288,13 +288,13 @@ export default function IntakePage() {
                   className="text-purple-400 hover:text-purple-300">Select All</button>
                 <span className="text-gray-600 dark:text-gray-400">·</span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, selectedModules: [] }))}
-                  className="text-gray-400 hover:text-gray-300">Clear</button>
+                  className="text-gray-400 hover:text-gray-600 dark:text-gray-300">Clear</button>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {MODULES_LIST.map(m => (
                 <label key={m.id} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
-                  form.selectedModules.includes(m.id) ? 'border-purple-600 bg-purple-900/20 text-purple-300' : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                  form.selectedModules.includes(m.id) ? 'border-purple-600 bg-purple-900/20 text-purple-300' : 'border-gray-300 dark:border-gray-700 text-gray-400 hover:border-gray-600'
                 }`}>
                   <input type="checkbox" checked={form.selectedModules.includes(m.id)} onChange={() => toggleModule(m.id)}
                     className="accent-purple-500" />
@@ -306,7 +306,7 @@ export default function IntakePage() {
           </section>
 
           {/* Admin Account */}
-          <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <section className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Portal Admin Account</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={LABEL}>Admin Email</label>
@@ -324,11 +324,11 @@ export default function IntakePage() {
           </section>
 
           {/* Notes */}
-          <section className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <section className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Internal Notes</h2>
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={3}
               placeholder="Any special requirements, SLA agreements, go-live dates…"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none" />
+              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none" />
           </section>
 
           <div className="flex gap-3 pt-2">
@@ -337,7 +337,7 @@ export default function IntakePage() {
               {loading ? 'Creating Client…' : 'Create Client & Send Welcome Email →'}
             </button>
             <button type="button" onClick={downloadJSON}
-              className="border border-gray-700 text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition">
+              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition">
               ⬇ Save as Draft
             </button>
           </div>

@@ -39,9 +39,9 @@ const ALL_MODULES = [
 const CATEGORIES = ['Core', 'Compliance', 'Learning', 'Talent', 'Performance', 'Safety', 'Intelligence', 'Experience', 'Operations'] as const
 
 const CATEGORY_STYLE: Record<string, { border: string; header: string; badge: string }> = {
-  Core:         { border: 'border-blue-800',   header: 'bg-blue-950/60',   badge: 'bg-blue-900 text-blue-200' },
-  Compliance:   { border: 'border-green-800',  header: 'bg-green-950/60',  badge: 'bg-green-900 text-green-200' },
-  Learning:     { border: 'border-purple-800', header: 'bg-purple-950/60', badge: 'bg-purple-900 text-purple-200' },
+  Core:         { border: 'border-blue-800',   header: 'bg-blue-950/60',   badge: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200' },
+  Compliance:   { border: 'border-green-800',  header: 'bg-green-950/60',  badge: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200' },
+  Learning:     { border: 'border-purple-800', header: 'bg-purple-950/60', badge: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200' },
   Talent:       { border: 'border-yellow-800', header: 'bg-yellow-950/60', badge: 'bg-yellow-900 text-yellow-200' },
   Performance:  { border: 'border-orange-800', header: 'bg-orange-950/60', badge: 'bg-orange-900 text-orange-200' },
   Safety:       { border: 'border-red-800',    header: 'bg-red-950/60',    badge: 'bg-red-900 text-red-200' },
@@ -136,9 +136,9 @@ export default function ModulesPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={`/super-admin/clients/${id}`} className="text-gray-500 hover:text-gray-300 text-sm transition dark:text-gray-400">← Edit Client</Link>
+            <Link href={`/super-admin/clients/${id}`} className="text-gray-500 hover:text-gray-600 dark:text-gray-300 text-sm transition dark:text-gray-400">← Edit Client</Link>
           </div>
-          <h1 className="text-2xl font-bold text-white">Module Configuration</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Module Configuration</h1>
           <p className="text-gray-400 text-sm mt-1">
             <span className="text-purple-300 font-medium">{tenantName}</span>
             {' · '}
@@ -170,8 +170,8 @@ export default function ModulesPage() {
       </div>
 
       {/* Tier legend */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-wrap gap-4 text-xs text-gray-400">
-        <span className="font-semibold text-gray-300">Tier includes:</span>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-wrap gap-4 text-xs text-gray-400">
+        <span className="font-semibold text-gray-600 dark:text-gray-300">Tier includes:</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />Starter — modules 01–09</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" />Professional — modules 01–19</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-purple-500" />Enterprise — all 28 modules</span>
@@ -184,7 +184,7 @@ export default function ModulesPage() {
         placeholder="Search modules…"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full max-w-sm bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+        className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
       />
 
       {/* Module categories */}
@@ -223,7 +223,7 @@ export default function ModulesPage() {
               </div>
 
               {/* Modules list */}
-              <div className="divide-y divide-gray-800/60 bg-gray-900">
+              <div className="divide-y divide-gray-200 dark:divide-gray-800/60 bg-white dark:bg-gray-900">
                 {mods.map(mod => {
                   const state   = states.find(s => s.id === mod.id)
                   const enabled = state?.isEnabled ?? false
@@ -231,7 +231,7 @@ export default function ModulesPage() {
                   const num     = String(mod.id).padStart(2, '0')
 
                   return (
-                    <div key={mod.id} className={`flex items-center justify-between px-5 py-3 transition ${!locked && !enabled ? 'opacity-60' : ''} hover:bg-gray-800/20`}>
+                    <div key={mod.id} className={`flex items-center justify-between px-5 py-3 transition ${!locked && !enabled ? 'opacity-60' : ''} hover:bg-gray-100 dark:bg-gray-800/20`}>
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-xs font-mono text-gray-500 shrink-0 w-6 dark:text-gray-400">{num}</span>
                         <span className={`text-sm ${enabled ? 'text-white' : 'text-gray-400'}`}>{mod.name}</span>
@@ -244,7 +244,7 @@ export default function ModulesPage() {
                         disabled={locked}
                         aria-label={`Toggle ${mod.name}`}
                         className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none ml-4 ${
-                          enabled ? 'bg-purple-600' : 'bg-gray-700'
+                          enabled ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-700'
                         } ${locked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                       >
                         <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform  dark:bg-gray-900${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
@@ -276,7 +276,7 @@ export default function ModulesPage() {
         </button>
         <Link
           href="/super-admin/clients"
-          className="border border-gray-700 text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition"
+          className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition"
         >
           Done
         </Link>

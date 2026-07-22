@@ -29,10 +29,10 @@ export default function AdminSidebar() {
   }
 
   return (
-    <aside className="w-60 bg-gray-900 border-r border-gray-800 flex flex-col h-full">
-      <div className="px-5 py-5 border-b border-gray-800">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400 mb-1">Super Admin</p>
-        <p className="text-base font-semibold text-white tracking-tight">HRMS</p>
+    <aside className="w-60 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full">
+      <div className="px-5 py-5 border-b border-gray-200 dark:border-gray-800">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400 mb-1">Super Admin</p>
+        <p className="text-base font-semibold text-gray-900 dark:text-white tracking-tight">HRMS</p>
         <p className="text-xs text-gray-500 dark:text-gray-400">Platform Control</p>
       </div>
 
@@ -45,8 +45,8 @@ export default function AdminSidebar() {
               href={item.href}
               className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition ${
                 active
-                  ? 'bg-purple-900/60 text-white border border-purple-700/50 font-medium'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-white border border-purple-200 dark:border-purple-700/50 font-medium'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               <Icon name={item.icon} className="w-4 h-4 shrink-0" strokeWidth={active ? 2 : 1.75} />
@@ -56,7 +56,7 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="px-4 py-3 border-t border-gray-800 text-xs text-gray-600 dark:text-gray-400">
+      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 text-xs text-gray-400 dark:text-gray-600">
         HRMS Platform v1.0
       </div>
     </aside>

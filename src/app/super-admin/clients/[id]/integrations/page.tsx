@@ -87,7 +87,7 @@ export default function ClientIntegrationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-white">Payroll Integrations</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Payroll Integrations</h1>
         <p className="text-gray-400 text-sm mt-1">
           {tenantName} · <span className="text-purple-300">{country}</span> · {currency}
         </p>
@@ -100,7 +100,7 @@ export default function ClientIntegrationsPage() {
       )}
 
       {providers.length === 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center">
           <p className="text-gray-400 text-sm">No payroll providers are configured for country <strong className="text-white">{country}</strong>.</p>
           <p className="text-gray-500 text-xs mt-1 dark:text-gray-400">Update the client country in their profile to see available integrations.</p>
         </div>
@@ -114,20 +114,20 @@ export default function ClientIntegrationsPage() {
             {connectedProviders.map(p => {
               const cfg = integrations[p.id]
               return (
-                <div key={p.id} className="bg-gray-900 border border-green-800/50 rounded-xl p-5">
+                <div key={p.id} className="bg-white dark:bg-gray-900 border border-green-800/50 rounded-xl p-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
                         style={{ background: p.color }}>{p.logo}</div>
                       <div>
-                        <p className="text-sm font-semibold text-white">{p.name}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{p.name}</p>
                         <p className="text-xs text-gray-400">{p.description}</p>
                       </div>
                     </div>
                     <div className="flex gap-2 items-center">
                       <span className="text-xs px-2 py-0.5 rounded-full bg-green-900/40 border border-green-700 text-green-300">● Connected</span>
                       <button onClick={() => startConfig(p)}
-                        className="text-xs px-3 py-1.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">
+                        className="text-xs px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 text-gray-400 hover:text-white transition">
                         Edit
                       </button>
                       <button onClick={() => disconnect(p)} disabled={saving === p.id}
@@ -143,19 +143,19 @@ export default function ClientIntegrationsPage() {
 
                   <div className="mt-3 flex flex-wrap gap-1">
                     {p.features.map(f => (
-                      <span key={f} className="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-300">{f}</span>
+                      <span key={f} className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">{f}</span>
                     ))}
                   </div>
 
                   {/* Config form (inline) */}
                   {configuring === p.id && (
-                    <div className="mt-4 border-t border-gray-700 pt-4 space-y-3">
+                    <div className="mt-4 border-t border-gray-300 dark:border-gray-700 pt-4 space-y-3">
                       {p.authType === 'api_key' && (
                         <div>
                           <label className="block text-xs text-gray-400 mb-1">API Key</label>
                           <input type="password" value={draft.apiKey ?? ''} onChange={e => setDraft(d => ({ ...d, apiKey: e.target.value }))}
                             placeholder="Enter API key…"
-                            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                            className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
                         </div>
                       )}
                       {p.authType === 'oauth2' && (
@@ -168,13 +168,13 @@ export default function ClientIntegrationsPage() {
                         <label className="block text-xs text-gray-400 mb-1">Organisation / Account ID</label>
                         <input value={draft.orgId ?? ''} onChange={e => setDraft(d => ({ ...d, orgId: e.target.value }))}
                           placeholder="Org or account identifier"
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                          className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
                       </div>
                       <div>
                         <label className="block text-xs text-gray-400 mb-1">Notes</label>
                         <input value={draft.notes ?? ''} onChange={e => setDraft(d => ({ ...d, notes: e.target.value }))}
                           placeholder="Any setup notes…"
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                          className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
                       </div>
                       <div className="flex gap-2">
                         <button onClick={() => save(p, draft, true)} disabled={saving === p.id}
@@ -182,7 +182,7 @@ export default function ClientIntegrationsPage() {
                           {saving === p.id ? 'Saving…' : 'Save'}
                         </button>
                         <button onClick={() => setConfiguring(null)}
-                          className="px-4 py-2 text-xs border border-gray-700 text-gray-400 hover:text-white rounded-lg">
+                          className="px-4 py-2 text-xs border border-gray-300 dark:border-gray-700 text-gray-400 hover:text-white rounded-lg">
                           Cancel
                         </button>
                       </div>
@@ -203,20 +203,20 @@ export default function ClientIntegrationsPage() {
           </h2>
           <div className="space-y-3">
             {otherProviders.map(p => (
-              <div key={p.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+              <div key={p.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 opacity-80"
                       style={{ background: p.color }}>{p.logo}</div>
                     <div>
-                      <p className="text-sm font-semibold text-white">{p.name}</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{p.name}</p>
                       <p className="text-xs text-gray-400">{p.description}</p>
                       <a href={p.website} target="_blank" rel="noopener noreferrer"
                         className="text-xs text-purple-400 hover:text-purple-300">{p.website}</a>
                     </div>
                   </div>
                   <div className="flex gap-2 items-center">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700 text-gray-400">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-400">
                       {p.authType === 'oauth2' ? 'OAuth2' : p.authType === 'api_key' ? 'API Key' : 'Manual'}
                     </span>
                     <button onClick={() => { startConfig(p) }}
@@ -229,18 +229,18 @@ export default function ClientIntegrationsPage() {
 
                 <div className="mt-3 flex flex-wrap gap-1">
                   {p.features.map(f => (
-                    <span key={f} className="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-300">{f}</span>
+                    <span key={f} className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">{f}</span>
                   ))}
                 </div>
 
                 {configuring === p.id && (
-                  <div className="mt-4 border-t border-gray-700 pt-4 space-y-3">
+                  <div className="mt-4 border-t border-gray-300 dark:border-gray-700 pt-4 space-y-3">
                     {p.authType === 'api_key' && (
                       <div>
                         <label className="block text-xs text-gray-400 mb-1">API Key *</label>
                         <input type="password" value={draft.apiKey ?? ''} onChange={e => setDraft(d => ({ ...d, apiKey: e.target.value }))}
                           placeholder={`Enter your ${p.name} API key…`}
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                          className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
                         <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
                           Find your API key at{' '}
                           <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300">{p.website}</a>
@@ -263,13 +263,13 @@ export default function ClientIntegrationsPage() {
                       <label className="block text-xs text-gray-400 mb-1">Organisation / Account ID</label>
                       <input value={draft.orgId ?? ''} onChange={e => setDraft(d => ({ ...d, orgId: e.target.value }))}
                         placeholder="Organisation or account identifier"
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                        className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-400 mb-1">Notes</label>
                       <input value={draft.notes ?? ''} onChange={e => setDraft(d => ({ ...d, notes: e.target.value }))}
                         placeholder="Setup notes, account manager name, etc."
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                        className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => save(p, draft, true)} disabled={saving === p.id}
@@ -278,7 +278,7 @@ export default function ClientIntegrationsPage() {
                         {saving === p.id ? 'Connecting…' : `Connect ${p.name}`}
                       </button>
                       <button onClick={() => setConfiguring(null)}
-                        className="px-4 py-2 text-xs border border-gray-700 text-gray-400 hover:text-white rounded-lg">
+                        className="px-4 py-2 text-xs border border-gray-300 dark:border-gray-700 text-gray-400 hover:text-white rounded-lg">
                         Cancel
                       </button>
                     </div>

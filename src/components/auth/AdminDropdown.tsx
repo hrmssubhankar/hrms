@@ -43,12 +43,12 @@ export default function AdminDropdown({ name, email }: Props) {
       {/* Trigger */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-800 transition"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
       >
         <div className="w-7 h-7 rounded-full bg-purple-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
           {initials}
         </div>
-        <span className="text-sm text-white font-medium hidden sm:block">{name}</span>
+        <span className="text-sm text-gray-900 dark:text-white font-medium hidden sm:block">{name}</span>
         <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
@@ -56,12 +56,12 @@ export default function AdminDropdown({ name, email }: Props) {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-56 bg-gray-900 border border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden">
           {/* Identity */}
-          <div className="px-4 py-3 border-b border-gray-800">
-            <p className="text-sm font-semibold text-white">{name}</p>
-            <p className="text-xs text-gray-400 truncate">{email}</p>
-            <span className="inline-block mt-1 text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded-full font-medium">
+          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">{name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{email}</p>
+            <span className="inline-block mt-1 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full font-medium">
               Super Admin
             </span>
           </div>
@@ -71,14 +71,14 @@ export default function AdminDropdown({ name, email }: Props) {
             <Link
               href="/super-admin/settings"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               Settings
             </Link>
           </div>
 
-          <div className="border-t border-gray-800 py-1">
+          <div className="border-t border-gray-100 dark:border-gray-800 py-1">
             <button
               onClick={logout}
               disabled={loading}
