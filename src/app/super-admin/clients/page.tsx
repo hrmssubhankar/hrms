@@ -101,7 +101,7 @@ export default function ClientsPage() {
     setConfirm({ type: 'impersonate', clientId, clientName })
   }
 
-  async function confirmImpersonate(clientId: string) {
+  async function confirmImpersonate(clientId: string, newTab: Window | null) {
     setImpersonating(clientId)
     try {
       const res  = await fetch('/api/super-admin/impersonate', {
@@ -110,13 +110,18 @@ export default function ClientsPage() {
         body: JSON.stringify({ tenantId: clientId }),
       })
       const data = await res.json()
-      if (!res.ok) { alert(data.error ?? 'Impersonation failed'); return }
-
-      // Open the tenant portal's /api/auth/impersonate URL in a new tab.
-      // That route sets the session cookie on the *tenant* domain and
+      if (!res.ok) {
+        newTab?.close()
+        alert(data.error ?? 'Impersonation failed')
+        return
+      }
+      // Navigate the pre-opened tab to the tenant's impersonate endpoint.
+      // That route sets the session cookie on the tenant domain and
       // redirects to /tenant/dashboard — fixing the cross-domain cookie issue.
-      window.open(data.redirectTo, '_blank')
+      if (newTab) newTab.location.href = data.redirectTo
+      else window.open(data.redirectTo, '_blank') // fallback if popup was blocked
     } catch {
+      newTab?.close()
       alert('Failed to impersonate tenant')
     } finally {
       setImpersonating(null)
@@ -126,9 +131,15 @@ export default function ClientsPage() {
   async function handleConfirm() {
     if (!confirm) return
     const { type, clientId } = confirm
+
+    // Open a blank tab NOW (synchronous, inside the click handler) to preserve
+    // the browser user-gesture required for window.open(). We navigate it to
+    // the real URL once the impersonate API responds.
+    const newTab = type === 'impersonate' ? window.open('', '_blank') : null
+
     setConfirm(null)
     if (type === 'delete') await confirmDelete(clientId)
-    else await confirmImpersonate(clientId)
+    else await confirmImpersonate(clientId, newTab)
   }
 
   const filtered = clients.filter(c =>
