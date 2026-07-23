@@ -128,7 +128,7 @@ export default function ModulesPage() {
   const enabledCount = states.filter(s => s.isEnabled).length
   const searchLower  = search.toLowerCase()
 
-  if (loading) return <div className="text-gray-400 py-10">Loading modules…</div>
+  if (loading) return <div className="text-gray-600 dark:text-gray-400 py-10">Loading modules…</div>
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -139,14 +139,14 @@ export default function ModulesPage() {
             <Link href={`/super-admin/clients/${id}`} className="text-gray-500 hover:text-gray-600 dark:text-gray-300 text-sm transition dark:text-gray-400">← Edit Client</Link>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Module Configuration</h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
             <span className="text-purple-300 font-medium">{tenantName}</span>
             {' · '}
             <span className={`text-xs font-semibold uppercase tracking-wide ${
               tenantTier === 'enterprise' ? 'text-purple-400' : tenantTier === 'professional' ? 'text-blue-400' : 'text-green-400'
             }`}>{tenantTier}</span>
             {' · '}
-            <span className="text-white font-semibold">{enabledCount}</span>
+            <span className="text-gray-900 dark:text-white font-semibold">{enabledCount}</span>
             <span className="text-gray-500 dark:text-gray-400"> / 28 modules enabled</span>
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function ModulesPage() {
       </div>
 
       {/* Tier legend */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-wrap gap-4 text-xs text-gray-400">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
         <span className="font-semibold text-gray-600 dark:text-gray-300">Tier includes:</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />Starter — modules 01–09</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" />Professional — modules 01–19</span>
@@ -184,7 +184,7 @@ export default function ModulesPage() {
         placeholder="Search modules…"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+        className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
       />
 
       {/* Module categories */}
@@ -205,7 +205,7 @@ export default function ModulesPage() {
               <div className={`flex items-center justify-between px-5 py-3 ${style.header} border-b ${style.border}`}>
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${style.badge}`}>{category}</span>
-                  <span className="text-xs text-gray-400">{enabled}/{mods.length} enabled</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{enabled}/{mods.length} enabled</span>
                 </div>
                 {!isCore && (
                   <div className="flex gap-2">
@@ -234,7 +234,7 @@ export default function ModulesPage() {
                     <div key={mod.id} className={`flex items-center justify-between px-5 py-3 transition ${!locked && !enabled ? 'opacity-60' : ''} hover:bg-gray-100 dark:bg-gray-800/20`}>
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-xs font-mono text-gray-500 shrink-0 w-6 dark:text-gray-400">{num}</span>
-                        <span className={`text-sm ${enabled ? 'text-white' : 'text-gray-400'}`}>{mod.name}</span>
+                        <span className={`text-sm ${enabled ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>{mod.name}</span>
                         <span className="shrink-0">{tierBadge(mod)}</span>
                         {locked && <span className="text-gray-600 text-xs shrink-0 dark:text-gray-400">always on</span>}
                       </div>
@@ -276,7 +276,7 @@ export default function ModulesPage() {
         </button>
         <Link
           href="/super-admin/clients"
-          className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition"
+          className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm px-4 py-2.5 rounded-lg transition"
         >
           Done
         </Link>

@@ -66,30 +66,30 @@ export default function BillingPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Billing & Subscriptions</h1>
-        <p className="text-gray-400 text-sm mt-1">Per-tenant subscription status and tier overview</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Per-tenant subscription status and tier overview</p>
       </div>
 
       {/* MRR Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-          <p className="text-xs text-gray-400 mb-2">Monthly Revenue</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Monthly Revenue</p>
           <p className="text-3xl font-bold text-green-400">${totalMRR.toLocaleString()}</p>
           <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / month</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-          <p className="text-xs text-gray-400 mb-2">Active Subscriptions</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Active Subscriptions</p>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">{activeClients.length}</p>
           <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">of {clients.length} total</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-          <p className="text-xs text-gray-400 mb-2">Avg Revenue / Client</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Avg Revenue / Client</p>
           <p className="text-3xl font-bold text-purple-400">
             ${activeClients.length ? Math.round(totalMRR / activeClients.length) : 0}
           </p>
           <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / month</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-          <p className="text-xs text-gray-400 mb-2">Annual Run Rate</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Annual Run Rate</p>
           <p className="text-3xl font-bold text-blue-400">${(totalMRR * 12).toLocaleString()}</p>
           <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">AUD / year</p>
         </div>
@@ -97,7 +97,7 @@ export default function BillingPage() {
 
       {/* Tier Breakdown */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Subscription Tiers</h2>
+        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Subscription Tiers</h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {(Object.entries(TIER_CONFIG) as [string, typeof TIER_CONFIG.starter][]).map(([key, cfg]) => (
             <div key={key} className={`border rounded-xl p-5 ${cfg.color}`}>
@@ -122,18 +122,18 @@ export default function BillingPage() {
 
       {/* Per-Tenant Table */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Client Subscriptions</h2>
+        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Client Subscriptions</h2>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Client</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tier</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Modules</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Monthly</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Since</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Client</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Tier</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Modules</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Monthly</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Since</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -146,7 +146,7 @@ export default function BillingPage() {
                 return (
                   <tr key={client.id} className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100 dark:bg-gray-800/20 transition">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-white">{client.name}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{client.name}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{client.slug}</p>
                     </td>
                     <td className="px-4 py-3">
@@ -181,7 +181,7 @@ export default function BillingPage() {
             {!loading && clients.length > 0 && (
               <tfoot>
                 <tr className="border-t border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/30">
-                  <td colSpan={3} className="px-4 py-3 text-xs text-gray-400 font-semibold">TOTAL (active clients)</td>
+                  <td colSpan={3} className="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 font-semibold">TOTAL (active clients)</td>
                   <td className="px-4 py-3 text-green-400 font-bold">${totalMRR} AUD/mo</td>
                   <td colSpan={3} />
                 </tr>

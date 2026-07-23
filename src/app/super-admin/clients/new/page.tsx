@@ -13,7 +13,7 @@ const TIERS = [
   { value: 'enterprise',   label: 'Enterprise',    modules: 30, price: 217, desc: 'All 30 modules — full platform' },
 ]
 
-const INPUT  = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT  = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL  = 'block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1'
 const GRID2  = 'grid grid-cols-2 gap-4'
 
@@ -151,7 +151,7 @@ export default function NewClientPage() {
     <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Add New Client</h1>
-        <p className="text-gray-400 text-sm mt-1">Onboard a new organisation onto the HRMS platform</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Onboard a new organisation onto the HRMS platform</p>
       </div>
 
       {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
@@ -343,12 +343,12 @@ export default function NewClientPage() {
                 onChange={() => set('tier', t.value)} className="mt-0.5" />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-white">{t.label}</p>
-                  <span className="text-xs text-gray-400">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{t.label}</p>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
                     {currencySymbol}{convertAUD(t.price, form.currency)}/mo · {t.modules} modules
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5">{t.desc}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{t.desc}</p>
               </div>
             </label>
           ))}
@@ -365,12 +365,12 @@ export default function NewClientPage() {
                 className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent" />
               <input type="text" value={form.primaryColor}
                 onChange={e => set('primaryColor', e.target.value)}
-                className="w-32 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                className="w-32 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500" />
               <div className="flex-1 h-10 rounded-lg"
                 style={{ background: `linear-gradient(135deg, ${form.primaryColor}, ${form.primaryColor}88)` }} />
             </div>
           </div>
-          <div className="bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-xs text-gray-400">
+          <div className="bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-xs text-gray-600 dark:text-gray-400">
             Logo upload is available after creation via <strong className="text-gray-600 dark:text-gray-300">Edit Client → Logo & Branding</strong>
           </div>
         </section>
@@ -407,12 +407,12 @@ export default function NewClientPage() {
           <div className="bg-white dark:bg-gray-900 border border-purple-800/50 rounded-xl p-5">
             <p className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-3">Summary</p>
             <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-400">Organisation</span><span className="text-white">{form.name}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">Country</span><span className="text-white">{COUNTRIES.find(c => c.code === form.country)?.name}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">Currency</span><span className="text-white">{form.currency}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">Tier</span><span className="text-white">{selectedTier?.label}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">Est. Monthly</span><span className="text-green-400 font-semibold">{currencySymbol}{convertAUD(selectedTier?.price ?? 0, form.currency)}</span></div>
-              {form.contactEmail && <div className="flex justify-between"><span className="text-gray-400">Contact</span><span className="text-white">{form.contactEmail}</span></div>}
+              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Organisation</span><span className="text-gray-900 dark:text-white">{form.name}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Country</span><span className="text-gray-900 dark:text-white">{COUNTRIES.find(c => c.code === form.country)?.name}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Currency</span><span className="text-gray-900 dark:text-white">{form.currency}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Tier</span><span className="text-gray-900 dark:text-white">{selectedTier?.label}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Est. Monthly</span><span className="text-green-400 font-semibold">{currencySymbol}{convertAUD(selectedTier?.price ?? 0, form.currency)}</span></div>
+              {form.contactEmail && <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Contact</span><span className="text-gray-900 dark:text-white">{form.contactEmail}</span></div>}
             </div>
           </div>
         )}
@@ -423,7 +423,7 @@ export default function NewClientPage() {
             {loading ? 'Creating…' : 'Create Client & Configure Modules →'}
           </button>
           <button type="button" onClick={() => router.back()}
-            className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+            className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
             Cancel
           </button>
         </div>

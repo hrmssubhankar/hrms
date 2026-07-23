@@ -86,7 +86,7 @@ export default function ClientsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Clients</h1>
-          <p className="text-gray-400 text-sm mt-1">{clients.length} client{clients.length !== 1 ? 's' : ''} · {clients.filter(c => c.isActive).length} active</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{clients.length} client{clients.length !== 1 ? 's' : ''} · {clients.filter(c => c.isActive).length} active</p>
         </div>
         <Link
           href="/super-admin/clients/new"
@@ -102,11 +102,11 @@ export default function ClientsPage() {
         placeholder="Search clients by name or slug…"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+        className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
       />
 
       {loading ? (
-        <div className="text-gray-400 text-sm">Loading clients…</div>
+        <div className="text-gray-600 dark:text-gray-400 text-sm">Loading clients…</div>
       ) : (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
@@ -137,14 +137,14 @@ export default function ClientsPage() {
                           className="w-8 h-8 rounded-lg object-contain bg-gray-100 dark:bg-gray-800 p-0.5 shrink-0" />
                       ) : (
                         <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-900 dark:text-white text-xs font-bold shrink-0"
                           style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
                         >
                           {c.name[0]}
                         </div>
                       )}
                       <div>
-                        <span className="font-medium text-white">{c.name}</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{c.name}</span>
                         <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                           Since {new Date(c.createdAt).toLocaleDateString('en-AU', { month: 'short', year: 'numeric' })}
                         </p>
@@ -180,7 +180,7 @@ export default function ClientsPage() {
                         style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
                         title={c.primaryColor}
                       />
-                      <span className="text-xs text-gray-400">{c.primaryColor || 'default'}</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-400">{c.primaryColor || 'default'}</span>
                     </div>
                   </td>
                   <td className="px-5 py-3.5">

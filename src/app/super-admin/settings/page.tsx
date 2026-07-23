@@ -47,7 +47,7 @@ export default function PlatformSettingsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Settings</h1>
-        <p className="text-gray-400 text-sm mt-1">Global configuration for the HRMS platform</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Global configuration for the HRMS platform</p>
       </div>
 
       {saved && (
@@ -65,8 +65,8 @@ export default function PlatformSettingsPage() {
               onClick={() => setActiveSection(s.key)}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-left transition ${
                 activeSection === s.key
-                  ? 'bg-purple-900/50 text-white border border-purple-700'
-                  : 'text-gray-400 hover:bg-gray-100 dark:bg-gray-800 hover:text-white'
+                  ? 'bg-purple-900/50 text-gray-900 dark:text-white border border-purple-700'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 hover:text-gray-900 dark:text-white'
               }`}
             >
               <span>{s.icon}</span>
@@ -91,7 +91,7 @@ export default function PlatformSettingsPage() {
                 <select
                   value={defaultTier}
                   onChange={e => setDefaultTier(e.target.value)}
-                  className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500 w-full"
+                  className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 w-full"
                 >
                   <option value="starter">Starter (11 modules)</option>
                   <option value="professional">Professional (20 modules)</option>
@@ -104,7 +104,7 @@ export default function PlatformSettingsPage() {
 
               {/* Platform info (read-only) */}
               <div className="border-t border-gray-200 dark:border-gray-800 pt-4 space-y-2">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Platform Info</h3>
+                <h3 className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">Platform Info</h3>
                 <InfoRow label="Version"         value="v1.0.0" />
                 <InfoRow label="Framework"       value="Next.js 15 + .NET 8" />
                 <InfoRow label="Database"        value="PostgreSQL (Neon Serverless)" />
@@ -141,7 +141,7 @@ export default function PlatformSettingsPage() {
               </Field>
               <div className="pt-2">
                 <button
-                  className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:border-gray-500 text-gray-600 dark:text-gray-300 hover:text-white px-4 py-2 rounded-lg transition"
+                  className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:border-gray-500 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white px-4 py-2 rounded-lg transition"
                   onClick={() => alert('Test email sent (not wired in this UI demo)')}
                 >
                   Send Test Email
@@ -189,7 +189,7 @@ export default function PlatformSettingsPage() {
                   value={maintenanceMsg}
                   onChange={e => setMaintenanceMsg(e.target.value)}
                   rows={3}
-                  className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"
+                  className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"
                 />
               </Field>
             </>
@@ -204,7 +204,7 @@ export default function PlatformSettingsPage() {
             </button>
             <button
               onClick={() => setActiveSection(activeSection)}
-              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition"
+              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm px-4 py-2.5 rounded-lg transition"
             >
               Cancel
             </button>
@@ -238,7 +238,7 @@ function Input({
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+      className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
     />
   )
 }
@@ -258,7 +258,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-1.5 text-sm">
-      <span className="text-gray-400">{label}</span>
+      <span className="text-gray-600 dark:text-gray-400">{label}</span>
       <span className="text-gray-200 font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">{value}</span>
     </div>
   )

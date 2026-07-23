@@ -34,7 +34,7 @@ const PRESET_THEMES = [
   { label: 'Slate',    primaryColor: '#334155', accentColor: '#0ea5e9' },
 ]
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL = 'block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1'
 
 function EditClientInner() {
@@ -160,7 +160,7 @@ function EditClientInner() {
     setTimeout(() => setSuccess(''), 3000)
   }
 
-  if (loading) return <div className="text-gray-400 p-6">Loading client…</div>
+  if (loading) return <div className="text-gray-600 dark:text-gray-400 p-6">Loading client…</div>
 
 
   const tierChanged = form.tier !== originalTier
@@ -175,14 +175,14 @@ function EditClientInner() {
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-lg object-contain bg-gray-100 dark:bg-gray-800 p-1" />
           ) : (
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-900 dark:text-white text-sm font-bold"
               style={{ background: form.primaryColor }}>
               {form.name[0] ?? 'C'}
             </div>
           )}
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{form.name}</h1>
-            <p className="text-gray-400 text-sm">{form.slug} · {form.tier}</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">{form.slug} · {form.tier}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -218,7 +218,7 @@ function EditClientInner() {
           { id: 'theme',    label: 'Theme & Colours' },
         ] as { id: 'general'|'branding'|'theme'; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${activeTab === t.id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-300'}`}>
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${activeTab === t.id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300'}`}>
             {t.label}
           </button>
         ))}
@@ -231,8 +231,8 @@ function EditClientInner() {
           {/* Active toggle */}
           <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-800">
             <div>
-              <p className="text-sm font-medium text-white">Account Status</p>
-              <p className="text-xs text-gray-400 mt-0.5">Inactive clients cannot log in</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">Account Status</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Inactive clients cannot log in</p>
             </div>
             <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
               className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${form.isActive ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
@@ -266,10 +266,10 @@ function EditClientInner() {
                     onChange={() => setForm(f => ({ ...f, tier: t.value }))} className="mt-0.5" />
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-white">{t.label}</p>
-                      <span className="text-xs text-gray-400">{t.modules} modules</span>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{t.label}</p>
+                      <span className="text-xs text-gray-600 dark:text-gray-400">{t.modules} modules</span>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">{t.desc}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{t.desc}</p>
                   </div>
                   {originalTier === t.value && <span className="text-xs text-gray-500 shrink-0 mt-0.5 dark:text-gray-400">current</span>}
                 </label>
@@ -279,7 +279,7 @@ function EditClientInner() {
 
           {/* Deployment URL */}
           <div className="rounded-lg bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 px-4 py-3">
-            <p className="text-xs font-medium text-gray-400 mb-1">Vercel Deployment URL</p>
+            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Vercel Deployment URL</p>
             {deploymentUrl ? (
               <div className="flex items-center gap-2">
                 <a href={deploymentUrl} target="_blank" rel="noopener noreferrer"
@@ -293,7 +293,7 @@ function EditClientInner() {
               </div>
             ) : (
               <p className="text-sm text-gray-500 italic dark:text-gray-400">
-                Not yet deployed — set <code className="text-gray-400">VERCEL_API_TOKEN</code> + <code className="text-gray-400">VERCEL_TEAM_ID</code> in env vars to auto-create on next client add.
+                Not yet deployed — set <code className="text-gray-600 dark:text-gray-400">VERCEL_API_TOKEN</code> + <code className="text-gray-600 dark:text-gray-400">VERCEL_TEAM_ID</code> in env vars to auto-create on next client add.
               </p>
             )}
           </div>
@@ -304,7 +304,7 @@ function EditClientInner() {
               {saving ? 'Saving…' : 'Save Changes'}
             </button>
             <button type="button" onClick={() => router.push('/super-admin/clients')}
-              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2.5 rounded-lg transition">
+              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm px-4 py-2.5 rounded-lg transition">
               ← Clients
             </button>
           </div>
@@ -330,7 +330,7 @@ function EditClientInner() {
                 <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
                   className="hidden" onChange={handleLogoFile} />
                 <button onClick={() => fileRef.current?.click()} disabled={logoUploading}
-                  className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-700 disabled:opacity-60 text-white text-sm px-4 py-2.5 rounded-lg transition">
+                  className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-700 disabled:opacity-60 text-gray-900 dark:text-white text-sm px-4 py-2.5 rounded-lg transition">
                   {logoUploading ? '⏳ Uploading…' : 'Upload Logo'}
                 </button>
                 {logoUrl && (
@@ -359,13 +359,13 @@ function EditClientInner() {
                 {logoUrl ? (
                   <img src={logoUrl} alt="Logo" className="h-12 mx-auto object-contain" />
                 ) : (
-                  <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-white text-xl font-bold"
+                  <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-gray-900 dark:text-white text-xl font-bold"
                     style={{ background: form.primaryColor }}>
                     {form.name[0] ?? 'C'}
                   </div>
                 )}
-                <p className="text-white font-bold text-lg">{form.name || 'Your Organisation'}</p>
-                <p className="text-gray-400 text-xs">Sign in to {form.name || 'your organisation'}</p>
+                <p className="text-gray-900 dark:text-white font-bold text-lg">{form.name || 'Your Organisation'}</p>
+                <p className="text-gray-600 dark:text-gray-400 text-xs">Sign in to {form.name || 'your organisation'}</p>
                 <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-3 space-y-2 mt-2">
                   <div className="h-7 bg-gray-100 dark:bg-gray-800 rounded-lg" />
                   <div className="h-7 bg-gray-100 dark:bg-gray-800 rounded-lg" />
@@ -408,7 +408,7 @@ function EditClientInner() {
                 <button key={p.label}
                   onClick={() => { setForm(f => ({ ...f, primaryColor: p.primaryColor })); setTheme(t => ({ ...t, accentColor: p.accentColor })) }}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition ${
-                    form.primaryColor === p.primaryColor ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-400 hover:border-gray-500'}`}>
+                    form.primaryColor === p.primaryColor ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-500'}`}>
                   <span className="w-3 h-3 rounded-full" style={{ background: p.primaryColor }} />
                   {p.label}
                 </button>
@@ -428,7 +428,7 @@ function EditClientInner() {
                     className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent" />
                   <input type="text" value={form.primaryColor}
                     onChange={e => setForm(f => ({ ...f, primaryColor: e.target.value }))}
-                    className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                    className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500" />
                 </div>
                 <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Sidebar, header accent, buttons</p>
               </div>
@@ -440,7 +440,7 @@ function EditClientInner() {
                     className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent" />
                   <input type="text" value={theme.accentColor}
                     onChange={e => setTheme(t => ({ ...t, accentColor: e.target.value }))}
-                    className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                    className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500" />
                 </div>
                 <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Badges, highlights, secondary elements</p>
               </div>
@@ -452,7 +452,7 @@ function EditClientInner() {
               <div className="flex flex-wrap gap-2">
                 {FONT_OPTIONS.map(f => (
                   <button key={f} onClick={() => setTheme(t => ({ ...t, fontFamily: f }))}
-                    className={`px-3 py-1.5 rounded-lg border text-sm transition ${theme.fontFamily === f ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-400 hover:border-gray-600'}`}
+                    className={`px-3 py-1.5 rounded-lg border text-sm transition ${theme.fontFamily === f ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
                     style={{ fontFamily: f }}>
                     {f}
                   </button>
@@ -466,7 +466,7 @@ function EditClientInner() {
               <div className="flex gap-2">
                 {RADIUS_OPTIONS.map(r => (
                   <button key={r.value} onClick={() => setTheme(t => ({ ...t, borderRadius: r.value }))}
-                    className={`flex-1 py-2 text-xs border transition ${theme.borderRadius === r.value ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-400 hover:border-gray-600'}`}
+                    className={`flex-1 py-2 text-xs border transition ${theme.borderRadius === r.value ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
                     style={{ borderRadius: r.value }}>
                     {r.label}
                   </button>
@@ -490,7 +490,7 @@ function EditClientInner() {
             <div className="rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700" style={{ fontFamily: theme.fontFamily }}>
               <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">Live preview</div>
               <div className="flex h-48">
-                <div className="w-32 flex flex-col text-white text-xs" style={{ background: theme.sidebarDark ? '#111827' : form.primaryColor }}>
+                <div className="w-32 flex flex-col text-gray-900 dark:text-white text-xs" style={{ background: theme.sidebarDark ? '#111827' : form.primaryColor }}>
                   <div className="px-3 py-2.5 border-b border-white/10 font-bold truncate" style={{ borderRadius: theme.borderRadius }}>
                     {form.name || 'Client Portal'}
                   </div>
@@ -504,13 +504,13 @@ function EditClientInner() {
                 <div className="flex-1 bg-gray-50 dark:bg-gray-950 p-3 space-y-2">
                   <div className="flex gap-2">
                     {[{ label: '48 Staff', bg: form.primaryColor }, { label: '3 Leave', bg: theme.accentColor }, { label: '2 Due', bg: '#64748b' }].map(s => (
-                      <div key={s.label} className="flex-1 rounded py-1.5 text-center text-white text-xs font-semibold"
+                      <div key={s.label} className="flex-1 rounded py-1.5 text-center text-gray-900 dark:text-white text-xs font-semibold"
                         style={{ background: s.bg, borderRadius: theme.borderRadius }}>{s.label}</div>
                     ))}
                   </div>
-                  <div className="text-xs text-gray-400">Recent Activity</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Recent Activity</div>
                   <div className="bg-white dark:bg-gray-900 rounded p-2 text-xs text-gray-500 dark:text-gray-400" style={{ borderRadius: theme.borderRadius }}>John Smith — Leave Approved</div>
-                  <button className="text-xs text-white px-3 py-1 font-medium"
+                  <button className="text-xs text-gray-900 dark:text-white px-3 py-1 font-medium"
                     style={{ background: form.primaryColor, borderRadius: theme.borderRadius }}>+ Add Employee</button>
                 </div>
               </div>
@@ -532,7 +532,7 @@ function EditClientInner() {
 
 export default function EditClientPage() {
   return (
-    <Suspense fallback={<div className="text-gray-400 p-6">Loading…</div>}>
+    <Suspense fallback={<div className="text-gray-600 dark:text-gray-400 p-6">Loading…</div>}>
       <EditClientInner />
     </Suspense>
   )

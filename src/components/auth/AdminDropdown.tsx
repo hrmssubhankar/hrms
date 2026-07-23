@@ -49,7 +49,7 @@ export default function AdminDropdown({ name, email }: Props) {
           {initials}
         </div>
         <span className="text-sm text-gray-900 dark:text-white font-medium hidden sm:block">{name}</span>
-        <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className={`w-3.5 h-3.5 text-gray-600 dark:text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>

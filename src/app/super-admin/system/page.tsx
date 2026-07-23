@@ -55,7 +55,7 @@ export default function SystemHealthPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">System Health</h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
             Real-time platform status ·{' '}
             {lastChecked ? `Last checked ${lastChecked.toLocaleTimeString('en-AU')}` : 'Checking…'}
           </p>
@@ -63,7 +63,7 @@ export default function SystemHealthPage() {
         <button
           onClick={refresh}
           disabled={loading}
-          className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:border-gray-500 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2 rounded-lg transition disabled:opacity-50"
+          className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:border-gray-500 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm px-4 py-2 rounded-lg transition disabled:opacity-50"
         >
           {loading ? '⟳ Checking…' : '⟳ Refresh'}
         </button>
@@ -99,7 +99,7 @@ export default function SystemHealthPage() {
                   {cs.label}
                 </span>
               </div>
-              <p className="text-xs text-gray-400">{check.message}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">{check.message}</p>
               {check.latencyMs !== undefined && (
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-xs text-gray-500 mb-1 dark:text-gray-400">
@@ -131,7 +131,7 @@ export default function SystemHealthPage() {
       {/* Platform Info */}
       {data?.platform && (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Platform Information</h2>
+          <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Platform Information</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { label: 'Node.js',      value: data.platform.nodeVersion },
@@ -150,7 +150,7 @@ export default function SystemHealthPage() {
 
       {/* Infrastructure summary */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Infrastructure Stack</h2>
+        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Infrastructure Stack</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[
             { name: 'Azure App Service',       role: 'Next.js + .NET 8 API hosting',   tier: 'Basic B3',        status: 'ok' as const },

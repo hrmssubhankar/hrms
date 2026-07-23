@@ -121,19 +121,19 @@ export default function UsersPage() {
     setUsers(u => u.filter(x => x.id !== user.id))
   }
 
-  if (loading) return <div className="text-gray-400">Loading users…</div>
+  if (loading) return <div className="text-gray-600 dark:text-gray-400">Loading users…</div>
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Users</h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
             Manage login accounts for <span className="text-purple-300 font-medium">{tenantName}</span>
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href={`/super-admin/clients/${id}`} className="text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white px-3 py-1.5 rounded-lg transition">← Edit Client</Link>
+          <Link href={`/super-admin/clients/${id}`} className="text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white px-3 py-1.5 rounded-lg transition">← Edit Client</Link>
           <button
             onClick={() => { setShowForm(true); setError('') }}
             className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition"
@@ -163,31 +163,31 @@ export default function UsersPage() {
           {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-2 text-xs text-red-300">{error}</div>}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Email *</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Email *</label>
               <input
                 required type="email"
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 placeholder="user@organisation.com"
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Temporary Password *</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Temporary Password *</label>
               <input
                 required type="text"
                 value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                 placeholder="min 8 characters"
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Role</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Role</label>
               <select
                 value={form.role}
                 onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
               >
                 {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
@@ -197,7 +197,7 @@ export default function UsersPage() {
             <button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-5 py-2 rounded-lg transition">
               {saving ? 'Creating…' : 'Create User'}
             </button>
-            <button type="button" onClick={() => { setShowForm(false); setError('') }} className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2 rounded-lg transition">
+            <button type="button" onClick={() => { setShowForm(false); setError('') }} className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm px-4 py-2 rounded-lg transition">
               Cancel
             </button>
           </div>
@@ -208,14 +208,14 @@ export default function UsersPage() {
       {resetTarget && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-sm space-y-4">
-            <h2 className="text-white font-semibold">Reset Password</h2>
-            <p className="text-sm text-gray-400">{resetTarget.email}</p>
+            <h2 className="text-gray-900 dark:text-white font-semibold">Reset Password</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{resetTarget.email}</p>
             <input
               type="text"
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
               placeholder="New password"
-              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
             />
             <div className="flex gap-2">
               <button
@@ -259,7 +259,7 @@ export default function UsersPage() {
                     <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">
                       {u.email[0].toUpperCase()}
                     </div>
-                    <span className="text-white">{u.email}</span>
+                    <span className="text-gray-900 dark:text-white">{u.email}</span>
                   </div>
                 </td>
                 <td className="px-5 py-3.5">
@@ -278,7 +278,7 @@ export default function UsersPage() {
                     {u.isActive ? 'Active' : 'Inactive'}
                   </button>
                 </td>
-                <td className="px-5 py-3.5 text-gray-400 text-xs">
+                <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400 text-xs">
                   {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Never'}
                 </td>
                 <td className="px-5 py-3.5">

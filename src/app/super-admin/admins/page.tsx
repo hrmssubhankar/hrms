@@ -69,14 +69,14 @@ export default function AdminsPage() {
     setAdmins(a => a.filter(x => x.id !== admin.id))
   }
 
-  if (loading) return <div className="text-gray-400">Loading…</div>
+  if (loading) return <div className="text-gray-600 dark:text-gray-400">Loading…</div>
 
   return (
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Super Admins</h1>
-          <p className="text-gray-400 text-sm mt-1">Platform-level administrator accounts</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Platform-level administrator accounts</p>
         </div>
         <button
           onClick={() => { setShowForm(v => !v); setFormError('') }}
@@ -99,28 +99,28 @@ export default function AdminsPage() {
           )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Full Name *</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Full Name *</label>
               <input
                 required
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 placeholder="Jane Smith"
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Email *</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Email *</label>
               <input
                 required
                 type="email"
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 placeholder="jane@example.com"
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Password *</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Password *</label>
               <input
                 required
                 type="password"
@@ -128,7 +128,7 @@ export default function AdminsPage() {
                 value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                 placeholder="min 8 characters"
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
               />
             </div>
           </div>
@@ -143,7 +143,7 @@ export default function AdminsPage() {
             <button
               type="button"
               onClick={() => { setShowForm(false); setFormError('') }}
-              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-2 rounded-lg transition"
+              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm px-4 py-2 rounded-lg transition"
             >
               Cancel
             </button>
@@ -179,8 +179,8 @@ export default function AdminsPage() {
                       {a.name[0]?.toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-white font-medium text-sm">{a.name}</p>
-                      <p className="text-gray-400 text-xs">{a.email}</p>
+                      <p className="text-gray-900 dark:text-white font-medium text-sm">{a.name}</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs">{a.email}</p>
                     </div>
                   </div>
                 </td>
@@ -197,12 +197,12 @@ export default function AdminsPage() {
                     {a.isActive ? 'Active' : 'Inactive'}
                   </button>
                 </td>
-                <td className="px-5 py-3.5 text-gray-400 text-xs">
+                <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400 text-xs">
                   {a.lastLoginAt
                     ? new Date(a.lastLoginAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
                     : 'Never'}
                 </td>
-                <td className="px-5 py-3.5 text-gray-400 text-xs">
+                <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400 text-xs">
                   {new Date(a.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </td>
                 <td className="px-5 py-3.5">

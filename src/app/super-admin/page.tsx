@@ -74,7 +74,7 @@ const ACTION_COLOR: Record<string, string> = {
 
 function actionColor(action: string) {
   const key = Object.keys(ACTION_COLOR).find((k) => action.toLowerCase().includes(k))
-  return key ? ACTION_COLOR[key] : 'text-gray-400'
+  return key ? ACTION_COLOR[key] : 'text-gray-600 dark:text-gray-400'
 }
 
 export default async function SuperAdminDashboard() {
@@ -86,13 +86,13 @@ export default async function SuperAdminDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Dashboard</h1>
-          <p className="text-gray-400 text-sm mt-1">Manage all client tenants and platform settings</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage all client tenants and platform settings</p>
         </div>
       </div>
 
       {/* Primary stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Clients"   value={d.totalClients}   color="text-white"       sub={`${d.activeClients} active`} />
+        <StatCard label="Total Clients"   value={d.totalClients}   color="text-gray-900 dark:text-white"       sub={`${d.activeClients} active`} />
         <StatCard label="Platform Users"  value={d.totalUsers}     color="text-blue-400"    sub={`${d.activeUsers} active`} />
         <StatCard label="Active Modules"  value={d.enabledModules} color="text-purple-400"  sub="across all tenants" />
         <StatCard label="Monthly Revenue" value={`$${d.mrr}`}      color="text-green-400"   sub="AUD / month" />
@@ -144,13 +144,13 @@ export default async function SuperAdminDashboard() {
                 {d.clients.map((c: any) => (
                   <div key={c.id} className="flex items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:bg-gray-800/20 transition">
                     <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-900 dark:text-white text-xs font-bold shrink-0"
                       style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
                     >
                       {c.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white font-medium truncate">{c.name}</p>
+                      <p className="text-sm text-gray-900 dark:text-white font-medium truncate">{c.name}</p>
                       <div className="flex items-center gap-1 mt-1">
                         {[
                           { label: 'Active', done: c.isActive },
@@ -159,7 +159,7 @@ export default async function SuperAdminDashboard() {
                         ].map((step) => (
                           <span
                             key={step.label}
-                            className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-900/50 text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}
+                            className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-900/50 text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                           >
                             {step.done ? '' : '○'} {step.label}
                           </span>
@@ -167,7 +167,7 @@ export default async function SuperAdminDashboard() {
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-xs text-gray-400">{c.onboardingScore}/{c.onboardingTotal}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{c.onboardingScore}/{c.onboardingTotal}</p>
                       <div className="w-16 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mt-1">
                         <div
                           className="h-1.5 rounded-full bg-purple-500"
@@ -201,7 +201,7 @@ export default async function SuperAdminDashboard() {
                   <div className="min-w-0 flex-1">
                     <span className={`text-xs font-semibold ${actionColor(log.action)}`}>{log.action}</span>
                     <span className="text-xs text-gray-500 ml-1 dark:text-gray-400">·</span>
-                    <span className="text-xs text-gray-400 ml-1 truncate">{log.resource}</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 ml-1 truncate">{log.resource}</span>
                   </div>
                 </div>
                 <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">
@@ -220,7 +220,7 @@ export default async function SuperAdminDashboard() {
 function StatCard({ label, value, color, sub }: { label: string; value: string | number; color: string; sub: string }) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-      <p className="text-xs text-gray-400 mb-2">{label}</p>
+      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{label}</p>
       <p className={`text-3xl font-bold ${color}`}>{value}</p>
       <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{sub}</p>
     </div>

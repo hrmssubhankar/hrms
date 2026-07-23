@@ -76,7 +76,7 @@ export default function AnnouncementsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Announcements</h1>
-          <p className="text-gray-400 text-sm mt-1">Broadcast messages to all tenants or specific clients</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Broadcast messages to all tenants or specific clients</p>
         </div>
         <button
           onClick={() => setShowForm(v => !v)}
@@ -91,31 +91,31 @@ export default function AnnouncementsPage() {
         <div className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-purple-300">New Announcement</h2>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Title *</label>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Title *</label>
             <input
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               placeholder="e.g. Scheduled Maintenance on 15 Aug"
-              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Message *</label>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Message *</label>
             <textarea
               value={form.body}
               onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
               rows={3}
               placeholder="Enter the message all tenants will see…"
-              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"
+              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"
             />
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Priority</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Priority</label>
               <select
                 value={form.priority}
                 onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
               >
                 <option value="info">ℹ️ Info</option>
                 <option value="warning">️ Warning</option>
@@ -123,22 +123,22 @@ export default function AnnouncementsPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Audience</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Audience</label>
               <select
                 value={form.targetTenants}
                 onChange={e => setForm(f => ({ ...f, targetTenants: e.target.value }))}
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
               >
                 <option value="all">All Tenants</option>
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Expires (optional)</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Expires (optional)</label>
               <input
                 type="date"
                 value={form.expiresAt}
                 onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))}
-                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
               />
             </div>
           </div>
@@ -156,11 +156,11 @@ export default function AnnouncementsPage() {
 
       {/* Announcements list */}
       {loading ? (
-        <div className="text-gray-400 text-sm">Loading…</div>
+        <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
       ) : announcements.length === 0 ? (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-12 text-center">
           <div className="text-5xl mb-3"></div>
-          <p className="text-gray-400">No announcements yet</p>
+          <p className="text-gray-600 dark:text-gray-400">No announcements yet</p>
           <p className="text-gray-600 text-sm mt-1 dark:text-gray-400">Create one to broadcast a message to all tenants</p>
         </div>
       ) : (
@@ -199,7 +199,7 @@ export default function AnnouncementsPage() {
                       onClick={() => toggleActive(ann.id, ann.isActive)}
                       className={`text-xs px-3 py-1 rounded-lg border transition ${
                         ann.isActive
-                          ? 'border-gray-600 text-gray-400 hover:border-red-600 hover:text-red-400'
+                          ? 'border-gray-600 text-gray-600 dark:text-gray-400 hover:border-red-600 hover:text-red-400'
                           : 'border-green-700 text-green-400 hover:bg-green-900/30'
                       }`}
                     >

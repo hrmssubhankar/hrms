@@ -94,7 +94,7 @@ export default function AuditLogsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Audit Log</h1>
-          <p className="text-gray-400 text-sm mt-1">Tamper-evident log of all actions across all tenants</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Tamper-evident log of all actions across all tenants</p>
         </div>
         <button
           onClick={exportCSV}
@@ -112,12 +112,12 @@ export default function AuditLogsPage() {
             placeholder="Search action / resource…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
+            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
           />
           <select
             value={tenantId}
             onChange={e => setTenantId(e.target.value)}
-            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
           >
             <option value="">All Tenants</option>
             {tenants.map(t => (
@@ -128,13 +128,13 @@ export default function AuditLogsPage() {
             type="date"
             value={from}
             onChange={e => setFrom(e.target.value)}
-            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
           />
           <input
             type="date"
             value={to}
             onChange={e => setTo(e.target.value)}
-            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
+            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
           />
         </div>
         <div className="flex gap-2 mt-3">
@@ -146,7 +146,7 @@ export default function AuditLogsPage() {
           </button>
           <button
             onClick={() => { setSearch(''); setTenantId(''); setFrom(''); setTo('') }}
-            className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm px-4 py-1.5 rounded-lg transition"
+            className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm px-4 py-1.5 rounded-lg transition"
           >
             Clear
           </button>
@@ -159,12 +159,12 @@ export default function AuditLogsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Date / Time</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Tenant</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Action</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Resource</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">IP Address</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Detail</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Date / Time</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Tenant</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Action</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Resource</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">IP Address</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Detail</th>
               </tr>
             </thead>
             <tbody>
@@ -208,7 +208,7 @@ export default function AuditLogsPage() {
                           {log.oldValues && (
                             <div>
                               <p className="text-red-400 font-semibold mb-1">Before</p>
-                              <pre className="text-gray-400 whitespace-pre-wrap break-all">
+                              <pre className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-all">
                                 {JSON.stringify(log.oldValues, null, 2)}
                               </pre>
                             </div>
@@ -216,7 +216,7 @@ export default function AuditLogsPage() {
                           {log.newValues && (
                             <div>
                               <p className="text-green-400 font-semibold mb-1">After</p>
-                              <pre className="text-gray-400 whitespace-pre-wrap break-all">
+                              <pre className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-all">
                                 {JSON.stringify(log.newValues, null, 2)}
                               </pre>
                             </div>
@@ -238,14 +238,14 @@ export default function AuditLogsPage() {
             <button
               onClick={() => load(page - 1)}
               disabled={page <= 1 || loading}
-              className="text-xs px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white disabled:opacity-40 transition"
+              className="text-xs px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white disabled:opacity-40 transition"
             >
               ← Prev
             </button>
             <button
               onClick={() => load(page + 1)}
               disabled={logs.length < 50 || loading}
-              className="text-xs px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white disabled:opacity-40 transition"
+              className="text-xs px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white disabled:opacity-40 transition"
             >
               Next →
             </button>

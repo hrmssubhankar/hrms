@@ -58,28 +58,28 @@ export default function ModulesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Module Analytics</h1>
-        <p className="text-gray-400 text-sm mt-1">Usage of all 28 feature modules across {tenantCount} client{tenantCount !== 1 ? 's' : ''}</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Usage of all 28 feature modules across {tenantCount} client{tenantCount !== 1 ? 's' : ''}</p>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">Total Modules</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total Modules</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-white">28</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">Active Toggles</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Active Toggles</p>
           <p className="text-2xl font-bold text-green-400">{totalEnabled}</p>
           <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">of {maxPossible} possible</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">Avg Modules/Client</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Avg Modules/Client</p>
           <p className="text-2xl font-bold text-purple-400">
             {tenantCount ? Math.round(totalEnabled / tenantCount) : 0}
           </p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-1">Platform Adoption</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Platform Adoption</p>
           <p className="text-2xl font-bold text-blue-400">
             {maxPossible ? Math.round((totalEnabled / maxPossible) * 100) : 0}%
           </p>
@@ -95,7 +95,7 @@ export default function ModulesPage() {
             className={`text-xs px-3 py-1.5 rounded-full border transition ${
               categoryFilter === cat
                 ? 'bg-purple-700 border-purple-600 text-white'
-                : 'border-gray-300 dark:border-gray-700 text-gray-400 hover:text-white hover:border-gray-500'
+                : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white hover:border-gray-500'
             }`}
           >
             {cat}
@@ -108,11 +108,11 @@ export default function ModulesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-800">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider w-8">#</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Module</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Category</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Adoption</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider w-48">Usage</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-8">#</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Module</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Category</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Adoption</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-48">Usage</th>
             </tr>
           </thead>
           <tbody>
@@ -133,7 +133,7 @@ export default function ModulesPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-sm font-semibold ${mod.percentage === 100 ? 'text-green-400' : mod.percentage > 50 ? 'text-blue-400' : 'text-gray-400'}`}>
+                    <span className={`text-sm font-semibold ${mod.percentage === 100 ? 'text-green-400' : mod.percentage > 50 ? 'text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
                       {mod.enabledCount}/{tenantCount}
                     </span>
                     <span className="text-xs text-gray-500 ml-1 dark:text-gray-400">({mod.percentage}%)</span>
