@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       .from(tenants)
       .where(eq(tenants.id, user.tenantId))
 
-    const appUrl   = process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+    const appUrl   = process.env.APP_URL ?? req.nextUrl.origin
     const resetUrl = `${appUrl}/reset-password?token=${token}`
     const orgName  = tenant?.name ?? 'HRMS'
     const color    = tenant?.primaryColor ?? '#1a4fff'

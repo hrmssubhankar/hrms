@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
 
     // Send welcome email to tenant admin
     if (adminEmail && adminUser) {
-      const loginUrl = deploymentUrl ?? process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+      const loginUrl = deploymentUrl ?? `https://${tenant.slug}-hrmsapp.vercel.app`
       const tmpl = newTenantOnboardedEmail({
         recipientName: adminEmail.split('@')[0],
         orgName:       name,
