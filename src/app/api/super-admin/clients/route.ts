@@ -134,7 +134,6 @@ export async function POST(req: NextRequest) {
     if (vercelToken && !deploymentUrl) {
       try {
         const projectName = `${tenant.slug}-hrmsapp`
-        const baseUrl = process.env.APP_URL ?? 'https://yahweh-hrms-dusky.vercel.app'
 
         // Create project
         const createRes = await fetch(

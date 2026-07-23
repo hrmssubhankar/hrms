@@ -121,7 +121,8 @@ export async function POST(req: NextRequest) {
       }).returning({ id: users.id, email: users.email })
       adminUser = user
 
-      const loginUrl = process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+      const deploymentUrl = `https://${slug}-hrmsapp.vercel.app`
+      const loginUrl = `${deploymentUrl}/login`
       const tmpl = newTenantOnboardedEmail({
         recipientName: contactName ?? adminEmail,
         orgName:       tradingName,

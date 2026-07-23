@@ -59,7 +59,7 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
 
     // Email notifications (fire-and-forget)
     try {
-      const loginUrl = process.env.APP_URL ?? `https://${process.env.VERCEL_URL ?? 'hrms.app'}`
+      const loginUrl = (existingSettings.deploymentUrl as string | undefined) ?? process.env.APP_URL ?? 'https://hrms.app'
       // Get tenant admin emails
       const admins = await db.select({ email: users.email })
         .from(users)
