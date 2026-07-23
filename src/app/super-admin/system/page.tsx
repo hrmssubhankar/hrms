@@ -29,19 +29,21 @@ const CHECK_LABELS: Record<string, string> = {
 }
 
 export default function SystemHealthPage() {
-  const [data, setData]       = useState<HealthData | null>(null)
+  const [data,    setData]    = useState<HealthData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState<string | null>(null)
   const [lastChecked, setLastChecked] = useState<Date | null>(null)
 
   const refresh = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/super-admin/health')
       const json = await res.json()
       if (res.ok && json.status) { setData(json); setLastChecked(new Date()) }
-      else setData(null)
+      else { setData(null); setError(json.error ?? `Error ${res.status}`) }
     } catch {
-      setData(null)
+      setData(null); setError('Network error — could not reach health API')
     }
     setLoading(false)
   }, [])
@@ -57,7 +59,7 @@ export default function SystemHealthPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">System Health</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
             Real-time platform status ·{' '}
-            {lastChecked ? `Last checked ${lastChecked.toLocaleTimeString('en-AU')}` : 'Checking…'}
+            {loading ? 'Checking…' : lastChecked ? `Last checked ${lastChecked.toLocaleTimeString('en-AU')}` : error ? `Failed: ${error}` : 'Not checked'}
           </p>
         </div>
         <button
@@ -87,7 +89,19 @@ export default function SystemHealthPage() {
 
       {/* Checks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {data ? Object.entries(data.checks).map(([key, check]) => {
+        {loading ? (
+          [1, 2, 3].map(i => (
+            <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 animate-pulse">
+              <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-1/2 mb-3" />
+              <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
+            </div>
+          ))
+        ) : error ? (
+          <div className="lg:col-span-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-5">
+            <p className="text-sm text-red-700 dark:text-red-300 font-medium">Could not load health checks</p>
+            <p className="text-xs text-red-600 dark:text-red-400 mt-1">{error}</p>
+          </div>
+        ) : data ? Object.entries(data.checks).map(([key, check]) => {
           const cs = STATUS_STYLES[check.status] ?? STATUS_STYLES.error
           return (
             <div key={key} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
@@ -118,14 +132,7 @@ export default function SystemHealthPage() {
               )}
             </div>
           )
-        }) : (
-          [1, 2, 3].map(i => (
-            <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 animate-pulse">
-              <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-1/2 mb-3" />
-              <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
-            </div>
-          ))
-        )}
+        }) : null}
       </div>
 
       {/* Platform Info */}
