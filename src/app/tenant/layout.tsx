@@ -155,7 +155,7 @@ export default async function TenantLayout({ children }: { children: React.React
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-y-auto p-6 dark:bg-gray-950">
+          <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-950">
             {children}
           </main>
         </div>

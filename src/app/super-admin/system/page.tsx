@@ -17,9 +17,9 @@ type HealthData = {
 }
 
 const STATUS_STYLES = {
-  ok:    { dot: 'bg-green-400',  badge: 'bg-green-50 dark:bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700',  label: 'Healthy' },
-  warn:  { dot: 'bg-yellow-400', badge: 'bg-yellow-50 dark:bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700', label: 'Warning' },
-  error: { dot: 'bg-red-400',    badge: 'bg-red-50 dark:bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700',         label: 'Error' },
+  ok:    { dot: 'bg-green-400',  badge: 'bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700',  label: 'Healthy' },
+  warn:  { dot: 'bg-yellow-400', badge: 'bg-yellow-50 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700', label: 'Warning' },
+  error: { dot: 'bg-red-400',    badge: 'bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700',         label: 'Error' },
 }
 
 const CHECK_LABELS: Record<string, string> = {
@@ -88,7 +88,7 @@ export default function SystemHealthPage() {
       {/* Checks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {data ? Object.entries(data.checks).map(([key, check]) => {
-          const cs = STATUS_STYLES[check.status]
+          const cs = STATUS_STYLES[check.status] ?? STATUS_STYLES.error
           return (
             <div key={key} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
