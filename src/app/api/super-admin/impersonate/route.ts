@@ -54,8 +54,15 @@ export async function POST(req: NextRequest) {
       .setExpirationTime('1h')
       .sign(secret)
 
-    // Return the token and redirect URL — the client will set the cookie
-    const redirectTo = `${process.env.APP_URL ?? ''}/tenant/dashboard`
+    // Return the token and redirect URL.
+    // The client opens this URL on the *tenant* deployment so the cookie is
+    // set on the correct domain by /api/auth/impersonate.
+    const tenantSettings = (tenant.settings ?? {}) as Record<string, unknown>
+    const tenantBaseUrl  = (tenantSettings.deploymentUrl as string | undefined)
+      ?? `https://${tenant.slug}-hrmsapp.vercel.app`
+    // Full URL the super-admin client opens in a new tab:
+    // the tenant portal's /api/auth/impersonate sets the cookie on its own domain.
+    const redirectTo = `${tenantBaseUrl}/api/auth/impersonate?token=${token}`
 
     return NextResponse.json({
       token,

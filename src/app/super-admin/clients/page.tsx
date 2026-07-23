@@ -60,14 +60,9 @@ export default function ClientsPage() {
       const data = await res.json()
       if (!res.ok) { alert(data.error ?? 'Impersonation failed'); return }
 
-      // Set the session cookie via the login API endpoint
-      await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ __impersonateToken: data.token }),
-      })
-
-      // Open tenant portal in new tab
+      // Open the tenant portal's /api/auth/impersonate URL in a new tab.
+      // That route sets the session cookie on the *tenant* domain and
+      // redirects to /tenant/dashboard — fixing the cross-domain cookie issue.
       window.open(data.redirectTo, '_blank')
     } catch {
       alert('Failed to impersonate tenant')
