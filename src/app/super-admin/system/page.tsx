@@ -38,8 +38,8 @@ export default function SystemHealthPage() {
     try {
       const res = await fetch('/api/super-admin/health')
       const json = await res.json()
-      setData(json)
-      setLastChecked(new Date())
+      if (res.ok && json.status) { setData(json); setLastChecked(new Date()) }
+      else setData(null)
     } catch {
       setData(null)
     }
@@ -48,7 +48,7 @@ export default function SystemHealthPage() {
 
   useEffect(() => { refresh() }, [refresh])
 
-  const s = data ? STATUS_STYLES[data.status] : STATUS_STYLES.error
+  const s = data ? (STATUS_STYLES[data.status] ?? STATUS_STYLES.error) : STATUS_STYLES.error
 
   return (
     <div className="space-y-8">
