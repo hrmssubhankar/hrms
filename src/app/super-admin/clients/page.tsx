@@ -14,10 +14,55 @@ type Client = {
   createdAt: string
 }
 
+type ConfirmState = {
+  type: 'delete' | 'impersonate'
+  clientId: string
+  clientName: string
+} | null
+
 const TIER_COLORS: Record<string, string> = {
   enterprise:   'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200',
   professional: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200',
   starter:      'bg-gray-200 dark:bg-gray-700 text-gray-200',
+}
+
+function ConfirmModal({ state, onConfirm, onCancel }: {
+  state: ConfirmState
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  if (!state) return null
+  const isDelete = state.type === 'delete'
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+          {isDelete ? 'Delete client?' : 'Login as tenant?'}
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-5">
+          {isDelete
+            ? `Delete "${state.clientName}"? This cannot be undone.`
+            : `Open ${state.clientName}'s portal as an impersonated user. You will get a 1-hour session.`}
+        </p>
+        <div className="flex gap-3 justify-end">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`px-4 py-2 text-sm rounded-lg font-medium text-white transition ${
+              isDelete ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'
+            }`}
+          >
+            {isDelete ? 'Delete' : 'Open portal'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function ClientsPage() {
@@ -25,6 +70,7 @@ export default function ClientsPage() {
   const [loading, setLoading]           = useState(true)
   const [search, setSearch]             = useState('')
   const [impersonating, setImpersonating] = useState<string | null>(null)
+  const [confirm, setConfirm]           = useState<ConfirmState>(null)
 
   useEffect(() => {
     fetch('/api/super-admin/clients')
@@ -43,13 +89,19 @@ export default function ClientsPage() {
   }
 
   async function deleteClient(id: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    setConfirm({ type: 'delete', clientId: id, clientName: name })
+  }
+
+  async function confirmDelete(id: string) {
     await fetch(`/api/super-admin/clients/${id}`, { method: 'DELETE' })
     setClients(c => c.filter(x => x.id !== id))
   }
 
-  async function loginAsTenant(clientId: string, clientName: string) {
-    if (!confirm(`Open ${clientName}'s portal as impersonated user? You will get a 1-hour session.`)) return
+  function loginAsTenant(clientId: string, clientName: string) {
+    setConfirm({ type: 'impersonate', clientId, clientName })
+  }
+
+  async function confirmImpersonate(clientId: string) {
     setImpersonating(clientId)
     try {
       const res  = await fetch('/api/super-admin/impersonate', {
@@ -71,6 +123,14 @@ export default function ClientsPage() {
     }
   }
 
+  async function handleConfirm() {
+    if (!confirm) return
+    const { type, clientId } = confirm
+    setConfirm(null)
+    if (type === 'delete') await confirmDelete(clientId)
+    else await confirmImpersonate(clientId)
+  }
+
   const filtered = clients.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.slug.toLowerCase().includes(search.toLowerCase())
@@ -78,6 +138,7 @@ export default function ClientsPage() {
 
   return (
     <div className="space-y-6">
+      <ConfirmModal state={confirm} onConfirm={handleConfirm} onCancel={() => setConfirm(null)} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Clients</h1>
