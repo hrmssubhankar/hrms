@@ -44,16 +44,7 @@ const nextConfig = {
       ],
     },
   ],
-  // Redirect root to dashboard or login
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/dashboard',
-        permanent: false,
-      },
-    ]
-  },
 }
+// Root '/' is handled by src/app/page.tsx which redirects based on x-tenant-slug header.
 
 module.exports = nextConfig
