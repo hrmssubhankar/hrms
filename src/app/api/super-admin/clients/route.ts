@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { tenants, tenantModules, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { getSession } from '@/lib/auth/session'
 import { sendEmail } from '@/lib/email/resend'
 import { newTenantOnboardedEmail } from '@/lib/email/templates'
 
@@ -51,6 +52,10 @@ function getDefaultModules(tier: string): number[] {
 
 // GET /api/super-admin/clients — list all tenants
 export async function GET() {
+  const session = await getSession()
+  if (!session || session.role !== 'super_admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   try {
     const clients = await db.select().from(tenants).orderBy(tenants.createdAt)
     return NextResponse.json({ clients })

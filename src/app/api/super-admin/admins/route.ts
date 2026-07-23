@@ -3,11 +3,16 @@ import { db } from '@/lib/db'
 import { superAdmins } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
+import { getSession } from '@/lib/auth/session'
 import { sendEmail } from '@/lib/email/resend'
 import { superAdminInviteEmail } from '@/lib/email/templates'
 
 // GET — list all super admins
 export async function GET() {
+  const session = await getSession()
+  if (!session || session.role !== 'super_admin') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   try {
     const admins = await db
       .select({
