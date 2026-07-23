@@ -28,7 +28,7 @@ const STATUS_STYLE: Record<string, string> = {
   expired:   'bg-gray-800 text-gray-400 border-gray-700',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 function daysUntil(d: string | null) {
   if (!d) return null
@@ -43,10 +43,10 @@ export default function TrainingPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Training & LMS</h1>
-        <p className="text-gray-400 text-sm mt-1">Manage courses, enrolments and completion records</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage courses, enrolments and completion records</p>
       </div>
 
-      <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-1 w-fit">
         {([
           { key: 'library', label: 'Course Library' },
           { key: 'records', label: 'Training Records' },
@@ -140,9 +140,9 @@ function LibraryTab() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterCat) }}
           placeholder="Search courses…"
-          className="flex-1 min-w-48 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+          className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
         <select value={filterCat} onChange={e => { setFilterCat(e.target.value); load(search, e.target.value) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All categories</option>
           {categories.map(c => <option key={c}>{c}</option>)}
         </select>
@@ -154,29 +154,29 @@ function LibraryTab() {
 
       {/* Create form */}
       {showForm && (
-        <form onSubmit={createCourse} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={createCourse} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">New Course</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <label className="text-xs text-gray-400 mb-1 block">Course Title *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Course Title *</label>
               <input required value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                 placeholder="e.g. NDIS Module 1 — Participant Rights" className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Category</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Category</label>
               <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {CATEGORIES.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Validity (months)</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Validity (months)</label>
               <input type="number" min="1" value={form.validityMonths}
                 onChange={e => setForm(f => ({ ...f, validityMonths: e.target.value }))}
                 placeholder="Leave blank = no expiry" className={INPUT} />
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-400 mb-1 block">Description</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Description</label>
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 rows={2} placeholder="Optional course description…" className={INPUT} />
             </div>
@@ -184,7 +184,7 @@ function LibraryTab() {
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.isMandatory} onChange={e => setForm(f => ({ ...f, isMandatory: e.target.checked }))}
               className="w-4 h-4 rounded accent-purple-500" />
-            <span className="text-sm text-gray-300">Mandatory for all employees</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">Mandatory for all employees</span>
           </label>
           <button type="submit" disabled={saving}
             className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2 rounded-lg transition">
@@ -196,17 +196,17 @@ function LibraryTab() {
       {/* Enrol modal */}
       {enrollCourse && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md space-y-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-md space-y-4">
             <h3 className="text-lg font-bold text-white">Enrol Employees</h3>
-            <p className="text-sm text-gray-400">Course: <span className="text-white font-medium">{enrollCourse.title}</span></p>
-            <div className="max-h-60 overflow-y-auto space-y-1 border border-gray-800 rounded-lg p-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400">Course: <span className="text-white font-medium">{enrollCourse.title}</span></p>
+            <div className="max-h-60 overflow-y-auto space-y-1 border border-gray-200 dark:border-gray-800 rounded-lg p-2">
               {employees.map(e => (
-                <label key={e.id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-800 cursor-pointer">
+                <label key={e.id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-100 dark:bg-gray-800 cursor-pointer">
                   <input type="checkbox"
                     checked={enrollIds.includes(e.id)}
                     onChange={ev => setEnrollIds(ids => ev.target.checked ? [...ids, e.id] : ids.filter(i => i !== e.id))}
                     className="accent-purple-500" />
-                  <span className="text-sm text-gray-200">{e.firstName} {e.lastName}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-200">{e.firstName} {e.lastName}</span>
                 </label>
               ))}
             </div>
@@ -217,7 +217,7 @@ function LibraryTab() {
                 {enrolling ? 'Enrolling…' : 'Enrol Selected'}
               </button>
               <button onClick={() => { setEnrollCourse(null); setEnrollIds([]) }}
-                className="px-4 border border-gray-700 text-gray-300 hover:text-white text-sm rounded-lg transition">
+                className="px-4 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm rounded-lg transition">
                 Cancel
               </button>
             </div>
@@ -226,20 +226,20 @@ function LibraryTab() {
       )}
 
       {/* Course grid */}
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : courseList.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : courseList.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No courses yet</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No courses yet</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create your first course to get started.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {courseList.map(c => (
-            <div key={c.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5 flex flex-col gap-3 hover:border-gray-700 transition">
+            <div key={c.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 flex flex-col gap-3 hover:border-gray-300 dark:border-gray-700 transition">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -247,7 +247,7 @@ function LibraryTab() {
                       <span className="text-xs bg-red-900/60 text-red-300 px-2 py-0.5 rounded-full font-medium">Mandatory</span>
                     )}
                     {c.category && (
-                      <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full">{c.category}</span>
+                      <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">{c.category}</span>
                     )}
                   </div>
                   <h3 className="text-white font-semibold text-sm leading-snug">{c.title}</h3>
@@ -266,7 +266,7 @@ function LibraryTab() {
                     + Enrol
                   </button>
                   <button onClick={() => archiveCourse(c.id)}
-                    className="text-xs text-gray-500 hover:text-red-400 border border-gray-800 px-2.5 py-1.5 rounded-lg transition dark:text-gray-400">
+                    className="text-xs text-gray-500 hover:text-red-400 border border-gray-200 dark:border-gray-800 px-2.5 py-1.5 rounded-lg transition dark:text-gray-400">
                     Archive
                   </button>
                 </div>
@@ -324,8 +324,8 @@ function RecordsTab() {
           { label: 'Overdue',    value: stats.overdue,   color: 'text-red-400' },
           { label: 'Expiring',   value: stats.expiring,  color: 'text-amber-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -335,9 +335,9 @@ function RecordsTab() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterStatus) }}
           placeholder="Search employee or course…"
-          className="flex-1 min-w-48 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+          className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(search, e.target.value) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="enrolled">Enrolled</option>
           <option value="completed">Completed</option>
@@ -346,27 +346,27 @@ function RecordsTab() {
       </div>
 
       {/* Table */}
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No training records</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No training records</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Enrol employees in a course from the Course Library tab.</p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-left">
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Employee</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Course</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Score</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Expiry</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Action</th>
+              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Employee</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Course</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Score</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Expiry</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -375,13 +375,13 @@ function RecordsTab() {
                 const expiryWarn = days !== null && days >= 0 && days <= 30
                 const expired    = days !== null && days < 0
                 return (
-                  <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
+                  <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
                     <td className="px-5 py-3.5">
                       <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
                       <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                     </td>
                     <td className="px-5 py-3.5">
-                      <p className="text-gray-200 text-sm">{r.courseTitle}</p>
+                      <p className="text-gray-700 dark:text-gray-200 text-sm">{r.courseTitle}</p>
                       <div className="flex items-center gap-1 mt-0.5">
                         {r.courseCategory && <span className="text-xs text-gray-500 dark:text-gray-400">{r.courseCategory}</span>}
                         {r.courseMandatory && <span className="text-xs bg-red-900/40 text-red-400 px-1.5 rounded">Mandatory</span>}
@@ -392,7 +392,7 @@ function RecordsTab() {
                         {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-gray-400 text-sm">
+                    <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400 text-sm">
                       {r.score ? `${Number(r.score).toFixed(0)}%` : '—'}
                     </td>
                     <td className="px-5 py-3.5 text-xs">

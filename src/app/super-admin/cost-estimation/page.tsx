@@ -75,7 +75,7 @@ export default function CostEstimationPage() {
         </div>
         <div className="text-right">
           <p className="text-xs text-gray-500 dark:text-gray-400">Total portfolio (monthly)</p>
-          <p className="text-lg font-bold text-purple-300">{fmtAUD(totalMonthlyAUD)}</p>
+          <p className="text-lg font-bold text-purple-700 dark:text-purple-300">{fmtAUD(totalMonthlyAUD)}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">{fmtAUD(totalAnnualAUD)} / year</p>
         </div>
       </div>
@@ -87,15 +87,15 @@ export default function CostEstimationPage() {
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Total clients</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-green-400">{clients.filter(c => c.isActive).length}</p>
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400">{clients.filter(c => c.isActive).length}</p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Active</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-purple-400">{fmtAUD(totalMonthlyAUD)}</p>
+          <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{fmtAUD(totalMonthlyAUD)}</p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Monthly (AUD)</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-blue-400">{fmtAUD(totalAnnualAUD)}</p>
+          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{fmtAUD(totalAnnualAUD)}</p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Annual (AUD)</p>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function CostEstimationPage() {
           ))}
         </div>
         <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}
-          className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none">
+          className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white focus:outline-none">
           <option value="annual">Sort: Annual cost ↓</option>
           <option value="monthly">Sort: Monthly cost ↓</option>
           <option value="modules">Sort: Modules ↓</option>
@@ -128,14 +128,14 @@ export default function CostEstimationPage() {
           const sameAUD = client.currency === 'AUD'
           return (
             <div key={client.id}
-              className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden transition ${isExp ? 'border-purple-700' : 'border-gray-200 dark:border-gray-800'}`}>
+              className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden transition ${isExp ? 'border-purple-300 dark:border-purple-700' : 'border-gray-200 dark:border-gray-800'}`}>
               {/* Row */}
               <div className="flex items-center gap-4 p-5 cursor-pointer" onClick={() => setExpanded(isExp ? null : client.id)}>
                 {/* Name + meta */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{client.name}</p>
-                    <span className={`text-xs px-1.5 py-0.5 rounded ${client.isActive ? 'bg-green-900/40 text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}>
+                    <span className={`text-xs px-1.5 py-0.5 rounded ${client.isActive ? 'bg-green-50 dark:bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}>
                       {client.isActive ? 'Active' : 'Inactive'}
                     </span>
                     <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 capitalize">{client.tier}</span>
@@ -153,7 +153,7 @@ export default function CostEstimationPage() {
                 {/* Monthly */}
                 <div className="text-right hidden md:block">
                   <p className="text-xs text-gray-500 dark:text-gray-400">Monthly</p>
-                  <p className="text-sm font-semibold text-purple-300">{fmt(client.totalMonthlyCurr, client.symbol)}</p>
+                  <p className="text-sm font-semibold text-purple-700 dark:text-purple-300">{fmt(client.totalMonthlyCurr, client.symbol)}</p>
                   {!sameAUD && <p className="text-xs text-gray-600 dark:text-gray-400">{fmtAUD(client.totalMonthlyAUD)}</p>}
                 </div>
 
@@ -176,7 +176,7 @@ export default function CostEstimationPage() {
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Module Breakdown</p>
                     <Link href={`/super-admin/clients/${client.id}/integrations`}
-                      className="text-xs text-purple-400 hover:text-purple-300">
+                      className="text-xs text-purple-400 hover:text-purple-700 dark:text-purple-300">
                       View Integrations →
                     </Link>
                   </div>
@@ -214,7 +214,7 @@ export default function CostEstimationPage() {
                       </div>
                       <div>
                         <span className="text-gray-500 dark:text-gray-400">Monthly total: </span>
-                        <span className="text-purple-300 font-semibold">{fmt(client.totalMonthlyCurr, client.symbol)}</span>
+                        <span className="text-purple-700 dark:text-purple-300 font-semibold">{fmt(client.totalMonthlyCurr, client.symbol)}</span>
                       </div>
                       <div>
                         <span className="text-gray-500 dark:text-gray-400">Annual total: </span>
@@ -224,7 +224,7 @@ export default function CostEstimationPage() {
                   )}
 
                   {client.headcount === 0 && (
-                    <p className="text-xs text-amber-400 mt-3 bg-amber-900/20 border border-amber-800/40 rounded px-3 py-2">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-3 bg-amber-50 dark:bg-amber-100 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded px-3 py-2">
                       Headcount not set — costs shown as per-seat. Update the client profile to see total estimates.
                     </p>
                   )}

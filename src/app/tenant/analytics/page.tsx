@@ -25,8 +25,8 @@ function StatCard({ label, value, sub, color = 'text-white', alert = false }: {
   label: string; value: string | number; sub?: string; color?: string; alert?: boolean
 }) {
   return (
-    <div className={`bg-gray-900 border rounded-xl p-4 ${alert ? 'border-red-800' : 'border-gray-800'}`}>
-      <p className="text-xs text-gray-400">{label}</p>
+    <div className={`bg-white dark:bg-gray-900 border rounded-xl p-4 ${alert ? 'border-red-800' : 'border-gray-800'}`}>
+      <p className="text-xs text-gray-600 dark:text-gray-400">{label}</p>
       <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
       {sub && <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{sub}</p>}
     </div>
@@ -37,7 +37,7 @@ function SectionHeader({ title, icon }: { title: string; icon: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
       <span className="text-lg">{icon}</span>
-      <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">{title}</h2>
+      <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">{title}</h2>
     </div>
   )
 }
@@ -45,7 +45,7 @@ function SectionHeader({ title, icon }: { title: string; icon: string }) {
 function ProgressBar({ value, max, color = 'bg-purple-600' }: { value: number; max: number; color?: string }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0
   return (
-    <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+    <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
       <div className={`h-2 rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
     </div>
   )
@@ -61,7 +61,7 @@ export default function AnalyticsPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <p className="text-gray-400">Loading analytics…</p>
+      <p className="text-gray-600 dark:text-gray-400">Loading analytics…</p>
     </div>
   )
   if (!data) return <p className="text-red-400">Failed to load analytics.</p>
@@ -72,7 +72,7 @@ export default function AnalyticsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-white">Reporting & Analytics</h1>
-        <p className="text-gray-400 text-sm mt-1">Organisation-wide metrics across all HR modules</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Organisation-wide metrics across all HR modules</p>
       </div>
 
       {/* ── Headcount ── */}
@@ -88,7 +88,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Employment type breakdown */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Employment Type</p>
           <div className="space-y-2.5">
             {[
@@ -99,8 +99,8 @@ export default function AnalyticsPage() {
             ].map(row => (
               <div key={row.label}>
                 <div className="flex justify-between mb-1">
-                  <span className="text-xs text-gray-400">{row.label}</span>
-                  <span className="text-xs text-gray-300 font-medium">{row.value}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{row.label}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">{row.value}</span>
                 </div>
                 <ProgressBar value={row.value} max={headcount.total} color={row.color} />
               </div>
@@ -112,8 +112,8 @@ export default function AnalyticsPage() {
         {byEntity.length > 0 && (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
             {byEntity.map(e => (
-              <div key={e.name} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                <p className="text-xs text-gray-400 truncate">{e.name}</p>
+              <div key={e.name} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{e.name}</p>
                 <p className="text-xl font-bold text-white mt-1">{e.count}</p>
               </div>
             ))}
@@ -147,9 +147,9 @@ export default function AnalyticsPage() {
             color={training.expired > 0 ? 'text-red-400' : 'text-gray-400'}
             alert={training.expired > 0} />
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
           <div className="flex justify-between mb-2">
-            <span className="text-xs text-gray-400">Completion Rate</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
             <span className={`text-sm font-bold ${training.completionRate >= 80 ? 'text-green-400' : training.completionRate >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
               {training.completionRate}%
             </span>
@@ -180,8 +180,8 @@ export default function AnalyticsPage() {
               color={grievances.open > 0 ? 'text-amber-400' : 'text-gray-400'} />
             <StatCard label="Critical Risk" value={grievances.critical}
               color={grievances.critical > 0 ? 'text-red-400' : 'text-gray-400'} alert={grievances.critical > 0} />
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-              <p className="text-xs text-gray-400">Resolution Rate</p>
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+              <p className="text-xs text-gray-600 dark:text-gray-400">Resolution Rate</p>
               <p className={`text-2xl font-bold mt-1 ${grievances.total > 0 ? 'text-white' : 'text-gray-600'}`}>
                 {grievances.total > 0
                   ? `${Math.round(((grievances.total - grievances.open) / grievances.total) * 100)}%`

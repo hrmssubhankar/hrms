@@ -15,7 +15,7 @@ const STATUS_STYLE: Record<string, string> = {
   maintenance:'bg-amber-900/50 text-amber-300 border-amber-800',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function AssetsPage() {
   const [assets,      setAssets]      = useState<Asset[]>([])
@@ -74,7 +74,7 @@ export default function AssetsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Asset Management</h1>
-          <p className="text-gray-400 text-sm mt-1">Track equipment, uniforms, and PPE assigned to employees</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track equipment, uniforms, and PPE assigned to employees</p>
         </div>
         {tab === 'assets' && (
           <button onClick={() => setShowAssetForm(v => !v)} className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
@@ -90,14 +90,14 @@ export default function AssetsPage() {
           { label:'Assigned',  value:stats.assigned,  color:'text-blue-400' },
           { label:'Retired',   value:stats.retired,   color:'text-gray-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="flex border-b border-gray-800">
+      <div className="flex border-b border-gray-200 dark:border-gray-800">
         {(['assets','assignments'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition capitalize ${tab === t ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
@@ -107,20 +107,20 @@ export default function AssetsPage() {
       </div>
 
       {showAssetForm && tab === 'assets' && (
-        <form onSubmit={createAsset} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={createAsset} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Name *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Name *</label>
               <input required value={assetForm.name} onChange={e => setAssetForm(f => ({ ...f, name: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Category *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Category *</label>
               <select value={assetForm.category} onChange={e => setAssetForm(f => ({ ...f, category: e.target.value }))} className={INPUT}>
                 {ASSET_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Serial Number</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Serial Number</label>
               <input value={assetForm.serialNumber} onChange={e => setAssetForm(f => ({ ...f, serialNumber: e.target.value }))} className={INPUT} />
             </div>
           </div>
@@ -131,33 +131,33 @@ export default function AssetsPage() {
         </form>
       )}
 
-      {loading ? <p className="text-gray-400 text-sm">Loading…</p> : (
+      {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : (
         <>
           {tab === 'assets' && (
             assets.length === 0 ? (
-              <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-                <p className="text-gray-300 font-medium">No assets registered</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">No assets registered</p>
               </div>
             ) : (
-              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-800">
+                    <tr className="border-b border-gray-200 dark:border-gray-800">
                       {['Asset','Category','Serial','Status',''].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800/60">
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
                     {assets.map(a => (
-                      <tr key={a.id} className="hover:bg-gray-800/30">
-                        <td className="px-4 py-3 text-gray-200">{a.name}</td>
-                        <td className="px-4 py-3 text-gray-400 text-xs">{a.category}</td>
+                      <tr key={a.id} className="hover:bg-gray-100 dark:hover:bg-gray-800/30">
+                        <td className="px-4 py-3 text-gray-700 dark:text-gray-200">{a.name}</td>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs">{a.category}</td>
                         <td className="px-4 py-3 text-gray-500 text-xs font-mono dark:text-gray-400">{a.serialNumber ?? '—'}</td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[a.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
@@ -173,14 +173,14 @@ export default function AssetsPage() {
                                   Assign
                                 </button>
                                 <button onClick={() => retire(a.id)}
-                                  className="text-xs bg-gray-800 border border-gray-700 text-gray-400 hover:border-gray-600 px-2 py-1 rounded transition">
+                                  className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600 px-2 py-1 rounded transition">
                                   Retire
                                 </button>
                               </>
                             )}
                           </div>
                           {showAssignForm === a.id && (
-                            <div className="mt-2 bg-gray-800 rounded-lg p-3 space-y-2">
+                            <div className="mt-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-3 space-y-2">
                               <select value={assignForm.employeeId} onChange={e => setAssignForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                                 <option value="">— Select employee —</option>
                                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
@@ -191,7 +191,7 @@ export default function AssetsPage() {
                                   Confirm
                                 </button>
                                 <button onClick={() => setShowAssignForm(null)}
-                                  className="text-xs text-gray-400 hover:text-white px-3 py-1.5">Cancel</button>
+                                  className="text-xs text-gray-600 dark:text-gray-400 hover:text-white px-3 py-1.5">Cancel</button>
                               </div>
                             </div>
                           )}
@@ -209,11 +209,11 @@ export default function AssetsPage() {
               {assignments.filter(a => !a.returnedAt).map(a => {
                 const asset = assets.find(x => x.id === a.assetId)
                 return (
-                  <div key={a.id} className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
+                  <div key={a.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-white font-medium text-sm">{asset?.name ?? 'Unknown'}</span>
-                        <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">{asset?.category}</span>
+                        <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">{asset?.category}</span>
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                         → {a.employeeFirstName} {a.employeeLastName} · Issued {new Date(a.issuedAt).toLocaleDateString('en-AU')}
@@ -227,7 +227,7 @@ export default function AssetsPage() {
                 )
               })}
               {assignments.filter(a => !a.returnedAt).length === 0 && (
-                <div className="bg-gray-900 border border-gray-800 rounded-xl py-10 text-center">
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-10 text-center">
                   <p className="text-gray-500 text-sm dark:text-gray-400">No active assignments</p>
                 </div>
               )}

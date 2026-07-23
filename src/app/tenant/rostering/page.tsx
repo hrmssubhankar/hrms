@@ -168,7 +168,7 @@ function ShiftModal({
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {mode === 'create' ? 'Add Shift' : 'Edit Shift'}
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"></button>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"></button>
         </div>
 
         <form onSubmit={handleSave} className="p-6 space-y-4">
@@ -224,7 +224,7 @@ function ShiftModal({
                   className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
                   {hours.map(h => <option key={h}>{h}</option>)}
                 </select>
-                <span className="self-center text-gray-400 text-sm">:</span>
+                <span className="self-center text-gray-600 dark:text-gray-400 text-sm">:</span>
                 <select value={form.startMin} onChange={f('startMin')}
                   className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
                   {mins.map(m => <option key={m}>{m}</option>)}
@@ -238,7 +238,7 @@ function ShiftModal({
                   className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
                   {hours.map(h => <option key={h}>{h}</option>)}
                 </select>
-                <span className="self-center text-gray-400 text-sm">:</span>
+                <span className="self-center text-gray-600 dark:text-gray-400 text-sm">:</span>
                 <select value={form.endMin} onChange={f('endMin')}
                   className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
                   {mins.map(m => <option key={m}>{m}</option>)}
@@ -473,7 +473,7 @@ export default function RosteringPage() {
         ].map(c => (
           <div key={c.label} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2 flex items-center gap-2">
             <span className={`text-lg font-bold ${c.color}`}>{c.value}</span>
-            <span className="text-xs text-gray-400">{c.label}</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">{c.label}</span>
           </div>
         ))}
       </div>
@@ -481,7 +481,7 @@ export default function RosteringPage() {
       {/* Calendar */}
       <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-gray-400 text-sm">Loading roster…</div>
+          <div className="flex items-center justify-center py-20 text-gray-600 dark:text-gray-400 text-sm">Loading roster…</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse min-w-[860px]">
@@ -508,7 +508,7 @@ export default function RosteringPage() {
               <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {visibleEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-16 text-center text-sm text-gray-400">
+                    <td colSpan={8} className="px-4 py-16 text-center text-sm text-gray-600 dark:text-gray-400">
                       No shifts this week.{' '}
                       <PermissionGate permission="rostering:write">
                         <button onClick={() => openCreate(weekStart)} className="text-blue-500 hover:underline">
@@ -527,7 +527,7 @@ export default function RosteringPage() {
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{emp.firstName}</p>
-                          <p className="text-xs text-gray-400 truncate">{emp.lastName}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{emp.lastName}</p>
                         </div>
                       </div>
                     </td>
@@ -555,7 +555,7 @@ export default function RosteringPage() {
                             })}
                             <PermissionGate permission="rostering:write">
                               <button onClick={() => openCreate(day, emp.id)}
-                                className="w-full py-1 text-[11px] text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition text-center rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                                className="w-full py-1 text-[11px] text-gray-600 dark:text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-600 dark:text-gray-400 transition text-center rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                                 + add
                               </button>
                             </PermissionGate>

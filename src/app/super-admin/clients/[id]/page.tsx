@@ -186,22 +186,22 @@ function EditClientInner() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/super-admin/clients/${id}/users`}        className="text-xs border border-green-700 text-green-300 hover:bg-green-900/30 px-3 py-1.5 rounded-lg transition">Users</Link>
-          <Link href={`/super-admin/clients/${id}/modules`}      className="text-xs border border-purple-700 text-purple-300 hover:bg-purple-900/30 px-3 py-1.5 rounded-lg transition">Modules</Link>
-          <Link href={`/super-admin/clients/${id}/integrations`} className="text-xs border border-blue-700 text-blue-300 hover:bg-blue-900/30 px-3 py-1.5 rounded-lg transition">Integrations</Link>
+          <Link href={`/super-admin/clients/${id}/users`}        className="text-xs border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-100 dark:bg-green-900/30 px-3 py-1.5 rounded-lg transition">Users</Link>
+          <Link href={`/super-admin/clients/${id}/modules`}      className="text-xs border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:bg-purple-900/30 px-3 py-1.5 rounded-lg transition">Modules</Link>
+          <Link href={`/super-admin/clients/${id}/integrations`} className="text-xs border border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg transition">Integrations</Link>
         </div>
       </div>
 
       {/* Alerts */}
-      {error   && <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
-      {success && <div className="bg-green-900/50 border border-green-700 rounded-lg p-3 text-sm text-green-300">{success}</div>}
+      {error   && <div className="bg-red-50 dark:bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
+      {success && <div className="bg-green-50 dark:bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">{success}</div>}
 
       {/* Tier-change banner */}
       {tierChanged && (
-        <div className="bg-amber-950 border border-amber-700 rounded-xl p-4 flex items-start justify-between gap-4">
+        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-300 dark:border-amber-700 rounded-xl p-4 flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-amber-300">Tier changed → {form.tier}</p>
-            <p className="text-xs text-amber-400 mt-0.5">Save, then apply module defaults ({TIER_MODULE_MAP[form.tier].length} modules enabled).</p>
+            <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">Tier changed → {form.tier}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Save, then apply module defaults ({TIER_MODULE_MAP[form.tier].length} modules enabled).</p>
           </div>
           <button onClick={applyTierDefaults} disabled={applyingTier}
             className="shrink-0 bg-amber-600 hover:bg-amber-500 disabled:opacity-60 text-white text-xs font-semibold px-4 py-2 rounded-lg">
@@ -218,7 +218,7 @@ function EditClientInner() {
           { id: 'theme',    label: 'Theme & Colours' },
         ] as { id: 'general'|'branding'|'theme'; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${activeTab === t.id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300'}`}>
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${activeTab === t.id ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300'}`}>
             {t.label}
           </button>
         ))}
@@ -252,7 +252,7 @@ function EditClientInner() {
               onChange={e => setForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))}
               className={INPUT} />
             <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
-              Portal URL: <span className="text-purple-400">{form.slug}.yourdomain.com</span>
+              Portal URL: <span className="text-purple-600 dark:text-purple-400">{form.slug}.yourdomain.com</span>
             </p>
           </div>
 
@@ -261,7 +261,7 @@ function EditClientInner() {
             <div className="space-y-2 mt-2">
               {TIERS.map(t => (
                 <label key={t.value} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
-                  form.tier === t.value ? 'border-purple-500 bg-purple-900/30' : 'border-gray-300 dark:border-gray-700 hover:border-gray-600'}`}>
+                  form.tier === t.value ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30' : 'border-gray-300 dark:border-gray-700 hover:border-gray-600'}`}>
                   <input type="radio" name="tier" value={t.value} checked={form.tier === t.value}
                     onChange={() => setForm(f => ({ ...f, tier: t.value }))} className="mt-0.5" />
                   <div className="flex-1">
@@ -283,11 +283,11 @@ function EditClientInner() {
             {deploymentUrl ? (
               <div className="flex items-center gap-2">
                 <a href={deploymentUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-sm text-purple-400 hover:text-purple-300 truncate flex-1 underline underline-offset-2">
+                  className="text-sm text-purple-400 hover:text-purple-700 dark:text-purple-300 truncate flex-1 underline underline-offset-2">
                   {deploymentUrl}
                 </a>
                 <a href={`${deploymentUrl}/login`} target="_blank" rel="noopener noreferrer"
-                  className="shrink-0 text-xs border border-purple-700 text-purple-300 hover:bg-purple-900/30 px-2.5 py-1 rounded-lg transition">
+                  className="shrink-0 text-xs border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:bg-purple-900/30 px-2.5 py-1 rounded-lg transition">
                   Open Portal →
                 </a>
               </div>
@@ -335,7 +335,7 @@ function EditClientInner() {
                 </button>
                 {logoUrl && (
                   <button onClick={removeLogo}
-                    className="w-full border border-red-800 text-red-400 hover:bg-red-900/30 text-sm px-4 py-2.5 rounded-lg transition">
+                    className="w-full border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-100 dark:bg-red-900/30 text-sm px-4 py-2.5 rounded-lg transition">
                     Remove Logo
                   </button>
                 )}
@@ -408,7 +408,7 @@ function EditClientInner() {
                 <button key={p.label}
                   onClick={() => { setForm(f => ({ ...f, primaryColor: p.primaryColor })); setTheme(t => ({ ...t, accentColor: p.accentColor })) }}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition ${
-                    form.primaryColor === p.primaryColor ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-500'}`}>
+                    form.primaryColor === p.primaryColor ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-500'}`}>
                   <span className="w-3 h-3 rounded-full" style={{ background: p.primaryColor }} />
                   {p.label}
                 </button>
@@ -452,7 +452,7 @@ function EditClientInner() {
               <div className="flex flex-wrap gap-2">
                 {FONT_OPTIONS.map(f => (
                   <button key={f} onClick={() => setTheme(t => ({ ...t, fontFamily: f }))}
-                    className={`px-3 py-1.5 rounded-lg border text-sm transition ${theme.fontFamily === f ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
+                    className={`px-3 py-1.5 rounded-lg border text-sm transition ${theme.fontFamily === f ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
                     style={{ fontFamily: f }}>
                     {f}
                   </button>
@@ -466,7 +466,7 @@ function EditClientInner() {
               <div className="flex gap-2">
                 {RADIUS_OPTIONS.map(r => (
                   <button key={r.value} onClick={() => setTheme(t => ({ ...t, borderRadius: r.value }))}
-                    className={`flex-1 py-2 text-xs border transition ${theme.borderRadius === r.value ? 'border-purple-500 bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
+                    className={`flex-1 py-2 text-xs border transition ${theme.borderRadius === r.value ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
                     style={{ borderRadius: r.value }}>
                     {r.label}
                   </button>

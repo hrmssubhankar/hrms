@@ -56,7 +56,7 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
         >
           {initial}
         </div>
-        <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className={`w-3.5 h-3.5 text-gray-600 dark:text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -74,7 +74,7 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{email}</p>
-                <p className="text-xs text-gray-400">{ROLE_LABELS[role] ?? role}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{ROLE_LABELS[role] ?? role}</p>
               </div>
             </div>
           </div>

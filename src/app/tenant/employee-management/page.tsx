@@ -69,7 +69,7 @@ EMP001,Jane,Smith,jane.smith@example.com,full_time,2026-01-15,,+61400000001,Yahw
                 <div className="flex justify-center gap-6 mt-3 text-sm">
                   <span className="text-green-600 font-semibold">{result.imported} imported</span>
                   {result.skipped > 0 && <span className="text-amber-600 font-semibold">{result.skipped} skipped</span>}
-                  <span className="text-gray-400">{result.total} total rows</span>
+                  <span className="text-gray-600 dark:text-gray-400">{result.total} total rows</span>
                 </div>
               </div>
               {result.errors.length > 0 && (
@@ -112,18 +112,18 @@ EMP001,Jane,Smith,jane.smith@example.com,full_time,2026-01-15,,+61400000001,Yahw
                 {file ? (
                   <>
                     <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
                     <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{file.name}</p>
-                    <p className="text-xs text-gray-400 mt-1">{(file.size / 1024).toFixed(1)} KB · Click to change</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{(file.size / 1024).toFixed(1)} KB · Click to change</p>
                   </>
                 ) : (
                   <>
                     <p className="text-3xl mb-2"></p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Click to select a CSV file</p>
-                    <p className="text-xs text-gray-400 mt-1">Max 5 MB</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Max 5 MB</p>
                   </>
                 )}
               </div>
@@ -308,7 +308,7 @@ export default function EmployeeManagementPage() {
         {(search || status || empType) && (
           <button
             onClick={() => { setSearch(''); setStatus(''); setEmpType('') }}
-            className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition dark:text-gray-400"
+            className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-600 dark:text-gray-300 transition dark:text-gray-400"
           >
             Clear
           </button>
@@ -318,7 +318,7 @@ export default function EmployeeManagementPage() {
       {/* Table */}
       <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-gray-400 text-sm">Loading…</div>
+          <div className="flex items-center justify-center py-16 text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
         ) : employees.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <span className="text-5xl"></span>
@@ -373,13 +373,13 @@ export default function EmployeeManagementPage() {
                               {fullName}
                               {emp.ndisWorker && <span className="ml-1.5 text-xs text-purple-500">NDIS</span>}
                             </p>
-                            <p className="text-xs text-gray-400">{emp.email}</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">{emp.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-gray-700 dark:text-gray-300">{emp.positionTitle ?? '—'}</p>
-                        <p className="text-xs text-gray-400">{emp.departmentName ?? '—'}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{emp.departmentName ?? '—'}</p>
                       </td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">
                         {EMP_TYPE_LABEL[emp.employmentType] ?? emp.employmentType}
@@ -411,7 +411,7 @@ export default function EmployeeManagementPage() {
                 })}
               </tbody>
             </table>
-            <div className="px-4 py-3 border-t border-gray-50 dark:border-gray-800 text-xs text-gray-400">
+            <div className="px-4 py-3 border-t border-gray-50 dark:border-gray-800 text-xs text-gray-600 dark:text-gray-400">
               {employees.length} employee{employees.length !== 1 ? 's' : ''} shown
             </div>
           </div>

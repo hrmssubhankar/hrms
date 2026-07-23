@@ -103,8 +103,8 @@ const expColor = (exp: string | null) => {
   return 'text-gray-400'
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
-const LABEL = 'block text-xs font-medium text-gray-400 mb-1'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DocumentsPage() {
@@ -201,7 +201,7 @@ export default function DocumentsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Document Management</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Centralised register with expiry tracking and Vercel Blob storage</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Centralised register with expiry tracking and Vercel Blob storage</p>
         </div>
         <button
           onClick={() => { setShowForm(v => !v) }}
@@ -220,7 +220,7 @@ export default function DocumentsPage() {
           { label: 'Expiring (30d)', value: stats.expiringSoon,  color: stats.expiringSoon > 0 ? 'text-amber-400' : 'text-gray-600' },
           { label: 'Expired',        value: stats.expired,       color: stats.expired > 0 ? 'text-red-400' : 'text-gray-600' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -263,7 +263,7 @@ export default function DocumentsPage() {
 
       {/* Add document form */}
       {showForm && (
-        <form onSubmit={create} className="bg-gray-900 border border-purple-800/50 rounded-2xl p-6 space-y-4">
+        <form onSubmit={create} className="bg-white dark:bg-gray-900 border border-purple-800/50 rounded-2xl p-6 space-y-4">
           <h3 className="text-sm font-semibold text-white">Add Document to Register</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
@@ -323,7 +323,7 @@ export default function DocumentsPage() {
               {saving ? 'Saving…' : 'Add to Register'}
             </button>
             <button type="button" onClick={() => setShowForm(false)}
-              className="px-5 py-2 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg">
+              className="px-5 py-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg">
               Cancel
             </button>
           </div>
@@ -334,16 +334,16 @@ export default function DocumentsPage() {
       <div className="flex gap-3 flex-wrap items-center">
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search title or employee…"
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 flex-1 min-w-48" />
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 flex-1 min-w-48" />
         <select value={filterCat}
           onChange={e => { setFilterCat(e.target.value); load(e.target.value, filterStat) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All categories</option>
           {DOC_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <select value={filterStat}
           onChange={e => { setFilterStat(e.target.value); load(filterCat, e.target.value) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="active">Active</option>
           <option value="pending_review">Pending Review</option>
@@ -352,7 +352,7 @@ export default function DocumentsPage() {
         </select>
         {(filterCat || filterStat || search) && (
           <button onClick={() => { setFilterCat(''); setFilterStat(''); setSearch(''); load('', '') }}
-            className="text-xs text-gray-400 hover:text-white px-3 py-2 border border-gray-700 rounded-lg">
+            className="text-xs text-gray-600 dark:text-gray-400 hover:text-white px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg">
             Clear
           </button>
         )}
@@ -362,22 +362,22 @@ export default function DocumentsPage() {
       {loading ? (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
       ) : filtered.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl py-16 text-center">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl py-16 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No documents found</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No documents found</p>
           <p className="text-sm text-gray-600 mt-1 dark:text-gray-400">
             {filterCat || filterStat ? 'Try clearing filters' : 'Add a document to build your compliance register'}
           </p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-gray-200 dark:border-gray-800">
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Document</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Category</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Employee</th>
@@ -386,9 +386,9 @@ export default function DocumentsPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800/60">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
               {filtered.map(d => (
-                <tr key={d.id} className="hover:bg-gray-800/30 group">
+                <tr key={d.id} className="hover:bg-gray-100 dark:hover:bg-gray-800/30 group">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <span className="text-lg shrink-0">{mimeIcon(d.mimeType)}</span>
@@ -404,11 +404,11 @@ export default function DocumentsPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full whitespace-nowrap">
+                    <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full whitespace-nowrap">
                       {d.category}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-400">
+                  <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">
                     {d.employeeFirstName
                       ? `${d.employeeFirstName} ${d.employeeLastName}`
                       : <span className="text-gray-600 dark:text-gray-400">Org-wide</span>}
@@ -445,7 +445,7 @@ export default function DocumentsPage() {
                       )}
                       {d.status !== 'archived' && (
                         <button onClick={() => updateStatus(d.id, 'archived')}
-                          className="text-xs bg-gray-800 border border-gray-700 text-gray-400 hover:border-gray-600 px-2 py-1 rounded transition">
+                          className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600 px-2 py-1 rounded transition">
                           Archive
                         </button>
                       )}
@@ -468,7 +468,7 @@ export default function DocumentsPage() {
               ))}
             </tbody>
           </table>
-          <div className="px-4 py-3 border-t border-gray-800">
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800">
             <p className="text-xs text-gray-600 dark:text-gray-400">{filtered.length} document{filtered.length !== 1 ? 's' : ''} shown</p>
           </div>
         </div>

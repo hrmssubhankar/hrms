@@ -183,7 +183,7 @@ function ClockCard({ onAction }: { onAction: () => void }) {
 
   if (status === 'loading') {
     return (
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-sm text-gray-400">
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-sm text-gray-600 dark:text-gray-400">
         Loading clock status…
       </div>
     )
@@ -255,7 +255,7 @@ function TimesheetRow({
       {isManager && (
         <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200 whitespace-nowrap">
           <div className="font-medium">{ts.empFirst} {ts.empLast}</div>
-          <div className="text-xs text-gray-400">{ts.empEmail}</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">{ts.empEmail}</div>
         </td>
       )}
       <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
@@ -280,8 +280,8 @@ function TimesheetRow({
           </span>
         )}
         {ts.location && <span className="text-xs">{ts.location}</span>}
-        {ts.partFirst && <div className="text-xs text-gray-400">{ts.partFirst} {ts.partLast}</div>}
-        {ts.notes && <div className="text-xs text-gray-400 truncate max-w-[180px]">{ts.notes}</div>}
+        {ts.partFirst && <div className="text-xs text-gray-600 dark:text-gray-400">{ts.partFirst} {ts.partLast}</div>}
+        {ts.notes && <div className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[180px]">{ts.notes}</div>}
       </td>
       <td className="px-4 py-3">
         <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${c}`}>
@@ -308,7 +308,7 @@ function TimesheetRow({
             </div>
           )}
           {ts.status === 'approved' && (
-            <span className="text-xs text-gray-400">{fmtDateTime(ts.approvedAt)}</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">{fmtDateTime(ts.approvedAt)}</span>
           )}
         </td>
       )}
@@ -423,7 +423,7 @@ export default function TimesheetsPage() {
         ].map(c => (
           <div key={c.label} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2 flex items-center gap-2">
             <span className={`text-lg font-bold ${c.color}`}>{c.value}</span>
-            <span className="text-xs text-gray-400">{c.label}</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">{c.label}</span>
           </div>
         ))}
       </div>
@@ -431,9 +431,9 @@ export default function TimesheetsPage() {
       {/* Table */}
       <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-gray-400 text-sm">Loading timesheets…</div>
+          <div className="flex items-center justify-center py-16 text-gray-600 dark:text-gray-400 text-sm">Loading timesheets…</div>
         ) : timesheets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400 text-sm gap-2">
+          <div className="flex flex-col items-center justify-center py-16 text-gray-600 dark:text-gray-400 text-sm gap-2">
             <span className="text-3xl"></span>
             <span>No timesheet entries this week.</span>
           </div>

@@ -39,15 +39,15 @@ const ALL_MODULES = [
 const CATEGORIES = ['Core', 'Compliance', 'Learning', 'Talent', 'Performance', 'Safety', 'Intelligence', 'Experience', 'Operations'] as const
 
 const CATEGORY_STYLE: Record<string, { border: string; header: string; badge: string }> = {
-  Core:         { border: 'border-blue-800',   header: 'bg-blue-950/60',   badge: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200' },
-  Compliance:   { border: 'border-green-800',  header: 'bg-green-950/60',  badge: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200' },
-  Learning:     { border: 'border-purple-800', header: 'bg-purple-950/60', badge: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200' },
-  Talent:       { border: 'border-yellow-800', header: 'bg-yellow-950/60', badge: 'bg-yellow-900 text-yellow-200' },
-  Performance:  { border: 'border-orange-800', header: 'bg-orange-950/60', badge: 'bg-orange-900 text-orange-200' },
-  Safety:       { border: 'border-red-800',    header: 'bg-red-950/60',    badge: 'bg-red-900 text-red-200' },
-  Intelligence: { border: 'border-cyan-800',   header: 'bg-cyan-950/60',   badge: 'bg-cyan-900 text-cyan-200' },
-  Experience:   { border: 'border-pink-800',   header: 'bg-pink-950/60',   badge: 'bg-pink-900 text-pink-200' },
-  Operations:   { border: 'border-teal-800',   header: 'bg-teal-950/60',   badge: 'bg-teal-900 text-teal-200' },
+  Core:         { border: 'border-blue-200 dark:border-blue-800',   header: 'bg-blue-50 dark:bg-blue-950/60',   badge: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200' },
+  Compliance:   { border: 'border-green-200 dark:border-green-800',  header: 'bg-green-50 dark:bg-green-950/60',  badge: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200' },
+  Learning:     { border: 'border-purple-200 dark:border-purple-800', header: 'bg-purple-50 dark:bg-purple-950/60', badge: 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200' },
+  Talent:       { border: 'border-yellow-200 dark:border-yellow-800', header: 'bg-yellow-50 dark:bg-yellow-950/60', badge: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200' },
+  Performance:  { border: 'border-orange-200 dark:border-orange-800', header: 'bg-orange-50 dark:bg-orange-950/60', badge: 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-200' },
+  Safety:       { border: 'border-red-200 dark:border-red-800',    header: 'bg-red-50 dark:bg-red-950/60',    badge: 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200' },
+  Intelligence: { border: 'border-cyan-200 dark:border-cyan-800',   header: 'bg-cyan-50 dark:bg-cyan-950/60',   badge: 'bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-200' },
+  Experience:   { border: 'border-pink-200 dark:border-pink-800',   header: 'bg-pink-50 dark:bg-pink-950/60',   badge: 'bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-200' },
+  Operations:   { border: 'border-teal-200 dark:border-teal-800',   header: 'bg-teal-50 dark:bg-teal-950/60',   badge: 'bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-200' },
 }
 
 const TIER_DEFAULTS: Record<string, number[]> = {
@@ -57,9 +57,9 @@ const TIER_DEFAULTS: Record<string, number[]> = {
 }
 
 function tierBadge(mod: typeof ALL_MODULES[0]) {
-  if (mod.starterOn)      return <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-900/60 text-green-300 border border-green-700">Starter</span>
-  if (mod.proOn)          return <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700">Pro</span>
-  if (mod.enterpriseOn)   return <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-900/60 text-purple-300 border border-purple-700">Enterprise</span>
+  if (mod.starterOn)      return <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/60 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700">Starter</span>
+  if (mod.proOn)          return <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700">Pro</span>
+  if (mod.enterpriseOn)   return <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-700">Enterprise</span>
   return null
 }
 
@@ -140,10 +140,10 @@ export default function ModulesPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Module Configuration</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            <span className="text-purple-300 font-medium">{tenantName}</span>
+            <span className="text-purple-600 dark:text-purple-300 font-medium">{tenantName}</span>
             {' · '}
             <span className={`text-xs font-semibold uppercase tracking-wide ${
-              tenantTier === 'enterprise' ? 'text-purple-400' : tenantTier === 'professional' ? 'text-blue-400' : 'text-green-400'
+              tenantTier === 'enterprise' ? 'text-purple-600 dark:text-purple-400' : tenantTier === 'professional' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'
             }`}>{tenantTier}</span>
             {' · '}
             <span className="text-gray-900 dark:text-white font-semibold">{enabledCount}</span>
@@ -155,7 +155,7 @@ export default function ModulesPage() {
         <div className="flex flex-col gap-2 shrink-0">
           <button
             onClick={applyTierDefaults}
-            className="text-xs border border-purple-700 text-purple-300 hover:bg-purple-900/30 px-3 py-1.5 rounded-lg transition whitespace-nowrap"
+            className="text-xs border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:bg-purple-900/30 px-3 py-1.5 rounded-lg transition whitespace-nowrap"
           >
             ↺ Apply {tenantTier.charAt(0).toUpperCase() + tenantTier.slice(1)} Defaults
           </button>
@@ -211,12 +211,12 @@ export default function ModulesPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setCategoryAll(category, true)}
-                      className="text-xs text-green-400 hover:text-green-300 transition"
+                      className="text-xs text-green-400 hover:text-green-700 dark:text-green-300 transition"
                     >All On</button>
                     <span className="text-gray-700 dark:text-gray-300">|</span>
                     <button
                       onClick={() => setCategoryAll(category, false)}
-                      className="text-xs text-red-400 hover:text-red-300 transition"
+                      className="text-xs text-red-400 hover:text-red-700 dark:text-red-300 transition"
                     >All Off</button>
                   </div>
                 )}
@@ -231,10 +231,10 @@ export default function ModulesPage() {
                   const num     = String(mod.id).padStart(2, '0')
 
                   return (
-                    <div key={mod.id} className={`flex items-center justify-between px-5 py-3 transition ${!locked && !enabled ? 'opacity-60' : ''} hover:bg-gray-100 dark:bg-gray-800/20`}>
+                    <div key={mod.id} className={`flex items-center justify-between px-5 py-3 transition ${!locked && !enabled ? 'opacity-60' : ''} hover:bg-gray-100 dark:hover:bg-gray-800/20`}>
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-xs font-mono text-gray-500 shrink-0 w-6 dark:text-gray-400">{num}</span>
-                        <span className={`text-sm ${enabled ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>{mod.name}</span>
+                        <span className={`text-sm ${enabled ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400'}`}>{mod.name}</span>
                         <span className="shrink-0">{tierBadge(mod)}</span>
                         {locked && <span className="text-gray-600 text-xs shrink-0 dark:text-gray-400">always on</span>}
                       </div>
@@ -270,7 +270,7 @@ export default function ModulesPage() {
         <button
           onClick={() => saveModules(true)}
           disabled={saving}
-          className="border border-purple-700 text-purple-300 hover:bg-purple-900/30 text-sm font-medium px-6 py-2.5 rounded-lg transition"
+          className="border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:bg-purple-900/30 text-sm font-medium px-6 py-2.5 rounded-lg transition"
         >
           Save & Configure Theme →
         </button>

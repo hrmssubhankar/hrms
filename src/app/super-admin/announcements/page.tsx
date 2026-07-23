@@ -15,9 +15,9 @@ type Announcement = {
 }
 
 const PRIORITY_STYLES = {
-  info:     { badge: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200',   icon: 'ℹ️',  border: 'border-blue-800' },
-  warning:  { badge: 'bg-yellow-900 text-yellow-200', icon: '️',  border: 'border-yellow-800' },
-  critical: { badge: 'bg-red-900 text-red-200',      icon: '', border: 'border-red-800' },
+  info:     { badge: 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200',   icon: 'ℹ️',  border: 'border-blue-200 dark:border-blue-800' },
+  warning:  { badge: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-200', icon: '️',  border: 'border-yellow-200 dark:border-yellow-800' },
+  critical: { badge: 'bg-red-100 dark:bg-red-900 text-red-200',      icon: '', border: 'border-red-200 dark:border-red-800' },
 }
 
 export default function AnnouncementsPage() {
@@ -88,8 +88,8 @@ export default function AnnouncementsPage() {
 
       {/* Create form */}
       {showForm && (
-        <div className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-purple-300">New Announcement</h2>
+        <div className="bg-white dark:bg-gray-900 border border-purple-200 dark:border-purple-800 rounded-xl p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-purple-700 dark:text-purple-300">New Announcement</h2>
           <div>
             <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Title *</label>
             <input
@@ -199,15 +199,15 @@ export default function AnnouncementsPage() {
                       onClick={() => toggleActive(ann.id, ann.isActive)}
                       className={`text-xs px-3 py-1 rounded-lg border transition ${
                         ann.isActive
-                          ? 'border-gray-600 text-gray-600 dark:text-gray-400 hover:border-red-600 hover:text-red-400'
-                          : 'border-green-700 text-green-400 hover:bg-green-900/30'
+                          ? 'border-gray-600 text-gray-600 dark:text-gray-400 hover:border-red-600 hover:text-red-600 dark:text-red-400'
+                          : 'border-green-300 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-100 dark:bg-green-900/30'
                       }`}
                     >
                       {ann.isActive ? 'Deactivate' : 'Activate'}
                     </button>
                     <button
                       onClick={() => deleteAnn(ann.id)}
-                      className="text-xs text-red-400 hover:text-red-300 px-2 py-1 transition"
+                      className="text-xs text-red-400 hover:text-red-700 dark:text-red-300 px-2 py-1 transition"
                     >
                       Delete
                     </button>

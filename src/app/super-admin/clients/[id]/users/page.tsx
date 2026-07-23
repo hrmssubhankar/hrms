@@ -28,13 +28,13 @@ const ROLES = [
 const ROLE_COLORS: Record<string, string> = {
   director:            'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200',
   hr_officer:          'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200',
-  compliance_manager:  'bg-amber-900 text-amber-200',
+  compliance_manager:  'bg-amber-100 dark:bg-amber-900 text-amber-200',
   operations_manager:  'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200',
-  team_leader:         'bg-teal-900 text-teal-200',
-  payroll_officer:     'bg-pink-900 text-pink-200',
+  team_leader:         'bg-teal-100 dark:bg-teal-900 text-teal-200',
+  payroll_officer:     'bg-pink-100 dark:bg-pink-900 text-pink-200',
   employee:            'bg-gray-200 dark:bg-gray-700 text-gray-200',
-  auditor:             'bg-orange-900 text-orange-200',
-  it_admin:            'bg-indigo-900 text-indigo-200',
+  auditor:             'bg-orange-100 dark:bg-orange-900 text-orange-200',
+  it_admin:            'bg-indigo-100 dark:bg-indigo-900 text-indigo-200',
 }
 
 export default function UsersPage() {
@@ -129,7 +129,7 @@ export default function UsersPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Users</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Manage login accounts for <span className="text-purple-300 font-medium">{tenantName}</span>
+            Manage login accounts for <span className="text-purple-700 dark:text-purple-300 font-medium">{tenantName}</span>
           </p>
         </div>
         <div className="flex gap-2">
@@ -144,23 +144,23 @@ export default function UsersPage() {
       </div>
 
       {/* Login info banner */}
-      <div className="bg-blue-950 border border-blue-800 rounded-xl p-4 text-sm text-blue-300">
+      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-sm text-blue-700 dark:text-blue-300">
         <strong className="text-blue-200">Client login URL:</strong>{' '}
-        <code className="text-purple-300">
+        <code className="text-purple-700 dark:text-purple-300">
           {typeof window !== 'undefined' ? window.location.origin : ''}/login?tenant={tenantSlug}
         </code>
-        <p className="text-xs text-blue-400 mt-1">Users visit this URL and sign in with their email + password.</p>
+        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">Users visit this URL and sign in with their email + password.</p>
       </div>
 
       {success && (
-        <div className="bg-green-900/50 border border-green-700 rounded-lg p-3 text-sm text-green-300">{success}</div>
+        <div className="bg-green-50 dark:bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">{success}</div>
       )}
 
       {/* Create user form */}
       {showForm && (
-        <form onSubmit={createUser} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={createUser} className="bg-white dark:bg-gray-900 border border-purple-200 dark:border-purple-800 rounded-xl p-5 space-y-4">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-white">New User</h2>
-          {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-2 text-xs text-red-300">{error}</div>}
+          {error && <div className="bg-red-50 dark:bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-lg p-2 text-xs text-red-700 dark:text-red-300">{error}</div>}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Email *</label>
@@ -249,11 +249,11 @@ export default function UsersPage() {
             {users.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-5 py-10 text-center text-gray-500 dark:text-gray-400">
-                  No users yet. <button onClick={() => setShowForm(true)} className="text-purple-400 hover:underline">Add the first user →</button>
+                  No users yet. <button onClick={() => setShowForm(true)} className="text-purple-600 dark:text-purple-400 hover:underline">Add the first user →</button>
                 </td>
               </tr>
             ) : users.map(u => (
-              <tr key={u.id} className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:bg-gray-800/50">
+              <tr key={u.id} className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800/50">
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
                     <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">
@@ -271,7 +271,7 @@ export default function UsersPage() {
                   <button
                     onClick={() => toggleActive(u)}
                     className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium transition ${
-                      u.isActive ? 'bg-green-900 text-green-300 hover:bg-red-900 hover:text-red-300' : 'bg-red-900 text-red-300 hover:bg-green-900 hover:text-green-300'
+                      u.isActive ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 hover:bg-red-100 dark:bg-red-900 hover:text-red-700 dark:text-red-300' : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 hover:bg-green-100 dark:bg-green-900 hover:text-green-700 dark:text-green-300'
                     }`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${u.isActive ? 'bg-green-400' : 'bg-red-400'}`} />
@@ -283,8 +283,8 @@ export default function UsersPage() {
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
-                    <button onClick={() => { setResetTarget(u); setNewPassword('') }} className="text-xs text-amber-400 hover:text-amber-300 font-medium">Reset PW</button>
-                    <button onClick={() => deleteUser(u)} className="text-xs text-red-400 hover:text-red-300 font-medium">Delete</button>
+                    <button onClick={() => { setResetTarget(u); setNewPassword('') }} className="text-xs text-amber-400 hover:text-amber-700 dark:text-amber-300 font-medium">Reset PW</button>
+                    <button onClick={() => deleteUser(u)} className="text-xs text-red-400 hover:text-red-700 dark:text-red-300 font-medium">Delete</button>
                   </div>
                 </td>
               </tr>

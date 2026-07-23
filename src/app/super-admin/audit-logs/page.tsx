@@ -18,14 +18,14 @@ type AuditLog = {
 type Tenant = { id: string; name: string }
 
 const ACTION_COLORS: Record<string, string> = {
-  login:    'bg-blue-900/50 text-blue-300',
+  login:    'bg-blue-50 dark:bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
   logout:   'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
-  create:   'bg-green-900/50 text-green-300',
-  update:   'bg-yellow-900/50 text-yellow-300',
-  delete:   'bg-red-900/50 text-red-300',
-  export:   'bg-purple-900/50 text-purple-300',
-  upload:   'bg-teal-900/50 text-teal-300',
-  download: 'bg-indigo-900/50 text-indigo-300',
+  create:   'bg-green-50 dark:bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300',
+  update:   'bg-yellow-50 dark:bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300',
+  delete:   'bg-red-50 dark:bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300',
+  export:   'bg-purple-50 dark:bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300',
+  upload:   'bg-teal-50 dark:bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300',
+  download: 'bg-indigo-50 dark:bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300',
 }
 
 function actionColor(action: string) {
@@ -183,7 +183,7 @@ export default function AuditLogsPage() {
                 <>
                   <tr
                     key={log.id}
-                    className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100 dark:bg-gray-800/30 transition cursor-pointer"
+                    className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/30 transition cursor-pointer"
                     onClick={() => setExpanded(expanded === log.id ? null : log.id)}
                   >
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap text-xs">{formatDate(log.createdAt)}</td>
@@ -197,7 +197,7 @@ export default function AuditLogsPage() {
                     <td className="px-4 py-3 text-gray-500 text-xs font-mono dark:text-gray-400">{log.ipAddress ?? '—'}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs dark:text-gray-400">
                       {(log.oldValues || log.newValues) ? (
-                        <span className="text-purple-400">{expanded === log.id ? '▲ hide' : '▼ show'}</span>
+                        <span className="text-purple-600 dark:text-purple-400">{expanded === log.id ? '▲ hide' : '▼ show'}</span>
                       ) : '—'}
                     </td>
                   </tr>
@@ -207,7 +207,7 @@ export default function AuditLogsPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
                           {log.oldValues && (
                             <div>
-                              <p className="text-red-400 font-semibold mb-1">Before</p>
+                              <p className="text-red-600 dark:text-red-400 font-semibold mb-1">Before</p>
                               <pre className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-all">
                                 {JSON.stringify(log.oldValues, null, 2)}
                               </pre>
@@ -215,7 +215,7 @@ export default function AuditLogsPage() {
                           )}
                           {log.newValues && (
                             <div>
-                              <p className="text-green-400 font-semibold mb-1">After</p>
+                              <p className="text-green-600 dark:text-green-400 font-semibold mb-1">After</p>
                               <pre className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-all">
                                 {JSON.stringify(log.newValues, null, 2)}
                               </pre>

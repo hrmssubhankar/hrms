@@ -17,7 +17,7 @@ const STATUS_STYLE: Record<string, string> = {
   rejected: 'bg-red-900/50 text-red-300 border-red-800',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function ReferralsPage() {
   const [referrals, setReferrals] = useState<Referral[]>([])
@@ -63,7 +63,7 @@ export default function ReferralsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Referral Program</h1>
-          <p className="text-gray-400 text-sm mt-1">Track employee referrals and bonus payments</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track employee referrals and bonus payments</p>
         </div>
         <button onClick={() => setShowForm(v => !v)} className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
           {showForm ? 'Cancel' : '+ Submit Referral'}
@@ -77,33 +77,33 @@ export default function ReferralsPage() {
           { label:'Hired',      value:stats.hired,     color:'text-green-400' },
           { label:'Bonus Paid', value:stats.bonusPaid, color:'text-purple-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Referring Employee *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Referring Employee *</label>
               <select required value={form.referrerId} onChange={e => setForm(f => ({ ...f, referrerId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Referred Person Name *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Referred Person Name *</label>
               <input required value={form.referredName} onChange={e => setForm(f => ({ ...f, referredName: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Referred Email</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Referred Email</label>
               <input type="email" value={form.referredEmail} onChange={e => setForm(f => ({ ...f, referredEmail: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Bonus Amount ($)</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Bonus Amount ($)</label>
               <input type="number" step="0.01" value={form.bonusAmount} onChange={e => setForm(f => ({ ...f, bonusAmount: e.target.value }))} className={INPUT} />
             </div>
           </div>
@@ -114,19 +114,19 @@ export default function ReferralsPage() {
         </form>
       )}
 
-      {loading ? <p className="text-gray-400 text-sm">Loading…</p> : referrals.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : referrals.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No referrals yet</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No referrals yet</p>
         </div>
       ) : (
         <div className="space-y-2">
           {referrals.map(r => (
-            <div key={r.id} className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
+            <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-white font-medium text-sm">{r.referredName}</span>

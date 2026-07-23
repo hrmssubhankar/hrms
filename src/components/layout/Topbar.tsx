@@ -7,7 +7,7 @@ export default function Topbar() {
     <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0 dark:bg-gray-900 dark:border-gray-700">
       {/* Search */}
       <div className="relative w-72">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600 dark:text-gray-400" />
         <input
           type="search"
           placeholder="Search employees, documents…"

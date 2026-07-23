@@ -41,7 +41,7 @@ const STATUS_DOT: Record<string, string> = {
   green: 'bg-green-400', amber: 'bg-amber-400', red: 'bg-red-400', pending: 'bg-gray-500',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 function statusLabel(s: string) {
   if (s === 'in_progress') return 'In Progress'
@@ -62,11 +62,11 @@ export default function CompliancePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Compliance Centre</h1>
-        <p className="text-gray-400 text-sm mt-1">Pre-employment screening, compliance tracking & lock exceptions</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Pre-employment screening, compliance tracking & lock exceptions</p>
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-1 w-fit">
         {([
           { key: 'screening', label: 'Screening',   desc: 'Module 6' },
           { key: 'tracking',  label: 'Tracking',    desc: 'Module 8' },
@@ -151,8 +151,8 @@ function ScreeningTab() {
           { label: 'Expiring <30d', value: stats.expiring, color: 'text-amber-400' },
           { label: 'Expired/Red',  value: stats.red + stats.expired, color: 'text-red-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -162,9 +162,9 @@ function ScreeningTab() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterStatus) }}
           placeholder="Search employee…"
-          className="flex-1 min-w-48 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+          className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(search, e.target.value) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="pending">Pending</option>
           <option value="green">Verified</option>
@@ -179,37 +179,37 @@ function ScreeningTab() {
 
       {/* Add form */}
       {showForm && (
-        <form onSubmit={submit} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">New Screening Check</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Employee *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
               <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Check Type *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Check Type *</label>
               <select required value={form.checkType} onChange={e => setForm(f => ({ ...f, checkType: e.target.value }))} className={INPUT}>
                 {CHECK_TYPES.map(t => <option key={t}>{t}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Reference No.</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Reference No.</label>
               <input value={form.referenceNumber} onChange={e => setForm(f => ({ ...f, referenceNumber: e.target.value }))}
                 placeholder="e.g. NWS-12345" className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Issued Date</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Issued Date</label>
               <input type="date" value={form.issuedDate} onChange={e => setForm(f => ({ ...f, issuedDate: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Expiry Date</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Expiry Date</label>
               <input type="date" value={form.expiryDate} onChange={e => setForm(f => ({ ...f, expiryDate: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Notes</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notes</label>
               <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                 placeholder="Optional notes" className={INPUT} />
             </div>
@@ -222,23 +222,23 @@ function ScreeningTab() {
       )}
 
       {/* Table */}
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           {records.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-3xl mb-2"></p>
-              <p className="text-gray-400 text-sm">No screening records. Add the first check above.</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">No screening records. Add the first check above.</p>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-left">
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Employee</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Check Type</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Ref No.</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Expiry</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Action</th>
+                <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Employee</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Check Type</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Ref No.</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Expiry</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -247,13 +247,13 @@ function ScreeningTab() {
                   const expiryWarning = days !== null && days >= 0 && days <= 30
                   const expired       = days !== null && days < 0
                   return (
-                    <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
+                    <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
                       <td className="px-5 py-3.5">
                         <p className="text-white font-medium text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
                         <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className="text-gray-300 text-sm">{r.checkType}</span>
+                        <span className="text-gray-600 dark:text-gray-300 text-sm">{r.checkType}</span>
                         {r.employeeNdis && <span className="ml-2 text-xs bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded">NDIS</span>}
                       </td>
                       <td className="px-5 py-3.5">
@@ -273,7 +273,7 @@ function ScreeningTab() {
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-3.5 text-gray-400 text-xs">{r.referenceNumber ?? '—'}</td>
+                      <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400 text-xs">{r.referenceNumber ?? '—'}</td>
                       <td className="px-5 py-3.5 text-xs">
                         {r.expiryDate ? (
                           <span className={expired ? 'text-red-400 font-medium' : expiryWarning ? 'text-amber-400 font-medium' : 'text-gray-400'}>
@@ -356,8 +356,8 @@ function TrackingTab() {
           { label: 'Amber', value: stats.amber,   color: 'text-amber-400' },
           { label: 'Red',   value: stats.red,     color: 'text-red-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -371,27 +371,27 @@ function TrackingTab() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">New Compliance Item</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Employee *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
               <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Item Type *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Item Type *</label>
               <input required value={form.itemType} onChange={e => setForm(f => ({ ...f, itemType: e.target.value }))}
                 placeholder="e.g. NDIS Renewal, Annual Declaration" className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Due Date</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Due Date</label>
               <input type="date" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Notes</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notes</label>
               <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Optional" className={INPUT} />
             </div>
           </div>
@@ -402,40 +402,40 @@ function TrackingTab() {
         </form>
       )}
 
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           {records.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-3xl mb-2"></p>
-              <p className="text-gray-400 text-sm">No compliance tracking items yet.</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">No compliance tracking items yet.</p>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-left">
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Employee</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Item</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Due Date</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Last Checked</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Update</th>
+                <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Employee</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Item</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Due Date</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Last Checked</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Update</th>
                 </tr>
               </thead>
               <tbody>
                 {records.map(r => (
-                  <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
+                  <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
                     <td className="px-5 py-3.5">
                       <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
                       <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                     </td>
-                    <td className="px-5 py-3.5 text-gray-300">{r.itemType}</td>
+                    <td className="px-5 py-3.5 text-gray-600 dark:text-gray-300">{r.itemType}</td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_BADGE[r.status] ?? STATUS_BADGE.pending}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[r.status] ?? 'bg-gray-500'}`} />
                         {statusLabel(r.status)}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-gray-400 text-xs">
+                    <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400 text-xs">
                       {r.dueDate ? new Date(r.dueDate).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}
                     </td>
                     <td className="px-5 py-3.5 text-gray-500 text-xs dark:text-gray-400">
@@ -523,23 +523,23 @@ function LockTab() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="bg-gray-900 border border-amber-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-amber-800 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-amber-300">Grant Temporary Exception</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Employee *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
               <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Exception Expires *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Exception Expires *</label>
               <input required type="date" value={form.expiresAt} onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))} className={INPUT} />
             </div>
           </div>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Reason *</label>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Reason *</label>
             <textarea required value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))}
               rows={2} placeholder="Reason for granting exception…" className={INPUT} />
           </div>
@@ -550,17 +550,17 @@ function LockTab() {
         </form>
       )}
 
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : (
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : (
         <div className="space-y-4">
           {active.length > 0 && (
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Active Exceptions ({active.length})</p>
-              <div className="bg-gray-900 border border-amber-800/50 rounded-xl overflow-hidden">
+              <div className="bg-white dark:bg-gray-900 border border-amber-800/50 rounded-xl overflow-hidden">
                 {active.map(r => (
-                  <div key={r.id} className="flex items-center gap-4 px-5 py-4 border-b border-gray-800/50 last:border-0">
+                  <div key={r.id} className="flex items-center gap-4 px-5 py-4 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
                     <div className="flex-1">
                       <p className="text-white font-medium text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
-                      <p className="text-gray-400 text-xs mt-0.5">{r.reason}</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">{r.reason}</p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs text-amber-300">Expires {new Date(r.expiresAt).toLocaleDateString('en-AU')}</p>
@@ -579,11 +579,11 @@ function LockTab() {
           {inactive.length > 0 && (
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Expired / Revoked</p>
-              <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden opacity-60">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden opacity-60">
                 {inactive.slice(0,5).map(r => (
-                  <div key={r.id} className="flex items-center gap-4 px-5 py-3 border-b border-gray-800/50 last:border-0">
+                  <div key={r.id} className="flex items-center gap-4 px-5 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
                     <div className="flex-1">
-                      <p className="text-gray-300 text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
                       <p className="text-gray-500 text-xs dark:text-gray-400">{r.reason}</p>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Expired {new Date(r.expiresAt).toLocaleDateString('en-AU')}</p>
@@ -594,9 +594,9 @@ function LockTab() {
           )}
 
           {records.length === 0 && (
-            <div className="bg-gray-900 border border-gray-800 rounded-xl py-12 text-center">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-12 text-center">
               <p className="text-3xl mb-2"></p>
-              <p className="text-gray-400 text-sm">No lock exceptions on record.</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">No lock exceptions on record.</p>
             </div>
           )}
         </div>

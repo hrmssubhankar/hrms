@@ -84,8 +84,8 @@ const STATUS_STYLE: Record<string, string> = {
 }
 
 const MANAGER_ROLES = ['director', 'hr_officer', 'operations_manager', 'team_leader', 'compliance_manager']
-const INPUT  = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
-const LABEL  = 'block text-xs font-medium text-gray-400 mb-1'
+const INPUT  = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const LABEL  = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
 function calcDays(start: string, end: string): number {
   if (!start || !end) return 0
@@ -281,14 +281,14 @@ export default function LeavePage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Leave Management</h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
             {canApprove ? 'Review team leave requests, balances and calendar' : 'Submit and track your leave'}
           </p>
         </div>
         <div className="flex items-center gap-3">
           {canApprove && (
             <Link href="/tenant/leave/settings"
-              className="px-3 py-2 rounded-lg text-xs border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition">
+              className="px-3 py-2 rounded-lg text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white hover:border-gray-500 transition">
               Leave Settings
             </Link>
           )}
@@ -308,7 +308,7 @@ export default function LeavePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-800">
+      <div className="flex gap-1 border-b border-gray-200 dark:border-gray-800">
         {([
           { id: 'requests', label: 'Requests' },
           { id: 'balances', label: 'Balances' },
@@ -341,7 +341,7 @@ export default function LeavePage() {
               { label: 'Cancelled',    value: stats.cancelled,         color: 'text-gray-500' },
               { label: 'Days Approved',value: stats.totalDaysApproved, color: 'text-purple-400' },
             ].map(s => (
-              <div key={s.label} className="bg-gray-800 border border-gray-700 rounded-xl p-4">
+              <div key={s.label} className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl p-4">
                 <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                 <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
               </div>
@@ -352,7 +352,7 @@ export default function LeavePage() {
           <div className="flex flex-wrap gap-3">
             <select value={filterStatus}
               onChange={e => { setFilterStatus(e.target.value); loadRequests(e.target.value, filterType) }}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
               <option value="">All statuses</option>
               {['pending','approved','rejected','cancelled'].map(s => (
                 <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
@@ -360,13 +360,13 @@ export default function LeavePage() {
             </select>
             <select value={filterType}
               onChange={e => { setFilterType(e.target.value); loadRequests(filterStatus, e.target.value) }}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+              className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
               <option value="">All types</option>
               {leaveTypes.map(t => <option key={t.key} value={t.key}>{t.emoji} {t.label}</option>)}
             </select>
             {(filterStatus || filterType) && (
               <button onClick={() => { setFilterStatus(''); setFilterType(''); loadRequests('', '') }}
-                className="text-xs text-gray-400 hover:text-white px-3 py-2 border border-gray-700 rounded-lg">
+                className="text-xs text-gray-600 dark:text-gray-400 hover:text-white px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg">
                 Clear filters
               </button>
             )}
@@ -376,13 +376,13 @@ export default function LeavePage() {
           {loadingReqs ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
           ) : requests.length === 0 ? (
-            <div className="text-center py-16 bg-gray-800/50 rounded-2xl border border-gray-700">
+            <div className="text-center py-16 bg-gray-100 dark:bg-gray-800/50 rounded-2xl border border-gray-300 dark:border-gray-700">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-              <p className="text-gray-400 font-medium">No leave requests found</p>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">No leave requests found</p>
               <p className="text-sm text-gray-600 mt-1 dark:text-gray-400">
                 {canApprove ? 'No requests match your filters' : 'Submit your first leave request above'}
               </p>
@@ -393,10 +393,10 @@ export default function LeavePage() {
                 const isExpanded = expanded === r.id
                 const isBusy     = reviewing === r.id
                 return (
-                  <div key={r.id} className="bg-gray-800/70 border border-gray-700 rounded-xl overflow-hidden">
+                  <div key={r.id} className="bg-gray-100 dark:bg-gray-800/70 border border-gray-300 dark:border-gray-700 rounded-xl overflow-hidden">
                     <button
                       onClick={() => setExpanded(isExpanded ? null : r.id)}
-                      className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-800 transition-colors"
+                      className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-100 dark:bg-gray-800 transition-colors"
                     >
                       <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {(r.employeeFirstName?.[0] ?? '?').toUpperCase()}
@@ -406,7 +406,7 @@ export default function LeavePage() {
                           {canApprove && (
                             <span className="text-sm font-medium text-white">{r.employeeFirstName} {r.employeeLastName}</span>
                           )}
-                          <span className="text-xs text-gray-400">{typeLabel[r.leaveType] ?? r.leaveType}</span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">{typeLabel[r.leaveType] ?? r.leaveType}</span>
                         </div>
                         <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                           {fmt(r.startDate)} → {fmt(r.endDate)}
@@ -422,7 +422,7 @@ export default function LeavePage() {
                     </button>
 
                     {isExpanded && (
-                      <div className="px-5 pb-5 border-t border-gray-700 pt-4 space-y-4">
+                      <div className="px-5 pb-5 border-t border-gray-300 dark:border-gray-700 pt-4 space-y-4">
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                           <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Requested on</p>
@@ -431,7 +431,7 @@ export default function LeavePage() {
                           {r.reason && (
                             <div className="col-span-2">
                               <p className="text-xs text-gray-500 dark:text-gray-400">Reason</p>
-                              <p className="text-gray-300">{r.reason}</p>
+                              <p className="text-gray-600 dark:text-gray-300">{r.reason}</p>
                             </div>
                           )}
                           {r.reviewedAt && (
@@ -443,13 +443,13 @@ export default function LeavePage() {
                           {r.reviewNote && (
                             <div className="col-span-2">
                               <p className="text-xs text-gray-500 dark:text-gray-400">Review note</p>
-                              <p className="text-gray-300">{r.reviewNote}</p>
+                              <p className="text-gray-600 dark:text-gray-300">{r.reviewNote}</p>
                             </div>
                           )}
                         </div>
 
                         {canApprove && r.status === 'pending' && (
-                          <div className="space-y-3 pt-2 border-t border-gray-700">
+                          <div className="space-y-3 pt-2 border-t border-gray-300 dark:border-gray-700">
                             <div>
                               <label className={LABEL}>Note (optional)</label>
                               <input type="text" placeholder="Add a note for the employee…"
@@ -471,7 +471,7 @@ export default function LeavePage() {
                         )}
 
                         {!canApprove && r.status === 'pending' && (
-                          <div className="pt-2 border-t border-gray-700">
+                          <div className="pt-2 border-t border-gray-300 dark:border-gray-700">
                             <button onClick={() => cancel(r.id)} disabled={isBusy}
                               className="px-4 py-2 border border-red-800 text-red-400 hover:bg-red-900/30 disabled:opacity-50 text-sm rounded-lg transition-colors">
                               {isBusy ? 'Cancelling…' : 'Cancel Request'}
@@ -495,15 +495,15 @@ export default function LeavePage() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <button onClick={() => { const y = balYear - 1; setBalYear(y); loadBalances(y, balEmployee) }}
-                className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition">←</button>
-              <span className="px-4 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-white font-semibold min-w-[80px] text-center">{balYear}</span>
+                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition">←</button>
+              <span className="px-4 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white font-semibold min-w-[80px] text-center">{balYear}</span>
               <button onClick={() => { const y = balYear + 1; setBalYear(y); loadBalances(y, balEmployee) }}
-                className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition">→</button>
+                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition">→</button>
             </div>
             {canApprove && employees.length > 0 && (
               <select value={balEmployee}
                 onChange={e => { setBalEmployee(e.target.value); loadBalances(balYear, e.target.value) }}
-                className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
                 <option value="">My balance</option>
                 {employees.map(emp => (
                   <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
@@ -511,19 +511,19 @@ export default function LeavePage() {
               </select>
             )}
             <button onClick={() => loadBalances(balYear, balEmployee)}
-              className="px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-400 hover:text-white transition">
+              className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white transition">
               ↻ Refresh
             </button>
           </div>
 
           {!balLinked ? (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-              <p className="text-gray-400">Your account is not linked to an employee record. Contact HR.</p>
+              <p className="text-gray-600 dark:text-gray-400">Your account is not linked to an employee record. Contact HR.</p>
             </div>
           ) : loadingBal ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">Calculating balances…</div>
@@ -541,7 +541,7 @@ export default function LeavePage() {
                   : 'text-green-400'
 
                 return (
-                  <div key={b.key} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+                  <div key={b.key} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-3">
                     <div className="flex items-center gap-2.5">
                       <span className="text-2xl">{b.emoji}</span>
                       <div>
@@ -551,21 +551,21 @@ export default function LeavePage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="bg-gray-800/60 rounded-lg px-3 py-2">
+                      <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg px-3 py-2">
                         <p className="text-xs text-gray-500 dark:text-gray-400">Entitlement</p>
                         <p className="font-semibold text-white">
                           {b.entitlement == null || b.entitlement >= 999 ? '∞' : `${b.entitlement}d`}
                         </p>
                       </div>
-                      <div className="bg-gray-800/60 rounded-lg px-3 py-2">
+                      <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg px-3 py-2">
                         <p className="text-xs text-gray-500 dark:text-gray-400">Taken</p>
                         <p className="font-semibold text-white">{b.taken}d</p>
                       </div>
-                      <div className="bg-gray-800/60 rounded-lg px-3 py-2">
+                      <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg px-3 py-2">
                         <p className="text-xs text-gray-500 dark:text-gray-400">Pending</p>
                         <p className="font-semibold text-yellow-400">{b.pending}d</p>
                       </div>
-                      <div className="bg-gray-800/60 rounded-lg px-3 py-2">
+                      <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg px-3 py-2">
                         <p className="text-xs text-gray-500 dark:text-gray-400">Remaining</p>
                         <p className={`font-semibold ${remainingColor}`}>
                           {b.remaining == null ? '∞' : `${b.remaining}d`}
@@ -578,7 +578,7 @@ export default function LeavePage() {
                         <div className="flex justify-between text-xs text-gray-600 mb-1 dark:text-gray-400">
                           <span>Used</span><span>{pct}%</span>
                         </div>
-                        <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                        <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all"
                             style={{
@@ -608,7 +608,7 @@ export default function LeavePage() {
                 if (m < 1) { m = 12; y-- }
                 setCalMonth(m); setCalYear(y); loadCalendar(y, m)
               }}
-              className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition"
+              className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition"
             >← Prev</button>
             <h2 className="text-lg font-semibold text-white">{MONTHS[calMonth - 1]} {calYear}</h2>
             <button
@@ -617,7 +617,7 @@ export default function LeavePage() {
                 if (m > 12) { m = 1; y++ }
                 setCalMonth(m); setCalYear(y); loadCalendar(y, m)
               }}
-              className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition"
+              className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition"
             >Next →</button>
           </div>
 
@@ -625,12 +625,12 @@ export default function LeavePage() {
           {calEvents.length > 0 && (
             <div className="flex flex-wrap gap-3">
               {[...new Map(calEvents.map(e => [e.leaveType, { label: e.label, emoji: e.emoji, color: e.color }])).entries()].map(([key, cfg]) => (
-                <div key={key} className="flex items-center gap-1.5 text-xs text-gray-400">
+                <div key={key} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                   <span className="w-3 h-3 rounded-full inline-block shrink-0" style={{ background: cfg.color }} />
                   {cfg.emoji} {cfg.label}
                 </div>
               ))}
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                 <span className="w-3 h-3 rounded-full inline-block shrink-0 border-2 border-yellow-500 bg-transparent" />
                 Pending
               </div>
@@ -640,9 +640,9 @@ export default function LeavePage() {
           {loadingCal ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading calendar…</div>
           ) : (
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
               {/* Weekday headers */}
-              <div className="grid grid-cols-7 border-b border-gray-800">
+              <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-800">
                 {WEEKDAYS.map(d => (
                   <div key={d} className="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     {d}
@@ -664,7 +664,7 @@ export default function LeavePage() {
                   return (
                     <div
                       key={idx}
-                      className={`min-h-[90px] border-r border-b border-gray-800 p-1.5 last:border-r-0 ${
+                      className={`min-h-[90px] border-r border-b border-gray-200 dark:border-gray-800 p-1.5 last:border-r-0 ${
                         !day ? 'bg-gray-900/30' : 'bg-gray-900'
                       }`}
                     >
@@ -713,7 +713,7 @@ export default function LeavePage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <form onSubmit={submit}
-            className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl">
+            className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">New Leave Request</h2>
               <button type="button" onClick={() => { setShowForm(false); setFormError(null) }}
@@ -800,7 +800,7 @@ export default function LeavePage() {
                 {saving ? 'Submitting…' : 'Submit Request'}
               </button>
               <button type="button" onClick={() => { setShowForm(false); setFormError(null) }}
-                className="px-5 py-2.5 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg">
+                className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg">
                 Cancel
               </button>
             </div>

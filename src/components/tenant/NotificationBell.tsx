@@ -76,7 +76,7 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="relative p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        className="relative p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         aria-label="Notifications"
       >
         {/* Bell SVG */}
@@ -107,13 +107,13 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
 
           <div className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
             {loading ? (
-              <p className="px-4 py-6 text-sm text-gray-400 text-center">Loading…</p>
+              <p className="px-4 py-6 text-sm text-gray-600 dark:text-gray-400 text-center">Loading…</p>
             ) : notifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <svg className="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-8 h-8 mx-auto mb-2 text-gray-600 dark:text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
-                <p className="text-sm text-gray-400">No notifications yet</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">No notifications yet</p>
               </div>
             ) : notifications.map(n => (
               <button
@@ -127,8 +127,8 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
                     <p className={`text-sm leading-snug ${!n.isRead ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
                       {n.title}
                     </p>
-                    {n.body && <p className="text-xs text-gray-400 mt-0.5 truncate">{n.body}</p>}
-                    <p className="text-xs text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
+                    {n.body && <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate">{n.body}</p>}
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
                   </div>
                   {!n.isRead && (
                     <div className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ background: primaryColor }} />
@@ -139,7 +139,7 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
           </div>
 
           <div className="px-4 py-2.5 border-t border-gray-100 dark:border-gray-800 text-center">
-            <button className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">View all notifications</button>
+            <button className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-600 dark:text-gray-300">View all notifications</button>
           </div>
         </div>
       )}

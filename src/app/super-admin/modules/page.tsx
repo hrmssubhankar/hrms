@@ -13,15 +13,15 @@ type ModuleStat = {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Core:         'bg-blue-900/30 text-blue-300 border-blue-800',
-  Compliance:   'bg-green-900/30 text-green-300 border-green-800',
-  Learning:     'bg-purple-900/30 text-purple-300 border-purple-800',
-  Talent:       'bg-yellow-900/30 text-yellow-300 border-yellow-800',
-  Performance:  'bg-orange-900/30 text-orange-300 border-orange-800',
-  Safety:       'bg-red-900/30 text-red-300 border-red-800',
-  Intelligence: 'bg-cyan-900/30 text-cyan-300 border-cyan-800',
-  Experience:   'bg-pink-900/30 text-pink-300 border-pink-800',
-  Operations:   'bg-teal-900/30 text-teal-300 border-teal-800',
+  Core:         'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+  Compliance:   'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800',
+  Learning:     'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+  Talent:       'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800',
+  Performance:  'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+  Safety:       'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
+  Intelligence: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800',
+  Experience:   'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800',
+  Operations:   'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800',
 }
 
 const BAR_COLORS: Record<string, string> = {
@@ -69,18 +69,18 @@ export default function ModulesPage() {
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Active Toggles</p>
-          <p className="text-2xl font-bold text-green-400">{totalEnabled}</p>
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400">{totalEnabled}</p>
           <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">of {maxPossible} possible</p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Avg Modules/Client</p>
-          <p className="text-2xl font-bold text-purple-400">
+          <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
             {tenantCount ? Math.round(totalEnabled / tenantCount) : 0}
           </p>
         </div>
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Platform Adoption</p>
-          <p className="text-2xl font-bold text-blue-400">
+          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             {maxPossible ? Math.round((totalEnabled / maxPossible) * 100) : 0}%
           </p>
         </div>
@@ -122,18 +122,18 @@ export default function ModulesPage() {
               <>
                 <tr
                   key={mod.id}
-                  className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100 dark:bg-gray-800/20 cursor-pointer transition"
+                  className="border-b border-gray-200 dark:border-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800/20 cursor-pointer transition"
                   onClick={() => setExpanded(expanded === mod.id ? null : mod.id)}
                 >
                   <td className="px-4 py-3 text-gray-600 text-xs dark:text-gray-400">{mod.id}</td>
-                  <td className="px-4 py-3 text-gray-200 font-medium">{mod.name}</td>
+                  <td className="px-4 py-3 text-gray-700 dark:text-gray-200 font-medium">{mod.name}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded border ${CATEGORY_COLORS[mod.category] ?? ''}`}>
                       {mod.category}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-sm font-semibold ${mod.percentage === 100 ? 'text-green-400' : mod.percentage > 50 ? 'text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                    <span className={`text-sm font-semibold ${mod.percentage === 100 ? 'text-green-600 dark:text-green-400' : mod.percentage > 50 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
                       {mod.enabledCount}/{tenantCount}
                     </span>
                     <span className="text-xs text-gray-500 ml-1 dark:text-gray-400">({mod.percentage}%)</span>
@@ -147,7 +147,7 @@ export default function ModulesPage() {
                         />
                       </div>
                       {mod.enabledFor.length > 0 && (
-                        <span className="text-purple-400 text-xs">{expanded === mod.id ? '▲' : '▼'}</span>
+                        <span className="text-purple-600 dark:text-purple-400 text-xs">{expanded === mod.id ? '▲' : '▼'}</span>
                       )}
                     </div>
                   </td>

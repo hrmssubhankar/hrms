@@ -71,8 +71,8 @@ function expiryBadge(exp: string | null) {
   return { text: `Expires ${fmtDate(exp)}`, cls: 'text-gray-500 bg-gray-800 border-gray-700' }
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
-const LABEL = 'block text-xs font-medium text-gray-400 mb-1'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
 // Require expiry for certain categories
 const EXPIRY_CATS = new Set([
@@ -151,7 +151,7 @@ export default function MyDocumentsPage() {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">My Documents</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Upload personal compliance documents for HR review</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Upload personal compliance documents for HR review</p>
         </div>
         {linked && (
           <button
@@ -165,13 +165,13 @@ export default function MyDocumentsPage() {
 
       {/* Not linked state */}
       {!loading && !linked && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center space-y-3">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center space-y-3">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">Account not linked to an employee record</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">Account not linked to an employee record</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Contact HR to link your account before uploading documents.</p>
         </div>
       )}
@@ -188,7 +188,7 @@ export default function MyDocumentsPage() {
 
       {/* Upload form */}
       {showForm && linked && (
-        <form onSubmit={submit} className="bg-gray-900 border border-purple-800/50 rounded-2xl p-6 space-y-4">
+        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-purple-800/50 rounded-2xl p-6 space-y-4">
           <h3 className="text-sm font-semibold text-white">Upload Document for HR Review</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
@@ -245,7 +245,7 @@ export default function MyDocumentsPage() {
               {saving ? 'Uploading…' : 'Submit for Review'}
             </button>
             <button type="button" onClick={() => setShowForm(false)}
-              className="px-5 py-2 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg">
+              className="px-5 py-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg">
               Cancel
             </button>
           </div>
@@ -255,13 +255,13 @@ export default function MyDocumentsPage() {
       {loading ? (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
       ) : linked && docs.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl py-14 text-center space-y-3">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl py-14 text-center space-y-3">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No documents yet</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No documents yet</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Upload your compliance documents to keep HR informed of your certifications.</p>
         </div>
       ) : linked ? (

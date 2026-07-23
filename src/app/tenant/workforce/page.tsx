@@ -21,7 +21,7 @@ export default function WorkforcePage() {
     })
   }, [])
 
-  if (loading) return <div className="p-8 text-sm text-gray-400">Loading…</div>
+  if (loading) return <div className="p-8 text-sm text-gray-600 dark:text-gray-400">Loading…</div>
 
   return (
     <div className="h-full flex flex-col">
@@ -57,7 +57,7 @@ export default function WorkforcePage() {
             <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Headcount by Department</h2>
           </div>
           {depts.length === 0 ? (
-            <p className="p-6 text-sm text-gray-400">No departments configured</p>
+            <p className="p-6 text-sm text-gray-600 dark:text-gray-400">No departments configured</p>
           ) : (
             <table className="w-full text-sm">
               <thead><tr className="border-b border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-800">
@@ -75,7 +75,7 @@ export default function WorkforcePage() {
                     <td className="px-5 py-3">
                       {d.positions > d.count ? (
                         <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">{d.positions - d.count} open</span>
-                      ) : <span className="text-xs text-gray-400">—</span>}
+                      ) : <span className="text-xs text-gray-600 dark:text-gray-400">—</span>}
                     </td>
                   </tr>
                 ))}
@@ -90,13 +90,13 @@ export default function WorkforcePage() {
             <h2 className="text-sm font-semibold text-gray-900 dark:text-white">All Positions</h2>
           </div>
           {positions.length === 0 ? (
-            <p className="p-6 text-sm text-gray-400">No positions defined</p>
+            <p className="p-6 text-sm text-gray-600 dark:text-gray-400">No positions defined</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-4">
               {positions.map(p => (
                 <div key={p.id} className="border border-gray-100 rounded-lg p-3 dark:border-gray-800">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{p.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{depts.find(d => d.id === p.departmentId)?.name ?? 'Unassigned'}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{depts.find(d => d.id === p.departmentId)?.name ?? 'Unassigned'}</p>
                 </div>
               ))}
             </div>

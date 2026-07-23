@@ -28,7 +28,7 @@ const STATUS_STYLE: Record<string, string> = {
   void:   'bg-red-900/50 text-red-300 border-red-800',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function ContractsPage() {
   const [contracts,  setContracts]  = useState<Contract[]>([])
@@ -84,7 +84,7 @@ export default function ContractsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Employment Contracts</h1>
-          <p className="text-gray-400 text-sm mt-1">Create, send, and track employment contracts and onboarding documents</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Create, send, and track employment contracts and onboarding documents</p>
         </div>
         <button onClick={() => setShowForm(v => !v)}
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
@@ -100,8 +100,8 @@ export default function ContractsPage() {
           { label: 'Sent',   value: stats.sent,   color: 'text-blue-400' },
           { label: 'Signed', value: stats.signed, color: 'text-green-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -109,18 +109,18 @@ export default function ContractsPage() {
 
       {/* Create form */}
       {showForm && (
-        <form onSubmit={create} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={create} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
           <h3 className="text-sm font-semibold text-purple-300">Create New Contract</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Employee *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
               <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Contract Type *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Contract Type *</label>
               <select required value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
                 {CONTRACT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
@@ -143,7 +143,7 @@ export default function ContractsPage() {
 
       {/* Filter */}
       <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(e.target.value) }}
-        className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
         <option value="">All statuses</option>
         <option value="draft">Draft</option>
         <option value="sent">Sent</option>
@@ -151,14 +151,14 @@ export default function ContractsPage() {
         <option value="void">Void</option>
       </select>
 
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : contracts.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : contracts.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No contracts yet</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No contracts yet</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create a contract to begin the employment documentation process.</p>
         </div>
       ) : (
@@ -167,14 +167,14 @@ export default function ContractsPage() {
             const isOpen = expanded === c.id
             const ts = taxSuper[c.id] ?? { tfn: c.tfnProvided, fund: c.superFund ?? '' }
             return (
-              <div key={c.id} className={`bg-gray-900 border rounded-xl overflow-hidden ${
+              <div key={c.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden ${
                 c.status === 'signed' ? 'border-green-900/50' : 'border-gray-800'
               }`}>
                 <div className="flex items-center gap-4 px-5 py-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : c.id)}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
                       <span className="text-white font-medium text-sm">{c.employeeFirstName} {c.employeeLastName}</span>
-                      <span className="text-xs text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full">
+                      <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                         {CONTRACT_TYPES.find(t => t.value === c.type)?.label ?? c.type}
                       </span>
                       <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[c.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
@@ -192,7 +192,7 @@ export default function ContractsPage() {
                 </div>
 
                 {isOpen && (
-                  <div className="border-t border-gray-800 px-5 py-4 space-y-4">
+                  <div className="border-t border-gray-200 dark:border-gray-800 px-5 py-4 space-y-4">
                     {/* Status actions */}
                     {c.status !== 'signed' && c.status !== 'void' && (
                       <div className="flex gap-2 flex-wrap">
@@ -209,7 +209,7 @@ export default function ContractsPage() {
                           </button>
                         )}
                         <button onClick={() => patch(c.id, { status: 'void' })}
-                          className="text-xs bg-gray-800 border border-gray-700 text-gray-400 hover:border-red-700 hover:text-red-400 px-3 py-1.5 rounded-lg transition">
+                          className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-700 hover:text-red-400 px-3 py-1.5 rounded-lg transition">
                           Void
                         </button>
                       </div>
@@ -248,7 +248,7 @@ export default function ContractsPage() {
                             checked={ts.tfn}
                             onChange={e => setTaxSuper(prev => ({ ...prev, [c.id]: { ...ts, tfn: e.target.checked } }))}
                             className="accent-green-500 w-4 h-4" />
-                          <span className="text-sm text-gray-300">TFN Provided</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-300">TFN Provided</span>
                         </label>
                         <div>
                           <input value={ts.fund}
@@ -257,7 +257,7 @@ export default function ContractsPage() {
                         </div>
                       </div>
                       <button onClick={() => saveTaxSuper(c.id)}
-                        className="mt-2 text-xs bg-gray-800 border border-gray-700 text-gray-300 hover:border-purple-600 px-3 py-1.5 rounded-lg transition">
+                        className="mt-2 text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-purple-600 px-3 py-1.5 rounded-lg transition">
                         Save Tax & Super
                       </button>
                     </div>
@@ -268,7 +268,7 @@ export default function ContractsPage() {
                         <span className="text-xl"></span>
                         <div>
                           <p className="text-sm font-semibold text-green-300">Contract Executed</p>
-                          {c.signedAt && <p className="text-xs text-gray-400">Signed {new Date(c.signedAt).toLocaleDateString('en-AU')}</p>}
+                          {c.signedAt && <p className="text-xs text-gray-600 dark:text-gray-400">Signed {new Date(c.signedAt).toLocaleDateString('en-AU')}</p>}
                         </div>
                       </div>
                     )}

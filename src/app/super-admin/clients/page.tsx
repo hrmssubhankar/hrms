@@ -125,11 +125,11 @@ export default function ClientsPage() {
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
                     No clients yet.{' '}
-                    <Link href="/super-admin/clients/new" className="text-purple-400 hover:underline">Add one →</Link>
+                    <Link href="/super-admin/clients/new" className="text-purple-600 dark:text-purple-400 hover:underline">Add one →</Link>
                   </td>
                 </tr>
               ) : filtered.map((c, i) => (
-                <tr key={c.id} className={`border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:bg-gray-800/50 transition ${i % 2 === 0 ? '' : 'bg-white dark:bg-gray-900/50'}`}>
+                <tr key={c.id} className={`border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition ${i % 2 === 0 ? '' : 'bg-white dark:bg-gray-900/50'}`}>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       {c.logoUrl ? (
@@ -152,7 +152,7 @@ export default function ClientsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <code className="text-purple-300 text-xs">{c.slug}</code>
+                    <code className="text-purple-700 dark:text-purple-300 text-xs">{c.slug}</code>
                     <p className="text-gray-500 text-xs mt-0.5 dark:text-gray-400">{c.slug}.yourdomain.com</p>
                   </td>
                   <td className="px-5 py-3.5">
@@ -165,8 +165,8 @@ export default function ClientsPage() {
                       onClick={() => toggleActive(c.id, c.isActive)}
                       className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium transition ${
                         c.isActive
-                          ? 'bg-green-900 text-green-300 hover:bg-red-900 hover:text-red-300'
-                          : 'bg-red-900 text-red-300 hover:bg-green-900 hover:text-green-300'
+                          ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 hover:bg-red-100 dark:bg-red-900 hover:text-red-700 dark:text-red-300'
+                          : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 hover:bg-green-100 dark:bg-green-900 hover:text-green-700 dark:text-green-300'
                       }`}
                     >
                       <span className={`w-1.5 h-1.5 rounded-full ${c.isActive ? 'bg-green-400' : 'bg-red-400'}`} />
@@ -185,21 +185,21 @@ export default function ClientsPage() {
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Link href={`/super-admin/clients/${c.id}`}         className="text-xs text-blue-400 hover:text-blue-300 font-medium">Edit</Link>
-                      <Link href={`/super-admin/clients/${c.id}/users`}   className="text-xs text-green-400 hover:text-green-300 font-medium">Users</Link>
-                      <Link href={`/super-admin/clients/${c.id}/modules`} className="text-xs text-purple-400 hover:text-purple-300 font-medium">Modules</Link>
-                      <Link href={`/super-admin/clients/${c.id}?tab=theme`} className="text-xs text-pink-400 hover:text-pink-300 font-medium">Theme</Link>
+                      <Link href={`/super-admin/clients/${c.id}`}         className="text-xs text-blue-400 hover:text-blue-700 dark:text-blue-300 font-medium">Edit</Link>
+                      <Link href={`/super-admin/clients/${c.id}/users`}   className="text-xs text-green-400 hover:text-green-700 dark:text-green-300 font-medium">Users</Link>
+                      <Link href={`/super-admin/clients/${c.id}/modules`} className="text-xs text-purple-400 hover:text-purple-700 dark:text-purple-300 font-medium">Modules</Link>
+                      <Link href={`/super-admin/clients/${c.id}?tab=theme`} className="text-xs text-pink-400 hover:text-pink-700 dark:text-pink-300 font-medium">Theme</Link>
                       <button
                         onClick={() => loginAsTenant(c.id, c.name)}
                         disabled={impersonating === c.id || !c.isActive}
-                        className="text-xs text-yellow-400 hover:text-yellow-300 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="text-xs text-yellow-400 hover:text-yellow-700 dark:text-yellow-300 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
                         title={c.isActive ? 'Open this tenant\'s portal as an impersonated session' : 'Client is inactive'}
                       >
                         {impersonating === c.id ? '…' : 'Login as'}
                       </button>
                       <button
                         onClick={() => deleteClient(c.id, c.name)}
-                        className="text-xs text-red-400 hover:text-red-300 font-medium"
+                        className="text-xs text-red-400 hover:text-red-700 dark:text-red-300 font-medium"
                       >
                         Delete
                       </button>

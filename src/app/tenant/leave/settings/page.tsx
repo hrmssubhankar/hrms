@@ -18,7 +18,7 @@ type LeaveTypeRow = {
   _dirty?: boolean
 }
 
-const INPUT = 'w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500'
 const LABEL = 'block text-xs font-medium text-gray-500 mb-1'
 
 export default function LeaveSettingsPage() {
@@ -117,12 +117,12 @@ export default function LeaveSettingsPage() {
           {types.map(t => (
             <div
               key={t.key}
-              className={`bg-gray-900 border rounded-2xl overflow-hidden transition ${
+              className={`bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden transition ${
                 t._dirty ? 'border-purple-700/60' : t.isActive ? 'border-gray-800' : 'border-gray-800/40 opacity-60'
               }`}
             >
               {/* Row header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{t.emoji}</span>
                   <div>
@@ -198,11 +198,11 @@ export default function LeaveSettingsPage() {
       )}
 
       {!loading && types.length > 0 && (
-        <div className="bg-gray-900/60 border border-gray-800 rounded-xl px-5 py-4 text-xs text-gray-600 leading-relaxed dark:text-gray-400">
+        <div className="bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-xl px-5 py-4 text-xs text-gray-600 leading-relaxed dark:text-gray-400">
           <p className="font-medium text-gray-500 mb-1 dark:text-gray-400">Notes</p>
-          <p>• Setting a type to <strong className="text-gray-400">Inactive</strong> hides it from the leave request form. Existing requests are not affected.</p>
+          <p>• Setting a type to <strong className="text-gray-600 dark:text-gray-400">Inactive</strong> hides it from the leave request form. Existing requests are not affected.</p>
           <p>• Entitlement changes apply to balance calculations going forward. Historical requests are recalculated on the next view.</p>
-          <p>• <strong className="text-gray-400">999</strong> is used internally to represent unlimited leave (e.g. Unpaid Leave). It displays as ∞ in the balances view.</p>
+          <p>• <strong className="text-gray-600 dark:text-gray-400">999</strong> is used internally to represent unlimited leave (e.g. Unpaid Leave). It displays as ∞ in the balances view.</p>
         </div>
       )}
     </div>

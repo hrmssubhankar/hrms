@@ -89,12 +89,12 @@ export default function ClientIntegrationsPage() {
       <div>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Payroll Integrations</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-          {tenantName} · <span className="text-purple-300">{country}</span> · {currency}
+          {tenantName} · <span className="text-purple-700 dark:text-purple-300">{country}</span> · {currency}
         </p>
       </div>
 
       {msg && (
-        <div className={`rounded-lg px-4 py-2.5 text-sm border ${msg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${msg.startsWith('') ? 'bg-green-50 dark:bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-100 dark:bg-red-900/40 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300'}`}>
           {msg}
         </div>
       )}
@@ -114,7 +114,7 @@ export default function ClientIntegrationsPage() {
             {connectedProviders.map(p => {
               const cfg = integrations[p.id]
               return (
-                <div key={p.id} className="bg-white dark:bg-gray-900 border border-green-800/50 rounded-xl p-5">
+                <div key={p.id} className="bg-white dark:bg-gray-900 border border-green-200 dark:border-green-800/50 rounded-xl p-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-900 dark:text-white font-bold text-sm shrink-0"
@@ -125,13 +125,13 @@ export default function ClientIntegrationsPage() {
                       </div>
                     </div>
                     <div className="flex gap-2 items-center">
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-900/40 border border-green-700 text-green-300">● Connected</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300">● Connected</span>
                       <button onClick={() => startConfig(p)}
                         className="text-xs px-3 py-1.5 rounded border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white transition">
                         Edit
                       </button>
                       <button onClick={() => disconnect(p)} disabled={saving === p.id}
-                        className="text-xs px-3 py-1.5 rounded border border-red-800 text-red-400 hover:bg-red-900/20 transition disabled:opacity-50">
+                        className="text-xs px-3 py-1.5 rounded border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-100 dark:bg-red-900/20 transition disabled:opacity-50">
                         {saving === p.id ? '…' : 'Disconnect'}
                       </button>
                     </div>
@@ -159,7 +159,7 @@ export default function ClientIntegrationsPage() {
                         </div>
                       )}
                       {p.authType === 'oauth2' && (
-                        <div className="bg-blue-950/40 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
+                        <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
                           OAuth2 connection is managed at the tenant level. The tenant connects via Settings → Integrations in their portal.
                           Record the Xero Tenant ID here if needed for reference.
                         </div>
@@ -212,7 +212,7 @@ export default function ClientIntegrationsPage() {
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{p.name}</p>
                       <p className="text-xs text-gray-600 dark:text-gray-400">{p.description}</p>
                       <a href={p.website} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-purple-400 hover:text-purple-300">{p.website}</a>
+                        className="text-xs text-purple-400 hover:text-purple-700 dark:text-purple-300">{p.website}</a>
                     </div>
                   </div>
                   <div className="flex gap-2 items-center">
@@ -243,19 +243,19 @@ export default function ClientIntegrationsPage() {
                           className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500" />
                         <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
                           Find your API key at{' '}
-                          <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300">{p.website}</a>
+                          <a href={p.website} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-700 dark:text-purple-300">{p.website}</a>
                         </p>
                       </div>
                     )}
                     {p.authType === 'oauth2' && (
-                      <div className="bg-blue-950/40 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
+                      <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
                         <p className="font-semibold mb-1">OAuth2 Integration</p>
                         <p>The tenant connects their {p.name} account via their portal under Settings → Integrations.
                         Once connected, record their {p.name} Organisation ID below for reference.</p>
                       </div>
                     )}
                     {p.authType === 'manual' && (
-                      <div className="bg-amber-950/40 border border-amber-800 rounded-lg p-3 text-xs text-amber-300">
+                      <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-xs text-amber-700 dark:text-amber-300">
                         This provider uses a manual export/import process. Configure the export settings and record the account details below.
                       </div>
                     )}

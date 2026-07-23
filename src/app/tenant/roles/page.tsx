@@ -32,7 +32,7 @@ const ROLE_LABEL: Record<string, string> = {
   employee: 'Employee', contractor: 'Contractor', auditor: 'Auditor', it_admin: 'IT Admin',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 function generatePassword(length = 12) {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'
@@ -103,7 +103,7 @@ export default function RolesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Roles & Access</h1>
-          <p className="text-gray-400 text-sm mt-1">Manage portal users and their access roles</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage portal users and their access roles</p>
         </div>
         <PermissionGate permission="roles:write">
           <button onClick={() => { setShowForm(v => !v); setForm({ email: '', role: 'employee', password: generatePassword() }) }}
@@ -115,23 +115,23 @@ export default function RolesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400">Total Users</p>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <p className="text-xs text-gray-600 dark:text-gray-400">Total Users</p>
           <p className="text-2xl font-bold text-white mt-1">{users.length}</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400">Active</p>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <p className="text-xs text-gray-600 dark:text-gray-400">Active</p>
           <p className="text-2xl font-bold text-green-400 mt-1">{activeCount}</p>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <p className="text-xs text-gray-400">Suspended</p>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <p className="text-xs text-gray-600 dark:text-gray-400">Suspended</p>
           <p className="text-2xl font-bold text-red-400 mt-1">{inactiveCount}</p>
         </div>
       </div>
 
       {/* Role breakdown */}
       {Object.keys(roleCounts).length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Breakdown by Role</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(roleCounts).map(([role, count]) => (
@@ -145,31 +145,31 @@ export default function RolesPage() {
 
       {/* Invite form */}
       {showForm && (
-        <form onSubmit={invite} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={invite} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
           <h3 className="text-sm font-semibold text-purple-300">Invite new portal user</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Email *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Email *</label>
               <input required type="email" value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Role *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Role *</label>
               <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} className={INPUT}>
                 {ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
               </select>
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-400 mb-1 block">Temporary Password</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Temporary Password</label>
               <div className="flex gap-2">
                 <input value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                   className={`${INPUT} font-mono`} />
                 <button type="button" onClick={copyPw}
-                  className="shrink-0 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-2 rounded-lg transition">
+                  className="shrink-0 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-lg transition">
                   {copied || 'Copy'}
                 </button>
                 <button type="button" onClick={() => setForm(f => ({ ...f, password: generatePassword() }))}
-                  className="shrink-0 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-2 rounded-lg transition">
+                  className="shrink-0 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-lg transition">
                   ↺
                 </button>
               </div>
@@ -184,29 +184,29 @@ export default function RolesPage() {
       )}
 
       {/* User table */}
-      {loading ? <p className="text-gray-400 text-sm">Loading…</p> : users.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : users.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No portal users yet</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No portal users yet</p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-gray-200 dark:border-gray-800">
                 {['Email', 'Role', '2FA', 'Last Login', 'Status', ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800/60">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
               {users.map(u => (
-                <tr key={u.id} className={`hover:bg-gray-800/30 ${!u.isActive ? 'opacity-50' : ''}`}>
-                  <td className="px-4 py-3 text-gray-200 font-mono text-xs">{u.email}</td>
+                <tr key={u.id} className={`hover:bg-gray-100 dark:hover:bg-gray-800/30 ${!u.isActive ? 'opacity-50' : ''}`}>
+                  <td className="px-4 py-3 text-gray-700 dark:text-gray-200 font-mono text-xs">{u.email}</td>
                   <td className="px-4 py-3">
                     <PermissionGate permission="roles:write"
                       fallback={
@@ -217,7 +217,7 @@ export default function RolesPage() {
                       {editId === u.id ? (
                         <div className="flex gap-1.5">
                           <select value={editRole} onChange={e => setEditRole(e.target.value)}
-                            className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-white">
+                            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded px-2 py-1 text-xs text-gray-900 dark:text-white">
                             {ROLES.map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
                           </select>
                           <button onClick={() => changeRole(u.id, editRole)}

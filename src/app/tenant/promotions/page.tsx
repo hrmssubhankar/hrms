@@ -34,8 +34,8 @@ const EVENT_ICON: Record<string, string> = {
   implemented:'', note_added:'', updated:'️', salary_updated:'',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
-const LABEL = 'block text-xs font-medium text-gray-400 mb-1'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 const TEXTAREA = INPUT + ' min-h-[80px] resize-y'
 
 export default function PromotionsPage() {
@@ -134,7 +134,7 @@ export default function PromotionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Promotions</h1>
-          <p className="text-gray-400 text-sm mt-0.5">Raise, review and track promotion cases</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-0.5">Raise, review and track promotion cases</p>
         </div>
         <button onClick={()=>{
           setForm({employeeId:'',proposedTitle:'',proposedSalary:'',effectiveDate:'',
@@ -155,9 +155,9 @@ export default function PromotionsPage() {
           ['Rejected',    stats.rejected,      'border-red-800'],
           ['Implemented', stats.implemented,   'border-purple-800'],
         ].map(([label, value, border]) => (
-          <div key={label as string} className={`bg-gray-900 border rounded-xl p-3 text-center ${border}`}>
+          <div key={label as string} className={`bg-white dark:bg-gray-900 border rounded-xl p-3 text-center ${border}`}>
             <p className="text-xl font-bold text-white">{value}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{label}</p>
           </div>
         ))}
       </div>
@@ -179,7 +179,7 @@ export default function PromotionsPage() {
           : promotions.length === 0 ? (
             <div className="text-center py-12 text-gray-600 dark:text-gray-400">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
@@ -196,7 +196,7 @@ export default function PromotionsPage() {
                   {STATUS_LABEL[p.status] ?? p.status}
                 </span>
               </div>
-              <p className="text-xs text-gray-400">{p.currentTitle || '—'} → <span className="text-purple-300">{p.proposedTitle}</span></p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">{p.currentTitle || '—'} → <span className="text-purple-300">{p.proposedTitle}</span></p>
               {salaryDiff(p.currentSalary, p.proposedSalary) && (
                 <p className="text-xs text-green-400 mt-0.5">{salaryDiff(p.currentSalary, p.proposedSalary)}</p>
               )}
@@ -208,9 +208,9 @@ export default function PromotionsPage() {
         {/* Detail panel */}
         <div className="lg:col-span-3">
           {!selected ? (
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-10 text-center">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-10 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
@@ -219,13 +219,13 @@ export default function PromotionsPage() {
           ) : (
             <div className="space-y-4">
               {/* Case header */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="text-lg font-bold text-white">
                       {selected.employeeFirstName} {selected.employeeLastName}
                     </h2>
-                    <p className="text-xs text-gray-400">{selected.employeeEmail}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{selected.employeeEmail}</p>
                   </div>
                   <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLE[selected.status] ?? ''}`}>
                     {STATUS_LABEL[selected.status] ?? selected.status}
@@ -234,10 +234,10 @@ export default function PromotionsPage() {
 
                 {/* Promotion comparison */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="bg-gray-800/60 rounded-xl p-3">
+                  <div className="bg-gray-100 dark:bg-gray-800/60 rounded-xl p-3">
                     <p className="text-xs text-gray-500 mb-1 dark:text-gray-400">Current</p>
                     <p className="text-sm font-semibold text-white">{selected.currentTitle || '—'}</p>
-                    {selected.currentSalary && <p className="text-xs text-gray-400 mt-0.5">${selected.currentSalary.toLocaleString()} / yr</p>}
+                    {selected.currentSalary && <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">${selected.currentSalary.toLocaleString()} / yr</p>}
                   </div>
                   <div className="bg-purple-900/30 border border-purple-800/50 rounded-xl p-3">
                     <p className="text-xs text-purple-400 mb-1">Proposed →</p>
@@ -259,15 +259,15 @@ export default function PromotionsPage() {
                   {selected.reviewedBy && <div><p className="text-gray-500 dark:text-gray-400">Reviewed By</p><p className="text-white mt-0.5">{selected.reviewedBy}</p></div>}
                 </div>
 
-                <div className="bg-gray-800/60 rounded-xl p-3 mb-4">
+                <div className="bg-gray-100 dark:bg-gray-800/60 rounded-xl p-3 mb-4">
                   <p className="text-xs text-gray-500 mb-1 dark:text-gray-400">Justification</p>
-                  <p className="text-sm text-gray-200 whitespace-pre-wrap">{selected.justification}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{selected.justification}</p>
                 </div>
 
                 {selected.reviewNotes && (
-                  <div className="bg-gray-800/60 rounded-xl p-3 mb-4">
+                  <div className="bg-gray-100 dark:bg-gray-800/60 rounded-xl p-3 mb-4">
                     <p className="text-xs text-gray-500 mb-1 dark:text-gray-400">Review Notes</p>
-                    <p className="text-sm text-gray-200">{selected.reviewNotes}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-200">{selected.reviewNotes}</p>
                   </div>
                 )}
 
@@ -303,12 +303,12 @@ export default function PromotionsPage() {
               </div>
 
               {/* Add note */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-                <p className="text-xs font-semibold text-gray-400 mb-2">Add Note</p>
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Add Note</p>
                 <div className="flex gap-2">
                   <input value={inlineNote} onChange={e=>setInlineNote(e.target.value)}
                     placeholder="Add a note to this case…"
-                    className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                    className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500" />
                   <button onClick={addNote} disabled={addingNote || !inlineNote.trim()}
                     className="px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition">
                     Add
@@ -317,8 +317,8 @@ export default function PromotionsPage() {
               </div>
 
               {/* History timeline */}
-              <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Timeline</p>
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Timeline</p>
                 {events.length === 0 ? (
                   <p className="text-gray-600 text-sm text-center py-4 dark:text-gray-400">No events yet</p>
                 ) : (
@@ -326,17 +326,17 @@ export default function PromotionsPage() {
                     {events.map((ev, i) => (
                       <div key={ev.id} className="flex gap-3 items-start">
                         <div className="flex flex-col items-center shrink-0">
-                          <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-sm">
+                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center text-sm">
                             {EVENT_ICON[ev.event] ?? ''}
                           </div>
-                          {i < events.length-1 && <div className="w-px h-4 bg-gray-700 mt-1" />}
+                          {i < events.length-1 && <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mt-1" />}
                         </div>
                         <div className="flex-1 pb-1">
                           <div className="flex items-center justify-between gap-2">
                             <p className="text-xs font-medium text-white capitalize">{ev.event.replace(/_/g,' ')}</p>
                             <p className="text-xs text-gray-600 shrink-0 dark:text-gray-400">{fmt(ev.createdAt)}</p>
                           </div>
-                          {ev.note        && <p className="text-xs text-gray-400 mt-0.5">{ev.note}</p>}
+                          {ev.note        && <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{ev.note}</p>}
                           {ev.performedBy && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">by {ev.performedBy}</p>}
                         </div>
                       </div>
@@ -352,10 +352,10 @@ export default function PromotionsPage() {
       {/* New Promotion Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-800">
+          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
               <h2 className="text-lg font-bold text-white">Raise Promotion Case</h2>
-              <button onClick={()=>setShowForm(false)} className="text-gray-400 hover:text-white text-xl">×</button>
+              <button onClick={()=>setShowForm(false)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl">×</button>
             </div>
             <form onSubmit={submitForm} className="p-6 space-y-4">
               <div>
@@ -408,7 +408,7 @@ export default function PromotionsPage() {
                   {saving ? 'Submitting…' : 'Raise Promotion Case'}
                 </button>
                 <button type="button" onClick={()=>setShowForm(false)}
-                  className="px-5 py-2.5 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg">
+                  className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg">
                   Cancel
                 </button>
               </div>

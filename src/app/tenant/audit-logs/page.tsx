@@ -57,31 +57,31 @@ export default function AuditLogsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Audit Log</h1>
-        <p className="text-gray-400 text-sm mt-1">Immutable record of all system actions — who did what, and when</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Immutable record of all system actions — who did what, and when</p>
       </div>
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap items-end">
         <div>
-          <label className="text-xs text-gray-400 mb-1 block">Resource</label>
+          <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Resource</label>
           <select value={filterResource} onChange={e => setFilterResource(e.target.value)}
-            className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500 min-w-32">
+            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 min-w-32">
             <option value="">All</option>
             {resources.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-xs text-gray-400 mb-1 block">Action</label>
+          <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Action</label>
           <select value={filterAction} onChange={e => setFilterAction(e.target.value)}
-            className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
             <option value="">All</option>
             {['create','update','delete','login','logout','export'].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-xs text-gray-400 mb-1 block">Since</label>
+          <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Since</label>
           <input type="date" value={filterSince} onChange={e => setFilterSince(e.target.value)}
-            className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500" />
         </div>
         <button onClick={applyFilters}
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-lg transition">
@@ -89,28 +89,28 @@ export default function AuditLogsPage() {
         </button>
         {(filterResource || filterAction || filterSince) && (
           <button onClick={() => { setFilterResource(''); setFilterAction(''); setFilterSince(''); setPage(0); load('','','',0) }}
-            className="text-xs text-gray-400 hover:text-white px-3 py-2 rounded-lg border border-gray-700 hover:border-gray-600 transition">
+            className="text-xs text-gray-600 dark:text-gray-400 hover:text-white px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-gray-600 transition">
             Clear
           </button>
         )}
       </div>
 
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : logs.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : logs.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No audit entries found</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No audit entries found</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Entries appear as users interact with the system.</p>
         </div>
       ) : (
         <>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-left">
+                <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
                   <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Timestamp</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">User</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Action</th>
@@ -119,7 +119,7 @@ export default function AuditLogsPage() {
                   <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-8 dark:text-gray-400"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800/60">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
                 {logs.map(log => {
                   const isOpen = expanded === log.id
                   const hasDetails = log.oldValues !== null || log.newValues !== null
@@ -127,12 +127,12 @@ export default function AuditLogsPage() {
                     <>
                       <tr key={log.id}
                         onClick={() => hasDetails && setExpanded(isOpen ? null : log.id)}
-                        className={`hover:bg-gray-800/40 ${hasDetails ? 'cursor-pointer' : ''}`}>
-                        <td className="px-4 py-3 text-gray-400 text-xs font-mono whitespace-nowrap">
+                        className={`hover:bg-gray-100 dark:hover:bg-gray-800/40 ${hasDetails ? 'cursor-pointer' : ''}`}>
+                        <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs font-mono whitespace-nowrap">
                           {new Date(log.createdAt).toLocaleString('en-AU', { day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit' })}
                         </td>
                         <td className="px-4 py-3">
-                          <p className="text-gray-200 text-xs">{log.userEmail ?? '—'}</p>
+                          <p className="text-gray-700 dark:text-gray-200 text-xs">{log.userEmail ?? '—'}</p>
                         </td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${actionColor(log.action)}`}>
@@ -140,7 +140,7 @@ export default function AuditLogsPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <p className="text-gray-300 text-xs">{log.resource}</p>
+                          <p className="text-gray-600 dark:text-gray-300 text-xs">{log.resource}</p>
                           {log.resourceId && <p className="text-gray-600 text-xs font-mono dark:text-gray-400">{log.resourceId.slice(0,8)}…</p>}
                         </td>
                         <td className="px-4 py-3 text-gray-500 text-xs font-mono dark:text-gray-400">{log.ipAddress ?? '—'}</td>
@@ -149,13 +149,13 @@ export default function AuditLogsPage() {
                         </td>
                       </tr>
                       {isOpen && hasDetails && (
-                        <tr key={`${log.id}-detail`} className="bg-gray-950">
+                        <tr key={`${log.id}-detail`} className="bg-gray-50 dark:bg-gray-950">
                           <td colSpan={6} className="px-4 py-3">
                             <div className="grid grid-cols-2 gap-4">
                               {log.oldValues !== null && (
                                 <div>
                                   <p className="text-xs font-semibold text-red-400 mb-1">Before</p>
-                                  <pre className="text-xs text-gray-400 bg-gray-900 rounded-lg p-3 overflow-x-auto max-h-48">
+                                  <pre className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 rounded-lg p-3 overflow-x-auto max-h-48">
                                     {formatValue(log.oldValues)}
                                   </pre>
                                 </div>
@@ -163,7 +163,7 @@ export default function AuditLogsPage() {
                               {log.newValues !== null && (
                                 <div>
                                   <p className="text-xs font-semibold text-green-400 mb-1">After</p>
-                                  <pre className="text-xs text-gray-400 bg-gray-900 rounded-lg p-3 overflow-x-auto max-h-48">
+                                  <pre className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 rounded-lg p-3 overflow-x-auto max-h-48">
                                     {formatValue(log.newValues)}
                                   </pre>
                                 </div>
@@ -185,12 +185,12 @@ export default function AuditLogsPage() {
             <div className="flex gap-2">
               <button disabled={page === 0}
                 onClick={() => { const p = page - 1; setPage(p); load(filterResource, filterAction, filterSince, p) }}
-                className="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-purple-600 hover:text-purple-300 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-purple-600 hover:text-purple-300 disabled:opacity-40 disabled:cursor-not-allowed transition">
                 ← Prev
               </button>
               <button disabled={logs.length < PAGE}
                 onClick={() => { const p = page + 1; setPage(p); load(filterResource, filterAction, filterSince, p) }}
-                className="text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-purple-600 hover:text-purple-300 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-purple-600 hover:text-purple-300 disabled:opacity-40 disabled:cursor-not-allowed transition">
                 Next →
               </button>
             </div>

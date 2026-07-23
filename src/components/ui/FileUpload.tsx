@@ -51,7 +51,7 @@ function MimeIcon({ mime }: { mime: string }) {
     ? 'M9 17V7m0 10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m0 10a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m0 10V7m0 10a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2'
     : 'M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z'
   return (
-    <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <svg className="w-8 h-8 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d={d} />
     </svg>
   )
@@ -139,7 +139,7 @@ export default function FileUpload({
 
   return (
     <div className="space-y-2">
-      {label && <label className="text-xs text-gray-400 block">{label}</label>}
+      {label && <label className="text-xs text-gray-600 dark:text-gray-400 block">{label}</label>}
 
       {/* Drop zone */}
       <div
@@ -168,7 +168,7 @@ export default function FileUpload({
         {uploading ? (
           <div className="space-y-2">
             <p className="text-sm text-purple-300">Uploading… {progress}%</p>
-            <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
               <div
                 className="bg-purple-500 h-1.5 rounded-full transition-all duration-200"
                 style={{ width: `${progress}%` }}
@@ -181,7 +181,7 @@ export default function FileUpload({
             <div className="text-left min-w-0">
               <p className="text-sm text-white truncate max-w-[220px]">{fileToShow.fileName}</p>
               {fileToShow.fileSizeBytes > 0 && (
-                <p className="text-xs text-gray-400">{fmtSize(fileToShow.fileSizeBytes)}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{fmtSize(fileToShow.fileSizeBytes)}</p>
               )}
             </div>
             <a
@@ -199,7 +199,7 @@ export default function FileUpload({
             <svg className="w-8 h-8 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               {dragging ? 'Drop file here' : 'Click or drag & drop'}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">PDF, Word, Excel, images · max 25 MB</p>
@@ -212,7 +212,7 @@ export default function FileUpload({
         <button
           type="button"
           onClick={() => !disabled && inputRef.current?.click()}
-          className="text-xs text-gray-400 hover:text-purple-400 transition"
+          className="text-xs text-gray-600 dark:text-gray-400 hover:text-purple-400 transition"
           disabled={disabled}
         >
           Replace file

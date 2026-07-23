@@ -148,7 +148,7 @@ export default function EditEmployeePage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center py-20 text-gray-400 text-sm">Loading…</div>
+    <div className="flex items-center justify-center py-20 text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
   )
 
   return (
@@ -157,7 +157,7 @@ export default function EditEmployeePage() {
       <div className="flex items-center gap-3">
         <Link
           href={`/tenant/employee-management/${id}`}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+          className="text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-700 dark:text-gray-200 transition"
         >
           ← Back to Profile
         </Link>
@@ -284,7 +284,7 @@ export default function EditEmployeePage() {
             />
           </div>
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            NDIS Worker <span className="text-xs text-gray-400 font-normal">(requires additional compliance screening)</span>
+            NDIS Worker <span className="text-xs text-gray-600 dark:text-gray-400 font-normal">(requires additional compliance screening)</span>
           </span>
         </label>
       </SECTION>

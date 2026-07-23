@@ -157,7 +157,7 @@ export default function IntakePage() {
             Print / PDF
           </button>
           <button onClick={downloadJSON}
-            className="px-3 py-2 text-xs border border-purple-700 text-purple-300 rounded-lg hover:bg-purple-900/20 transition">
+            className="px-3 py-2 text-xs border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-50 dark:bg-purple-100 dark:bg-purple-900/20 transition">
             ⬇ Download Form
           </button>
         </div>
@@ -167,14 +167,14 @@ export default function IntakePage() {
       <div className="flex border-b border-gray-200 dark:border-gray-800">
         {([['fill', 'Fill Online'], ['upload', 'Upload Completed Form']] as [Tab, string][]).map(([id, label]) => (
           <button key={id} onClick={() => setTab(id)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300'}`}>
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === id ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300'}`}>
             {label}
           </button>
         ))}
       </div>
 
-      {success && <div className="bg-green-900/40 border border-green-700 rounded-lg p-3 text-sm text-green-300">{success}</div>}
-      {error   && <div className="bg-red-900/40 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
+      {success && <div className="bg-green-50 dark:bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">{success}</div>}
+      {error   && <div className="bg-red-50 dark:bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
       {tab === 'upload' && (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center space-y-4">
@@ -285,7 +285,7 @@ export default function IntakePage() {
               <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Required Modules</h2>
               <div className="flex gap-2 text-xs">
                 <button type="button" onClick={() => setForm(f => ({ ...f, selectedModules: MODULES_LIST.map(m => m.id) }))}
-                  className="text-purple-400 hover:text-purple-300">Select All</button>
+                  className="text-purple-400 hover:text-purple-700 dark:text-purple-300">Select All</button>
                 <span className="text-gray-600 dark:text-gray-400">·</span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, selectedModules: [] }))}
                   className="text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300">Clear</button>
@@ -294,7 +294,7 @@ export default function IntakePage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {MODULES_LIST.map(m => (
                 <label key={m.id} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
-                  form.selectedModules.includes(m.id) ? 'border-purple-600 bg-purple-900/20 text-purple-300' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'
+                  form.selectedModules.includes(m.id) ? 'border-purple-600 bg-purple-50 dark:bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'
                 }`}>
                   <input type="checkbox" checked={form.selectedModules.includes(m.id)} onChange={() => toggleModule(m.id)}
                     className="accent-purple-500" />
@@ -312,12 +312,12 @@ export default function IntakePage() {
               <div><label className={LABEL}>Admin Email</label>
                 <input type="email" value={form.adminEmail} onChange={e => set('adminEmail', e.target.value)}
                   placeholder="admin@client.com" className={INPUT} /></div>
-              <div><label className={LABEL}>Temporary Password {form.adminEmail && <span className="text-red-400">*</span>}</label>
+              <div><label className={LABEL}>Temporary Password {form.adminEmail && <span className="text-red-600 dark:text-red-400">*</span>}</label>
                 <input type="text" value={form.adminPassword} onChange={e => set('adminPassword', e.target.value)}
                   placeholder="min 8 characters" className={INPUT} /></div>
             </div>
             {form.adminEmail && (
-              <div className="bg-blue-950/40 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
+              <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
                 A welcome email with login credentials will be sent to <strong>{form.adminEmail}</strong> once email integration is active.
               </div>
             )}

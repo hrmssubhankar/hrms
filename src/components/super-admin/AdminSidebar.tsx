@@ -56,7 +56,7 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 text-xs text-gray-400 dark:text-gray-600">
+      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 text-xs text-gray-600 dark:text-gray-400">
         HRMS Platform v1.0
       </div>
     </aside>

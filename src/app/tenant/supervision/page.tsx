@@ -24,7 +24,7 @@ const STATUS_STYLE: Record<string, string> = {
   cancelled: 'bg-gray-800 text-gray-400 border-gray-700',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function SupervisionPage() {
   const [records,   setRecords]   = useState<SupervisionRecord[]>([])
@@ -101,7 +101,7 @@ export default function SupervisionPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Supervision Management</h1>
-          <p className="text-gray-400 text-sm mt-1">Schedule and track employee supervision sessions and action items</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Schedule and track employee supervision sessions and action items</p>
         </div>
         <button onClick={() => setShowForm(v => !v)}
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
@@ -117,8 +117,8 @@ export default function SupervisionPage() {
           { label: 'Completed', value: stats.completed, color: 'text-green-400' },
           { label: 'Overdue',   value: stats.overdue,   color: 'text-red-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -126,36 +126,36 @@ export default function SupervisionPage() {
 
       {/* Schedule form */}
       {showForm && (
-        <form onSubmit={schedule} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={schedule} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">Schedule Supervision Session</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Employee *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
               <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Supervisor *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Supervisor *</label>
               <select required value={form.supervisorId} onChange={e => setForm(f => ({ ...f, supervisorId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Scheduled Date *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Scheduled Date *</label>
               <input required type="date" value={form.scheduledDate} onChange={e => setForm(f => ({ ...f, scheduledDate: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Type</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Type</label>
               <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
                 {SUP_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
           </div>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Initial Notes</label>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Initial Notes</label>
             <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               rows={2} placeholder="Agenda items, topics to cover…" className={INPUT} />
           </div>
@@ -169,27 +169,27 @@ export default function SupervisionPage() {
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(e.target.value, filterType) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="scheduled">Scheduled</option>
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
         </select>
         <select value={filterType} onChange={e => { setFilterType(e.target.value); load(filterStatus, e.target.value) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All types</option>
           {SUP_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
       </div>
 
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No supervision sessions</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No supervision sessions</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Schedule a session to begin tracking.</p>
         </div>
       ) : (
@@ -200,7 +200,7 @@ export default function SupervisionPage() {
             const supervisor = employees.find(e => e.id === r.supervisorId)
             const draft = actionDraft[r.id] ?? ''
             return (
-              <div key={r.id} className={`bg-gray-900 border rounded-xl overflow-hidden ${
+              <div key={r.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden ${
                 overdue ? 'border-red-900/60' : r.status === 'completed' ? 'border-green-900/50' : 'border-gray-800'
               }`}>
                 <div className="flex items-center gap-4 px-5 py-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : r.id)}>
@@ -209,7 +209,7 @@ export default function SupervisionPage() {
                       <span className="text-white font-medium text-sm">
                         {r.employeeFirstName} {r.employeeLastName}
                       </span>
-                      <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">
+                      <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">
                         {SUP_TYPES.find(t => t.value === r.type)?.label ?? r.type ?? 'Regular'}
                       </span>
                       <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
@@ -232,11 +232,11 @@ export default function SupervisionPage() {
                 </div>
 
                 {isOpen && (
-                  <div className="border-t border-gray-800 px-5 py-4 space-y-4">
+                  <div className="border-t border-gray-200 dark:border-gray-800 px-5 py-4 space-y-4">
                     {r.notes && (
                       <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 dark:text-gray-400">Session Notes</p>
-                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{r.notes}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{r.notes}</p>
                       </div>
                     )}
 
@@ -248,7 +248,7 @@ export default function SupervisionPage() {
                       ) : (
                         <ul className="space-y-1.5 mb-2">
                           {r.actionItems.map((item, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-gray-300 bg-gray-800/50 rounded-lg px-3 py-2">
+                            <li key={i} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800/50 rounded-lg px-3 py-2">
                               <span className="text-purple-400 shrink-0">•</span>
                               <span className="flex-1">{item}</span>
                               {r.status !== 'completed' && (
@@ -265,9 +265,9 @@ export default function SupervisionPage() {
                             onChange={e => setActionDraft(prev => ({ ...prev, [r.id]: e.target.value }))}
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAction(r.id, r.actionItems) } }}
                             placeholder="Add action item… (Enter to add)"
-                            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+                            className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
                           <button onClick={() => addAction(r.id, r.actionItems)}
-                            className="text-xs bg-gray-800 border border-gray-700 text-gray-300 hover:border-purple-600 px-3 py-1.5 rounded-lg transition">
+                            className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-purple-600 px-3 py-1.5 rounded-lg transition">
                             Add
                           </button>
                         </div>

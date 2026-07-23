@@ -81,7 +81,7 @@ export default function ContractingPage() {
             </select>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {loading ? <p className="p-4 text-sm text-gray-400">Loading…</p> : contracts.length===0 ? <p className="p-6 text-sm text-gray-400 text-center">No contracts</p> : contracts.map(c=>(
+            {loading ? <p className="p-4 text-sm text-gray-600 dark:text-gray-400">Loading…</p> : contracts.length===0 ? <p className="p-6 text-sm text-gray-600 dark:text-gray-400 text-center">No contracts</p> : contracts.map(c=>(
               <button key={c.id} onClick={()=>setSelected(c)}
                 className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition  dark:border-gray-800${selected?.id===c.id?'bg-brand-50 border-l-2 border-l-brand-500':''}`}>
                 <div className="flex items-start justify-between gap-2">
@@ -91,7 +91,7 @@ export default function ContractingPage() {
                   </div>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${STATUS_COLORS[c.status]??''}`}>{c.status}</span>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>
+                <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>
               </button>
             ))}
           </div>
@@ -128,15 +128,15 @@ export default function ContractingPage() {
               </label>
             </div>
 
-            {selected.sentAt && <p className="text-xs text-gray-400">Sent: {new Date(selected.sentAt).toLocaleString()}</p>}
+            {selected.sentAt && <p className="text-xs text-gray-600 dark:text-gray-400">Sent: {new Date(selected.sentAt).toLocaleString()}</p>}
             {selected.signedAt && <p className="text-xs text-green-600 font-medium">Signed: {new Date(selected.signedAt).toLocaleString()}</p>}
 
             <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-              <p className="text-xs text-gray-400 mb-3">PDF upload and e-signature is available — contact support to enable DocuSign / Adobe Sign integration.</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">PDF upload and e-signature is available — contact support to enable DocuSign / Adobe Sign integration.</p>
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-sm text-gray-400">Select a contract to view details</div>
+          <div className="flex-1 flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">Select a contract to view details</div>
         )}
       </div>
 

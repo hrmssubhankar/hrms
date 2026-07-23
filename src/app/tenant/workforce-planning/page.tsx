@@ -10,7 +10,7 @@ type Plan = {
 }
 type Stats = { totalPlanned: number; totalCurrent: number; totalVacancies: number; openRoles: number }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function WorkforcePlanningPage() {
   const [plans,   setPlans]   = useState<Plan[]>([])
@@ -46,7 +46,7 @@ export default function WorkforcePlanningPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Workforce Planning</h1>
-          <p className="text-gray-400 text-sm mt-1">Track headcount targets, vacancies, and hiring pipeline</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track headcount targets, vacancies, and hiring pipeline</p>
         </div>
         <button onClick={() => setShowForm(v => !v)} className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
           {showForm ? 'Cancel' : '+ Add Plan'}
@@ -60,39 +60,39 @@ export default function WorkforcePlanningPage() {
           { label:'Vacancies', value:stats.totalVacancies, color:'text-amber-400' },
           { label:'Open Roles',value:stats.openRoles,      color:'text-blue-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
       {showForm && (
-        <form onSubmit={create} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={create} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
           <h3 className="text-sm font-semibold text-purple-300">Add Headcount Plan</h3>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Planned Count *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Planned Count *</label>
               <input required type="number" min={1} value={form.plannedCount}
                 onChange={e => setForm(f => ({ ...f, plannedCount: Number(e.target.value) }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Current Count</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Current Count</label>
               <input type="number" min={0} value={form.currentCount}
                 onChange={e => setForm(f => ({ ...f, currentCount: Number(e.target.value) }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Vacancies</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Vacancies</label>
               <input type="number" min={0} value={form.vacancyCount}
                 onChange={e => setForm(f => ({ ...f, vacancyCount: Number(e.target.value) }))} className={INPUT} />
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-400 mb-1 block">Target Date</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Target Date</label>
               <input type="date" value={form.targetDate} onChange={e => setForm(f => ({ ...f, targetDate: e.target.value }))} className={INPUT} />
             </div>
           </div>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Notes</label>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notes</label>
             <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} className={INPUT} />
           </div>
           <button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2 rounded-lg">
@@ -101,38 +101,38 @@ export default function WorkforcePlanningPage() {
         </form>
       )}
 
-      {loading ? <p className="text-gray-400 text-sm">Loading…</p> : plans.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : plans.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No workforce plans yet</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No workforce plans yet</p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-left">
+              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
                 {['Role / Department','Planned','Current','Vacancies','Target Date','Status',''].map(h => (
                   <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800/60">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
               {plans.map(p => (
-                <tr key={p.id} className="hover:bg-gray-800/30">
+                <tr key={p.id} className="hover:bg-gray-100 dark:hover:bg-gray-800/30">
                   <td className="px-4 py-3">
-                    <p className="text-gray-200">{p.positionTitle ?? 'General'}</p>
+                    <p className="text-gray-700 dark:text-gray-200">{p.positionTitle ?? 'General'}</p>
                     {p.departmentName && <p className="text-xs text-gray-500 dark:text-gray-400">{p.departmentName}</p>}
                   </td>
-                  <td className="px-4 py-3 text-gray-300">{p.plannedCount}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{p.plannedCount}</td>
                   <td className="px-4 py-3 text-green-400">{p.currentCount}</td>
                   <td className="px-4 py-3">
                     <span className={p.vacancyCount > 0 ? 'text-amber-400 font-medium' : 'text-gray-500'}>{p.vacancyCount}</span>
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs">
                     {p.targetDate ? new Date(p.targetDate + 'T00:00:00').toLocaleDateString('en-AU') : '—'}
                   </td>
                   <td className="px-4 py-3">
@@ -143,7 +143,7 @@ export default function WorkforcePlanningPage() {
                   <td className="px-4 py-3">
                     {p.status === 'open' && (
                       <button onClick={() => close(p.id)}
-                        className="text-xs bg-gray-800 border border-gray-700 text-gray-400 hover:border-green-700 hover:text-green-400 px-2 py-1 rounded transition">
+                        className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-green-700 hover:text-green-400 px-2 py-1 rounded transition">
                         Mark Filled
                       </button>
                     )}

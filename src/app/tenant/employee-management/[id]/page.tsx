@@ -57,7 +57,7 @@ const age  = (d: string | null) => {
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-1 py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
-      <span className="sm:w-44 text-xs font-medium text-gray-400 uppercase tracking-wide shrink-0">{label}</span>
+      <span className="sm:w-44 text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide shrink-0">{label}</span>
       <span className="text-sm text-gray-800 dark:text-gray-200">{value ?? '—'}</span>
     </div>
   )
@@ -237,7 +237,7 @@ export default function EmployeeProfilePage() {
     setTimeout(() => setMsg(''), 3000)
   }
 
-  if (loading) return <div className="flex items-center justify-center py-20 text-gray-400 text-sm">Loading…</div>
+  if (loading) return <div className="flex items-center justify-center py-20 text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
   if (!emp)    return (
     <div className="flex flex-col items-center justify-center py-20 gap-3">
       <span className="text-5xl"></span>
@@ -254,7 +254,7 @@ export default function EmployeeProfilePage() {
     <div className="space-y-6 max-w-5xl">
 
       {/* Back */}
-      <Link href="/tenant/employee-management" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+      <Link href="/tenant/employee-management" className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-700 dark:text-gray-200 transition">
         ← All Employees
       </Link>
 
@@ -280,7 +280,7 @@ export default function EmployeeProfilePage() {
               )}
             </div>
             {emp.preferredName && (
-              <p className="text-sm text-gray-400 mt-0.5">Goes by "{emp.preferredName}"</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Goes by "{emp.preferredName}"</p>
             )}
             <div className="flex flex-wrap gap-2 mt-3">
               <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
@@ -413,7 +413,7 @@ export default function EmployeeProfilePage() {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {editingContact ? 'Edit Contact' : 'Add Emergency Contact'}
                     </h3>
-                    <button type="button" onClick={() => setShowContactForm(false)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+                    <button type="button" onClick={() => setShowContactForm(false)} className="text-gray-600 dark:text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
                   </div>
 
                   <div>
@@ -471,7 +471,7 @@ export default function EmployeeProfilePage() {
 
             {/* Contact list */}
             {!contactsLoaded ? (
-              <p className="text-sm text-gray-400 py-4">Loading…</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 py-4">Loading…</p>
             ) : contacts.length === 0 ? (
               <div className="text-center py-10 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                 <p className="text-3xl mb-2"></p>
@@ -506,11 +506,11 @@ export default function EmployeeProfilePage() {
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
-                      <button onClick={() => openEditContact(c)} className="text-xs text-gray-400 hover:text-blue-500 transition px-1" title="Edit"></button>
+                      <button onClick={() => openEditContact(c)} className="text-xs text-gray-600 dark:text-gray-400 hover:text-blue-500 transition px-1" title="Edit"></button>
                       <button
                         onClick={() => deleteContact(c.id)}
                         disabled={deletingContact === c.id}
-                        className="text-xs text-gray-400 hover:text-red-500 disabled:opacity-40 transition px-1"
+                        className="text-xs text-gray-600 dark:text-gray-400 hover:text-red-500 disabled:opacity-40 transition px-1"
                         title="Delete"
                       >
                         {deletingContact === c.id ? '…' : ''}
@@ -528,7 +528,7 @@ export default function EmployeeProfilePage() {
             {/* Overall status + change */}
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Overall Status</p>
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">Overall Status</p>
                 <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${badge.cls}`}>
                   {badge.label}
                 </span>
@@ -551,9 +551,9 @@ export default function EmployeeProfilePage() {
 
             {/* Screening records */}
             <div>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">Screening Checks</p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-3">Screening Checks</p>
               {!screeningLoaded ? (
-                <p className="text-sm text-gray-400">Loading…</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Loading…</p>
               ) : screening.length === 0 ? (
                 <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-6 text-center">
                   <p className="text-3xl mb-2"></p>
@@ -575,7 +575,7 @@ export default function EmployeeProfilePage() {
                       <div key={sr.id} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{sr.checkType}</p>
-                          <div className="flex flex-wrap gap-2 mt-0.5 text-xs text-gray-400">
+                          <div className="flex flex-wrap gap-2 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
                             {sr.referenceNumber && <span>Ref: {sr.referenceNumber}</span>}
                             {sr.issuedDate && <span>Issued: {fmt(sr.issuedDate)}</span>}
                             {sr.expiryDate && <span>Expires: {fmt(sr.expiryDate)}</span>}
@@ -596,7 +596,7 @@ export default function EmployeeProfilePage() {
         {tab === 'Documents' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Employee Documents</p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Employee Documents</p>
               <a
                 href="/tenant/documents"
                 className="text-xs text-blue-500 hover:underline"
@@ -605,7 +605,7 @@ export default function EmployeeProfilePage() {
               </a>
             </div>
             {!docsLoaded ? (
-              <p className="text-sm text-gray-400">Loading…</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Loading…</p>
             ) : docs.length === 0 ? (
               <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-6 text-center">
                 <p className="text-3xl mb-2"></p>
@@ -628,7 +628,7 @@ export default function EmployeeProfilePage() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{doc.title}</p>
-                        <div className="flex gap-2 mt-0.5 text-xs text-gray-400">
+                        <div className="flex gap-2 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
                           <span>{doc.category}</span>
                           {size && <span>{size}</span>}
                           {doc.expiryDate && <span>Expires: {fmt(doc.expiryDate)}</span>}

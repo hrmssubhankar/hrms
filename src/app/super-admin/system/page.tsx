@@ -17,9 +17,9 @@ type HealthData = {
 }
 
 const STATUS_STYLES = {
-  ok:    { dot: 'bg-green-400',  badge: 'bg-green-900/40 text-green-300 border-green-700',  label: 'Healthy' },
-  warn:  { dot: 'bg-yellow-400', badge: 'bg-yellow-900/40 text-yellow-300 border-yellow-700', label: 'Warning' },
-  error: { dot: 'bg-red-400',    badge: 'bg-red-900/40 text-red-300 border-red-700',         label: 'Error' },
+  ok:    { dot: 'bg-green-400',  badge: 'bg-green-50 dark:bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700',  label: 'Healthy' },
+  warn:  { dot: 'bg-yellow-400', badge: 'bg-yellow-50 dark:bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700', label: 'Warning' },
+  error: { dot: 'bg-red-400',    badge: 'bg-red-50 dark:bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700',         label: 'Error' },
 }
 
 const CHECK_LABELS: Record<string, string> = {
@@ -92,7 +92,7 @@ export default function SystemHealthPage() {
           return (
             <div key={key} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-gray-200">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                   {CHECK_LABELS[key] ?? key}
                 </span>
                 <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${cs.badge}`}>
@@ -104,7 +104,7 @@ export default function SystemHealthPage() {
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-xs text-gray-500 mb-1 dark:text-gray-400">
                     <span>Latency</span>
-                    <span className={check.latencyMs < 300 ? 'text-green-400' : check.latencyMs < 1000 ? 'text-yellow-400' : 'text-red-400'}>
+                    <span className={check.latencyMs < 300 ? 'text-green-600 dark:text-green-400' : check.latencyMs < 1000 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}>
                       {check.latencyMs}ms
                     </span>
                   </div>
@@ -141,7 +141,7 @@ export default function SystemHealthPage() {
             ].map(row => (
               <div key={row.label} className="space-y-1">
                 <p className="text-xs text-gray-500 dark:text-gray-400">{row.label}</p>
-                <p className="text-sm text-gray-200 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded truncate">{row.value}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-200 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded truncate">{row.value}</p>
               </div>
             ))}
           </div>
@@ -163,7 +163,7 @@ export default function SystemHealthPage() {
             <div key={svc.name} className="flex items-start gap-3 bg-gray-100 dark:bg-gray-800/40 rounded-lg p-3">
               <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${STATUS_STYLES[svc.status].dot}`} />
               <div>
-                <p className="text-sm font-medium text-gray-200">{svc.name}</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{svc.name}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{svc.role}</p>
                 <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{svc.tier}</p>
               </div>

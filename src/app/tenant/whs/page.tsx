@@ -35,7 +35,7 @@ const STATUS_STYLE: Record<string, string> = {
   closed:        'bg-gray-800 text-gray-400 border-gray-700',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function WhsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([])
@@ -122,7 +122,7 @@ export default function WhsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">WHS & Injury Management</h1>
-          <p className="text-gray-400 text-sm mt-1">Report incidents, track investigations and corrective actions</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Report incidents, track investigations and corrective actions</p>
         </div>
         <button onClick={() => setShowForm(v => !v)}
           className="bg-red-700 hover:bg-red-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
@@ -140,8 +140,8 @@ export default function WhsPage() {
           { label: 'Critical',      value: stats.critical,      color: 'text-red-300' },
           { label: 'High',          value: stats.high,          color: 'text-orange-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -149,47 +149,47 @@ export default function WhsPage() {
 
       {/* Report form */}
       {showForm && (
-        <form onSubmit={reportIncident} className="bg-gray-900 border border-red-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={reportIncident} className="bg-white dark:bg-gray-900 border border-red-800 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-red-300">Report New Incident</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Reported By (Employee) *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Reported By (Employee) *</label>
               <select required value={form.reportedBy} onChange={e => setForm(f => ({ ...f, reportedBy: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Injured Employee (if applicable)</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Injured Employee (if applicable)</label>
               <select value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                 <option value="">— None / Not applicable —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Incident Type *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Incident Type *</label>
               <select required value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
                 {INCIDENT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Severity *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Severity *</label>
               <select required value={form.severity} onChange={e => setForm(f => ({ ...f, severity: e.target.value }))} className={INPUT}>
                 {SEVERITIES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Date & Time *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Date & Time *</label>
               <input required type="datetime-local" value={form.occurredAt}
                 onChange={e => setForm(f => ({ ...f, occurredAt: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Location</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Location</label>
               <input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
                 placeholder="e.g. Client home, office, vehicle" className={INPUT} />
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-400 mb-1 block">Description *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Description *</label>
               <textarea required value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 rows={3} placeholder="Describe what happened, injuries sustained, witnesses…" className={INPUT} />
@@ -211,30 +211,30 @@ export default function WhsPage() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterStatus, filterSeverity) }}
           placeholder="Search employee or description…"
-          className="flex-1 min-w-48 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+          className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(search, e.target.value, filterSeverity) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="open">Open</option>
           <option value="investigating">Investigating</option>
           <option value="closed">Closed</option>
         </select>
         <select value={filterSeverity} onChange={e => { setFilterSeverity(e.target.value); load(search, filterStatus, e.target.value) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All severities</option>
           {SEVERITIES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </div>
 
       {/* Incident list */}
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : incidents.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : incidents.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No incidents recorded</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No incidents recorded</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Use the "Report Incident" button to log a new event.</p>
         </div>
       ) : (
@@ -243,7 +243,7 @@ export default function WhsPage() {
             const s = sev(inc.severity)
             const isOpen = expanded === inc.id
             return (
-              <div key={inc.id} className={`bg-gray-900 border rounded-xl overflow-hidden transition ${
+              <div key={inc.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden transition ${
                 inc.severity === 'critical' ? 'border-red-800' : inc.severity === 'high' ? 'border-orange-800/60' : 'border-gray-800'
               }`}>
                 {/* Summary row */}
@@ -263,7 +263,7 @@ export default function WhsPage() {
                         {inc.status.charAt(0).toUpperCase() + inc.status.slice(1)}
                       </span>
                     </div>
-                    <p className="text-gray-400 text-xs truncate">{inc.description}</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-xs truncate">{inc.description}</p>
                     <p className="text-gray-600 text-xs mt-0.5 dark:text-gray-400">
                       {inc.location && `${inc.location} · `}
                       {new Date(inc.occurredAt).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
@@ -275,8 +275,8 @@ export default function WhsPage() {
 
                 {/* Expanded detail */}
                 {isOpen && (
-                  <div className="border-t border-gray-800 px-5 py-4 space-y-4">
-                    <p className="text-sm text-gray-300 leading-relaxed">{inc.description}</p>
+                  <div className="border-t border-gray-200 dark:border-gray-800 px-5 py-4 space-y-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{inc.description}</p>
 
                     {/* Status actions */}
                     <div className="flex gap-2 flex-wrap">
@@ -295,7 +295,7 @@ export default function WhsPage() {
                       )}
                       {inc.status === 'closed' && (
                         <button onClick={() => updateStatus(inc.id, 'open')}
-                          className="text-xs border border-gray-700 text-gray-400 hover:text-white px-3 py-1.5 rounded-lg transition">
+                          className="text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white px-3 py-1.5 rounded-lg transition">
                           Reopen
                         </button>
                       )}
@@ -339,9 +339,9 @@ function ActionInput({ onAdd }: { onAdd: (a: string) => void }) {
       <input value={val} onChange={e => setVal(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && val.trim()) { onAdd(val.trim()); setVal('') } }}
         placeholder="Add corrective action… (press Enter)"
-        className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+        className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
       <button type="button" onClick={() => { if (val.trim()) { onAdd(val.trim()); setVal('') } }}
-        className="text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded-lg transition">
+        className="text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-lg transition">
         Add
       </button>
     </div>

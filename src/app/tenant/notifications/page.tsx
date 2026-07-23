@@ -143,7 +143,7 @@ export default function NotificationsPage() {
           {running ? 'Scanning & sending…' : `Run expiry check (${daysAhead} days)`}
         </button>
 
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+        <p className="text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500 mt-3">
           To automate this daily, add <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">vercel.json</code> with a cron job — see setup guide below.
         </p>
       </div>
@@ -160,7 +160,7 @@ export default function NotificationsPage() {
     }
   ]
 }`}</pre>
-        <p className="text-xs text-gray-400 mt-2">Also add <code>RESEND_API_KEY</code>, <code>RESEND_FROM</code>, and <code>APP_URL</code> to your Vercel environment variables.</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">Also add <code>RESEND_API_KEY</code>, <code>RESEND_FROM</code>, and <code>APP_URL</code> to your Vercel environment variables.</p>
       </div>
 
       {/* In-app Notifications */}
@@ -170,7 +170,7 @@ export default function NotificationsPage() {
         </div>
 
         {loading ? (
-          <div className="px-5 py-10 text-center text-gray-400 text-sm">Loading…</div>
+          <div className="px-5 py-10 text-center text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
         ) : notifications.length === 0 ? (
           <div className="px-5 py-12 text-center">
             <p className="text-3xl mb-2"></p>
@@ -185,7 +185,7 @@ export default function NotificationsPage() {
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium ${!n.isRead ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{n.title}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{n.message}</p>
-                  <p className="text-xs text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString('en-AU')}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString('en-AU')}</p>
                 </div>
                 {!n.isRead && (
                   <button onClick={() => markRead(n.id)}

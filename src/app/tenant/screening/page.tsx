@@ -116,8 +116,8 @@ export default function ScreeningPage() {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {loading ? <p className="p-4 text-sm text-gray-400">Loading…</p> : records.length === 0 ? (
-              <p className="p-6 text-sm text-gray-400 text-center">No records found</p>
+            {loading ? <p className="p-4 text-sm text-gray-600 dark:text-gray-400">Loading…</p> : records.length === 0 ? (
+              <p className="p-6 text-sm text-gray-600 dark:text-gray-400 text-center">No records found</p>
             ) : records.map(r => (
               <button key={r.id} onClick={() => setSelected(r)}
                 className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition  dark:border-gray-800${selected?.id === r.id ? 'bg-brand-50 border-l-2 border-l-brand-500' : ''}`}>
@@ -191,11 +191,11 @@ export default function ScreeningPage() {
             </div>
 
             {selected.verifiedAt && (
-              <p className="text-xs text-gray-400">Verified: {new Date(selected.verifiedAt).toLocaleString()}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Verified: {new Date(selected.verifiedAt).toLocaleString()}</p>
             )}
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-sm text-gray-400">Select a record to view details</div>
+          <div className="flex-1 flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">Select a record to view details</div>
         )}
       </div>
 

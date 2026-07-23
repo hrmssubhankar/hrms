@@ -237,7 +237,7 @@ export default function PayrollPage() {
               </button>
             ) : (
               <a href="/tenant/settings?tab=integrations"
-                className="px-3 py-2 rounded-xl text-xs border border-gray-700 text-gray-400 hover:text-white transition">
+                className="px-3 py-2 rounded-xl text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white transition">
                 Connect Xero
               </a>
             )
@@ -256,7 +256,7 @@ export default function PayrollPage() {
               </button>
             ) : (
               <a href="/tenant/settings?tab=integrations"
-                className="px-3 py-2 rounded-xl text-xs border border-gray-700 text-gray-400 hover:text-white transition">
+                className="px-3 py-2 rounded-xl text-xs border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white transition">
                 Connect MYOB
               </a>
             )
@@ -318,11 +318,11 @@ export default function PayrollPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {loading ? (
-                <tr><td colSpan={9} className="px-4 py-10 text-center text-gray-400 text-sm">Loading…</td></tr>
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-gray-600 dark:text-gray-400 text-sm">Loading…</td></tr>
               ) : records.length === 0 ? (
                 <tr><td colSpan={9} className="px-4 py-12 text-center">
                   <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
@@ -332,7 +332,7 @@ export default function PayrollPage() {
                 <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-900 dark:text-white">{r.employeeFirstName} {r.employeeLastName}</p>
-                    <p className="text-xs text-gray-400">{r.employeeEmail}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{r.employeeEmail}</p>
                   </td>
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300 text-xs whitespace-nowrap">{r.periodStart} → {r.periodEnd}</td>
                   <td className="px-4 py-3 text-right font-mono text-gray-900 dark:text-white">{fmt(r.grossPay)}</td>
@@ -385,7 +385,7 @@ export default function PayrollPage() {
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">New Pay Run</h2>
-              <button onClick={() => { setShowModal(false); setPreview(null) }} className="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl"></button>
+              <button onClick={() => { setShowModal(false); setPreview(null) }} className="text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl"></button>
             </div>
             <div className="px-6 py-5 space-y-5">
               {error && <div className="bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-800 rounded-lg px-3 py-2 text-sm text-red-600 dark:text-red-300">{error}</div>}
@@ -501,7 +501,7 @@ export default function PayrollPage() {
                       <span className="text-purple-400">Employer Super (11.5%)</span>
                       <span className="text-purple-300 font-medium">{fmt(preview.superContribution)} <span className="text-xs text-gray-500 dark:text-gray-400">(on top)</span></span>
                     </div>
-                    <div className="flex justify-between text-xs text-gray-400">
+                    <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                       <span>Annualised gross / Effective tax rate</span>
                       <span>{fmt(preview.annualisedGross)} / {preview.effectiveTaxRate}%</span>
                     </div>
@@ -527,7 +527,7 @@ export default function PayrollPage() {
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">Payslip</h2>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-white text-xl"></button>
+              <button onClick={() => setSelected(null)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl"></button>
             </div>
             <div className="px-6 py-5 space-y-3 text-sm">
               <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Employee</span><span className="font-medium text-gray-900 dark:text-white">{selected.employeeFirstName} {selected.employeeLastName}</span></div>

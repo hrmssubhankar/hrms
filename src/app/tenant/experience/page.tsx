@@ -38,7 +38,7 @@ export default function ExperiencePage() {
     return nextMilestone && (nextMilestone - e.tenureMonths) <= 2
   })
 
-  if (loading) return <div className="p-8 text-sm text-gray-400">Loading…</div>
+  if (loading) return <div className="p-8 text-sm text-gray-600 dark:text-gray-400">Loading…</div>
 
   return (
     <div className="h-full flex flex-col">
@@ -75,7 +75,7 @@ export default function ExperiencePage() {
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden dark:bg-gray-900 dark:border-gray-700">
           <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between dark:border-gray-800">
             <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Tenure Overview</h2>
-            <p className="text-xs text-gray-400">{withTenure.length} active employees</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">{withTenure.length} active employees</p>
           </div>
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-800">
@@ -97,7 +97,7 @@ export default function ExperiencePage() {
                       {lastMilestone ? (
                         <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
                           {lastMilestone>=12 ? `${lastMilestone/12}yr` : `${lastMilestone}mo`} </span>
-                      ) : <span className="text-xs text-gray-400">—</span>}
+                      ) : <span className="text-xs text-gray-600 dark:text-gray-400">—</span>}
                     </td>
                   </tr>
                 )

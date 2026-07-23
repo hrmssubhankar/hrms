@@ -51,7 +51,7 @@ export default function PlatformSettingsPage() {
       </div>
 
       {saved && (
-        <div className="bg-green-900/50 border border-green-700 rounded-lg p-3 text-sm text-green-300">
+        <div className="bg-green-50 dark:bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">
           Settings saved successfully.
         </div>
       )}
@@ -65,7 +65,7 @@ export default function PlatformSettingsPage() {
               onClick={() => setActiveSection(s.key)}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-left transition ${
                 activeSection === s.key
-                  ? 'bg-purple-900/50 text-gray-900 dark:text-white border border-purple-700'
+                  ? 'bg-purple-50 dark:bg-purple-100 dark:bg-purple-900/50 text-gray-900 dark:text-white border border-purple-300 dark:border-purple-700'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 hover:text-gray-900 dark:text-white'
               }`}
             >
@@ -118,7 +118,7 @@ export default function PlatformSettingsPage() {
           {activeSection === 'email' && (
             <>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800 pb-3">Email / SMTP Configuration</h2>
-              <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
+              <div className="bg-blue-50 dark:bg-blue-100 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
                 Brevo SMTP provides 300 emails/day (9,000/month) on the free tier — covering all HRMS notifications, reminders, and alerts.
               </div>
               <Field label="SMTP Host">
@@ -161,7 +161,7 @@ export default function PlatformSettingsPage() {
               </Field>
               <div className="flex items-center justify-between py-2">
                 <div>
-                  <p className="text-sm font-medium text-gray-200">Require 2FA for All Users</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Require 2FA for All Users</p>
                   <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Enforce TOTP authentication platform-wide (Google Authenticator)</p>
                 </div>
                 <Toggle value={require2FA} onChange={setRequire2FA} />
@@ -173,13 +173,13 @@ export default function PlatformSettingsPage() {
             <>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-800 pb-3">Maintenance Mode</h2>
               {maintenanceMode && (
-                <div className="bg-red-900/30 border border-red-700 rounded-lg p-3 text-sm text-red-300">
+                <div className="bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
                   ️ Maintenance mode is ON. All tenant users see the maintenance message below. Super admins can still log in.
                 </div>
               )}
               <div className="flex items-center justify-between py-2">
                 <div>
-                  <p className="text-sm font-medium text-gray-200">Enable Maintenance Mode</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Enable Maintenance Mode</p>
                   <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Blocks all tenant access while allowing super admin login</p>
                 </div>
                 <Toggle value={maintenanceMode} onChange={setMaintenanceMode} />
@@ -259,7 +259,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-1.5 text-sm">
       <span className="text-gray-600 dark:text-gray-400">{label}</span>
-      <span className="text-gray-200 font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">{value}</span>
+      <span className="text-gray-700 dark:text-gray-200 font-mono text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">{value}</span>
     </div>
   )
 }

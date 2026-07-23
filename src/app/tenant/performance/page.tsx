@@ -38,7 +38,7 @@ const STATUS_STYLE: Record<string, string> = {
 
 const RATING_LABELS = ['', 'Unsatisfactory', 'Needs Improvement', 'Meets Expectations', 'Exceeds Expectations', 'Outstanding']
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function PerformancePage() {
   const [reviews,   setReviews]   = useState<Review[]>([])
@@ -112,7 +112,7 @@ export default function PerformancePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Performance Management</h1>
-          <p className="text-gray-400 text-sm mt-1">Probation check-ins, KPI reviews and performance plans</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Probation check-ins, KPI reviews and performance plans</p>
         </div>
         <button onClick={() => setShowForm(v => !v)}
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
@@ -129,8 +129,8 @@ export default function PerformancePage() {
           { label: 'Overdue',    value: stats.overdue,   color: 'text-red-400' },
           { label: 'Probation',  value: stats.probation, color: 'text-amber-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -138,24 +138,24 @@ export default function PerformancePage() {
 
       {/* Create form */}
       {showForm && (
-        <form onSubmit={createReview} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={createReview} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">Schedule Review</h3>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Employee *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
               <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Review Type *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Review Type *</label>
               <select required value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
                 {REVIEW_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Scheduled Date</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Scheduled Date</label>
               <input type="date" value={form.scheduledDate} onChange={e => setForm(f => ({ ...f, scheduledDate: e.target.value }))} className={INPUT} />
             </div>
           </div>
@@ -169,14 +169,14 @@ export default function PerformancePage() {
       {/* Complete review modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-2xl space-y-5 my-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-2xl space-y-5 my-4">
             <h3 className="text-lg font-bold text-white">Complete Review</h3>
 
             {/* KPI Ratings */}
             <div className="space-y-3">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">KPI Ratings (1–5)</p>
               {editing.kpis.map((kpi, i) => (
-                <div key={kpi.id} className="bg-gray-800 rounded-lg p-3 space-y-2">
+                <div key={kpi.id} className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 space-y-2">
                   <p className="text-sm font-medium text-white">{kpi.area}</p>
                   <div className="flex gap-2">
                     {[1,2,3,4,5].map(n => (
@@ -202,23 +202,23 @@ export default function PerformancePage() {
                       setEditing({ ...editing, kpis: k })
                     }}
                     placeholder="Notes for this area…"
-                    className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-white placeholder-gray-500 focus:outline-none" />
+                    className="w-full bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none" />
                 </div>
               ))}
             </div>
 
             {/* Overall rating */}
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Overall Rating (override, 1–5)</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Overall Rating (override, 1–5)</label>
               <input type="number" min="1" max="5" step="0.1" value={editing.rating}
                 onChange={e => setEditing({ ...editing, rating: e.target.value })}
                 placeholder="Leave blank to auto-average KPIs"
-                className="w-32 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                className="w-32 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500" />
             </div>
 
             {/* Outcome */}
             <div>
-              <label className="text-xs text-gray-400 mb-2 block">Outcome</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-2 block">Outcome</label>
               <div className="flex gap-2 flex-wrap">
                 {OUTCOMES.map(o => (
                   <button key={o.value} type="button"
@@ -234,7 +234,7 @@ export default function PerformancePage() {
 
             {/* Development plan */}
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Development Plan / Notes</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Development Plan / Notes</label>
               <textarea value={editing.plan} onChange={e => setEditing({ ...editing, plan: e.target.value })}
                 rows={3} placeholder="Goals, actions, training requirements…"
                 className={INPUT} />
@@ -246,7 +246,7 @@ export default function PerformancePage() {
                 {saving ? 'Saving…' : 'Mark Complete'}
               </button>
               <button onClick={() => setEditing(null)}
-                className="px-5 border border-gray-700 text-gray-300 hover:text-white text-sm rounded-lg transition">
+                className="px-5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-white text-sm rounded-lg transition">
                 Cancel
               </button>
             </div>
@@ -258,54 +258,54 @@ export default function PerformancePage() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterStatus, filterType) }}
           placeholder="Search employee…"
-          className="flex-1 min-w-48 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+          className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(search, e.target.value, filterType) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="scheduled">Scheduled</option>
           <option value="completed">Completed</option>
           <option value="overdue">Overdue</option>
         </select>
         <select value={filterType} onChange={e => { setFilterType(e.target.value); load(search, filterStatus, e.target.value) }}
-          className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
           <option value="">All types</option>
           {REVIEW_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
       </div>
 
       {/* Table */}
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : reviews.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : reviews.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No reviews scheduled</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No reviews scheduled</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Schedule a review for an employee to get started.</p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-left">
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Employee</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Type</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Scheduled</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Rating</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Outcome</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Action</th>
+              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Employee</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Type</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Scheduled</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Rating</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Outcome</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Action</th>
               </tr>
             </thead>
             <tbody>
               {reviews.map(r => (
-                <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/20 transition">
+                <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
                   <td className="px-5 py-3.5">
                     <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
                     <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                   </td>
-                  <td className="px-5 py-3.5 text-gray-300 text-sm">
+                  <td className="px-5 py-3.5 text-gray-600 dark:text-gray-300 text-sm">
                     {REVIEW_TYPES.find(t => t.value === r.type)?.label ?? r.type}
                   </td>
                   <td className="px-5 py-3.5">
@@ -313,7 +313,7 @@ export default function PerformancePage() {
                       {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-gray-400 text-xs">
+                  <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400 text-xs">
                     {r.scheduledDate ? new Date(r.scheduledDate).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}
                   </td>
                   <td className="px-5 py-3.5">
@@ -326,7 +326,7 @@ export default function PerformancePage() {
                   </td>
                   <td className="px-5 py-3.5">
                     {r.outcome ? (
-                      <span className="text-xs text-gray-300">
+                      <span className="text-xs text-gray-600 dark:text-gray-300">
                         {OUTCOMES.find(o => o.value === r.outcome)?.label ?? r.outcome}
                       </span>
                     ) : '—'}

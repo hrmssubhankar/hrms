@@ -154,7 +154,7 @@ export default function NewClientPage() {
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Onboard a new organisation onto the HRMS platform</p>
       </div>
 
-      {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
 
@@ -207,7 +207,7 @@ export default function NewClientPage() {
             </div>
             <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
               Tenant URL:{' '}
-              <span className="text-purple-400">
+              <span className="text-purple-600 dark:text-purple-400">
                 https://{form.vercelProjectName || `${form.slug || 'slug'}-hrmsapp`}.vercel.app
               </span>
               {' '}— auto-created if Vercel API token is configured.
@@ -337,7 +337,7 @@ export default function NewClientPage() {
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Subscription Tier *</h2>
           {TIERS.map(t => (
             <label key={t.value} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
-              form.tier === t.value ? 'border-purple-500 bg-purple-900/30' : 'border-gray-300 dark:border-gray-700 hover:border-gray-600'
+              form.tier === t.value ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30' : 'border-gray-300 dark:border-gray-700 hover:border-gray-600'
             }`}>
               <input type="radio" name="tier" value={t.value} checked={form.tier === t.value}
                 onChange={() => set('tier', t.value)} className="mt-0.5" />
@@ -388,14 +388,14 @@ export default function NewClientPage() {
                 placeholder="admin@client.com" className={INPUT} />
             </div>
             <div>
-              <label className={LABEL}>Temp Password {form.adminEmail && <span className="text-red-400">*</span>}</label>
+              <label className={LABEL}>Temp Password {form.adminEmail && <span className="text-red-600 dark:text-red-400">*</span>}</label>
               <input type="text" value={form.adminPassword} onChange={e => set('adminPassword', e.target.value)}
                 placeholder="min 8 characters" className={INPUT} />
             </div>
           </div>
 
           {form.adminEmail && form.adminPassword && (
-            <div className="bg-blue-950/50 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
+            <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
               A Director account will be created for <strong>{form.adminEmail}</strong>.
               A welcome email with login details will be sent once email integration is active.
             </div>
@@ -404,14 +404,14 @@ export default function NewClientPage() {
 
         {/* Summary */}
         {form.name && (
-          <div className="bg-white dark:bg-gray-900 border border-purple-800/50 rounded-xl p-5">
-            <p className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-3">Summary</p>
+          <div className="bg-white dark:bg-gray-900 border border-purple-200 dark:border-purple-800/50 rounded-xl p-5">
+            <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-3">Summary</p>
             <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
               <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Organisation</span><span className="text-gray-900 dark:text-white">{form.name}</span></div>
               <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Country</span><span className="text-gray-900 dark:text-white">{COUNTRIES.find(c => c.code === form.country)?.name}</span></div>
               <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Currency</span><span className="text-gray-900 dark:text-white">{form.currency}</span></div>
               <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Tier</span><span className="text-gray-900 dark:text-white">{selectedTier?.label}</span></div>
-              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Est. Monthly</span><span className="text-green-400 font-semibold">{currencySymbol}{convertAUD(selectedTier?.price ?? 0, form.currency)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Est. Monthly</span><span className="text-green-600 dark:text-green-400 font-semibold">{currencySymbol}{convertAUD(selectedTier?.price ?? 0, form.currency)}</span></div>
               {form.contactEmail && <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Contact</span><span className="text-gray-900 dark:text-white">{form.contactEmail}</span></div>}
             </div>
           </div>

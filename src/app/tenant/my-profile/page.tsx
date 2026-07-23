@@ -29,9 +29,9 @@ type EmergencyContact = {
   isPrimary:    boolean
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
-const LABEL = 'block text-xs font-medium text-gray-400 mb-1'
-const ROW   = 'flex justify-between items-center py-2.5 border-b border-gray-800 last:border-0'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
+const ROW   = 'flex justify-between items-center py-2.5 border-b border-gray-200 dark:border-gray-800 last:border-0'
 
 // ── 2FA Section ───────────────────────────────────────────────────────────────
 type TotpStep = 'idle' | 'setup' | 'disable'
@@ -100,9 +100,9 @@ function TwoFactorSection() {
   if (enabled === null) return null  // still loading
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Two-Factor Authentication</h2>
+        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Two-Factor Authentication</h2>
         <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${enabled ? 'bg-green-900/40 text-green-300 border-green-800' : 'bg-gray-800 text-gray-500 border-gray-700'}`}>
           {enabled ? 'Enabled' : 'Disabled'}
         </span>
@@ -137,7 +137,7 @@ function TwoFactorSection() {
 
       {step === 'setup' && qrCode && (
         <div className="space-y-4">
-          <p className="text-sm text-gray-400">Scan this QR code with your authenticator app, then enter the 6-digit code below.</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Scan this QR code with your authenticator app, then enter the 6-digit code below.</p>
           <div className="flex justify-center">
             <div className="bg-white p-3 rounded-xl inline-block dark:bg-gray-900">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -154,7 +154,7 @@ function TwoFactorSection() {
             value={code}
             onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
             placeholder="6-digit code"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white text-center tracking-widest font-mono focus:outline-none focus:border-purple-500"
+            className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white text-center tracking-widest font-mono focus:outline-none focus:border-purple-500"
           />
           <div className="flex gap-3">
             <button onClick={verifySetup} disabled={busy || code.length !== 6}
@@ -162,7 +162,7 @@ function TwoFactorSection() {
               {busy ? 'Verifying…' : 'Verify & Enable'}
             </button>
             <button onClick={cancelStep}
-              className="px-5 py-2.5 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg">
+              className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg">
               Cancel
             </button>
           </div>
@@ -171,7 +171,7 @@ function TwoFactorSection() {
 
       {step === 'disable' && (
         <div className="space-y-4">
-          <p className="text-sm text-gray-400">Enter the 6-digit code from your authenticator app to confirm disabling 2FA.</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Enter the 6-digit code from your authenticator app to confirm disabling 2FA.</p>
           <input
             type="text"
             inputMode="numeric"
@@ -179,7 +179,7 @@ function TwoFactorSection() {
             value={code}
             onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
             placeholder="6-digit code"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white text-center tracking-widest font-mono focus:outline-none focus:border-red-500"
+            className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white text-center tracking-widest font-mono focus:outline-none focus:border-red-500"
           />
           <div className="flex gap-3">
             <button onClick={disableTotp} disabled={busy || code.length !== 6}
@@ -187,7 +187,7 @@ function TwoFactorSection() {
               {busy ? 'Processing…' : 'Confirm Disable'}
             </button>
             <button onClick={cancelStep}
-              className="px-5 py-2.5 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg">
+              className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg">
               Cancel
             </button>
           </div>
@@ -256,7 +256,7 @@ export default function MyProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
+      <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
         <div className="text-center">
           <div className="text-4xl mb-3 animate-pulse"></div>
           <p className="text-sm">Loading your profile…</p>
@@ -268,14 +268,14 @@ export default function MyProfilePage() {
   if (!linked || !profile) {
     return (
       <div className="p-6 max-w-2xl mx-auto">
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
           <h2 className="text-lg font-semibold text-white mb-2">Profile Not Linked</h2>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
             Your user account has not yet been linked to an employee profile.
             Please contact your HR administrator to set this up.
           </p>
@@ -307,7 +307,7 @@ export default function MyProfilePage() {
             <h1 className="text-2xl font-bold text-white">
               {profile.preferredName || profile.firstName} {profile.lastName}
             </h1>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               #{profile.employeeNumber} · {profile.entityName ?? 'HRMS'} ·{' '}
               <span className={`${profile.isActive ? 'text-green-400' : 'text-red-400'}`}>
                 {profile.isActive ? 'Active' : 'Inactive'}
@@ -334,7 +334,7 @@ export default function MyProfilePage() {
 
       {/* Edit form */}
       {editing && (
-        <div className="bg-gray-900 border border-purple-800/50 rounded-2xl p-6">
+        <div className="bg-white dark:bg-gray-900 border border-purple-800/50 rounded-2xl p-6">
           <h2 className="text-sm font-semibold text-white mb-4">Update Contact Information</h2>
           <form onSubmit={save} className="space-y-4">
             <div>
@@ -358,7 +358,7 @@ export default function MyProfilePage() {
                 {saving ? 'Saving…' : 'Save Changes'}
               </button>
               <button type="button" onClick={() => setEditing(false)}
-                className="px-5 py-2.5 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg">
+                className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg">
                 Cancel
               </button>
             </div>
@@ -370,8 +370,8 @@ export default function MyProfilePage() {
       )}
 
       {/* Personal Information */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Personal Information</h2>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
+        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Personal Information</h2>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Full Name</span><span className="text-white text-sm font-medium">{profile.firstName} {profile.lastName}</span></div>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Preferred Name</span><span className="text-white text-sm">{profile.preferredName || '—'}</span></div>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Email</span><span className="text-white text-sm">{profile.email}</span></div>
@@ -383,8 +383,8 @@ export default function MyProfilePage() {
       </div>
 
       {/* Employment Details */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Employment Details</h2>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
+        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Employment Details</h2>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employee Number</span><span className="text-white text-sm font-mono">#{profile.employeeNumber}</span></div>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Organisation</span><span className="text-white text-sm">{profile.entityName || '—'}</span></div>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employment Type</span><span className="text-white text-sm">{employmentTypeLabel[profile.employmentType] ?? profile.employmentType}</span></div>
@@ -397,14 +397,14 @@ export default function MyProfilePage() {
       </div>
 
       {/* Emergency Contacts */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Emergency Contacts</h2>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
+        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Emergency Contacts</h2>
         {contacts.length === 0 ? (
           <p className="text-gray-600 text-sm text-center py-4 dark:text-gray-400">No emergency contacts on file. Contact HR to add them.</p>
         ) : (
           <div className="space-y-4">
             {contacts.map(c => (
-              <div key={c.id} className="bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3">
+              <div key={c.id} className="bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1">
                   <p className="font-medium text-white text-sm">{c.name}</p>
                   {c.isPrimary && (
@@ -412,7 +412,7 @@ export default function MyProfilePage() {
                   )}
                 </div>
                 {c.relationship && <p className="text-xs text-gray-500 mb-1 dark:text-gray-400">{c.relationship}</p>}
-                <div className="flex gap-4 text-xs text-gray-400">
+                <div className="flex gap-4 text-xs text-gray-600 dark:text-gray-400">
                   {c.phone && <span>{c.phone}</span>}
                   {c.email && <span>{c.email}</span>}
                 </div>

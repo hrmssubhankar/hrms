@@ -20,7 +20,7 @@ const BENEFIT_TYPES = [
   { value: 'other',          label: 'Other' },
 ]
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function BenefitsPage() {
   const [benefits,  setBenefits]  = useState<Benefit[]>([])
@@ -60,7 +60,7 @@ export default function BenefitsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Employee Benefits</h1>
-          <p className="text-gray-400 text-sm mt-1">Track benefits, entitlements, and support programs assigned to employees</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track benefits, entitlements, and support programs assigned to employees</p>
         </div>
         <button onClick={() => setShowForm(v => !v)} className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
           {showForm ? 'Cancel' : '+ Assign Benefit'}
@@ -68,31 +68,31 @@ export default function BenefitsPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={create} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={create} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Employee *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
               <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Benefit Type *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Benefit Type *</label>
               <select required value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
                 {BENEFIT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Start Date</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Start Date</label>
               <input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">End Date</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">End Date</label>
               <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={INPUT} />
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-400 mb-1 block">Description</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Description</label>
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 rows={2} placeholder="Details of the benefit…" className={INPUT} />
             </div>
@@ -105,32 +105,32 @@ export default function BenefitsPage() {
       )}
 
       <select value={filterEmp} onChange={e => { setFilterEmp(e.target.value); load(e.target.value) }}
-        className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
         <option value="">All employees</option>
         {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
       </select>
 
-      {loading ? <p className="text-gray-400 text-sm">Loading…</p> : benefits.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+      {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : benefits.length === 0 ? (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-300 font-medium">No benefits assigned</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No benefits assigned</p>
         </div>
       ) : (
         <div className="space-y-2">
           {benefits.map(b => (
-            <div key={b.id} className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
+            <div key={b.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-white font-medium text-sm">{b.employeeFirstName} {b.employeeLastName}</span>
-                  <span className="text-xs text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full">
+                  <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                     {BENEFIT_TYPES.find(t => t.value === b.type)?.label ?? b.type}
                   </span>
                 </div>
-                {b.description && <p className="text-xs text-gray-400">{b.description}</p>}
+                {b.description && <p className="text-xs text-gray-600 dark:text-gray-400">{b.description}</p>}
                 {(b.startDate || b.endDate) && (
                   <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">
                     {b.startDate && new Date(b.startDate + 'T00:00:00').toLocaleDateString('en-AU')}

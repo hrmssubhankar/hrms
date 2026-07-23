@@ -61,7 +61,7 @@ export default function ReportsPage() {
         {/* Sidebar */}
         <div className="w-64 border-r border-gray-200 bg-white flex flex-col dark:bg-gray-900 dark:border-gray-700">
           <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Report Type</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-3">Report Type</p>
             <div className="space-y-1">
               {REPORTS.map(r => (
                 <button key={r.id} onClick={() => { setSelected(r.id); setRan(false); setData([]); setSummary({}) }}
@@ -73,7 +73,7 @@ export default function ReportsPage() {
           </div>
 
           <div className="p-4 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Date Range</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Date Range</p>
             <div>
               <label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">From</label>
               <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
@@ -101,7 +101,7 @@ export default function ReportsPage() {
               </div>
             </div>
           ) : loading ? (
-            <div className="flex items-center justify-center h-full text-gray-400 text-sm">Generating report…</div>
+            <div className="flex items-center justify-center h-full text-gray-600 dark:text-gray-400 text-sm">Generating report…</div>
           ) : (
             <div className="p-6 space-y-6">
               {/* Summary cards */}
@@ -128,7 +128,7 @@ export default function ReportsPage() {
 
               {/* Table */}
               {data.length === 0 ? (
-                <div className="bg-white rounded-xl border border-gray-200 py-12 text-center text-gray-400 text-sm dark:bg-gray-900 dark:border-gray-700">No data for this period</div>
+                <div className="bg-white rounded-xl border border-gray-200 py-12 text-center text-gray-600 dark:text-gray-400 text-sm dark:bg-gray-900 dark:border-gray-700">No data for this period</div>
               ) : (
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden dark:bg-gray-900 dark:border-gray-700">
                   <div className="overflow-x-auto">

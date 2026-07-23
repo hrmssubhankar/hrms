@@ -67,9 +67,9 @@ async function getPlatformData() {
 }
 
 const ACTION_COLOR: Record<string, string> = {
-  login:  'text-blue-400', create: 'text-green-400',
-  update: 'text-yellow-400', delete: 'text-red-400',
-  export: 'text-purple-400',
+  login:  'text-blue-600 dark:text-blue-400', create: 'text-green-600 dark:text-green-400',
+  update: 'text-yellow-600 dark:text-yellow-400', delete: 'text-red-600 dark:text-red-400',
+  export: 'text-purple-600 dark:text-purple-400',
 }
 
 function actionColor(action: string) {
@@ -93,15 +93,15 @@ export default async function SuperAdminDashboard() {
       {/* Primary stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Clients"   value={d.totalClients}   color="text-gray-900 dark:text-white"       sub={`${d.activeClients} active`} />
-        <StatCard label="Platform Users"  value={d.totalUsers}     color="text-blue-400"    sub={`${d.activeUsers} active`} />
-        <StatCard label="Active Modules"  value={d.enabledModules} color="text-purple-400"  sub="across all tenants" />
-        <StatCard label="Monthly Revenue" value={`$${d.mrr}`}      color="text-green-400"   sub="AUD / month" />
+        <StatCard label="Platform Users"  value={d.totalUsers}     color="text-blue-600 dark:text-blue-400"    sub={`${d.activeUsers} active`} />
+        <StatCard label="Active Modules"  value={d.enabledModules} color="text-purple-600 dark:text-purple-400"  sub="across all tenants" />
+        <StatCard label="Monthly Revenue" value={`$${d.mrr}`}      color="text-green-600 dark:text-green-400"   sub="AUD / month" />
       </div>
 
       {/* Tier breakdown */}
       <div className="grid grid-cols-3 gap-4">
-        <TierCard tier="Enterprise"   count={d.enterprise}   color="text-purple-400" bg="bg-purple-900/20 border-purple-800" />
-        <TierCard tier="Professional" count={d.professional} color="text-blue-400"   bg="bg-blue-900/20 border-blue-800" />
+        <TierCard tier="Enterprise"   count={d.enterprise}   color="text-purple-600 dark:text-purple-400" bg="bg-purple-50 dark:bg-purple-100 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800" />
+        <TierCard tier="Professional" count={d.professional} color="text-blue-600 dark:text-blue-400"   bg="bg-blue-50 dark:bg-blue-100 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" />
         <TierCard tier="Starter"      count={d.starter}      color="text-gray-600 dark:text-gray-300"   bg="bg-gray-100 dark:bg-gray-800/40 border-gray-300 dark:border-gray-700" />
       </div>
 
@@ -125,9 +125,9 @@ export default async function SuperAdminDashboard() {
               <Link
                 key={a.href}
                 href={a.href}
-                className="block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-purple-700 rounded-xl p-4 transition group"
+                className="block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:border-purple-700 rounded-xl p-4 transition group"
               >
-                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-300 transition">{a.label}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-700 dark:text-purple-300 transition">{a.label}</p>
                 <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{a.desc}</p>
               </Link>
             ))}
@@ -138,11 +138,11 @@ export default async function SuperAdminDashboard() {
             <div className="mt-2">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Client Setup Status</h2>
-                <Link href="/super-admin/clients" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
+                <Link href="/super-admin/clients" className="text-xs text-purple-400 hover:text-purple-700 dark:text-purple-300">View all →</Link>
               </div>
               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
                 {d.clients.map((c: any) => (
-                  <div key={c.id} className="flex items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:bg-gray-800/20 transition">
+                  <div key={c.id} className="flex items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-900 dark:text-white text-xs font-bold shrink-0"
                       style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
@@ -159,7 +159,7 @@ export default async function SuperAdminDashboard() {
                         ].map((step) => (
                           <span
                             key={step.label}
-                            className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-900/50 text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
+                            className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-50 dark:bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                           >
                             {step.done ? '' : '○'} {step.label}
                           </span>
@@ -175,7 +175,7 @@ export default async function SuperAdminDashboard() {
                         />
                       </div>
                     </div>
-                    <Link href={`/super-admin/clients/${c.id}`} className="text-xs text-gray-500 hover:text-purple-400 transition shrink-0 dark:text-gray-400">→</Link>
+                    <Link href={`/super-admin/clients/${c.id}`} className="text-xs text-gray-500 hover:text-purple-600 dark:text-purple-400 transition shrink-0 dark:text-gray-400">→</Link>
                   </div>
                 ))}
               </div>
@@ -187,7 +187,7 @@ export default async function SuperAdminDashboard() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Recent Activity</h2>
-            <Link href="/super-admin/audit-logs" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
+            <Link href="/super-admin/audit-logs" className="text-xs text-purple-400 hover:text-purple-700 dark:text-purple-300">View all →</Link>
           </div>
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
             {d.recentLogs.length === 0 ? (

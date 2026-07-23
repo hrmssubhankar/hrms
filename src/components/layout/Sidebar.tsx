@@ -85,7 +85,7 @@ export default function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">HRMS</p>
-          <p className="text-xs text-gray-400">Enterprise Edition</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Enterprise Edition</p>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 py-4 space-y-5">
         {navGroups.map((group) => (
           <div key={group.label}>
-            <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+            <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-600 dark:text-gray-400">
               {group.label}
             </p>
             <ul className="space-y-0.5">
@@ -122,7 +122,7 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800">
-        <p className="text-xs text-gray-400 text-center">v1.0 · 28 Modules</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 text-center">v1.0 · 28 Modules</p>
       </div>
     </aside>
   )

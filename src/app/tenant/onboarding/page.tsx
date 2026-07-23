@@ -69,7 +69,7 @@ export default function OnboardingPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Onboarding & Induction</h1>
-          <p className="text-gray-400 text-sm mt-1">Track new employee onboarding progress</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track new employee onboarding progress</p>
         </div>
         <Link href="/tenant/onboarding/new"
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
@@ -86,11 +86,11 @@ export default function OnboardingPage() {
           { label: 'Completed',   value: stats.completed,   color: 'text-green-400',   onClick: () => { setFilter('completed');   load(search, 'completed') } },
         ].map(s => (
           <button key={s.label} onClick={s.onClick}
-            className={`bg-gray-900 border rounded-xl p-5 text-left transition hover:border-purple-700 ${
+            className={`bg-white dark:bg-gray-900 border rounded-xl p-5 text-left transition hover:border-purple-700 ${
               (filter === (s.label === 'Total' ? '' : s.label.toLowerCase().replace(' ', '_')))
                 ? 'border-purple-600' : 'border-gray-800'
             }`}>
-            <p className="text-xs text-gray-400 mb-1">{s.label}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{s.label}</p>
             <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
           </button>
         ))}
@@ -102,11 +102,11 @@ export default function OnboardingPage() {
           value={search}
           onChange={e => { setSearch(e.target.value); load(e.target.value, filter) }}
           placeholder="Search by name or email…"
-          className="flex-1 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+          className="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
         />
         {(search || filter) && (
           <button onClick={() => { setSearch(''); setFilter(''); load('', '') }}
-            className="text-xs text-gray-400 hover:text-white border border-gray-700 px-3 py-2 rounded-lg transition">
+            className="text-xs text-gray-600 dark:text-gray-400 hover:text-white border border-gray-300 dark:border-gray-700 px-3 py-2 rounded-lg transition">
             Clear
           </button>
         )}
@@ -114,11 +114,11 @@ export default function OnboardingPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-gray-400 text-sm">Loading…</div>
+        <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
       ) : records.length === 0 ? (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-12 text-center">
           <div className="text-4xl mb-3"></div>
-          <p className="text-gray-300 font-medium">No onboarding records yet</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No onboarding records yet</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Start onboarding a new employee to get going.</p>
           <Link href="/tenant/onboarding/new"
             className="inline-block mt-4 bg-purple-600 hover:bg-purple-700 text-white text-sm px-5 py-2 rounded-lg transition">
@@ -126,16 +126,16 @@ export default function OnboardingPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 text-left">
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Employee</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Stage</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Status</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Progress</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Start Date</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-400"></th>
+              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Employee</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Stage</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Progress</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Start Date</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400"></th>
               </tr>
             </thead>
             <tbody>
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
                 const done = r.checklist?.filter(t => t.done).length ?? 0
                 const tot  = r.checklist?.length ?? 0
                 return (
-                  <tr key={r.id} className="border-b border-gray-800/50 last:border-0 hover:bg-gray-800/30 transition">
+                  <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/30 transition">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-purple-900 flex items-center justify-center text-white text-sm font-bold shrink-0">
@@ -152,12 +152,12 @@ export default function OnboardingPage() {
                         </div>
                         <div>
                           <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
-                          <p className="text-gray-400 text-xs">{r.employeeEmail}</p>
+                          <p className="text-gray-600 dark:text-gray-400 text-xs">{r.employeeEmail}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="text-xs text-gray-300">{STAGE_LABELS[r.stage] ?? r.stage}</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-300">{STAGE_LABELS[r.stage] ?? r.stage}</span>
                     </td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-300 border-gray-700'}`}>
@@ -166,13 +166,13 @@ export default function OnboardingPage() {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-24 bg-gray-800 rounded-full h-1.5">
+                        <div className="w-24 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
                           <div className="h-1.5 rounded-full bg-purple-500 transition-all" style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="text-xs text-gray-400">{done}/{tot}</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{done}/{tot}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-xs text-gray-400">
+                    <td className="px-5 py-4 text-xs text-gray-600 dark:text-gray-400">
                       {r.employeeStartDate
                         ? new Date(r.employeeStartDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
                         : '—'}

@@ -102,11 +102,11 @@ export default function CompetencyPage() {
             </div>
 
             {selectedEmp && (
-              loading ? <p className="text-sm text-gray-400">Loading…</p> :
+              loading ? <p className="text-sm text-gray-600 dark:text-gray-400">Loading…</p> :
               assessments.length === 0 ? (
-                <div className="text-center py-12 text-gray-400">
+                <div className="text-center py-12 text-gray-600 dark:text-gray-400">
                   <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
@@ -119,7 +119,7 @@ export default function CompetencyPage() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">{a.competencyName}</p>
-                          {a.competencyCategory && <p className="text-xs text-gray-400 capitalize">{a.competencyCategory}</p>}
+                          {a.competencyCategory && <p className="text-xs text-gray-600 dark:text-gray-400 capitalize">{a.competencyCategory}</p>}
                         </div>
                         {a.outcome && (
                           <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${OUTCOME_COLORS[a.outcome] ?? 'bg-gray-100 text-gray-500'}`}>
@@ -141,9 +141,9 @@ export default function CompetencyPage() {
         {tab === 'library' && (
           <div className="space-y-6">
             {categories.length === 0 && competencies.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12 text-gray-600 dark:text-gray-400">
                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
@@ -152,7 +152,7 @@ export default function CompetencyPage() {
             ) : (
               (categories.length > 0 ? categories : [null]).map(cat => (
                 <div key={cat ?? 'uncategorised'}>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">{cat ?? 'Uncategorised'}</h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-3">{cat ?? 'Uncategorised'}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {competencies.filter(c => c.category === cat).map(c => (
                       <div key={c.id} className="border border-gray-200 rounded-lg p-4 dark:border-gray-700">

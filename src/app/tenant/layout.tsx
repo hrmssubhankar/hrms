@@ -141,7 +141,7 @@ export default async function TenantLayout({ children }: { children: React.React
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{tenantName}</span>
 
             <div className="flex items-center gap-1.5">
-              <ThemeToggle className="p-2 rounded-lg text-gray-400 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition" />
+              <ThemeToggle className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition" />
               <NotificationBell primaryColor={primaryColor} />
               <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
               <TenantUserDropdown

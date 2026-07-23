@@ -87,15 +87,15 @@ export default function AdminsPage() {
       </div>
 
       {formSuccess && (
-        <div className="bg-green-900/50 border border-green-700 rounded-lg p-3 text-sm text-green-300">{formSuccess}</div>
+        <div className="bg-green-50 dark:bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">{formSuccess}</div>
       )}
 
       {/* Add admin form */}
       {showForm && (
-        <form onSubmit={createAdmin} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
-          <h2 className="text-sm font-semibold text-purple-300">New Super Admin</h2>
+        <form onSubmit={createAdmin} className="bg-white dark:bg-gray-900 border border-purple-200 dark:border-purple-800 rounded-xl p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-purple-700 dark:text-purple-300">New Super Admin</h2>
           {formError && (
-            <div className="bg-red-900/50 border border-red-700 rounded-lg p-2 text-xs text-red-300">{formError}</div>
+            <div className="bg-red-50 dark:bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-lg p-2 text-xs text-red-700 dark:text-red-300">{formError}</div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
@@ -167,15 +167,15 @@ export default function AdminsPage() {
               <tr>
                 <td colSpan={5} className="px-5 py-10 text-center text-gray-500 text-sm dark:text-gray-400">
                   No super admins found.{' '}
-                  <button onClick={() => setShowForm(true)} className="text-purple-400 hover:underline">Add the first one →</button>
+                  <button onClick={() => setShowForm(true)} className="text-purple-600 dark:text-purple-400 hover:underline">Add the first one →</button>
                 </td>
               </tr>
             )}
             {admins.map(a => (
-              <tr key={a.id} className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:bg-gray-800/50">
+              <tr key={a.id} className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800/50">
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-purple-900 flex items-center justify-center text-purple-200 text-xs font-bold shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-200 text-xs font-bold shrink-0">
                       {a.name[0]?.toUpperCase()}
                     </div>
                     <div>
@@ -189,8 +189,8 @@ export default function AdminsPage() {
                     onClick={() => toggleActive(a)}
                     className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium transition ${
                       a.isActive
-                        ? 'bg-green-900 text-green-300 hover:bg-red-900 hover:text-red-300'
-                        : 'bg-red-900 text-red-300 hover:bg-green-900 hover:text-green-300'
+                        ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 hover:bg-red-100 dark:bg-red-900 hover:text-red-700 dark:text-red-300'
+                        : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 hover:bg-green-100 dark:bg-green-900 hover:text-green-700 dark:text-green-300'
                     }`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${a.isActive ? 'bg-green-400' : 'bg-red-400'}`} />
@@ -209,7 +209,7 @@ export default function AdminsPage() {
                   {admins.length > 1 ? (
                     <button
                       onClick={() => deleteAdmin(a)}
-                      className="text-xs text-red-400 hover:text-red-300 font-medium"
+                      className="text-xs text-red-400 hover:text-red-700 dark:text-red-300 font-medium"
                     >
                       Delete
                     </button>
@@ -223,7 +223,7 @@ export default function AdminsPage() {
         </table>
       </div>
 
-      <div className="bg-amber-950 border border-amber-800 rounded-xl p-4 text-xs text-amber-300">
+      <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-xs text-amber-700 dark:text-amber-300">
         ️ The last remaining admin cannot be deleted.
       </div>
     </div>

@@ -106,7 +106,7 @@ function MiniBar({ items }: { items: { label: string; value: number; color: stri
       {items.map(item => (
         <div key={item.label} className="flex items-center gap-3">
           <span className="text-xs text-gray-500 w-28 shrink-0 truncate dark:text-gray-400">{item.label}</span>
-          <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all"
               style={{ width: `${Math.max(4, (item.value / max) * 100)}%`, background: item.color }}
@@ -206,13 +206,13 @@ export default function DashboardPage() {
       {loading && !data && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array(8).fill(0).map((_, i) => (
-            <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 h-28 animate-pulse" />
+            <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 h-28 animate-pulse" />
           ))}
         </div>
       )}
 
       {error && (
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-8 text-center">
           <p className="text-gray-500 text-sm dark:text-gray-400">
             Could not load live stats ({error}). You may not have manager-level access.
           </p>
@@ -233,7 +233,7 @@ export default function DashboardPage() {
                 { label: 'Amber Compliance', value: data.compliance.amberCount, color: data.compliance.amberCount > 0 ? 'text-amber-400' : 'text-gray-600', href: '/tenant/employee-management' },
                 { label: 'Red Compliance', value: data.compliance.redCount, color: data.compliance.redCount > 0 ? 'text-red-400' : 'text-gray-600', href: '/tenant/employee-management' },
               ].map(s => (
-                <div key={s.label} className={`bg-gray-900 border rounded-2xl p-5 ${data.compliance.redCount > 0 && s.label === 'Red Compliance' ? 'border-red-800/50' : 'border-gray-800'}`}>
+                <div key={s.label} className={`bg-white dark:bg-gray-900 border rounded-2xl p-5 ${data.compliance.redCount > 0 && s.label === 'Red Compliance' ? 'border-red-800/50' : 'border-gray-800'}`}>
                   {s.href ? (
                     <Link href={s.href} className="block">
                       <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
 
           {/* ── Workforce breakdown ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white">By Employment Type</h3>
               {data.headcount.byEmploymentType.length === 0
                 ? <p className="text-sm text-gray-600 dark:text-gray-400">No data yet</p>
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                   }))} />
               }
             </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-white">By Entity</h3>
               {data.headcount.byEntity.length === 0
                 ? <p className="text-sm text-gray-600 dark:text-gray-400">No entity data yet — set entity on employee profiles</p>
@@ -271,9 +271,9 @@ export default function DashboardPage() {
                     <MiniBar items={data.headcount.byEntity.map((e, i) => ({
                       label: e.name, value: e.count, color: ENTITY_COLORS[i % ENTITY_COLORS.length],
                     }))} />
-                    <div className="flex flex-wrap gap-3 pt-2 border-t border-gray-800">
+                    <div className="flex flex-wrap gap-3 pt-2 border-t border-gray-200 dark:border-gray-800">
                       {data.headcount.byEntity.map((e, i) => (
-                        <div key={e.name} className="flex items-center gap-1.5 text-xs text-gray-400">
+                        <div key={e.name} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: ENTITY_COLORS[i % ENTITY_COLORS.length] }} />
                           {e.name} <span className="text-white font-medium">{e.count}</span>
                         </div>
@@ -288,7 +288,7 @@ export default function DashboardPage() {
           <section>
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Payroll</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-white">Last Pay Run</h3>
                   <Link href="/tenant/payroll" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
@@ -305,7 +305,7 @@ export default function DashboardPage() {
                         { label: 'Net',   value: data.payroll.lastRunNet,   color: 'text-green-400' },
                         { label: 'Super', value: data.payroll.lastRunSuper, color: 'text-purple-400' },
                       ].map(s => (
-                        <div key={s.label} className="bg-gray-800/60 rounded-xl px-3 py-3">
+                        <div key={s.label} className="bg-gray-100 dark:bg-gray-800/60 rounded-xl px-3 py-3">
                           <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                           <p className={`text-sm font-bold mt-0.5 ${s.color}`}>{fmt(s.value)}</p>
                         </div>
@@ -317,7 +317,7 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
                 <h3 className="text-sm font-semibold text-white">Year to Date — {new Date().getFullYear()}</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[
@@ -325,7 +325,7 @@ export default function DashboardPage() {
                     { label: 'Net',   value: data.payroll.ytdNet,   color: 'text-green-400' },
                     { label: 'Super', value: data.payroll.ytdSuper, color: 'text-purple-400' },
                   ].map(s => (
-                    <div key={s.label} className="bg-gray-800/60 rounded-xl px-3 py-3">
+                    <div key={s.label} className="bg-gray-100 dark:bg-gray-800/60 rounded-xl px-3 py-3">
                       <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                       <p className={`text-sm font-bold mt-0.5 ${s.color}`}>{fmt(s.value)}</p>
                     </div>
@@ -339,7 +339,7 @@ export default function DashboardPage() {
           {/* ── Leave / Holidays / Documents / WHS ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">Leave</h3>
                 <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
@@ -364,7 +364,7 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">Holidays</h3>
                 <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
@@ -385,7 +385,7 @@ export default function DashboardPage() {
               }
             </div>
 
-            <div className={`bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.documents.expiredActive > 0 ? 'border-red-700/40' : 'border-gray-800'}`}>
+            <div className={`bg-white dark:bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.documents.expiredActive > 0 ? 'border-red-700/40' : 'border-gray-800'}`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">Documents</h3>
                 <Link href="/tenant/documents" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
@@ -402,7 +402,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className={`bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.incidents.openCritical > 0 ? 'border-red-700/40' : 'border-gray-800'}`}>
+            <div className={`bg-white dark:bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.incidents.openCritical > 0 ? 'border-red-700/40' : 'border-gray-800'}`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-white">️ WHS</h3>
                 <Link href="/tenant/whs" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
@@ -434,9 +434,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {MODULE_SHORTCUTS.map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}
-              className="bg-gray-900 border border-gray-800 hover:border-purple-700/50 hover:bg-gray-800 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition group">
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-purple-700/50 hover:bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition group">
               <span className="text-2xl">{m.icon}</span>
-              <span className="text-xs text-gray-400 group-hover:text-white font-medium transition">{m.label}</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-white font-medium transition">{m.label}</span>
             </Link>
           ))}
         </div>

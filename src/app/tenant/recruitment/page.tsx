@@ -31,7 +31,7 @@ const REQ_STATUS_STYLE: Record<string, string> = {
   closed: 'bg-red-900/50 text-red-300 border-red-800',
 }
 
-const INPUT = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 
 export default function RecruitmentPage() {
   const [requisitions, setRequisitions] = useState<Requisition[]>([])
@@ -118,7 +118,7 @@ export default function RecruitmentPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Recruitment & ATS</h1>
-          <p className="text-gray-400 text-sm mt-1">Manage job requisitions and candidate pipelines</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage job requisitions and candidate pipelines</p>
         </div>
         {tab === 'jobs' && (
           <button onClick={() => setShowReqForm(v => !v)}
@@ -144,15 +144,15 @@ export default function RecruitmentPage() {
           { label: 'Applications',value: stats.totalApps,color: 'text-blue-400' },
           { label: 'Hired',       value: stats.hired,    color: 'text-teal-400' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-800 gap-4">
+      <div className="flex border-b border-gray-200 dark:border-gray-800 gap-4">
         <button onClick={() => setTab('jobs')}
           className={`px-4 py-2.5 text-sm font-medium border-b-2 transition ${tab === 'jobs' ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
           Job Requisitions
@@ -167,15 +167,15 @@ export default function RecruitmentPage() {
 
       {/* Create requisition form */}
       {tab === 'jobs' && showReqForm && (
-        <form onSubmit={createReq} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={createReq} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
           <h3 className="text-sm font-semibold text-purple-300">Create Job Requisition</h3>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Job Title *</label>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Job Title *</label>
             <input required value={reqForm.title} onChange={e => setReqForm(f => ({ ...f, title: e.target.value }))}
               placeholder="e.g. Support Worker — Community" className={INPUT} />
           </div>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Description</label>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Description</label>
             <textarea value={reqForm.description} onChange={e => setReqForm(f => ({ ...f, description: e.target.value }))}
               rows={3} placeholder="Role summary, key responsibilities, requirements…" className={INPUT} />
           </div>
@@ -188,27 +188,27 @@ export default function RecruitmentPage() {
 
       {/* Add candidate form */}
       {tab === 'pipeline' && showAppForm && selectedReq && (
-        <form onSubmit={addCandidate} className="bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={addCandidate} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
           <h3 className="text-sm font-semibold text-purple-300">Add Candidate to Pipeline</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">First Name *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">First Name *</label>
               <input required value={appForm.firstName} onChange={e => setAppForm(f => ({ ...f, firstName: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Last Name *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Last Name *</label>
               <input required value={appForm.lastName} onChange={e => setAppForm(f => ({ ...f, lastName: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Email *</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Email *</label>
               <input required type="email" value={appForm.email} onChange={e => setAppForm(f => ({ ...f, email: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Phone</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Phone</label>
               <input value={appForm.phone} onChange={e => setAppForm(f => ({ ...f, phone: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Source</label>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Source</label>
               <select value={appForm.source} onChange={e => setAppForm(f => ({ ...f, source: e.target.value }))} className={INPUT}>
                 <option value="">— Select —</option>
                 {['Seek','LinkedIn','Indeed','Referral','Walk-in','Agency','Internal'].map(s => <option key={s} value={s}>{s}</option>)}
@@ -216,7 +216,7 @@ export default function RecruitmentPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Notes</label>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notes</label>
             <textarea value={appForm.notes} onChange={e => setAppForm(f => ({ ...f, notes: e.target.value }))}
               rows={2} placeholder="Initial notes about this candidate…" className={INPUT} />
           </div>
@@ -227,24 +227,24 @@ export default function RecruitmentPage() {
         </form>
       )}
 
-      {loading ? <div className="text-gray-400 text-sm">Loading…</div> : (
+      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : (
         <>
           {/* Jobs list */}
           {tab === 'jobs' && (
             requisitions.length === 0 ? (
-              <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-                <p className="text-gray-300 font-medium">No requisitions yet</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">No requisitions yet</p>
                 <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create a job requisition to begin hiring.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {requisitions.map(r => (
-                  <div key={r.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5 flex items-start gap-4">
+                  <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 flex items-start gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="text-white font-medium">{r.title}</span>
@@ -252,7 +252,7 @@ export default function RecruitmentPage() {
                           {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                         </span>
                       </div>
-                      {r.description && <p className="text-sm text-gray-400 line-clamp-2 mt-0.5">{r.description}</p>}
+                      {r.description && <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-0.5">{r.description}</p>}
                       <p className="text-xs text-gray-600 mt-2 dark:text-gray-400">
                         Created {new Date(r.createdAt).toLocaleDateString('en-AU')} · {r.applicationCount} application{r.applicationCount !== 1 ? 's' : ''} · {r.hiredCount} hired
                       </p>
@@ -270,7 +270,7 @@ export default function RecruitmentPage() {
                       )}
                       {r.status === 'open' && (
                         <button onClick={() => updateReqStatus(r.id, 'closed')}
-                          className="text-xs bg-gray-800 border border-gray-700 text-gray-400 hover:border-red-700 hover:text-red-400 px-3 py-1.5 rounded-lg transition">
+                          className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-700 hover:text-red-400 px-3 py-1.5 rounded-lg transition">
                           Close Role
                         </button>
                       )}
@@ -284,19 +284,19 @@ export default function RecruitmentPage() {
           {/* Pipeline */}
           {tab === 'pipeline' && selectedReq && (
             applications.length === 0 ? (
-              <div className="bg-gray-900 border border-gray-800 rounded-xl py-14 text-center">
+              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-                <p className="text-gray-300 font-medium">No candidates in pipeline</p>
+                <p className="text-gray-600 dark:text-gray-300 font-medium">No candidates in pipeline</p>
                 <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Add candidates to begin tracking applications.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {applications.map(a => (
-                  <div key={a.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                  <div key={a.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
                     <div className="flex items-center gap-3 flex-wrap">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
@@ -313,7 +313,7 @@ export default function RecruitmentPage() {
                       <div className="flex flex-wrap gap-1 shrink-0">
                         {APP_STATUSES.filter(s => s.value !== a.status).map(s => (
                           <button key={s.value} onClick={() => moveStatus(a.id, s.value)}
-                            className="text-xs bg-gray-800 border border-gray-700 text-gray-400 hover:border-purple-600 hover:text-purple-300 px-2.5 py-1 rounded-lg transition">
+                            className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-purple-600 hover:text-purple-300 px-2.5 py-1 rounded-lg transition">
                             → {s.label}
                           </button>
                         ))}
