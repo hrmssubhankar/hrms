@@ -127,6 +127,12 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState('')
   const [tenantName, setTenantName] = useState('')
   const [primaryColor, setPrimaryColor] = useState('#6d28d9')
+  const [greetingText, setGreetingText] = useState('') // client-only — avoids SSR hydration mismatch
+
+  useEffect(() => {
+    // Greeting is computed client-side only to avoid SSR/CSR hydration mismatch
+    setGreetingText(greeting())
+  }, [])
 
   useEffect(() => {
     // Load user info for greeting
@@ -173,7 +179,7 @@ export default function DashboardPage() {
         style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}aa)` }}
       >
         <div className="relative z-10">
-          <p className="text-sm font-medium opacity-80">{greeting()},</p>
+          <p className="text-sm font-medium opacity-80">{greetingText || 'Welcome'},</p>
           <h1 className="text-2xl font-bold mt-0.5">{userName || '…'} </h1>
           <p className="text-sm opacity-70 mt-1">{tenantName || 'HRMS'} · HR Portal</p>
         </div>
