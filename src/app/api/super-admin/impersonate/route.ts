@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
       sub:            targetUser.id,
       email:          targetUser.email,
       role:           'tenant_user',
+      userRole:       targetUser.role,   // actual DB role — used by apiGuard for permission checks
       tenantId:       tenantId,
       tenantSlug:     tenant.slug,
       name:           `[Impersonated by ${session.email}]`,
