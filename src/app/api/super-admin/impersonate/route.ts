@@ -26,10 +26,15 @@ export async function POST(req: NextRequest) {
         .where(and(eq(users.id, userId), eq(users.tenantId, tenantId)))
         .limit(1)
     } else {
-      // Default to first active director/hr_officer in the tenant
+      // Prefer director > hr_officer > any active user
       const allUsers = await db.select().from(users)
         .where(and(eq(users.tenantId, tenantId), eq(users.isActive, true)))
-      targetUser = allUsers.find(u => ['director', 'hr_officer'].includes(u.role)) ?? allUsers[0]
+      const ROLE_PRIORITY: Record<string, number> = { director: 0, hr_officer: 1 }
+      targetUser =
+        allUsers
+          .filter(u => u.role in ROLE_PRIORITY)
+          .sort((a, b) => (ROLE_PRIORITY[a.role] ?? 99) - (ROLE_PRIORITY[b.role] ?? 99))[0]
+        ?? allUsers[0]
     }
 
     if (!targetUser) {
