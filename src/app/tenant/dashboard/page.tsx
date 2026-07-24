@@ -122,6 +122,7 @@ function MiniBar({ items }: { items: { label: string; value: number; color: stri
 // ── Personal dashboard types ───────────────────────────────────────────────────
 type LeaveRequest = { id: string; leaveType: string; startDate: string; endDate: string; totalDays: number; status: string }
 type PublicHoliday = { name: string; date: string; country: string }
+type LeaveBalance = { key: string; label: string; emoji: string; color: string; entitlement: number | null; taken: number; pending: number; remaining: number | null }
 
 const PERSONAL_SHORTCUTS = [
   { key: 'my-profile',   icon: '', label: 'My Profile',   desc: 'Your personal details' },
@@ -152,15 +153,18 @@ const LEAVE_STATUS_COLOR: Record<string, string> = {
 function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }: {
   userName: string; tenantName: string; primaryColor: string; greetingText: string
 }) {
-  const [leaveRequests,  setLeaveRequests]  = useState<LeaveRequest[]>([])
-  const [holidays,       setHolidays]       = useState<PublicHoliday[]>([])
+  const [leaveRequests,   setLeaveRequests]   = useState<LeaveRequest[]>([])
+  const [holidays,        setHolidays]        = useState<PublicHoliday[]>([])
+  const [leaveBalances,   setLeaveBalances]   = useState<LeaveBalance[]>([])
+  const [employeeLinked,  setEmployeeLinked]  = useState(true)
   const [loadingPersonal, setLoadingPersonal] = useState(true)
 
   useEffect(() => {
     Promise.all([
       fetch('/api/tenant/leave').then(r => r.json()).catch(() => ({ requests: [] })),
       fetch('/api/tenant/public-holidays').then(r => r.json()).catch(() => ({ holidays: [] })),
-    ]).then(([leaveData, holidayData]) => {
+      fetch('/api/tenant/leave/balances').then(r => r.json()).catch(() => ({ balances: [], employeeLinked: false })),
+    ]).then(([leaveData, holidayData, balanceData]) => {
       const today = new Date().toISOString().slice(0, 10)
       const reqs: LeaveRequest[] = (leaveData.requests ?? [])
         .sort((a: LeaveRequest, b: LeaveRequest) => b.startDate.localeCompare(a.startDate))
@@ -170,6 +174,9 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
         .slice(0, 5)
       setLeaveRequests(reqs)
       setHolidays(upcomingHols)
+      // Only show types with an entitlement cap (skip 'unpaid' etc.)
+      setLeaveBalances((balanceData.balances ?? []).filter((b: LeaveBalance) => b.entitlement != null))
+      setEmployeeLinked(balanceData.employeeLinked !== false)
     }).finally(() => setLoadingPersonal(false))
   }, [])
 
@@ -189,7 +196,53 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
         <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full opacity-10 bg-white" />
       </div>
 
-      {/* Leave summary + upcoming holidays */}
+      {/* Leave balance summary */}
+      {employeeLinked && leaveBalances.length > 0 && (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Leave Balances — {new Date().getFullYear()}</h3>
+            <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">Full details →</Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {leaveBalances.map(b => {
+              const pct = b.entitlement ? Math.min(100, Math.round((b.taken / b.entitlement) * 100)) : 0
+              const isLow = b.remaining != null && b.entitlement != null && b.remaining <= b.entitlement * 0.2
+              return (
+                <div key={b.key} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 flex flex-col gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base">{b.emoji}</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{b.label}</span>
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-end mb-1">
+                      <span className={`text-xl font-bold ${isLow ? 'text-amber-500' : 'text-gray-900 dark:text-white'}`}>
+                        {b.remaining ?? '—'}
+                      </span>
+                      <span className="text-xs text-gray-400">/ {b.entitlement}d</span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                      <div
+                        className={`h-1.5 rounded-full transition-all ${isLow ? 'bg-amber-400' : 'bg-green-500'}`}
+                        style={{ width: `${100 - pct}%` }}
+                      />
+                    </div>
+                  </div>
+                  {b.pending > 0 && (
+                    <span className="text-[10px] text-yellow-600 dark:text-yellow-400">{b.pending}d pending</span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+      {!employeeLinked && !loadingPersonal && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl px-5 py-4 text-sm text-amber-700 dark:text-amber-300">
+          Your account isn&apos;t linked to an employee profile yet — leave balances won&apos;t show until an admin connects your account. Contact HR.
+        </div>
+      )}
+
+      {/* Leave requests + upcoming holidays */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* My Leave */}
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
