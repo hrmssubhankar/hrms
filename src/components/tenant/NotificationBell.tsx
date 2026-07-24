@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 type Notification = {
   id: string
@@ -28,17 +29,28 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [open, setOpen]   = useState(false)
   const [loading, setLoading] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const ref    = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   const unread = notifications.filter(n => !n.isRead).length
 
-  useEffect(() => {
-    setLoading(true)
+  const fetchNotifications = useCallback((showLoader = false) => {
+    if (showLoader) setLoading(true)
     fetch('/api/tenant/notifications')
       .then(r => r.json())
       .then(d => setNotifications(d.notifications ?? []))
-      .finally(() => setLoading(false))
+      .catch(() => {})
+      .finally(() => { if (showLoader) setLoading(false) })
   }, [])
+
+  // Initial load
+  useEffect(() => { fetchNotifications(true) }, [fetchNotifications])
+
+  // Poll every 30 s to keep badge count current
+  useEffect(() => {
+    const id = setInterval(() => fetchNotifications(false), 30_000)
+    return () => clearInterval(id)
+  }, [fetchNotifications])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -139,7 +151,11 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
           </div>
 
           <div className="px-4 py-2.5 border-t border-gray-100 dark:border-gray-800 text-center">
-            <button className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-600 dark:text-gray-300">View all notifications</button>
+            <button
+              onClick={() => { setOpen(false); router.push('/tenant/notifications') }}
+              className="text-xs text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition">
+              View all notifications →
+            </button>
           </div>
         </div>
       )}

@@ -5,6 +5,7 @@ import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
 import { trainingAssignedEmail, trainingCompletedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { notify, notifyRole } from '@/lib/notifications/notify'
 
 export async function GET(req: NextRequest) {
   try {
@@ -116,22 +117,46 @@ export async function POST(req: NextRequest) {
       }))
     ).returning()
 
-    // Email each enrolled employee
-    try {
-      const ctx = await getTenantEmailCtx(session.tenantId)
-      if (ctx.notify.emailTraining) {
+    // Email + in-app notification for each enrolled employee
+    ;(async () => {
+      try {
+        const ctx = await getTenantEmailCtx(session.tenantId)
         for (const rec of inserted) {
-          const [emp] = await db.select({ firstName: employees.firstName, email: employees.email })
+          const [emp] = await db
+            .select({ firstName: employees.firstName, email: employees.email, userId: employees.userId })
             .from(employees).where(eq(employees.id, rec.employeeId))
-          if (emp?.email) {
+
+          if (ctx.notify.emailTraining && emp?.email) {
             fireEmail(ctx, { to: emp.email, ...trainingAssignedEmail({
               recipientName: emp.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
               courseTitle: course.title, isMandatory: course.isMandatory ?? false, loginUrl: ctx.loginUrl,
             }) })
           }
+
+          // In-app notification to employee
+          if (emp?.userId) {
+            notify(session.tenantId, emp.userId, {
+              type:  'training',
+              title: course.isMandatory
+                ? `Mandatory training assigned: ${course.title}`
+                : `New training assigned: ${course.title}`,
+              body:  'You have been enrolled in a training course. Please complete it at your earliest convenience.',
+              link:  '/tenant/training',
+            })
+          }
         }
-      }
-    } catch (emailErr) { console.error('Training assigned email error:', emailErr) }
+
+        // Notify HR/managers of bulk enrolment (if more than one employee)
+        if (inserted.length > 1) {
+          notifyRole(session.tenantId, ['hr_officer', 'director', 'operations_manager'], {
+            type:  'training',
+            title: `${inserted.length} employees enrolled in ${course.title}`,
+            body:  course.isMandatory ? 'Mandatory training — completion tracking active.' : undefined,
+            link:  '/tenant/training',
+          })
+        }
+      } catch (err) { console.error('Training enrolment notifications error:', err) }
+    })()
 
     return NextResponse.json({ records: inserted }, { status: 201 })
   } catch (err) {
@@ -178,6 +203,42 @@ export async function PATCH(req: NextRequest) {
       .set(updates)
       .where(and(eq(trainingRecords.id, id), eq(trainingRecords.tenantId, session.tenantId)))
       .returning()
+
+    // In-app notification when training completed
+    if (status === 'completed') {
+      ;(async () => {
+        const [empRow] = await db
+          .select({ userId: employees.userId, firstName: employees.firstName, lastName: employees.lastName })
+          .from(employees)
+          .where(eq(employees.id, existing.employeeId))
+          .limit(1)
+        const [courseRow] = await db
+          .select({ title: courses.title, isMandatory: courses.isMandatory })
+          .from(courses)
+          .where(eq(courses.id, existing.courseId))
+          .limit(1)
+
+        if (empRow?.userId) {
+          notify(session.tenantId, empRow.userId, {
+            type:  'training',
+            title: `Training completed: ${courseRow?.title ?? 'Course'}`,
+            body:  score != null ? `Your score: ${score}%` : 'Well done — your certificate has been recorded.',
+            link:  '/tenant/training',
+          })
+        }
+
+        // Notify HR of mandatory training completion
+        if (courseRow?.isMandatory) {
+          const name = empRow ? `${empRow.firstName} ${empRow.lastName}` : 'An employee'
+          notifyRole(session.tenantId, ['hr_officer', 'director', 'compliance_manager'], {
+            type:  'training',
+            title: `Mandatory training completed — ${courseRow.title}`,
+            body:  `${name} has completed mandatory training.`,
+            link:  '/tenant/training',
+          })
+        }
+      })().catch(() => {})
+    }
 
     return NextResponse.json({ record: updated })
   } catch (err) {

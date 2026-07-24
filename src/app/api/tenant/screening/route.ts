@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { screeningRecords, employees } from '@/lib/db/schema'
 import { eq, and, desc, or, lte } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { notify, notifyRole } from '@/lib/notifications/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -96,6 +97,31 @@ export async function POST(req: NextRequest) {
     status:          'pending',
   }).returning()
 
+  // Notify compliance team of new pending check
+  notifyRole(session.tenantId, ['compliance_manager', 'hr_officer', 'director'], {
+    type:  'compliance',
+    title: `New screening check pending — ${checkType}`,
+    body:  `${emp.id} has a new ${checkType} check awaiting verification.`,
+    link:  '/tenant/screening',
+  })
+
+  // Also notify the employee their check has been lodged
+  ;(async () => {
+    const [empRow] = await db
+      .select({ userId: employees.userId, firstName: employees.firstName })
+      .from(employees)
+      .where(eq(employees.id, employeeId))
+      .limit(1)
+    if (empRow?.userId) {
+      notify(session.tenantId, empRow.userId, {
+        type:  'compliance',
+        title: `Screening check submitted — ${checkType}`,
+        body:  'Your check has been lodged and is pending verification.',
+        link:  '/tenant/my-profile',
+      })
+    }
+  })().catch(() => {})
+
   return NextResponse.json({ record }, { status: 201 })
 }
 
@@ -121,6 +147,48 @@ export async function PATCH(req: NextRequest) {
     .set(updates)
     .where(and(eq(screeningRecords.id, id), eq(screeningRecords.tenantId, session.tenantId)))
     .returning()
+
+  // Fire notifications on status changes that need attention
+  if (status === 'red' || status === 'amber') {
+    ;(async () => {
+      const [rec] = await db
+        .select({
+          checkType:  screeningRecords.checkType,
+          userId:     employees.userId,
+          firstName:  employees.firstName,
+          lastName:   employees.lastName,
+        })
+        .from(screeningRecords)
+        .leftJoin(employees, eq(screeningRecords.employeeId, employees.id))
+        .where(eq(screeningRecords.id, id))
+        .limit(1)
+        .catch(() => [])
+
+      const empName  = rec ? `${rec.firstName ?? ''} ${rec.lastName ?? ''}`.trim() : ''
+      const checkType = rec?.checkType ?? 'screening check'
+
+      notifyRole(session.tenantId, ['compliance_manager', 'director', 'hr_officer'], {
+        type:  'compliance',
+        title: status === 'red'
+          ? `🔴 Screening check invalid — ${checkType}`
+          : `🟡 Screening check needs attention — ${checkType}`,
+        body:  `${empName ? `${empName}: ` : ''}${checkType} marked ${status === 'red' ? 'invalid/expired' : 'expiring soon'}.`,
+        link:  '/tenant/screening',
+      })
+
+      // Notify the employee directly
+      if (rec?.userId) {
+        notify(session.tenantId, rec.userId, {
+          type:  'compliance',
+          title: status === 'red'
+            ? `Action required: ${checkType} is invalid`
+            : `${checkType} expiring soon`,
+          body:  'Please contact HR to arrange renewal.',
+          link:  '/tenant/my-profile',
+        })
+      }
+    })().catch(() => {})
+  }
 
   return NextResponse.json({ record: updated })
 }
