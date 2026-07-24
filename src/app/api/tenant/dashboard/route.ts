@@ -29,7 +29,10 @@ export const dynamic = 'force-dynamic'
  * }
  */
 export async function GET() {
-  const guard = await apiGuard('payroll:read')
+  // employees:read is held by all manager-level roles (director, hr_officer,
+  // compliance_manager, operations_manager, payroll_officer, auditor, etc.)
+  // so the dashboard is accessible to any authenticated manager.
+  const guard = await apiGuard('employees:read')
   if (guard.error) return guard.error
   const { session } = guard
   const tid = session.tenantId

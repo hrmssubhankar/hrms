@@ -42,6 +42,7 @@ function generatePassword(length = 12) {
 export default function RolesPage() {
   const [users,    setUsers]    = useState<User[]>([])
   const [loading,  setLoading]  = useState(true)
+  const [denied,   setDenied]   = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [saving,   setSaving]   = useState(false)
   const [editId,   setEditId]   = useState<string | null>(null)
@@ -51,7 +52,9 @@ export default function RolesPage() {
 
   const load = async () => {
     setLoading(true)
-    const data = await fetch('/api/tenant/roles').then(r => r.json())
+    const res  = await fetch('/api/tenant/roles')
+    if (res.status === 403) { setDenied(true); setLoading(false); return }
+    const data = await res.json()
     setUsers(data.users ?? [])
     setLoading(false)
   }
@@ -97,6 +100,22 @@ export default function RolesPage() {
     acc[u.role] = (acc[u.role] ?? 0) + 1
     return acc
   }, {})
+
+  if (denied) return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold text-white">Roles & Access</h1>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage portal users and their access roles</p>
+      </div>
+      <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl gap-3">
+        <span className="text-4xl">🔒</span>
+        <p className="text-gray-900 dark:text-white font-semibold">Access Restricted</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs">
+          User role management is restricted to HR Officers and Directors. Contact your HR administrator for assistance.
+        </p>
+      </div>
+    </div>
+  )
 
   return (
     <div className="space-y-6">

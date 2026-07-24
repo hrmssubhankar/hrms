@@ -190,6 +190,7 @@ export default function EmployeeManagementPage() {
   const router = useRouter()
   const [employees, setEmployees]   = useState<Employee[]>([])
   const [loading,   setLoading]     = useState(true)
+  const [denied,    setDenied]      = useState(false)
   const [search,    setSearch]      = useState('')
   const [status,    setStatus]      = useState('')
   const [empType,   setEmpType]     = useState('')
@@ -211,6 +212,7 @@ export default function EmployeeManagementPage() {
       if (empType)         params.set('type', empType)
       params.set('limit', '50')
       const res  = await fetch(`/api/tenant/employees?${params}`)
+      if (res.status === 403) { setDenied(true); setLoading(false); return }
       const data = await res.json()
       setEmployees(data.employees ?? [])
     } catch {
@@ -225,6 +227,22 @@ export default function EmployeeManagementPage() {
   const activeCount   = employees.filter(e => e.isActive).length
   const inactiveCount = employees.length - activeCount
   const ndisCount     = employees.filter(e => e.ndisWorker).length
+
+  if (denied) return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Employees</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your workforce</p>
+      </div>
+      <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl gap-3">
+        <span className="text-4xl">👥</span>
+        <p className="text-gray-900 dark:text-white font-semibold">Access Restricted</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs">
+          The employee directory is available to managers and above. View your own profile under <strong>My Profile</strong>.
+        </p>
+      </div>
+    </div>
+  )
 
   return (
     <div className="space-y-6">

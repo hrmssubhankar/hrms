@@ -54,9 +54,18 @@ function ProgressBar({ value, max, color = 'bg-purple-600' }: { value: number; m
 export default function AnalyticsPage() {
   const [data,    setData]    = useState<Analytics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [denied,  setDenied]  = useState(false)
 
   useEffect(() => {
-    fetch('/api/tenant/analytics').then(r => r.json()).then(d => { setData(d); setLoading(false) })
+    fetch('/api/tenant/analytics')
+      .then(r => {
+        if (r.status === 403) { setDenied(true); setLoading(false); return null }
+        return r.json()
+      })
+      .then(d => {
+        if (d) { setData(d); setLoading(false) }
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   if (loading) return (
@@ -64,7 +73,28 @@ export default function AnalyticsPage() {
       <p className="text-gray-600 dark:text-gray-400">Loading analytics…</p>
     </div>
   )
-  if (!data) return <p className="text-red-400">Failed to load analytics.</p>
+
+  if (denied) return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold text-white">Reporting & Analytics</h1>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Organisation-wide metrics across all HR modules</p>
+      </div>
+      <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl gap-3">
+        <span className="text-4xl">📊</span>
+        <p className="text-gray-900 dark:text-white font-semibold">Access Restricted</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs">
+          Analytics are available to managers and above. Contact your HR administrator if you need access.
+        </p>
+      </div>
+    </div>
+  )
+
+  if (!data) return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-red-400">Failed to load analytics. Please try refreshing the page.</p>
+    </div>
+  )
 
   const { headcount, byEntity, compliance, training, whs, performance, grievances, turnover, supervision } = data
 
