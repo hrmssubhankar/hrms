@@ -337,16 +337,22 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
   )
 }
 
+type Celebration = {
+  id: string; name: string; jobTitle: string | null; photoUrl: string | null
+  type: 'birthday' | 'anniversary'; daysUntil: number; yearsCount?: number
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
-  const [data,       setData]       = useState<DashboardData | null>(null)
-  const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState<string | null>(null)
-  const [isPersonal, setIsPersonal] = useState(false)
-  const [userName, setUserName] = useState('')
-  const [tenantName, setTenantName] = useState('')
-  const [primaryColor, setPrimaryColor] = useState('#6d28d9')
-  const [greetingText, setGreetingText] = useState('') // client-only — avoids SSR hydration mismatch
+  const [data,          setData]          = useState<DashboardData | null>(null)
+  const [loading,       setLoading]       = useState(true)
+  const [error,         setError]         = useState<string | null>(null)
+  const [isPersonal,    setIsPersonal]    = useState(false)
+  const [userName,      setUserName]      = useState('')
+  const [tenantName,    setTenantName]    = useState('')
+  const [primaryColor,  setPrimaryColor]  = useState('#6d28d9')
+  const [greetingText,  setGreetingText]  = useState('')
+  const [celebrations,  setCelebrations]  = useState<Celebration[]>([])
 
   useEffect(() => {
     // Greeting is computed client-side only to avoid SSR/CSR hydration mismatch
@@ -372,6 +378,11 @@ export default function DashboardPage() {
     }).catch(() => {})
 
     loadDashboard()
+    // Celebrations widget (fire-and-forget; failure is silent)
+    fetch('/api/tenant/dashboard/celebrations')
+      .then(r => r.ok ? r.json() : { celebrations: [] })
+      .then(d => setCelebrations(d.celebrations ?? []))
+      .catch(() => {})
   }, [])
 
   function loadDashboard() {
@@ -670,6 +681,37 @@ export default function DashboardPage() {
             </div>
           </div>
         </>
+      )}
+
+      {/* ── Celebrations widget ── */}
+      {celebrations.length > 0 && (
+        <section>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Upcoming Celebrations</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {celebrations.map(c => (
+              <div key={`${c.id}-${c.type}`}
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                  {c.photoUrl
+                    ? <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
+                    : c.type === 'birthday' ? '🎂' : '🎉'}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{c.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {c.type === 'birthday'
+                      ? 'Birthday'
+                      : `${c.yearsCount} year anniversary`}
+                    {' · '}
+                    <span className="text-purple-500 font-medium">
+                      {c.daysUntil === 0 ? 'Today!' : c.daysUntil === 1 ? 'Tomorrow' : `in ${c.daysUntil}d`}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* ── Module shortcuts ── (always shown) */}

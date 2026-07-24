@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import {
   employees, leaveRequests, screeningRecords, performanceReviews,
-  separationRecords, whsIncidents, grievances,
+  separationRecords, whsIncidents, grievances, courses, trainingRecords,
+  departments, positions,
 } from '@/lib/db/schema'
-import { eq, and, gte, lte, count, desc } from 'drizzle-orm'
+import { eq, and, gte, lte, count, desc, ne, inArray } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
 export const dynamic = 'force-dynamic'
@@ -182,5 +183,76 @@ export async function GET(req: NextRequest) {
     })
   }
 
+  // ── Training gap report ──────────────────────────────────────────────────
+  if (report === 'training_gap') {
+    // Find all mandatory courses for this tenant
+    const mandatoryCourses = await db
+      .select({ id: courses.id, title: courses.title })
+      .from(courses)
+      .where(and(
+        eq(courses.tenantId, tenantId),
+        eq(courses.isMandatory, true),
+      ))
+
+    if (mandatoryCourses.length === 0) {
+      return NextResponse.json({
+        report: 'training_gap',
+        data: [],
+        summary: { mandatoryCourses: 0, employeesWithGaps: 0, totalGaps: 0 },
+      })
+    }
+
+    // Active employees
+    const activeEmployees = await db
+      .select({ id: employees.id, firstName: employees.firstName, lastName: employees.lastName,
+                email: employees.email, positionTitle: positions.title, departmentName: departments.name })
+      .from(employees)
+      .leftJoin(positions,   eq(employees.positionId,   positions.id))
+      .leftJoin(departments, eq(employees.departmentId, departments.id))
+      .where(and(eq(employees.tenantId, tenantId), eq(employees.isActive, true)))
+
+    // Completed training records
+    const completedRecords = await db
+      .select({ employeeId: trainingRecords.employeeId, courseId: trainingRecords.courseId })
+      .from(trainingRecords)
+      .where(and(
+        eq(trainingRecords.tenantId, tenantId),
+        eq(trainingRecords.status, 'completed'),
+        inArray(trainingRecords.courseId, mandatoryCourses.map(c => c.id)),
+      ))
+
+    const courseMap = Object.fromEntries(mandatoryCourses.map(c => [c.id, c.title]))
+    const completed = new Set(completedRecords.map(r => `${r.employeeId}::${r.courseId}`))
+
+    const rows: ReportRow[] = []
+    for (const emp of activeEmployees) {
+      const missing = mandatoryCourses.filter(c => !completed.has(`${emp.id}::${c.id}`))
+      if (missing.length === 0) continue
+      rows.push({
+        employee:        `${emp.firstName} ${emp.lastName}`,
+        email:           emp.email,
+        jobTitle:        emp.positionTitle ?? '—',
+        department:      emp.departmentName ?? '—',
+        missingCourses:  missing.map(c => c.title).join(', '),
+        gapCount:        missing.length,
+      })
+    }
+
+    rows.sort((a, b) => (b.gapCount as number) - (a.gapCount as number))
+
+    return NextResponse.json({
+      report: 'training_gap',
+      data: rows,
+      summary: {
+        mandatoryCourses: mandatoryCourses.length,
+        employeesWithGaps: rows.length,
+        employeesCompliant: activeEmployees.length - rows.length,
+        totalGaps: rows.reduce((s, r) => s + (r.gapCount as number), 0),
+      },
+    })
+  }
+
   return NextResponse.json({ error: 'Unknown report type' }, { status: 400 })
 }
+
+type ReportRow = Record<string, unknown>

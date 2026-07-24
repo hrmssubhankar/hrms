@@ -127,6 +127,48 @@ export default function EmployeeProfilePage() {
   const [docs,       setDocs]       = useState<EmployeeDoc[]>([])
   const [docsLoaded, setDocsLoaded] = useState(false)
 
+  // Photo upload state
+  const [photoUploading, setPhotoUploading] = useState(false)
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !emp) return
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      alert('Please select a JPG, PNG, WebP or GIF image.')
+      return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image must be smaller than 2 MB.')
+      return
+    }
+    setPhotoUploading(true)
+    try {
+      const reader = new FileReader()
+      const dataUrl: string = await new Promise((res, rej) => {
+        reader.onload = () => res(reader.result as string)
+        reader.onerror = rej
+        reader.readAsDataURL(file)
+      })
+      const res = await fetch(`/api/tenant/employees/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoUrl: dataUrl }),
+      })
+      if (res.ok) {
+        const d = await res.json()
+        setEmp(d.employee ?? emp)
+        setMsg('Photo updated')
+        setTimeout(() => setMsg(''), 3000)
+      } else {
+        alert('Failed to save photo. Please try again.')
+      }
+    } catch {
+      alert('Upload failed. Please try again.')
+    } finally {
+      setPhotoUploading(false)
+    }
+  }
+
   useEffect(() => {
     fetch(`/api/tenant/employees/${id}`)
       .then(r => r.json())
@@ -261,13 +303,19 @@ export default function EmployeeProfilePage() {
       {/* Profile header card */}
       <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-          {/* Avatar */}
-          <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shrink-0"
-            style={{ background: 'var(--primary)' }}
-          >
-            {initials}
-          </div>
+          {/* Avatar / photo upload */}
+          <label className="relative group cursor-pointer shrink-0" title="Click to upload photo">
+            <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+            <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-white text-2xl font-bold"
+              style={{ background: emp.photoUrl ? 'transparent' : 'var(--primary)' }}>
+              {emp.photoUrl
+                ? <img src={emp.photoUrl} alt={fullName} className="w-full h-full object-cover" />
+                : initials}
+            </div>
+            <div className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+              <span className="text-white text-xs font-medium">{photoUploading ? '…' : '📷'}</span>
+            </div>
+          </label>
 
           {/* Info */}
           <div className="flex-1 min-w-0">
@@ -571,6 +619,20 @@ export default function EmployeeProfilePage() {
                       red:'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
                       pending:'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
                     }
+                    // Compute expiry countdown badge
+                    let countdownBadge: { label: string; cls: string } | null = null
+                    if (sr.expiryDate) {
+                      const daysLeft = Math.round((new Date(sr.expiryDate + 'T00:00:00').getTime() - Date.now()) / 86_400_000)
+                      if (daysLeft < 0) {
+                        countdownBadge = { label: `Expired ${Math.abs(daysLeft)}d ago`, cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' }
+                      } else if (daysLeft === 0) {
+                        countdownBadge = { label: 'Expires today', cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' }
+                      } else if (daysLeft <= 14) {
+                        countdownBadge = { label: `Expires in ${daysLeft}d`, cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' }
+                      } else if (daysLeft <= 30) {
+                        countdownBadge = { label: `Expires in ${daysLeft}d`, cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' }
+                      }
+                    }
                     return (
                       <div key={sr.id} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                         <div className="flex-1 min-w-0">
@@ -581,9 +643,16 @@ export default function EmployeeProfilePage() {
                             {sr.expiryDate && <span>Expires: {fmt(sr.expiryDate)}</span>}
                           </div>
                         </div>
-                        <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${statusStyle[sr.status] ?? statusStyle.pending}`}>
-                          {sr.status.charAt(0).toUpperCase() + sr.status.slice(1)}
-                        </span>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyle[sr.status] ?? statusStyle.pending}`}>
+                            {sr.status.charAt(0).toUpperCase() + sr.status.slice(1)}
+                          </span>
+                          {countdownBadge && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${countdownBadge.cls}`}>
+                              ⏰ {countdownBadge.label}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     )
                   })}

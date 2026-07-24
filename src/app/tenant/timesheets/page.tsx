@@ -242,16 +242,31 @@ function ClockCard({ onAction }: { onAction: () => void }) {
 // ── Timesheet row ──────────────────────────────────────────────────────────────
 
 function TimesheetRow({
-  ts, isManager, onApprove, onReject,
+  ts, isManager, onApprove, onReject, isSelected, onToggleSelect,
 }: {
   ts: Timesheet
   isManager: boolean
   onApprove: (id: string) => void
   onReject: (id: string) => void
+  isSelected?: boolean
+  onToggleSelect?: (id: string) => void
 }) {
   const c = STATUS_COLOURS[ts.status] ?? STATUS_COLOURS.pending
+  const approvable = ts.status === 'pending' || ts.status === 'submitted'
   return (
-    <tr className="hover:bg-gray-50/60 dark:hover:bg-gray-800/30 transition border-b border-gray-50 dark:border-gray-800">
+    <tr className={`hover:bg-gray-50/60 dark:hover:bg-gray-800/30 transition border-b border-gray-50 dark:border-gray-800 ${isSelected ? 'bg-green-50/50 dark:bg-green-900/10' : ''}`}>
+      {isManager && (
+        <td className="px-3 py-3 w-10">
+          {approvable && (
+            <input
+              type="checkbox"
+              checked={!!isSelected}
+              onChange={() => onToggleSelect?.(ts.id)}
+              className="accent-green-600 w-4 h-4 cursor-pointer"
+            />
+          )}
+        </td>
+      )}
       {isManager && (
         <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200 whitespace-nowrap">
           <div className="font-medium">{ts.empFirst} {ts.empLast}</div>
@@ -322,11 +337,13 @@ export default function TimesheetsPage() {
   const { can } = usePermissions()
   const isManager = can('timesheets:approve')
 
-  const [timesheets,  setTimesheets]  = useState<Timesheet[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [statusFilter,setStatusFilter]= useState('')
-  const [weekStart,   setWeekStart]   = useState<Date>(getMondayOf(new Date()))
-  const [rejectId,    setRejectId]    = useState<string | null>(null)
+  const [timesheets,   setTimesheets]   = useState<Timesheet[]>([])
+  const [loading,      setLoading]      = useState(true)
+  const [statusFilter, setStatusFilter] = useState('')
+  const [weekStart,    setWeekStart]    = useState<Date>(getMondayOf(new Date()))
+  const [rejectId,     setRejectId]     = useState<string | null>(null)
+  const [selected,     setSelected]     = useState<Set<string>>(new Set())
+  const [bulkApproving,setBulkApproving]= useState(false)
 
   const fetchTimesheets = useCallback(async () => {
     setLoading(true)
@@ -359,6 +376,38 @@ export default function TimesheetsPage() {
     })
     setRejectId(null)
     fetchTimesheets()
+  }
+
+  async function bulkApprove() {
+    if (selected.size === 0) return
+    setBulkApproving(true)
+    await fetch('/api/tenant/timesheets/bulk-approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: Array.from(selected) }),
+    })
+    setSelected(new Set())
+    setBulkApproving(false)
+    fetchTimesheets()
+  }
+
+  const approvable = timesheets.filter(t => t.status === 'pending' || t.status === 'submitted')
+  const allSelected = approvable.length > 0 && approvable.every(t => selected.has(t.id))
+
+  function toggleSelectAll() {
+    if (allSelected) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(approvable.map(t => t.id)))
+    }
+  }
+
+  function toggleOne(id: string) {
+    setSelected(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
   }
 
   // Summary stats
@@ -404,6 +453,16 @@ export default function TimesheetsPage() {
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
           </select>
+          {/* Bulk approve button — only shown when manager has selected some timesheets */}
+          {isManager && selected.size > 0 && (
+            <button
+              onClick={bulkApprove}
+              disabled={bulkApproving}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition"
+            >
+              {bulkApproving ? 'Approving…' : `✓ Approve ${selected.size} selected`}
+            </button>
+          )}
         </div>
       </div>
 
@@ -443,6 +502,17 @@ export default function TimesheetsPage() {
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                   {isManager && (
+                    <th className="px-3 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={toggleSelectAll}
+                        className="accent-green-600 w-4 h-4 cursor-pointer"
+                        title="Select all approvable timesheets"
+                      />
+                    </th>
+                  )}
+                  {isManager && (
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Employee
                     </th>
@@ -467,6 +537,8 @@ export default function TimesheetsPage() {
                     isManager={isManager}
                     onApprove={approve}
                     onReject={id => setRejectId(id)}
+                    isSelected={selected.has(ts.id)}
+                    onToggleSelect={toggleOne}
                   />
                 ))}
               </tbody>

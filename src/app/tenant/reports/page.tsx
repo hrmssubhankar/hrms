@@ -3,11 +3,12 @@
 import { useState, useCallback } from 'react'
 
 const REPORTS = [
-  { id:'headcount',  label:'Headcount',          icon:'', description:'All employees by type and status' },
-  { id:'leave',      label:'Leave Summary',       icon:'️', description:'Leave requests in a date range' },
-  { id:'compliance', label:'Compliance / Checks', icon:'', description:'Screening record status overview' },
-  { id:'turnover',   label:'Turnover / Exits',    icon:'', description:'Separation and exit records' },
-  { id:'whs',        label:'WHS Incidents',       icon:'', description:'Workplace safety incidents summary' },
+  { id:'headcount',     label:'Headcount',           icon:'👥', description:'All employees by type and status' },
+  { id:'leave',         label:'Leave Summary',        icon:'🏖️', description:'Leave requests in a date range' },
+  { id:'compliance',    label:'Compliance / Checks',  icon:'🔒', description:'Screening record status overview' },
+  { id:'turnover',      label:'Turnover / Exits',     icon:'🚪', description:'Separation and exit records' },
+  { id:'whs',           label:'WHS Incidents',        icon:'⚠️', description:'Workplace safety incidents summary' },
+  { id:'training_gap',  label:'Training Gap',         icon:'📚', description:'Employees missing mandatory courses' },
 ]
 
 type ReportRow = Record<string, unknown>
@@ -22,6 +23,46 @@ function downloadCsv(rows: ReportRow[], filename: string) {
   a.href  = URL.createObjectURL(blob)
   a.download = filename
   a.click()
+}
+
+function downloadPdf(rows: ReportRow[], reportLabel: string, summary: Summary) {
+  if (!rows.length) return
+  const columns = Object.keys(rows[0]).filter(k => !k.endsWith('Id') && k !== 'id')
+  const fmtKey  = (k: string) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())
+  const fmtVal  = (v: unknown) => {
+    if (v == null) return '—'
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No'
+    return String(v)
+  }
+  const summaryHtml = Object.entries(summary).length
+    ? `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px">
+        ${Object.entries(summary).map(([k, v]) =>
+          `<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 20px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#111">${v}</div>
+            <div style="font-size:11px;color:#6b7280;text-transform:capitalize;margin-top:2px">${fmtKey(k)}</div>
+          </div>`
+        ).join('')}
+      </div>` : ''
+  const thead = `<thead><tr>${columns.map(c =>
+    `<th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;background:#f9fafb;border-bottom:2px solid #e5e7eb">${fmtKey(c)}</th>`
+  ).join('')}</tr></thead>`
+  const tbody = `<tbody>${rows.map((row, i) =>
+    `<tr style="background:${i % 2 === 0 ? '#ffffff' : '#f9fafb'}">${columns.map(c =>
+      `<td style="padding:8px 12px;font-size:12px;color:#374151;border-bottom:1px solid #f3f4f6">${fmtVal(row[c])}</td>`
+    ).join('')}</tr>`
+  ).join('')}</tbody>`
+  const html = `<!DOCTYPE html><html><head><title>${reportLabel}</title>
+    <style>body{font-family:Calibri,Arial,sans-serif;padding:24px;color:#111}
+    table{width:100%;border-collapse:collapse}@media print{button{display:none}}</style></head>
+    <body>
+      <h2 style="margin:0 0 4px;color:#4338ca">${reportLabel} Report</h2>
+      <p style="color:#6b7280;margin:0 0 20px;font-size:13px">Generated ${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})}</p>
+      ${summaryHtml}
+      <table>${thead}${tbody}</table>
+      <script>window.onload=()=>window.print()<\/script>
+    </body></html>`
+  const w = window.open('', '_blank')
+  if (w) { w.document.write(html); w.document.close() }
 }
 
 export default function ReportsPage() {
@@ -117,13 +158,20 @@ export default function ReportsPage() {
               )}
 
               {/* Export + row count */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <p className="text-sm text-gray-600 dark:text-gray-400"><span className="font-medium">{data.length}</span> records</p>
-                <button onClick={() => downloadCsv(data, `${selected}-report.csv`)}
-                  disabled={data.length === 0}
-                  className="px-4 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700">
-                  ⬇ Export CSV
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={() => downloadPdf(data, report.label, summary)}
+                    disabled={data.length === 0}
+                    className="px-4 py-2 border border-purple-300 bg-purple-50 rounded-lg text-sm text-purple-700 hover:bg-purple-100 disabled:opacity-50 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800">
+                    🖨 Export PDF
+                  </button>
+                  <button onClick={() => downloadCsv(data, `${selected}-report.csv`)}
+                    disabled={data.length === 0}
+                    className="px-4 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700">
+                    ⬇ Export CSV
+                  </button>
+                </div>
               </div>
 
               {/* Table */}

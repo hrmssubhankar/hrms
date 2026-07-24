@@ -8,13 +8,15 @@
  *   1. Documents expiring in 1, 7, or 30 days → email employee + compliance managers
  *   2. Training certificate expiries → email employee
  *   3. Screening record expiries → email employee + compliance managers
+ *   4. Probation end dates within 14 days → in-app notify HR + manager
+ *   5. Fixed-term contract end dates within 30 days → in-app notify HR
  *
  * Each email is fire-and-forget (non-blocking).
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { tenants, documents, employees, trainingRecords, courses, screeningRecords, users, complianceTracking } from '@/lib/db/schema'
-import { eq, and, lte, gte, isNotNull, ne, inArray, lt } from 'drizzle-orm'
+import { eq, and, lte, gte, isNotNull, ne, inArray, lt, between } from 'drizzle-orm'
 import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
 import {
   documentExpiryEmail,
@@ -358,6 +360,76 @@ export async function GET(req: NextRequest) {
           body:  `${emp ? `${emp.firstName} ${emp.lastName} — ` : ''}${item.itemType} was due ${item.dueDate}.`,
           link:  '/tenant/compliance',
         })
+      }
+
+      // ── 5. Probation end-date alerts (14-day window) ────────────────────────
+      {
+        const in14     = new Date(today); in14.setDate(in14.getDate() + 14)
+        const todayStr = today.toISOString().slice(0, 10)
+        const in14Str  = in14.toISOString().slice(0, 10)
+
+        const probationDue = await db
+          .select({
+            id:               employees.id,
+            firstName:        employees.firstName,
+            lastName:         employees.lastName,
+            probationEndDate: employees.probationEndDate,
+          })
+          .from(employees)
+          .where(and(
+            eq(employees.tenantId, tenant.id),
+            eq(employees.isActive, true),
+            isNotNull(employees.probationEndDate),
+            gte(employees.probationEndDate, todayStr),
+            lte(employees.probationEndDate, in14Str),
+          ))
+
+        for (const emp of probationDue) {
+          if (!emp.probationEndDate) continue
+          const daysLeft = Math.round((new Date(emp.probationEndDate).getTime() - today.getTime()) / 86_400_000)
+          notifyRole(tenant.id, ['hr_officer', 'director', 'ops_manager'], {
+            type:  'compliance',
+            title: `⏰ Probation ending in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
+            body:  `${emp.firstName} ${emp.lastName}'s probation ends on ${fmtDate(emp.probationEndDate)}. Schedule a review if needed.`,
+            link:  `/tenant/performance`,
+          })
+        }
+      }
+
+      // ── 6. Fixed-term contract end alerts (30-day window) ───────────────────
+      {
+        const in30     = new Date(today); in30.setDate(in30.getDate() + 30)
+        const todayStr = today.toISOString().slice(0, 10)
+        const in30Str  = in30.toISOString().slice(0, 10)
+
+        // employees.endDate stores fixed-term contract end for casual/fixed-term staff
+        const contractDue = await db
+          .select({
+            id:        employees.id,
+            firstName: employees.firstName,
+            lastName:  employees.lastName,
+            endDate:   employees.endDate,
+            empType:   employees.employmentType,
+          })
+          .from(employees)
+          .where(and(
+            eq(employees.tenantId, tenant.id),
+            eq(employees.isActive, true),
+            isNotNull(employees.endDate),
+            gte(employees.endDate, todayStr),
+            lte(employees.endDate, in30Str),
+          ))
+
+        for (const emp of contractDue) {
+          if (!emp.endDate) continue
+          const daysLeft = Math.round((new Date(emp.endDate).getTime() - today.getTime()) / 86_400_000)
+          notifyRole(tenant.id, ['hr_officer', 'director'], {
+            type:  'document',
+            title: `📋 Contract ending in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
+            body:  `${emp.firstName} ${emp.lastName}'s ${emp.empType ?? 'employment'} contract ends on ${fmtDate(emp.endDate)}. Action if renewing or separating.`,
+            link:  `/tenant/employee-management`,
+          })
+        }
       }
 
     } catch (err: any) {
