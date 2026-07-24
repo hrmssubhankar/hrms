@@ -6,7 +6,7 @@ type Notification = {
   id: string
   type: string
   title: string
-  message: string
+  body: string | null
   isRead: boolean
   createdAt: string
 }
@@ -66,11 +66,14 @@ export default function NotificationsPage() {
   const unread = notifications.filter(n => !n.isRead).length
 
   const TYPE_ICON: Record<string, string> = {
-    document_expiry: '',
-    payslip:         '',
-    onboarding:      '',
-    compliance:      '',
-    general:         '',
+    leave:           '🌴',
+    payroll:         '💰',
+    onboarding:      '🚀',
+    compliance:      '🔒',
+    document:        '📄',
+    document_expiry: '📄',
+    system:          '🔔',
+    general:         '🔔',
   }
 
   return (
@@ -184,7 +187,7 @@ export default function NotificationsPage() {
                 <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[n.type] ?? ''}</span>
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium ${!n.isRead ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{n.title}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{n.message}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{n.body}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString('en-AU')}</p>
                 </div>
                 {!n.isRead && (

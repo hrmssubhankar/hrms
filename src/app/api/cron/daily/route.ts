@@ -13,8 +13,8 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { tenants, documents, employees, trainingRecords, courses, screeningRecords, users } from '@/lib/db/schema'
-import { eq, and, lte, gte, isNotNull, ne, inArray } from 'drizzle-orm'
+import { tenants, documents, employees, trainingRecords, courses, screeningRecords, users, complianceTracking } from '@/lib/db/schema'
+import { eq, and, lte, gte, isNotNull, ne, inArray, lt } from 'drizzle-orm'
 import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
 import {
   documentExpiryEmail,
@@ -22,6 +22,7 @@ import {
   trainingExpiringEmail,
   genericNotificationEmail,
 } from '@/lib/email/templates'
+import { notifyRole } from '@/lib/notifications/notify'
 
 export const dynamic = 'force-dynamic'
 // Vercel cron functions have a 60-second max; configured in vercel.json functions block
@@ -146,6 +147,16 @@ export async function GET(req: NextRequest) {
               }),
             })
             report.emailsSent++
+          }
+
+          // In-app notification for milestone days
+          if ([1, 7, 30].includes(daysLeft)) {
+            notifyRole(tenant.id, ['hr_officer', 'director', 'compliance_manager'], {
+              type:  'document',
+              title: `Document expiring in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`,
+              body:  `"${doc.name}" expires on ${doc.expiryDate}.`,
+              link:  '/tenant/documents',
+            })
           }
         }
 
@@ -311,6 +322,44 @@ export async function GET(req: NextRequest) {
           }
         }
       }
+      // ── 4. Compliance items: auto-escalate amber → red if overdue ────────────
+
+      const todayStr2 = today.toISOString().slice(0, 10)
+      const overdueItems = await db
+        .select({
+          id:         complianceTracking.id,
+          employeeId: complianceTracking.employeeId,
+          itemType:   complianceTracking.itemType,
+          dueDate:    complianceTracking.dueDate,
+        })
+        .from(complianceTracking)
+        .where(
+          and(
+            eq(complianceTracking.tenantId, tenant.id),
+            eq(complianceTracking.status, 'amber'),
+            isNotNull(complianceTracking.dueDate),
+            lt(complianceTracking.dueDate, todayStr2),
+          )
+        )
+
+      for (const item of overdueItems) {
+        await db.update(complianceTracking)
+          .set({ status: 'red', escalatedAt: today, updatedAt: today })
+          .where(eq(complianceTracking.id, item.id))
+          .catch(() => {})
+
+        const [emp] = await db
+          .select({ firstName: employees.firstName, lastName: employees.lastName })
+          .from(employees).where(eq(employees.id, item.employeeId)).catch(() => [])
+
+        notifyRole(tenant.id, ['compliance_manager', 'director', 'hr_officer'], {
+          type:  'compliance',
+          title: '🔴 Compliance item escalated to overdue',
+          body:  `${emp ? `${emp.firstName} ${emp.lastName} — ` : ''}${item.itemType} was due ${item.dueDate}.`,
+          link:  '/tenant/compliance',
+        })
+      }
+
     } catch (err: any) {
       console.error(`cron/daily: tenant ${tenant.id} error:`, err)
       report.errors.push(`${tenant.name}: ${err.message ?? 'unknown error'}`)
