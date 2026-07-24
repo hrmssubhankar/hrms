@@ -45,6 +45,10 @@ const NAV_PERMISSION: Record<string, Permission | null> = {
   'payroll':            'payroll:read',
   'leave':              'leave:read',
   'public-holidays':    'leave:read',
+  // Built-in routes (IDs 31+) — not controlled by tenant module toggles
+  'timesheets':         'timesheets:read',
+  'screening':          'compliance:read',
+  'reports':            'analytics:read',
 }
 
 // Maps SOW module ID → { route slug, sidebar label }
@@ -79,6 +83,10 @@ const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
   28: { key: 'payroll',               label: 'Payroll' },
   29: { key: 'leave',                 label: 'Leave Management' },
   30: { key: 'public-holidays',       label: 'Public Holidays' },
+  // IDs 31+ are built-in routes (always visible, not toggled by tenant module settings)
+  31: { key: 'timesheets',            label: 'Timesheets' },
+  32: { key: 'screening',             label: 'Screening' },
+  33: { key: 'reports',               label: 'Reports' },
 }
 
 async function getTenantConfig(slug: string) {
@@ -140,7 +148,12 @@ export default async function TenantLayout({ children }: { children: React.React
   // Then filter by role permissions so each role only sees routes they can access
   const isRestrictedEmployee = userRole === 'employee' || userRole === 'contractor'
   const navItems = Object.entries(MODULE_ROUTES)
-    .filter(([id]) => enabledModuleIds.includes(Number(id)) && Number(id) !== 1)
+    .filter(([id]) => {
+      const numId = Number(id)
+      if (numId === 1) return false                      // Dashboard shown separately
+      if (numId >= 31) return true                       // Built-in routes always included
+      return enabledModuleIds.includes(numId)            // Tenant-toggled modules
+    })
     .map(([, { key, label }]) => ({ key, label }))
     .filter((item, idx, arr) => arr.findIndex(x => x.key === item.key) === idx)
     .filter(({ key }) => {
@@ -149,8 +162,10 @@ export default async function TenantLayout({ children }: { children: React.React
       if (requiredPerm === undefined) return false
       // No permission required — always show
       if (requiredPerm === null) return true
-      // employee-management: employees:read but never for employee/contractor roles
+      // employee-management: never for employee/contractor roles
       if (key === 'employee-management' && isRestrictedEmployee) return false
+      // rostering: employees use My Schedule instead
+      if (key === 'rostering' && isRestrictedEmployee) return false
       return hasPermission(userRole, requiredPerm)
     })
 

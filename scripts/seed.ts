@@ -83,6 +83,9 @@ const MODULES = [
   { id: 28, name: 'Payroll' },
   { id: 29, name: 'Leave Management' },
   { id: 30, name: 'Public Holidays' },
+  { id: 31, name: 'Timesheets' },
+  { id: 32, name: 'Screening' },
+  { id: 33, name: 'Reports' },
 ]
 
 const SUPER_ADMIN = {
