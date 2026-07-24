@@ -119,11 +119,168 @@ function MiniBar({ items }: { items: { label: string; value: number; color: stri
   )
 }
 
+// ── Personal dashboard types ───────────────────────────────────────────────────
+type LeaveRequest = { id: string; leaveType: string; startDate: string; endDate: string; totalDays: number; status: string }
+type PublicHoliday = { name: string; date: string; country: string }
+
+const PERSONAL_SHORTCUTS = [
+  { key: 'my-profile',   icon: '', label: 'My Profile',   desc: 'Your personal details' },
+  { key: 'my-payslips',  icon: '', label: 'My Payslips',  desc: 'Pay history & slips' },
+  { key: 'my-documents', icon: '', label: 'My Documents',  desc: 'Your documents' },
+  { key: 'leave',        icon: '', label: 'Leave',         desc: 'Apply & track leave' },
+  { key: 'timesheets',   icon: '⏱',label: 'Timesheets',   desc: 'Clock in / out' },
+  { key: 'training',     icon: '', label: 'Training',      desc: 'Courses & records' },
+  { key: 'rostering',    icon: '', label: 'Rostering',     desc: 'My schedule' },
+  { key: 'benefits',     icon: '', label: 'Benefits',      desc: 'Entitlements' },
+  { key: 'whs',          icon: '️', label: 'WHS',           desc: 'Report a hazard' },
+  { key: 'recognition',  icon: '', label: 'Recognition',   desc: 'Kudos & shoutouts' },
+  { key: 'referrals',    icon: '', label: 'Referrals',     desc: 'Refer a friend' },
+  { key: 'engagement',   icon: '', label: 'Engagement',    desc: 'Pulse surveys' },
+]
+
+const LEAVE_TYPE_LABEL: Record<string, string> = {
+  annual: 'Annual Leave', sick: 'Sick Leave', personal: 'Personal Leave',
+  long_service: 'Long Service', parental: 'Parental Leave', unpaid: 'Unpaid Leave', other: 'Other',
+}
+const LEAVE_STATUS_COLOR: Record<string, string> = {
+  pending:  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  cancelled:'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+}
+
+function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }: {
+  userName: string; tenantName: string; primaryColor: string; greetingText: string
+}) {
+  const [leaveRequests,  setLeaveRequests]  = useState<LeaveRequest[]>([])
+  const [holidays,       setHolidays]       = useState<PublicHoliday[]>([])
+  const [loadingPersonal, setLoadingPersonal] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/tenant/leave').then(r => r.json()).catch(() => ({ requests: [] })),
+      fetch('/api/tenant/public-holidays').then(r => r.json()).catch(() => ({ holidays: [] })),
+    ]).then(([leaveData, holidayData]) => {
+      const today = new Date().toISOString().slice(0, 10)
+      const reqs: LeaveRequest[] = (leaveData.requests ?? [])
+        .sort((a: LeaveRequest, b: LeaveRequest) => b.startDate.localeCompare(a.startDate))
+        .slice(0, 5)
+      const upcomingHols: PublicHoliday[] = (holidayData.holidays ?? [])
+        .filter((h: PublicHoliday) => h.date >= today)
+        .slice(0, 5)
+      setLeaveRequests(reqs)
+      setHolidays(upcomingHols)
+    }).finally(() => setLoadingPersonal(false))
+  }, [])
+
+  const pendingCount = leaveRequests.filter(r => r.status === 'pending').length
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
+      {/* Welcome banner */}
+      <div className="rounded-2xl p-6 text-white relative overflow-hidden"
+        style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}aa)` }}>
+        <div className="relative z-10">
+          <p className="text-sm font-medium opacity-80">{greetingText || 'Welcome'},</p>
+          <h1 className="text-2xl font-bold mt-0.5">{userName || '…'} </h1>
+          <p className="text-sm opacity-70 mt-1">{tenantName || 'HRMS'} · Employee Portal</p>
+        </div>
+        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-white" />
+        <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full opacity-10 bg-white" />
+      </div>
+
+      {/* Leave summary + upcoming holidays */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* My Leave */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white"> My Leave</h3>
+            <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
+          </div>
+          {loadingPersonal ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">Loading…</p>
+          ) : leaveRequests.length === 0 ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">No leave requests yet.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {pendingCount > 0 && (
+                <div className="text-xs font-medium text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg px-3 py-2">
+                  {pendingCount} request{pendingCount > 1 ? 's' : ''} pending approval
+                </div>
+              )}
+              {leaveRequests.map(r => (
+                <div key={r.id} className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-medium text-gray-900 dark:text-white">
+                      {LEAVE_TYPE_LABEL[r.leaveType] ?? r.leaveType}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {fmtDate(r.startDate)} · {r.totalDays}d
+                    </p>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${LEAVE_STATUS_COLOR[r.status] ?? ''}`}>
+                    {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          <Link href="/tenant/leave"
+            className="block w-full text-center py-2 rounded-xl text-xs font-semibold text-white transition hover:opacity-90"
+            style={{ background: primaryColor }}>
+            + Apply for Leave
+          </Link>
+        </div>
+
+        {/* Upcoming public holidays */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white"> Upcoming Holidays</h3>
+            <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
+          </div>
+          {loadingPersonal ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">Loading…</p>
+          ) : holidays.length === 0 ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400">No upcoming holidays on record.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {holidays.map(h => (
+                <div key={h.date + h.name} className="flex justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-medium text-gray-900 dark:text-white">{h.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{fmtHolidayDate(h.date)}</p>
+                  </div>
+                  <span className="text-xs text-purple-400 shrink-0 font-medium">{daysUntil(h.date)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Personal module shortcuts */}
+      <section>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">My Modules</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {PERSONAL_SHORTCUTS.map(m => (
+            <Link key={m.key} href={`/tenant/${m.key}`}
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-purple-400 dark:hover:border-purple-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition group">
+              <span className="text-2xl">{m.icon}</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white font-medium transition">{m.label}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
-  const [data,    setData]    = useState<DashboardData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState<string | null>(null)
+  const [data,       setData]       = useState<DashboardData | null>(null)
+  const [loading,    setLoading]    = useState(true)
+  const [error,      setError]      = useState<string | null>(null)
+  const [isPersonal, setIsPersonal] = useState(false)
   const [userName, setUserName] = useState('')
   const [tenantName, setTenantName] = useState('')
   const [primaryColor, setPrimaryColor] = useState('#6d28d9')
@@ -158,10 +315,23 @@ export default function DashboardPage() {
   function loadDashboard() {
     setLoading(true)
     fetch('/api/tenant/dashboard')
-      .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json() })
-      .then(d => { setData(d); setError(null) })
+      .then(r => {
+        if (r.status === 403) { setIsPersonal(true); setLoading(false); return null }
+        if (!r.ok) throw new Error(String(r.status))
+        return r.json()
+      })
+      .then(d => { if (d) { setData(d); setError(null) } })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
+  }
+
+  if (isPersonal) {
+    return <PersonalDashboard
+      userName={userName}
+      tenantName={tenantName}
+      primaryColor={primaryColor}
+      greetingText={greetingText}
+    />
   }
 
   const hasAlerts = data && (

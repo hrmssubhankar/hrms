@@ -35,6 +35,15 @@ export async function GET() {
   const guard = await apiGuard('employees:read')
   if (guard.error) return guard.error
   const { session } = guard
+
+  // employee and contractor roles see a personal dashboard in the UI.
+  // They must not see org-wide payroll totals, headcount, or compliance data.
+  if (session.role === 'employee' || session.role === 'contractor') {
+    return NextResponse.json(
+      { error: 'Personal dashboard — use /api/tenant/leave and /api/tenant/public-holidays.' },
+      { status: 403 }
+    )
+  }
   const tid = session.tenantId
 
   const now   = new Date()
