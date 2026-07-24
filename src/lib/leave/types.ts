@@ -5,11 +5,16 @@
  * If absent, DEFAULT_LEAVE_TYPES is used.
  *
  * Australian Fair Work Act 2009 defaults:
- *   Annual Leave         20 days FT / pro-rata PT / 0 casual
- *   Personal/Carer       10 days FT+PT / 2 days casual (per occasion)
- *   Compassionate         2 days per event (all)
- *   Long Service         65 days FT after 10 years (state-specific)
- *   Unpaid               unlimited (employer discretion)
+ *   Annual Leave         20 days FT / pro-rata PT / 0 casual   — accumulates indefinitely (FWA s.87)
+ *   Personal/Carer       10 days FT+PT / 2 days casual          — accumulates indefinitely (FWA s.97)
+ *   Compassionate         2 days per event (all)                 — per-event, does NOT carry forward
+ *   Long Service         65 days FT after 10 years              — accumulates (state-specific)
+ *   Unpaid               unlimited (employer discretion)         — no carry-forward concept
+ *
+ * maxCarryForwardDays:
+ *   null  = unlimited (balance rolls over in full — FWA default for annual & personal leave)
+ *   0     = no carry-forward (use-it-or-lose-it)
+ *   N     = cap at N days carried into next year
  */
 
 export type LeaveTypeConfig = {
@@ -22,6 +27,13 @@ export type LeaveTypeConfig = {
   entitlementDaysCasual: number   // casual entitlement per year
   accrualNote:           string   // human-readable rule
   isActive:              boolean
+  /**
+   * Max days that roll over into the next calendar year.
+   * null  = unlimited accumulation (FWA default for annual & personal leave)
+   * 0     = no carry-forward (use-it-or-lose-it)
+   * N > 0 = carry at most N days
+   */
+  maxCarryForwardDays:   number | null
 }
 
 export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
@@ -33,8 +45,9 @@ export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
     entitlementDaysFT:     20,
     entitlementDaysPT:     20,
     entitlementDaysCasual: 0,
-    accrualNote:           '4 weeks per year (FWA s.87)',
+    accrualNote:           '4 weeks per year (FWA s.87) — accumulates indefinitely',
     isActive:              true,
+    maxCarryForwardDays:   null,   // FWA: must accumulate — employers may cap by agreement
   },
   {
     key:                   'sick',
@@ -44,8 +57,9 @@ export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
     entitlementDaysFT:     10,
     entitlementDaysPT:     10,
     entitlementDaysCasual: 0,
-    accrualNote:           '10 days per year, part of personal/carer leave (FWA s.97)',
+    accrualNote:           '10 days per year, part of personal/carer leave pool (FWA s.97) — accumulates',
     isActive:              true,
+    maxCarryForwardDays:   null,   // FWA: personal/carer leave accumulates
   },
   {
     key:                   'personal',
@@ -55,8 +69,9 @@ export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
     entitlementDaysFT:     10,
     entitlementDaysPT:     10,
     entitlementDaysCasual: 2,
-    accrualNote:           '10 days per year FT/PT; 2 days per occasion casual (FWA s.97)',
+    accrualNote:           '10 days per year FT/PT; 2 days per occasion casual (FWA s.97) — accumulates',
     isActive:              true,
+    maxCarryForwardDays:   null,   // FWA: accumulates indefinitely
   },
   {
     key:                   'carer',
@@ -66,8 +81,9 @@ export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
     entitlementDaysFT:     10,
     entitlementDaysPT:     10,
     entitlementDaysCasual: 2,
-    accrualNote:           'Drawn from personal/carer leave pool (FWA s.97)',
+    accrualNote:           'Drawn from personal/carer leave pool (FWA s.97) — accumulates',
     isActive:              true,
+    maxCarryForwardDays:   null,
   },
   {
     key:                   'compassionate',
@@ -77,8 +93,9 @@ export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
     entitlementDaysFT:     2,
     entitlementDaysPT:     2,
     entitlementDaysCasual: 2,
-    accrualNote:           '2 days per bereavement/serious illness event (FWA s.104)',
+    accrualNote:           '2 days per bereavement/serious illness event (FWA s.104) — does not carry forward',
     isActive:              true,
+    maxCarryForwardDays:   0,     // per-event entitlement — resets each year
   },
   {
     key:                   'long_service',
@@ -88,8 +105,9 @@ export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
     entitlementDaysFT:     65,
     entitlementDaysPT:     65,
     entitlementDaysCasual: 0,
-    accrualNote:           '~13 weeks after 10 years — state law applies',
+    accrualNote:           '~13 weeks after 10 years — state law applies, accumulates',
     isActive:              true,
+    maxCarryForwardDays:   null,  // accumulates over career
   },
   {
     key:                   'unpaid',
@@ -101,6 +119,7 @@ export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
     entitlementDaysCasual: 999,
     accrualNote:           'By agreement — no statutory cap',
     isActive:              true,
+    maxCarryForwardDays:   0,     // no balance concept — approved per request
   },
 ]
 
@@ -108,7 +127,15 @@ export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
 export function mergeLeaveTypes(saved: Partial<LeaveTypeConfig>[]): LeaveTypeConfig[] {
   return DEFAULT_LEAVE_TYPES.map(def => {
     const override = saved.find(s => s.key === def.key)
-    return override ? { ...def, ...override } : def
+    if (!override) return def
+    return {
+      ...def,
+      ...override,
+      // Preserve null explicitly — JSON stringify/parse can drop undefined but not null
+      maxCarryForwardDays: 'maxCarryForwardDays' in override
+        ? override.maxCarryForwardDays ?? null
+        : def.maxCarryForwardDays,
+    }
   })
 }
 
@@ -117,4 +144,12 @@ export function entitlementDays(cfg: LeaveTypeConfig, employmentType: string): n
   if (employmentType === 'casual' || employmentType === 'contractor') return cfg.entitlementDaysCasual
   if (employmentType === 'part_time') return cfg.entitlementDaysPT
   return cfg.entitlementDaysFT   // full_time, volunteer default to FT
+}
+
+/**
+ * Maximum days that can be carried forward from the previous year.
+ * Returns Infinity when maxCarryForwardDays is null (unlimited).
+ */
+export function maxCarryForward(cfg: LeaveTypeConfig): number {
+  return cfg.maxCarryForwardDays === null ? Infinity : cfg.maxCarryForwardDays
 }

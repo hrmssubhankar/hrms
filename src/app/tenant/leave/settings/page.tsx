@@ -14,6 +14,8 @@ type LeaveTypeRow = {
   entitlementDaysPT: number
   entitlementDaysCasual: number
   isActive: boolean
+  /** null = unlimited carry-forward; 0 = no carry-forward; N = cap at N days */
+  maxCarryForwardDays: number | null
   // edit state
   _dirty?: boolean
 }
@@ -151,44 +153,112 @@ export default function LeaveSettingsPage() {
                 </label>
               </div>
 
-              {/* Entitlement fields */}
+              {/* Entitlement + carry-forward fields */}
               {t.isActive && (
-                <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-3 gap-5">
-                  <div>
-                    <label className={LABEL}>Full-Time Entitlement (days/year)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={999}
-                      value={t.entitlementDaysFT}
-                      onChange={e => update(t.key, 'entitlementDaysFT', parseInt(e.target.value) || 0)}
-                      className={INPUT}
-                    />
-                    <p className="text-xs text-gray-600 mt-1 dark:text-gray-400">0 = no entitlement · 999 = unlimited</p>
+                <div className="px-5 py-4 space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div>
+                      <label className={LABEL}>Full-Time Entitlement (days/year)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={999}
+                        value={t.entitlementDaysFT}
+                        onChange={e => update(t.key, 'entitlementDaysFT', parseInt(e.target.value) || 0)}
+                        className={INPUT}
+                      />
+                      <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">0 = no entitlement · 999 = unlimited</p>
+                    </div>
+                    <div>
+                      <label className={LABEL}>Part-Time Entitlement (days/year)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={999}
+                        value={t.entitlementDaysPT}
+                        onChange={e => update(t.key, 'entitlementDaysPT', parseInt(e.target.value) || 0)}
+                        className={INPUT}
+                      />
+                      <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Usually same as FT (pro-rata calculated separately)</p>
+                    </div>
+                    <div>
+                      <label className={LABEL}>Casual Entitlement (days/year)</label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={999}
+                        value={t.entitlementDaysCasual}
+                        onChange={e => update(t.key, 'entitlementDaysCasual', parseInt(e.target.value) || 0)}
+                        className={INPUT}
+                      />
+                      <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Often 0 or 2 per occasion</p>
+                    </div>
                   </div>
-                  <div>
-                    <label className={LABEL}>Part-Time Entitlement (days/year)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={999}
-                      value={t.entitlementDaysPT}
-                      onChange={e => update(t.key, 'entitlementDaysPT', parseInt(e.target.value) || 0)}
-                      className={INPUT}
-                    />
-                    <p className="text-xs text-gray-600 mt-1 dark:text-gray-400">Usually same as FT (pro-rata calculated separately)</p>
-                  </div>
-                  <div>
-                    <label className={LABEL}>Casual Entitlement (days/year)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={999}
-                      value={t.entitlementDaysCasual}
-                      onChange={e => update(t.key, 'entitlementDaysCasual', parseInt(e.target.value) || 0)}
-                      className={INPUT}
-                    />
-                    <p className="text-xs text-gray-600 mt-1 dark:text-gray-400">Often 0 or 2 per occasion</p>
+
+                  {/* Carry-forward */}
+                  <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
+                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Year-end carry-forward
+                    </p>
+                    <div className="flex flex-wrap gap-3 items-start">
+                      {/* Radio buttons for the three modes */}
+                      {[
+                        { id: 'unlimited', label: 'Unlimited', desc: 'All unused days roll over (FWA default for annual & personal leave)', value: null },
+                        { id: 'none',      label: 'No carry-forward', desc: 'Use-it-or-lose-it — balance resets each year', value: 0 },
+                        { id: 'capped',    label: 'Cap at', desc: 'Carry forward up to a set number of days', value: 'custom' as const },
+                      ].map(opt => {
+                        const isCapped  = opt.value === 'custom'
+                        const isChecked = isCapped
+                          ? (t.maxCarryForwardDays !== null && t.maxCarryForwardDays > 0)
+                          : t.maxCarryForwardDays === opt.value
+
+                        return (
+                          <label
+                            key={opt.id}
+                            className={`flex-1 min-w-[160px] flex items-start gap-3 border rounded-xl px-4 py-3 cursor-pointer transition ${
+                              isChecked
+                                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={`cf-${t.key}`}
+                              className="mt-0.5 accent-purple-600 shrink-0"
+                              checked={isChecked}
+                              onChange={() => {
+                                if (opt.value === 'custom') {
+                                  // Default cap to the FT entitlement when switching to capped
+                                  update(t.key, 'maxCarryForwardDays', t.entitlementDaysFT || 20)
+                                } else {
+                                  update(t.key, 'maxCarryForwardDays', opt.value)
+                                }
+                              }}
+                            />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-gray-800 dark:text-white">{opt.label}</span>
+                                {isCapped && isChecked && (
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    max={365}
+                                    value={t.maxCarryForwardDays ?? ''}
+                                    onClick={e => e.stopPropagation()}
+                                    onChange={e => update(t.key, 'maxCarryForwardDays', Math.max(1, parseInt(e.target.value) || 1))}
+                                    className="w-16 bg-white dark:bg-gray-900 border border-purple-400 rounded-md px-2 py-0.5 text-sm text-gray-900 dark:text-white focus:outline-none"
+                                  />
+                                )}
+                                {isCapped && isChecked && (
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">days</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{opt.desc}</p>
+                            </div>
+                          </label>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
               )}

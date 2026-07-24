@@ -122,7 +122,12 @@ function MiniBar({ items }: { items: { label: string; value: number; color: stri
 // ── Personal dashboard types ───────────────────────────────────────────────────
 type LeaveRequest = { id: string; leaveType: string; startDate: string; endDate: string; totalDays: number; status: string }
 type PublicHoliday = { name: string; date: string; country: string }
-type LeaveBalance = { key: string; label: string; emoji: string; color: string; entitlement: number | null; taken: number; pending: number; remaining: number | null }
+type LeaveBalance = {
+  key: string; label: string; emoji: string; color: string
+  entitlement: number | null; carriedForward: number; totalEntitlement: number | null
+  taken: number; pending: number; remaining: number | null
+  maxCarryForwardDays: number | null
+}
 
 const PERSONAL_SHORTCUTS = [
   { key: 'my-profile',   icon: '', label: 'My Profile',   desc: 'Your personal details' },
@@ -205,8 +210,9 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {leaveBalances.map(b => {
-              const pct = b.entitlement ? Math.min(100, Math.round((b.taken / b.entitlement) * 100)) : 0
-              const isLow = b.remaining != null && b.entitlement != null && b.remaining <= b.entitlement * 0.2
+              const cap   = b.totalEntitlement ?? b.entitlement ?? 0
+              const pct   = cap > 0 ? Math.min(100, Math.round((b.taken / cap) * 100)) : 0
+              const isLow = b.remaining != null && cap > 0 && b.remaining <= cap * 0.2
               return (
                 <div key={b.key} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 flex flex-col gap-2">
                   <div className="flex items-center gap-1.5">
@@ -218,7 +224,7 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
                       <span className={`text-xl font-bold ${isLow ? 'text-amber-500' : 'text-gray-900 dark:text-white'}`}>
                         {b.remaining ?? '—'}
                       </span>
-                      <span className="text-xs text-gray-400">/ {b.entitlement}d</span>
+                      <span className="text-xs text-gray-400">/ {cap}d</span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                       <div
@@ -227,6 +233,9 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
                       />
                     </div>
                   </div>
+                  {b.carriedForward > 0 && (
+                    <span className="text-[10px] text-blue-500 dark:text-blue-400">+{b.carriedForward}d carried forward</span>
+                  )}
                   {b.pending > 0 && (
                     <span className="text-[10px] text-yellow-600 dark:text-yellow-400">{b.pending}d pending</span>
                   )}
