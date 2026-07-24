@@ -7,8 +7,45 @@ import { getSession } from '@/lib/auth/session'
 import { db } from '@/lib/db'
 import { tenants, tenantModules } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
+import { hasPermission, type Permission } from '@/lib/auth/permissions'
 
 export const dynamic = 'force-dynamic'
+
+/**
+ * Required permission to see each nav route.
+ * null = always shown (e.g. dashboard).
+ * Routes not listed default to hidden.
+ */
+const NAV_PERMISSION: Record<string, Permission | null> = {
+  'dashboard':          null,
+  'employee-management':'employees:read',   // further restricted below (not for employee/contractor)
+  'roles':              'roles:read',
+  'audit-logs':         'audit_logs:read',
+  'documents':          'documents:read',
+  'compliance':         'compliance:read',
+  'onboarding':         'onboarding:read',
+  'training':           'training:read',
+  'competencies':       'competencies:read',
+  'supervision':        'supervision:read',
+  'workforce-planning': 'workforce_planning:read',
+  'recruitment':        'recruitment:read',
+  'contracts':          'contracts:read',
+  'performance':        'performance:read',
+  'whs':                'whs:read',
+  'grievances':         'grievances:read',
+  'separation':         'separation:read',
+  'analytics':          'analytics:read',
+  'benefits':           'benefits:read',
+  'recognition':        'recognition:read',
+  'referrals':          'referrals:read',
+  'dei':                'dei:read',
+  'engagement':         'engagement:read',
+  'assets':             'assets:read',
+  'rostering':          'rostering:read',
+  'payroll':            'payroll:read',
+  'leave':              'leave:read',
+  'public-holidays':    'leave:read',
+}
 
 // Maps SOW module ID → { route slug, sidebar label }
 const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
@@ -100,10 +137,22 @@ export default async function TenantLayout({ children }: { children: React.React
 
   // Build nav items from enabled module IDs (skip Dashboard — always shown separately)
   // Deduplicate by key so sub-modules that share a route (e.g. compliance 6/7/8) appear once
+  // Then filter by role permissions so each role only sees routes they can access
+  const isRestrictedEmployee = userRole === 'employee' || userRole === 'contractor'
   const navItems = Object.entries(MODULE_ROUTES)
     .filter(([id]) => enabledModuleIds.includes(Number(id)) && Number(id) !== 1)
     .map(([, { key, label }]) => ({ key, label }))
     .filter((item, idx, arr) => arr.findIndex(x => x.key === item.key) === idx)
+    .filter(({ key }) => {
+      const requiredPerm = NAV_PERMISSION[key]
+      // Route not in our map — hide it
+      if (requiredPerm === undefined) return false
+      // No permission required — always show
+      if (requiredPerm === null) return true
+      // employee-management: employees:read but never for employee/contractor roles
+      if (key === 'employee-management' && isRestrictedEmployee) return false
+      return hasPermission(userRole, requiredPerm)
+    })
 
   return (
     <>
