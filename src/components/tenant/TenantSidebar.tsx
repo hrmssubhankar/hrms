@@ -72,6 +72,7 @@ const NAV_ICONS: Record<string, IconName> = {
   'my-profile':         'user-circle',
   'my-payslips':        'payslip',
   'my-documents':       'folder',
+  'my-schedule':        'rostering',
 }
 
 export default function TenantSidebar({
@@ -177,6 +178,7 @@ export default function TenantSidebar({
             My Portal
           </p>
           {[
+            { key: 'my-schedule',  label: 'My Schedule' },
             { key: 'my-profile',   label: 'My Profile' },
             { key: 'my-payslips',  label: 'My Payslips' },
             { key: 'my-documents', label: 'My Documents' },

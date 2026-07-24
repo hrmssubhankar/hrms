@@ -11,6 +11,7 @@ import { db } from '@/lib/db'
 import { shifts, employees, participants } from '@/lib/db/schema'
 import { eq, and, gte, lte, sql } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { hasPermission } from '@/lib/auth/permissions'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +21,22 @@ export async function GET(req: NextRequest) {
   const { session } = guard
 
   const weekStartParam = req.nextUrl.searchParams.get('weekStart')
-  const empFilter      = req.nextUrl.searchParams.get('employeeId')
+  const empFilterParam = req.nextUrl.searchParams.get('employeeId')
+
+  // Non-managers can only see their own shifts — resolve their employee record
+  const isManager = hasPermission(session.userRole, 'rostering:write')
+  let empFilter = empFilterParam
+
+  if (!isManager) {
+    const [myEmp] = await db
+      .select({ id: employees.id })
+      .from(employees)
+      .where(and(eq(employees.userId, session.sub), eq(employees.tenantId, session.tenantId)))
+      .limit(1)
+    // If no employee record, return empty (no shifts to show)
+    if (!myEmp) return NextResponse.json({ shifts: [] })
+    empFilter = myEmp.id
+  }
 
   // Default to current week Monday
   const weekStart = weekStartParam ? new Date(weekStartParam) : getMondayOf(new Date())
