@@ -11,6 +11,7 @@ import { timesheets, employees, users } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 import { hasPermission } from '@/lib/auth/permissions'
+import { notify } from '@/lib/notifications/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,6 +65,27 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         .set(updates)
         .where(and(eq(timesheets.id, id), eq(timesheets.tenantId, session.tenantId)))
         .returning()
+
+      // Notify employee of outcome
+      ;(async () => {
+        const [empRow] = await db
+          .select({ userId: employees.userId })
+          .from(employees)
+          .where(eq(employees.id, existing.employeeId))
+          .limit(1)
+        if (empRow?.userId) {
+          notify(session.tenantId, empRow.userId, {
+            type:  'payroll',
+            title: body.action === 'approve'
+              ? 'Timesheet approved'
+              : 'Timesheet requires attention',
+            body: body.action === 'approve'
+              ? 'Your timesheet has been approved.'
+              : `Your timesheet was not approved. Reason: ${body.reason}`,
+            link: '/tenant/timesheets',
+          })
+        }
+      })().catch(() => {})
 
       return NextResponse.json({ timesheet: updated })
     }

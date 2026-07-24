@@ -38,7 +38,7 @@ export async function GET() {
 
   // employee and contractor roles see a personal dashboard in the UI.
   // They must not see org-wide payroll totals, headcount, or compliance data.
-  if (session.role === 'employee' || session.role === 'contractor') {
+  if (session.userRole === 'employee' || session.userRole === 'contractor') {
     return NextResponse.json(
       { error: 'Personal dashboard — use /api/tenant/leave and /api/tenant/public-holidays.' },
       { status: 403 }

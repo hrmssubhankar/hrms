@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   // employees:read for 'employee' and 'contractor' is scoped to own record only
   // (see permissions.ts comment). This endpoint is the org-wide directory —
   // personal profile data is served by /api/tenant/my-profile instead.
-  if (session.role === 'employee' || session.role === 'contractor') {
+  if (session.userRole === 'employee' || session.userRole === 'contractor') {
     return NextResponse.json(
       { error: 'Access restricted. Use /api/tenant/my-profile for your own profile.' },
       { status: 403 }
