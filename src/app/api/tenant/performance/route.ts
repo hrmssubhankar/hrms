@@ -5,6 +5,7 @@ import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
 import { performanceReviewScheduledEmail, performanceReviewCompletedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { notify, notifyRole } from '@/lib/notifications/notify'
 
 export async function GET(req: NextRequest) {
   try {
@@ -107,20 +108,41 @@ export async function POST(req: NextRequest) {
       kpis:          defaultKpis,
     }).returning()
 
-    // Email employee about scheduled review
-    try {
-      const ctx = await getTenantEmailCtx(session.tenantId)
-      if (ctx.notify.emailPerformance && scheduledDate) {
-        const [emp] = await db.select({ firstName: employees.firstName, email: employees.email })
+    // In-app + email notifications
+    ;(async () => {
+      try {
+        const [emp] = await db
+          .select({ firstName: employees.firstName, lastName: employees.lastName, email: employees.email, userId: employees.userId })
           .from(employees).where(eq(employees.id, employeeId))
-        if (emp?.email) {
+
+        // Notify employee their review has been scheduled
+        if (emp?.userId) {
+          notify(session.tenantId, emp.userId, {
+            type:  'performance',
+            title: `Performance review scheduled — ${type.replace(/_/g, ' ')}`,
+            body:  scheduledDate ? `Your review is scheduled for ${scheduledDate}.` : 'A review has been created for you.',
+            link:  '/tenant/my-profile',
+          })
+        }
+
+        // Notify HR team
+        notifyRole(session.tenantId, ['hr_officer', 'director', 'operations_manager'], {
+          type:  'performance',
+          title: `New performance review created`,
+          body:  `${emp ? `${emp.firstName} ${emp.lastName}` : 'An employee'} — ${type.replace(/_/g, ' ')}${scheduledDate ? `, scheduled ${scheduledDate}` : ''}.`,
+          link:  '/tenant/performance',
+        })
+
+        // Email employee
+        const ctx = await getTenantEmailCtx(session.tenantId)
+        if (ctx.notify.emailPerformance && scheduledDate && emp?.email) {
           fireEmail(ctx, { to: emp.email, ...performanceReviewScheduledEmail({
             recipientName: emp.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
             reviewType: type, scheduledDate, loginUrl: ctx.loginUrl,
           }) })
         }
-      }
-    } catch (emailErr) { console.error('Performance review email error:', emailErr) }
+      } catch (emailErr) { console.error('Performance review notification error:', emailErr) }
+    })()
 
     return NextResponse.json({ review }, { status: 201 })
   } catch (err) {
@@ -155,21 +177,44 @@ export async function PATCH(req: NextRequest) {
       .where(and(eq(performanceReviews.id, id), eq(performanceReviews.tenantId, session.tenantId)))
       .returning()
 
-    // Email employee when review is completed
+    // In-app + email when review is completed
     if (status === 'completed' && updated) {
-      try {
-        const ctx = await getTenantEmailCtx(session.tenantId)
-        if (ctx.notify.emailPerformance) {
-          const [emp] = await db.select({ firstName: employees.firstName, email: employees.email })
+      ;(async () => {
+        try {
+          const [emp] = await db
+            .select({ firstName: employees.firstName, lastName: employees.lastName, email: employees.email, userId: employees.userId })
             .from(employees).where(eq(employees.id, updated.employeeId))
-          if (emp?.email) {
+
+          // Notify employee
+          if (emp?.userId) {
+            notify(session.tenantId, emp.userId, {
+              type:  'performance',
+              title: 'Performance review completed',
+              body:  updated.overallRating
+                ? `Your review is complete. Overall rating: ${updated.overallRating}/5.`
+                : 'Your performance review has been finalised.',
+              link:  '/tenant/my-profile',
+            })
+          }
+
+          // Notify HR of completion
+          notifyRole(session.tenantId, ['hr_officer', 'director'], {
+            type:  'performance',
+            title: `Review completed — ${emp ? `${emp.firstName} ${emp.lastName}` : 'Employee'}`,
+            body:  updated.overallRating ? `Overall rating: ${updated.overallRating}/5.` : undefined,
+            link:  '/tenant/performance',
+          })
+
+          // Email employee
+          const ctx = await getTenantEmailCtx(session.tenantId)
+          if (ctx.notify.emailPerformance && emp?.email) {
             fireEmail(ctx, { to: emp.email, ...performanceReviewCompletedEmail({
               recipientName: emp.firstName, orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
               reviewType: updated.type, overallRating: updated.overallRating ?? undefined, loginUrl: ctx.loginUrl,
             }) })
           }
-        }
-      } catch (emailErr) { console.error('Performance completed email error:', emailErr) }
+        } catch (emailErr) { console.error('Performance completed notification error:', emailErr) }
+      })()
     }
 
     return NextResponse.json({ review: updated })

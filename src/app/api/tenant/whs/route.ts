@@ -5,6 +5,7 @@ import { getTenantEmailCtx, getTenantRoleEmails, fireEmail } from '@/lib/email/e
 import { whsIncidentReportedEmail } from '@/lib/email/templates'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { notify, notifyRole } from '@/lib/notifications/notify'
 
 export async function GET(req: NextRequest) {
   try {
@@ -101,24 +102,55 @@ export async function POST(req: NextRequest) {
       correctiveActions: [],
     }).returning()
 
-    // Alert WHS managers
-    try {
-      const ctx = await getTenantEmailCtx(session.tenantId)
-      if (ctx.notify.emailWhs) {
-        const whsEmails = await getTenantRoleEmails(session.tenantId, ['director', 'hr_officer', 'operations_manager'])
-        if (whsEmails.length) {
-          const [reporter] = await db.select({ firstName: employees.firstName, lastName: employees.lastName })
-            .from(employees).where(eq(employees.id, record.reportedBy!))
-          fireEmail(ctx, { to: whsEmails, ...whsIncidentReportedEmail({
-            recipientName: 'WHS Team', orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
-            incidentType: record.type, severity: record.severity ?? 'unknown', location: record.location ?? 'Not specified',
-            occurredAt: record.occurredAt?.toString() ?? new Date().toISOString(),
-            reportedByName: reporter ? `${reporter.firstName} ${reporter.lastName}` : 'Unknown',
-            loginUrl: ctx.loginUrl,
-          }) })
+    // In-app notifications (fire-and-forget)
+    ;(async () => {
+      try {
+        // Notify WHS/operations team
+        const isCritical = record.severity === 'critical' || record.severity === 'high'
+        notifyRole(session.tenantId, ['director', 'hr_officer', 'operations_manager'], {
+          type:  'compliance',
+          title: isCritical
+            ? `🚨 ${record.severity?.toUpperCase()} incident reported — ${record.type}`
+            : `WHS incident reported — ${record.type}`,
+          body:  `${record.location ? `Location: ${record.location}. ` : ''}${record.description.slice(0, 100)}${record.description.length > 100 ? '…' : ''}`,
+          link:  '/tenant/whs',
+        })
+
+        // Notify involved employee (if named)
+        if (employeeId) {
+          const [empRow] = await db
+            .select({ userId: employees.userId })
+            .from(employees)
+            .where(eq(employees.id, employeeId))
+            .limit(1)
+          if (empRow?.userId) {
+            notify(session.tenantId, empRow.userId, {
+              type:  'compliance',
+              title: 'WHS incident lodged for you',
+              body:  'An incident report involving you has been submitted and is under review.',
+              link:  '/tenant/whs',
+            })
+          }
         }
-      }
-    } catch (emailErr) { console.error('WHS email error:', emailErr) }
+
+        // Email notification
+        const ctx = await getTenantEmailCtx(session.tenantId)
+        if (ctx.notify.emailWhs) {
+          const whsEmails = await getTenantRoleEmails(session.tenantId, ['director', 'hr_officer', 'operations_manager'])
+          if (whsEmails.length) {
+            const [reporter] = await db.select({ firstName: employees.firstName, lastName: employees.lastName })
+              .from(employees).where(eq(employees.id, record.reportedBy!))
+            fireEmail(ctx, { to: whsEmails, ...whsIncidentReportedEmail({
+              recipientName: 'WHS Team', orgName: ctx.orgName, logoUrl: ctx.logoUrl, primaryColor: ctx.primaryColor,
+              incidentType: record.type, severity: record.severity ?? 'unknown', location: record.location ?? 'Not specified',
+              occurredAt: record.occurredAt?.toString() ?? new Date().toISOString(),
+              reportedByName: reporter ? `${reporter.firstName} ${reporter.lastName}` : 'Unknown',
+              loginUrl: ctx.loginUrl,
+            }) })
+          }
+        }
+      } catch (emailErr) { console.error('WHS notification error:', emailErr) }
+    })()
 
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
@@ -148,6 +180,38 @@ export async function PATCH(req: NextRequest) {
       .set(updates)
       .where(and(eq(whsIncidents.id, id), eq(whsIncidents.tenantId, session.tenantId)))
       .returning()
+
+    // In-app notifications on status or severity changes
+    if (status || severity) {
+      ;(async () => {
+        try {
+          if (status === 'closed' && updated?.employeeId) {
+            const [empRow] = await db
+              .select({ userId: employees.userId })
+              .from(employees)
+              .where(eq(employees.id, updated.employeeId))
+              .limit(1)
+            if (empRow?.userId) {
+              notify(session.tenantId, empRow.userId, {
+                type:  'compliance',
+                title: 'WHS incident closed',
+                body:  'The incident report involving you has been closed.',
+                link:  '/tenant/whs',
+              })
+            }
+          }
+
+          if (severity === 'critical' || severity === 'high') {
+            notifyRole(session.tenantId, ['director', 'hr_officer', 'operations_manager'], {
+              type:  'compliance',
+              title: `⚠️ WHS incident escalated to ${severity}`,
+              body:  `Incident #${id.slice(0, 8)} severity upgraded — immediate review required.`,
+              link:  '/tenant/whs',
+            })
+          }
+        } catch (err) { console.error('WHS PATCH notification error:', err) }
+      })()
+    }
 
     return NextResponse.json({ record: updated })
   } catch (err) {
