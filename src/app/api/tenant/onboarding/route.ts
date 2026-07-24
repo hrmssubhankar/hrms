@@ -5,6 +5,7 @@ import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
 import { onboardingWelcomeEmail } from '@/lib/email/templates'
 import { eq, desc, and } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { notifyRole } from '@/lib/notifications/notify'
 
 // GET /api/tenant/onboarding
 export async function GET(req: NextRequest) {
@@ -125,6 +126,22 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch (emailErr) { console.error('Onboarding email error:', emailErr) }
+
+    // In-app notification → HR + managers that a new onboarding has started
+    ;(async () => {
+      try {
+        const [emp] = await db
+          .select({ firstName: employees.firstName, lastName: employees.lastName })
+          .from(employees).where(eq(employees.id, employeeId))
+        if (!emp) return
+        notifyRole(session.tenantId, ['director', 'hr_officer', 'operations_manager'], {
+          type:  'onboarding',
+          title: 'New onboarding started',
+          body:  `${emp.firstName} ${emp.lastName} has been added to the onboarding pipeline.`,
+          link:  `/tenant/onboarding/${record.id}`,
+        })
+      } catch { /* non-blocking */ }
+    })()
 
     return NextResponse.json({ record }, { status: 201 })
   } catch (err: any) {

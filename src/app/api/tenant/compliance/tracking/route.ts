@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { complianceTracking, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { notifyRole } from '@/lib/notifications/notify'
 
 export async function GET(req: NextRequest) {
   try {
@@ -113,6 +114,24 @@ export async function PATCH(req: NextRequest) {
       .set(updates)
       .where(and(eq(complianceTracking.id, id), eq(complianceTracking.tenantId, session.tenantId)))
       .returning()
+
+    // Notify compliance manager + director when a record is flagged red/overdue
+    if (updated && (status === 'red' || status === 'amber')) {
+      ;(async () => {
+        try {
+          const [emp] = await db
+            .select({ firstName: employees.firstName, lastName: employees.lastName })
+            .from(employees).where(eq(employees.id, updated.employeeId))
+          const severity = status === 'red' ? '🔴 Overdue' : '🟡 Attention needed'
+          notifyRole(session.tenantId, ['compliance_manager', 'director', 'hr_officer'], {
+            type:  'compliance',
+            title: `${severity}: compliance item flagged`,
+            body:  `${emp ? `${emp.firstName} ${emp.lastName} — ` : ''}${updated.itemType} is now ${status}.${updated.dueDate ? ` Due: ${updated.dueDate}.` : ''}`,
+            link:  '/tenant/compliance',
+          })
+        } catch { /* non-blocking */ }
+      })()
+    }
 
     return NextResponse.json({ record: updated })
   } catch (err) {

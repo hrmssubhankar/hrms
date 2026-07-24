@@ -6,6 +6,7 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 import { calculatePayroll, grossFromHours, grossFromSalary, type PayFrequency } from '@/lib/payroll/calculator'
 import { getTenantEmailCtx, fireEmail } from '@/lib/email/emailHelper'
 import { payslipReadyEmail } from '@/lib/email/templates'
+import { notify, notifyRole } from '@/lib/notifications/notify'
 
 export async function GET(req: NextRequest) {
   try {
@@ -120,6 +121,33 @@ export async function POST(req: NextRequest) {
       status:            'pending',
     }).returning()
 
+    // In-app: notify payroll officer + director that a new payroll record is pending
+    notifyRole(session.tenantId, ['director', 'payroll_officer'], {
+      type:  'payroll',
+      title: 'New payroll record pending approval',
+      body:  `Period: ${periodStart} → ${periodEnd}. Net pay: $${breakdown.netPay.toFixed(2)}.`,
+      link:  '/tenant/payroll',
+    })
+
+    // Also notify the employee via their linked userId (payslip ready)
+    ;(async () => {
+      try {
+        const [emp] = await db
+          .select({ userId: employees.userId, firstName: employees.firstName, lastName: employees.lastName, email: employees.email })
+          .from(employees).where(eq(employees.id, employeeId))
+        if (!emp) return
+
+        if (emp.userId) {
+          notify(session.tenantId, emp.userId, {
+            type:  'payroll',
+            title: 'Your payslip is being processed',
+            body:  `Period: ${periodStart} → ${periodEnd}. Check My Payslips once approved.`,
+            link:  '/tenant/my-payslips',
+          })
+        }
+      } catch { /* non-blocking */ }
+    })()
+
     return NextResponse.json({ record, breakdown }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/payroll', err)
@@ -149,33 +177,47 @@ export async function PATCH(req: NextRequest) {
       .where(and(eq(payrollRecords.id, id), eq(payrollRecords.tenantId, session.tenantId)))
       .returning()
 
-    // Send payslip email when a pay run is marked as paid
+    // When marked paid: email + in-app notify the employee
     if (status === 'paid' && updated) {
-      try {
-        const [emp] = await db
-          .select({ firstName: employees.firstName, lastName: employees.lastName, email: employees.email })
-          .from(employees)
-          .where(eq(employees.id, updated.employeeId))
+      ;(async () => {
+        try {
+          const [emp] = await db
+            .select({ userId: employees.userId, firstName: employees.firstName, lastName: employees.lastName, email: employees.email })
+            .from(employees)
+            .where(eq(employees.id, updated.employeeId))
+          if (!emp) return
 
-        if (emp?.email) {
-          const ctx = await getTenantEmailCtx(session.tenantId)
-          const tmpl = payslipReadyEmail({
-            recipientName: emp.firstName,
-            orgName:       ctx.orgName,
-            logoUrl:       ctx.logoUrl,
-            primaryColor:  ctx.primaryColor,
-            periodStart:   updated.periodStart,
-            periodEnd:     updated.periodEnd,
-            grossPay:      Number(updated.grossPay ?? 0),
-            netPay:        Number(updated.netPay ?? 0),
-            superAmount:   Number(updated.superContribution ?? 0),
-            loginUrl:      `${ctx.loginUrl}/tenant/payroll`,
-          })
-          fireEmail(ctx, { to: emp.email, ...tmpl })
+          // In-app notification to the employee
+          if (emp.userId) {
+            notify(session.tenantId, emp.userId, {
+              type:  'payroll',
+              title: 'Your payslip is ready',
+              body:  `Pay period: ${updated.periodStart} → ${updated.periodEnd}. Net: $${Number(updated.netPay ?? 0).toFixed(2)}.`,
+              link:  '/tenant/my-payslips',
+            })
+          }
+
+          // Email the payslip
+          if (emp.email) {
+            const ctx = await getTenantEmailCtx(session.tenantId)
+            const tmpl = payslipReadyEmail({
+              recipientName: emp.firstName,
+              orgName:       ctx.orgName,
+              logoUrl:       ctx.logoUrl,
+              primaryColor:  ctx.primaryColor,
+              periodStart:   updated.periodStart,
+              periodEnd:     updated.periodEnd,
+              grossPay:      Number(updated.grossPay ?? 0),
+              netPay:        Number(updated.netPay ?? 0),
+              superAmount:   Number(updated.superContribution ?? 0),
+              loginUrl:      `${ctx.loginUrl}/tenant/payroll`,
+            })
+            fireEmail(ctx, { to: emp.email, ...tmpl })
+          }
+        } catch (e) {
+          console.error('Payslip notification error:', e)
         }
-      } catch (e) {
-        console.error('Payslip email error:', e)
-      }
+      })()
     }
 
     return NextResponse.json({ record: updated })

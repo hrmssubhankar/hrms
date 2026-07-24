@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { documents, employees } from '@/lib/db/schema'
 import { eq, and, desc, gte, lte } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
+import { notifyRole } from '@/lib/notifications/notify'
 
 export async function GET(req: NextRequest) {
   try {
@@ -104,6 +105,20 @@ export async function POST(req: NextRequest) {
       version:       1,
     }).returning()
 
+    // Notify HR if the document expires within 30 days
+    if (expiryDate) {
+      const msUntilExpiry = new Date(expiryDate).getTime() - Date.now()
+      const daysUntilExpiry = Math.ceil(msUntilExpiry / 864e5)
+      if (daysUntilExpiry >= 0 && daysUntilExpiry <= 30) {
+        notifyRole(session.tenantId, ['hr_officer', 'director', 'compliance_manager'], {
+          type:  'document',
+          title: `Document expiring in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? '' : 's'}`,
+          body:  `"${title}" expires on ${expiryDate}.`,
+          link:  '/tenant/documents',
+        })
+      }
+    }
+
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/documents', err)
@@ -131,6 +146,29 @@ export async function PATCH(req: NextRequest) {
       .update(documents).set(updates)
       .where(and(eq(documents.id, id), eq(documents.tenantId, session.tenantId)))
       .returning()
+
+    // Notify on status change to expired, or new expiry within 30 days
+    if (updated) {
+      if (status === 'expired') {
+        notifyRole(session.tenantId, ['hr_officer', 'director', 'compliance_manager'], {
+          type:  'document',
+          title: 'Document marked as expired',
+          body:  `"${updated.title}" has been marked expired.`,
+          link:  '/tenant/documents',
+        })
+      } else if (expiryDate) {
+        const msUntilExpiry = new Date(expiryDate).getTime() - Date.now()
+        const daysUntilExpiry = Math.ceil(msUntilExpiry / 864e5)
+        if (daysUntilExpiry >= 0 && daysUntilExpiry <= 30) {
+          notifyRole(session.tenantId, ['hr_officer', 'director', 'compliance_manager'], {
+            type:  'document',
+            title: `Document expiring in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? '' : 's'}`,
+            body:  `"${updated.title}" expires on ${expiryDate}.`,
+            link:  '/tenant/documents',
+          })
+        }
+      }
+    }
 
     return NextResponse.json({ record: updated })
   } catch (err) {

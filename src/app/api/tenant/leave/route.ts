@@ -6,6 +6,7 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 import { hasPermission } from '@/lib/auth/permissions'
 import { getTenantEmailCtx, getTenantRoleEmails, fireEmail } from '@/lib/email/emailHelper'
 import { genericNotificationEmail } from '@/lib/email/templates'
+import { notify, notifyRole } from '@/lib/notifications/notify'
 
 export const dynamic = 'force-dynamic'
 
@@ -140,7 +141,19 @@ export async function POST(req: NextRequest) {
     })
     .returning()
 
-  // Notify managers with leave:approve about new request
+  // In-app notification → managers
+  notifyRole(
+    session.tenantId,
+    ['director', 'hr_officer', 'operations_manager', 'team_leader'],
+    {
+      type:  'leave',
+      title: 'New leave request pending approval',
+      body:  `A ${created.leaveType} leave request (${created.startDate} → ${created.endDate}, ${created.totalDays} day${created.totalDays === 1 ? '' : 's'}) needs your review.`,
+      link:  '/tenant/leave',
+    },
+  )
+
+  // Email notification → managers with leave:approve
   ;(async () => {
     try {
       const ctx = await getTenantEmailCtx(session.tenantId)
@@ -206,17 +219,32 @@ export async function PATCH(req: NextRequest) {
       })
       .where(eq(leaveRequests.id, id))
 
-    // Fire email notification to employee
+    const approved = action === 'approve'
+
+    // In-app notification → employee (via employees.userId → users.id)
     ;(async () => {
       try {
         const [emp] = await db
-          .select({ firstName: employees.firstName, lastName: employees.lastName, email: employees.email })
+          .select({ userId: employees.userId, firstName: employees.firstName, lastName: employees.lastName, email: employees.email })
           .from(employees)
           .where(eq(employees.id, existing.employeeId))
+        if (!emp) return
+
+        if (emp.userId) {
+          notify(session.tenantId, emp.userId, {
+            type:  'leave',
+            title: approved ? 'Leave request approved' : 'Leave request not approved',
+            body:  approved
+              ? `Your ${existing.leaveType} leave (${existing.startDate} → ${existing.endDate}) has been approved.${reviewNote ? ` Note: ${reviewNote}` : ''}`
+              : `Your ${existing.leaveType} leave (${existing.startDate} → ${existing.endDate}) was not approved.${reviewNote ? ` Reason: ${reviewNote}` : ''}`,
+            link: '/tenant/leave',
+          })
+        }
+
+        // Email notification
         if (!emp?.email) return
         const ctx = await getTenantEmailCtx(session.tenantId)
-        if (!ctx.notify.emailPayroll) return   // reuse general flag
-        const approved = action === 'approve'
+        if (!ctx.notify.emailPayroll) return
         const tmpl = genericNotificationEmail({
           recipientName: `${emp.firstName} ${emp.lastName}`,
           orgName:       ctx.orgName,
@@ -233,7 +261,6 @@ export async function PATCH(req: NextRequest) {
       } catch { /* non-blocking */ }
     })()
 
-    // Notify HR managers on new pending request (POST path handled below)
     return NextResponse.json({ ok: true })
   }
 
