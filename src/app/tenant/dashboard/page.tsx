@@ -131,8 +131,14 @@ export default function DashboardPage() {
   useEffect(() => {
     // Load user info for greeting
     fetch('/api/auth/me').then(r => r.json()).then(d => {
-      const email = d.email ?? ''
-      setUserName(email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()))
+      const email = d.user?.email ?? d.email ?? ''
+      const name  = d.user?.name  ?? d.name  ?? ''
+      // Prefer explicit name (e.g. from employee profile), else derive from email
+      if (name && !name.startsWith('[Impersonated')) {
+        setUserName(name)
+      } else {
+        setUserName(email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()))
+      }
     }).catch(() => {})
 
     fetch('/api/tenant/config').then(r => r.json()).then(d => {
