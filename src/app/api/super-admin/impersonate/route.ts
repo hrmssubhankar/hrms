@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { users, tenants } from '@/lib/db/schema'
+import { users, tenants, auditLogs } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { getSession } from '@/lib/auth/session'
 import { SignJWT } from 'jose'
@@ -59,6 +59,20 @@ export async function POST(req: NextRequest) {
       .setIssuedAt()
       .setExpirationTime('1h')
       .sign(secret)
+
+    // Audit log — fire-and-forget; never block the response
+    db.insert(auditLogs).values({
+      tenantId:   tenantId,
+      action:     'impersonate',
+      resource:   'user',
+      resourceId: targetUser.id,
+      newValues:  {
+        impersonatedBy: session!.email,
+        targetEmail:    targetUser.email,
+        targetRole:     targetUser.role,
+        tenantSlug:     tenant.slug,
+      },
+    }).catch(err => console.error('[impersonate-audit]', err))
 
     // Return the token and redirect URL.
     // The client opens this URL on the *tenant* deployment so the cookie is

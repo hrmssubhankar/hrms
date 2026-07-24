@@ -34,18 +34,30 @@ export default function ModulesPage() {
   const [modules, setModules]       = useState<ModuleStat[]>([])
   const [tenantCount, setTenantCount] = useState(0)
   const [loading, setLoading]       = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [expanded, setExpanded]     = useState<number | null>(null)
 
   useEffect(() => {
     fetch('/api/super-admin/modules')
-      .then(r => r.json())
+      .then(async r => {
+        if (!r.ok) {
+          const msg = r.status === 401
+            ? 'Not authenticated — please log in to the super admin portal.'
+            : `Server error (HTTP ${r.status})`
+          throw new Error(msg)
+        }
+        return r.json()
+      })
       .then(d => {
         setModules(d.modules ?? [])
         setTenantCount(d.tenantCount ?? 0)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(err => {
+        setFetchError(err instanceof Error ? err.message : 'Failed to load module data.')
+        setLoading(false)
+      })
   }, [])
 
   const categories = ['All', ...Array.from(new Set(modules.map(m => m.category)))]
@@ -118,6 +130,13 @@ export default function ModulesPage() {
           <tbody>
             {loading ? (
               <tr><td colSpan={5} className="px-4 py-12 text-center text-gray-500 dark:text-gray-400">Loading…</td></tr>
+            ) : fetchError ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-12 text-center">
+                  <p className="text-2xl mb-2">⚠️</p>
+                  <p className="text-sm font-medium text-red-600 dark:text-red-400">{fetchError}</p>
+                </td>
+              </tr>
             ) : filtered.map(mod => (
               <>
                 <tr

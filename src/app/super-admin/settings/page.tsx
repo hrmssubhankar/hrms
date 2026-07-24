@@ -1,26 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type Section = 'general' | 'email' | 'security' | 'maintenance'
 
 export default function PlatformSettingsPage() {
   const [activeSection, setActiveSection] = useState<Section>('general')
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved]       = useState(false)
+  const [saving, setSaving]     = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   // General
-  const [platformName,   setPlatformName]   = useState('HRMS')
-  const [supportEmail,   setSupportEmail]   = useState('support@yahwehhrms.com')
-  const [defaultTier,    setDefaultTier]    = useState('starter')
+  const [platformName,      setPlatformName]      = useState('HRMS')
+  const [supportEmail,      setSupportEmail]      = useState('support@yahwehhrms.com')
+  const [defaultTier,       setDefaultTier]       = useState('starter')
   const [maxUsersPerTenant, setMaxUsersPerTenant] = useState('500')
 
   // Email / SMTP
-  const [smtpHost,     setSmtpHost]     = useState('smtp-relay.brevo.com')
-  const [smtpPort,     setSmtpPort]     = useState('587')
-  const [smtpUser,     setSmtpUser]     = useState('')
-  const [smtpPass,     setSmtpPass]     = useState('')
-  const [fromEmail,    setFromEmail]    = useState('noreply@yahwehhrms.com')
-  const [fromName,     setFromName]     = useState('HRMS Platform')
+  const [smtpHost,  setSmtpHost]  = useState('smtp-relay.brevo.com')
+  const [smtpPort,  setSmtpPort]  = useState('587')
+  const [smtpUser,  setSmtpUser]  = useState('')
+  const [smtpPass,  setSmtpPass]  = useState('')
+  const [fromEmail, setFromEmail] = useState('noreply@yahwehhrms.com')
+  const [fromName,  setFromName]  = useState('HRMS Platform')
 
   // Security
   const [sessionHours,    setSessionHours]    = useState('8')
@@ -31,9 +33,66 @@ export default function PlatformSettingsPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [maintenanceMsg,  setMaintenanceMsg]  = useState('The platform is undergoing scheduled maintenance. We will be back shortly.')
 
-  function handleSave() {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+  // Load settings on mount
+  useEffect(() => {
+    fetch('/api/super-admin/settings')
+      .then(async r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
+      .then(({ settings: s }) => {
+        if (!s) return
+        setPlatformName(s.platformName      ?? 'HRMS')
+        setSupportEmail(s.supportEmail      ?? 'support@yahwehhrms.com')
+        setDefaultTier(s.defaultTier        ?? 'starter')
+        setMaxUsersPerTenant(String(s.maxUsersPerTenant ?? 500))
+        setSmtpHost(s.smtpHost             ?? 'smtp-relay.brevo.com')
+        setSmtpPort(String(s.smtpPort      ?? 587))
+        setSmtpUser(s.smtpUser             ?? '')
+        setSmtpPass(s.smtpPass             ?? '')
+        setFromEmail(s.fromEmail           ?? 'noreply@yahwehhrms.com')
+        setFromName(s.fromName             ?? 'HRMS Platform')
+        setSessionHours(String(s.sessionHours ?? 8))
+        setRequire2FA(!!s.require2FA)
+        setAuditRetainDays(String(s.auditRetainDays ?? 365))
+        setMaintenanceMode(!!s.maintenanceMode)
+        setMaintenanceMsg(s.maintenanceMsg  ?? 'The platform is undergoing scheduled maintenance. We will be back shortly.')
+      })
+      .catch(err => setLoadError(err.message))
+  }, [])
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/super-admin/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          platformName,
+          supportEmail,
+          defaultTier,
+          maxUsersPerTenant: parseInt(maxUsersPerTenant, 10) || 500,
+          smtpHost,
+          smtpPort: parseInt(smtpPort, 10) || 587,
+          smtpUser,
+          smtpPass,
+          fromEmail,
+          fromName,
+          sessionHours: parseInt(sessionHours, 10) || 8,
+          require2FA,
+          auditRetainDays: parseInt(auditRetainDays, 10) || 365,
+          maintenanceMode,
+          maintenanceMsg,
+        }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      alert('Save failed — ' + (err instanceof Error ? err.message : 'unknown error'))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const SECTIONS: { key: Section; label: string; icon: string }[] = [
@@ -50,8 +109,14 @@ export default function PlatformSettingsPage() {
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Global configuration for the HRMS platform</p>
       </div>
 
+      {loadError && (
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
+          Could not load saved settings ({loadError}) — showing defaults.
+        </div>
+      )}
+
       {saved && (
-        <div className="bg-green-50 dark:bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">
+        <div className="bg-green-50 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">
           Settings saved successfully.
         </div>
       )}
@@ -198,9 +263,10 @@ export default function PlatformSettingsPage() {
           <div className="pt-2 border-t border-gray-200 dark:border-gray-800 flex gap-3">
             <button
               onClick={handleSave}
-              className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition"
+              disabled={saving}
+              className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition"
             >
-              Save Settings
+              {saving ? 'Saving…' : 'Save Settings'}
             </button>
             <button
               onClick={() => setActiveSection(activeSection)}
