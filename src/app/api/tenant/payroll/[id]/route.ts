@@ -1,0 +1,50 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { payrollRecords, employees } from '@/lib/db/schema'
+import { eq, and } from 'drizzle-orm'
+import { apiGuard } from '@/lib/auth/apiGuard'
+
+type RouteContext = { params: Promise<{ id: string }> }
+
+// GET /api/tenant/payroll/[id]
+export async function GET(_req: NextRequest, ctx: RouteContext) {
+  const { id } = await ctx.params
+  try {
+    const guard = await apiGuard('payroll:read')
+    if (guard.error) return guard.error
+    const { session } = guard
+
+    const [record] = await db
+      .select({
+        id:                payrollRecords.id,
+        employeeId:        payrollRecords.employeeId,
+        periodStart:       payrollRecords.periodStart,
+        periodEnd:         payrollRecords.periodEnd,
+        hoursWorked:       payrollRecords.hoursWorked,
+        hourlyRate:        payrollRecords.hourlyRate,
+        grossPay:          payrollRecords.grossPay,
+        paygWithholding:   payrollRecords.paygWithholding,
+        medicareLevy:      payrollRecords.medicareLevy,
+        superContribution: payrollRecords.superContribution,
+        netPay:            payrollRecords.netPay,
+        payslipData:       payrollRecords.payslipData,
+        status:            payrollRecords.status,
+        exportedToXero:    payrollRecords.exportedToXero,
+        exportedAt:        payrollRecords.exportedAt,
+        createdAt:         payrollRecords.createdAt,
+        employeeFirstName: employees.firstName,
+        employeeLastName:  employees.lastName,
+        employeeEmail:     employees.email,
+        employeeEntityName: employees.entityName,
+      })
+      .from(payrollRecords)
+      .leftJoin(employees, eq(payrollRecords.employeeId, employees.id))
+      .where(and(eq(payrollRecords.id, id), eq(payrollRecords.tenantId, session.tenantId)))
+
+    if (!record) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    return NextResponse.json({ record })
+  } catch (err) {
+    console.error('GET /api/tenant/payroll/[id]', err)
+    return NextResponse.json({ error: 'Failed to fetch record' }, { status: 500 })
+  }
+}

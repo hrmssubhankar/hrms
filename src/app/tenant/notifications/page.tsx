@@ -7,6 +7,7 @@ type Notification = {
   type: string
   title: string
   body: string | null
+  link: string | null
   isRead: boolean
   createdAt: string
 }
@@ -19,13 +20,42 @@ type AlertResult = {
   details: { sent: string[]; failed: string[] }
 }
 
+const TYPE_ICON: Record<string, string> = {
+  leave:           '🌴',
+  payroll:         '💰',
+  onboarding:      '🚀',
+  compliance:      '🔒',
+  document:        '📄',
+  document_expiry: '📄',
+  recruitment:     '🎯',
+  training:        '📚',
+  performance:     '⭐',
+  system:          '🔔',
+  general:         '🔔',
+}
+
+const ALL_TYPES = Object.keys(TYPE_ICON)
+
+function relativeTime(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins  = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days  = Math.floor(diff / 86400000)
+  if (mins < 1)   return 'just now'
+  if (mins < 60)  return `${mins}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days < 7)   return `${days}d ago`
+  return new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+}
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading]             = useState(true)
-  const [running, setRunning]             = useState(false)
-  const [daysAhead, setDaysAhead]         = useState(7)
-  const [result, setResult]               = useState<AlertResult | null>(null)
-  const [error, setError]                 = useState('')
+  const [loading,    setLoading]    = useState(true)
+  const [typeFilter, setTypeFilter] = useState('')
+  const [running,    setRunning]    = useState(false)
+  const [daysAhead,  setDaysAhead]  = useState(7)
+  const [result,     setResult]     = useState<AlertResult | null>(null)
+  const [error,      setError]      = useState('')
 
   async function load() {
     setLoading(true)
@@ -41,12 +71,23 @@ export default function NotificationsPage() {
 
   async function markAllRead() {
     await fetch('/api/tenant/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
-    load()
+    setNotifications(n => n.map(x => ({ ...x, isRead: true })))
   }
 
   async function markRead(id: string) {
     await fetch('/api/tenant/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
     setNotifications(n => n.map(x => x.id === id ? { ...x, isRead: true } : x))
+  }
+
+  async function dismiss(id: string) {
+    await fetch(`/api/tenant/notifications?id=${id}`, { method: 'DELETE' })
+    setNotifications(n => n.filter(x => x.id !== id))
+  }
+
+  async function clearAll() {
+    if (!confirm('Clear all notifications? This cannot be undone.')) return
+    await fetch('/api/tenant/notifications', { method: 'DELETE' })
+    setNotifications([])
   }
 
   async function runExpiryCheck() {
@@ -63,35 +104,34 @@ export default function NotificationsPage() {
     finally { setRunning(false) }
   }
 
-  const unread = notifications.filter(n => !n.isRead).length
-
-  const TYPE_ICON: Record<string, string> = {
-    leave:           '🌴',
-    payroll:         '💰',
-    onboarding:      '🚀',
-    compliance:      '🔒',
-    document:        '📄',
-    document_expiry: '📄',
-    system:          '🔔',
-    general:         '🔔',
-  }
+  const unread   = notifications.filter(n => !n.isRead).length
+  const filtered = typeFilter ? notifications.filter(n => n.type === typeFilter) : notifications
+  const presentTypes = [...new Set(notifications.map(n => n.type))].filter(t => ALL_TYPES.includes(t))
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {unread > 0 ? `${unread} unread` : 'All caught up'}
           </p>
         </div>
-        {unread > 0 && (
-          <button onClick={markAllRead}
-            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition underline underline-offset-2">
-            Mark all read
-          </button>
-        )}
+        <div className="flex gap-2">
+          {unread > 0 && (
+            <button onClick={markAllRead}
+              className="text-sm px-3 py-1.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white rounded-lg transition">
+              Mark all read
+            </button>
+          )}
+          {notifications.length > 0 && (
+            <button onClick={clearAll}
+              className="text-sm px-3 py-1.5 border border-red-800 text-red-400 hover:bg-red-900/20 rounded-lg transition">
+              Clear all
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Email Alert Panel */}
@@ -168,37 +208,85 @@ export default function NotificationsPage() {
 
       {/* In-app Notifications */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+        <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between gap-4 flex-wrap">
           <h2 className="font-semibold text-gray-900 dark:text-white">In-app Notifications</h2>
+
+          {/* Type filter tabs */}
+          {presentTypes.length > 1 && (
+            <div className="flex gap-1 flex-wrap">
+              <button
+                onClick={() => setTypeFilter('')}
+                className={`text-xs px-2.5 py-1 rounded-full border transition ${typeFilter === '' ? 'bg-purple-600 border-purple-600 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white'}`}>
+                All ({notifications.length})
+              </button>
+              {presentTypes.map(t => (
+                <button key={t}
+                  onClick={() => setTypeFilter(t === typeFilter ? '' : t)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition flex items-center gap-1 ${typeFilter === t ? 'bg-purple-600 border-purple-600 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white'}`}>
+                  {TYPE_ICON[t]} {t.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {loading ? (
           <div className="px-5 py-10 text-center text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
-        ) : notifications.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="px-5 py-12 text-center">
-            <p className="text-3xl mb-2"></p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">No notifications yet.</p>
+            <p className="text-3xl mb-2">🔔</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              {typeFilter ? `No ${typeFilter} notifications` : 'No notifications yet.'}
+            </p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-            {notifications.map(n => (
-              <li key={n.id}
-                className={`flex gap-3 px-5 py-4 transition ${!n.isRead ? 'bg-blue-50 dark:bg-blue-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/40'}`}>
-                <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[n.type] ?? ''}</span>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${!n.isRead ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{n.title}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{n.body}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString('en-AU')}</p>
-                </div>
-                {!n.isRead && (
-                  <button onClick={() => markRead(n.id)}
-                    className="shrink-0 text-xs text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition mt-1">
-                    Mark read
-                  </button>
-                )}
-              </li>
-            ))}
+            {filtered.map(n => {
+              const isClickable = !!n.link
+              const Wrapper = isClickable ? 'a' : 'div'
+              const wrapperProps = isClickable
+                ? { href: n.link!, onClick: () => !n.isRead && markRead(n.id) }
+                : {}
+              return (
+                <li key={n.id}
+                  className={`flex gap-3 px-5 py-4 transition group ${!n.isRead ? 'bg-blue-50 dark:bg-blue-900/10' : 'hover:bg-gray-50 dark:hover:bg-gray-800/40'}`}>
+                  <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[n.type] ?? '🔔'}</span>
+                  <Wrapper {...(wrapperProps as any)} className={`flex-1 min-w-0 ${isClickable ? 'cursor-pointer' : ''}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`text-sm font-medium leading-snug ${!n.isRead ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'} ${isClickable ? 'hover:text-purple-400 transition' : ''}`}>
+                        {n.title}
+                        {isClickable && <span className="ml-1 text-purple-500 text-xs">→</span>}
+                      </p>
+                      <span className="text-xs text-gray-500 dark:text-gray-500 shrink-0">{relativeTime(n.createdAt)}</span>
+                    </div>
+                    {n.body && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{n.body}</p>}
+                  </Wrapper>
+                  <div className="flex items-start gap-1 shrink-0 ml-1">
+                    {!n.isRead && (
+                      <button onClick={() => markRead(n.id)}
+                        className="text-xs text-blue-500 hover:text-blue-300 transition px-1 py-0.5 opacity-0 group-hover:opacity-100"
+                        title="Mark read">
+                        ✓
+                      </button>
+                    )}
+                    <button onClick={() => dismiss(n.id)}
+                      className="text-xs text-gray-600 dark:text-gray-500 hover:text-red-400 transition px-1 py-0.5 opacity-0 group-hover:opacity-100"
+                      title="Dismiss">
+                      ✕
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
+        )}
+
+        {filtered.length > 0 && (
+          <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-500 dark:text-gray-500">
+            {filtered.length} notification{filtered.length !== 1 ? 's' : ''}
+            {typeFilter && ` · filtered by ${typeFilter}`}
+            {unread > 0 && ` · ${unread} unread`}
+          </div>
         )}
       </div>
     </div>

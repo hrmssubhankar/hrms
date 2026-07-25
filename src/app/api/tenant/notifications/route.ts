@@ -42,6 +42,41 @@ export async function GET() {
   }
 }
 
+// DELETE — dismiss single or clear all
+export async function DELETE(req: NextRequest) {
+  const guard = await apiGuard()
+  if (guard.error) return guard.error
+  const { session } = guard
+
+  const userId = session.sub
+  if (!userId) return NextResponse.json({ ok: true })
+
+  try {
+    const { searchParams } = req.nextUrl
+    const id = searchParams.get('id')
+
+    if (id) {
+      await db
+        .delete(notifications)
+        .where(and(
+          eq(notifications.id, id),
+          eq(notifications.userId, userId),
+          eq(notifications.tenantId, session.tenantId),
+        ))
+    } else {
+      await db
+        .delete(notifications)
+        .where(and(
+          eq(notifications.userId, userId),
+          eq(notifications.tenantId, session.tenantId),
+        ))
+    }
+    return NextResponse.json({ ok: true })
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+  }
+}
+
 // PATCH — mark read (all or single)
 export async function PATCH(req: NextRequest) {
   const guard = await apiGuard()

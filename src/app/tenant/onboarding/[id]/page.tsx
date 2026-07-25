@@ -24,6 +24,10 @@ type Record_ = {
   employeePhotoUrl:  string | null
 }
 
+type Employee = { id: string; firstName: string; lastName: string; jobTitle: string | null }
+
+const CATEGORIES = ['admin', 'it', 'hr', 'legal', 'compliance', 'culture']
+
 const STAGE_LABELS: Record<string, string> = {
   pre_start:     'Pre-start',
   day1:          'Day 1',
@@ -58,11 +62,112 @@ export default function OnboardingDetailPage() {
   const [saved,  setSaved]  = useState(false)
   const [error,  setError]  = useState('')
 
+  // Notes editing
+  const [editingNotes, setEditingNotes] = useState(false)
+  const [notesDraft,   setNotesDraft]   = useState('')
+  const [notesSaving,  setNotesSaving]  = useState(false)
+
+  // Buddy
+  const [buddyName,     setBuddyName]     = useState<string | null>(null)
+  const [showBuddyEdit, setShowBuddyEdit] = useState(false)
+  const [allEmployees,  setAllEmployees]  = useState<Employee[]>([])
+  const [buddyDraft,    setBuddyDraft]    = useState('')
+  const [buddySaving,   setBuddySaving]   = useState(false)
+
+  // Custom task
+  const [addingTask,    setAddingTask]    = useState(false)
+  const [newTaskText,   setNewTaskText]   = useState('')
+  const [newTaskCat,    setNewTaskCat]    = useState('admin')
+  const [taskSaving,    setTaskSaving]    = useState(false)
+
   useEffect(() => {
     fetch(`/api/tenant/onboarding/${id}`)
       .then(r => r.json())
-      .then(d => setRec(d.record ?? null))
+      .then(d => {
+        const record = d.record ?? null
+        setRec(record)
+        if (record?.buddyId) {
+          fetch(`/api/tenant/employees?limit=200`)
+            .then(r => r.json())
+            .then(ed => {
+              const buddy = (ed.employees ?? []).find((e: Employee) => e.id === record.buddyId)
+              if (buddy) setBuddyName(`${buddy.firstName} ${buddy.lastName}`)
+              setAllEmployees(ed.employees ?? [])
+            })
+        }
+      })
   }, [id])
+
+  async function saveNotes() {
+    if (!rec) return
+    setNotesSaving(true)
+    try {
+      const res  = await fetch(`/api/tenant/onboarding/${id}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ notes: notesDraft }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setRec(r => r ? { ...r, notes: data.record.notes } : r)
+      setEditingNotes(false)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setNotesSaving(false)
+    }
+  }
+
+  async function saveBuddy() {
+    if (!rec) return
+    setBuddySaving(true)
+    try {
+      const res  = await fetch(`/api/tenant/onboarding/${id}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ buddyId: buddyDraft || null }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setRec(r => r ? { ...r, buddyId: data.record.buddyId } : r)
+      const buddy = allEmployees.find(e => e.id === buddyDraft)
+      setBuddyName(buddy ? `${buddy.firstName} ${buddy.lastName}` : null)
+      setShowBuddyEdit(false)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setBuddySaving(false)
+    }
+  }
+
+  async function addTask() {
+    if (!rec || !newTaskText.trim()) return
+    setTaskSaving(true)
+    const newItem: ChecklistItem = {
+      id:       `custom_${Date.now()}`,
+      task:     newTaskText.trim(),
+      done:     false,
+      category: newTaskCat,
+    }
+    const updated = [...rec.checklist, newItem]
+    try {
+      const res  = await fetch(`/api/tenant/onboarding/${id}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ checklist: updated }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setRec(r => r ? { ...r, checklist: updated, status: data.record.status, completedAt: data.record.completedAt } : r)
+      setNewTaskText('')
+      setNewTaskCat('admin')
+      setAddingTask(false)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setTaskSaving(false)
+    }
+  }
 
   async function toggleItem(itemId: string) {
     if (!rec) return
@@ -214,9 +319,108 @@ export default function OnboardingDetailPage() {
         )}
       </div>
 
+      {/* Buddy + Notes row */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+        {/* Buddy */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Onboarding Buddy</p>
+            <button onClick={() => {
+              setBuddyDraft(rec.buddyId ?? '')
+              if (allEmployees.length === 0) {
+                fetch('/api/tenant/employees?limit=200').then(r => r.json()).then(d => setAllEmployees(d.employees ?? []))
+              }
+              setShowBuddyEdit(b => !b)
+            }} className="text-xs text-purple-400 hover:text-purple-300 transition">
+              {showBuddyEdit ? 'Cancel' : 'Edit'}
+            </button>
+          </div>
+
+          {showBuddyEdit ? (
+            <div className="space-y-2">
+              <select value={buddyDraft} onChange={e => setBuddyDraft(e.target.value)}
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+                <option value="">— No buddy —</option>
+                {allEmployees
+                  .filter(e => e.id !== rec.employeeId)
+                  .map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}{e.jobTitle ? ` — ${e.jobTitle}` : ''}</option>)
+                }
+              </select>
+              <button onClick={saveBuddy} disabled={buddySaving}
+                className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm py-1.5 rounded-lg transition">
+                {buddySaving ? 'Saving…' : 'Save Buddy'}
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-purple-900/50 flex items-center justify-center text-purple-300 text-sm font-bold">
+                {buddyName ? buddyName[0].toUpperCase() : '?'}
+              </div>
+              <span className="text-sm text-gray-200">{buddyName ?? <span className="text-gray-500 italic">Not assigned</span>}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Notes */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Notes</p>
+            <button onClick={() => {
+              setNotesDraft(rec.notes ?? '')
+              setEditingNotes(n => !n)
+            }} className="text-xs text-purple-400 hover:text-purple-300 transition">
+              {editingNotes ? 'Cancel' : 'Edit'}
+            </button>
+          </div>
+          {editingNotes ? (
+            <div className="space-y-2">
+              <textarea value={notesDraft} onChange={e => setNotesDraft(e.target.value)} rows={4}
+                placeholder="Add notes…"
+                className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none" />
+              <button onClick={saveNotes} disabled={notesSaving}
+                className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm py-1.5 rounded-lg transition">
+                {notesSaving ? 'Saving…' : 'Save Notes'}
+              </button>
+            </div>
+          ) : rec.notes ? (
+            <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{rec.notes}</p>
+          ) : (
+            <p className="text-sm text-gray-500 italic">No notes yet.</p>
+          )}
+        </div>
+      </div>
+
       {/* Checklist by category */}
       <div className="space-y-4">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Onboarding Checklist</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Onboarding Checklist</h2>
+          <button onClick={() => setAddingTask(t => !t)}
+            className="text-xs text-purple-400 hover:text-purple-300 transition flex items-center gap-1">
+            {addingTask ? '✕ Cancel' : '+ Add Task'}
+          </button>
+        </div>
+
+        {/* Add task form */}
+        {addingTask && (
+          <div className="bg-white dark:bg-gray-900 border border-purple-700 rounded-xl p-4 space-y-3">
+            <p className="text-xs font-semibold text-purple-300">New Checklist Task</p>
+            <input value={newTaskText} onChange={e => setNewTaskText(e.target.value)}
+              placeholder="Task description…"
+              className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+            <div className="flex gap-2 items-center">
+              <select value={newTaskCat} onChange={e => setNewTaskCat(e.target.value)}
+                className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+                {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+              </select>
+              <button onClick={addTask} disabled={taskSaving || !newTaskText.trim()}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm py-2 rounded-lg transition">
+                {taskSaving ? 'Adding…' : 'Add Task'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {Object.entries(grouped).map(([category, items]) => (
           <div key={category} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
             <div className="px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
@@ -247,14 +451,6 @@ export default function OnboardingDetailPage() {
           </div>
         ))}
       </div>
-
-      {/* Notes */}
-      {rec.notes && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Notes</p>
-          <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{rec.notes}</p>
-        </div>
-      )}
 
     </div>
   )

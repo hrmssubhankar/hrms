@@ -981,3 +981,20 @@ export const platformAnnouncements = pgTable('platform_announcements', {
   activeIdx:   index('announcements_active_idx').on(t.isActive),
   createdIdx:  index('announcements_created_idx').on(t.createdAt),
 }))
+
+// ──────────────────────────────────────────────
+// Offer Letter — Custom Templates (per tenant)
+// ──────────────────────────────────────────────
+export const offerLetterTemplates = pgTable('offer_letter_templates', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  tenantId:  uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  name:      varchar('name', { length: 255 }).notNull(),
+  content:   text('content').notNull(),           // extracted plain text with {{merge}} tags
+  fileUrl:   text('file_url'),                    // original uploaded file (Vercel Blob)
+  isActive:  boolean('is_active').notNull().default(true),
+  createdBy: text('created_by'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('offer_tmpl_tenant_idx').on(t.tenantId),
+}))

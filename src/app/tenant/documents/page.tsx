@@ -126,6 +126,9 @@ export default function DocumentsPage() {
   const [filterStat, setFilterStat] = useState('')
   const [search,     setSearch]     = useState('')
   const [deleting,   setDeleting]   = useState<string | null>(null)
+  const [editing,    setEditing]    = useState<string | null>(null)
+  const [editForm,   setEditForm]   = useState({ title: '', expiryDate: '', notes: '' })
+  const [editSaving, setEditSaving] = useState(false)
   const [form, setForm] = useState({
     title: '', category: 'Police Check', blobUrl: '', employeeId: '',
     fileName: '', fileSizeBytes: 0, mimeType: '', expiryDate: '', notes: '',
@@ -184,6 +187,27 @@ export default function DocumentsPage() {
     setDeleting(id)
     await fetch(`/api/tenant/documents?id=${id}`, { method: 'DELETE' })
     setDeleting(null)
+    load()
+  }
+
+  function startEdit(d: Doc) {
+    setEditing(d.id)
+    setEditForm({ title: d.title, expiryDate: d.expiryDate ?? '', notes: d.notes ?? '' })
+  }
+
+  async function saveEdit(id: string) {
+    setEditSaving(true)
+    await fetch('/api/tenant/documents', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        title:      editForm.title,
+        expiryDate: editForm.expiryDate || null,
+        notes:      editForm.notes || null,
+      }),
+    })
+    setEditing(null)
+    setEditSaving(false)
     load()
   }
 
@@ -396,6 +420,7 @@ export default function DocumentsPage() {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
               {filtered.map(d => (
+                <>
                 <tr key={d.id} className="hover:bg-gray-100 dark:hover:bg-gray-800/30 group">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -415,6 +440,7 @@ export default function DocumentsPage() {
                         {!isRealUrl(d.blobUrl) && (
                           <p className="text-xs text-amber-500 mt-0.5">⚠ No file attached — upload a file to enable viewing</p>
                         )}
+                        {d.notes && <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5 italic">{d.notes}</p>}
                       </div>
                     </div>
                   </td>
@@ -446,6 +472,11 @@ export default function DocumentsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1 flex-wrap">
+                      <button
+                        onClick={() => editing === d.id ? setEditing(null) : startEdit(d)}
+                        className="text-xs bg-purple-900/20 border border-purple-800 text-purple-300 hover:bg-purple-900/40 px-2 py-1 rounded transition">
+                        {editing === d.id ? 'Cancel' : 'Edit'}
+                      </button>
                       {d.status === 'pending_review' && (
                         <button onClick={() => updateStatus(d.id, 'active')}
                           className="text-xs bg-green-900/30 border border-green-800 text-green-300 hover:bg-green-900/50 px-2 py-1 rounded transition">
@@ -480,6 +511,44 @@ export default function DocumentsPage() {
                     </div>
                   </td>
                 </tr>
+                {editing === d.id && (
+                  <tr key={`${d.id}-edit`} className="bg-purple-950/20 border-b border-purple-900/40">
+                    <td colSpan={6} className="px-4 py-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                        <div>
+                          <label className={LABEL}>Title</label>
+                          <input value={editForm.title}
+                            onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
+                            className={INPUT} />
+                        </div>
+                        <div>
+                          <label className={LABEL}>Expiry Date</label>
+                          <input type="date" value={editForm.expiryDate}
+                            onChange={e => setEditForm(f => ({ ...f, expiryDate: e.target.value }))}
+                            className={INPUT} />
+                        </div>
+                        <div>
+                          <label className={LABEL}>Notes</label>
+                          <input value={editForm.notes}
+                            onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))}
+                            placeholder="Reference number, authority…"
+                            className={INPUT} />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <button onClick={() => saveEdit(d.id)} disabled={editSaving || !editForm.title.trim()}
+                          className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition">
+                          {editSaving ? 'Saving…' : 'Save Changes'}
+                        </button>
+                        <button onClick={() => setEditing(null)}
+                          className="px-4 py-1.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-xs rounded-lg transition">
+                          Cancel
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </>
               ))}
             </tbody>
           </table>

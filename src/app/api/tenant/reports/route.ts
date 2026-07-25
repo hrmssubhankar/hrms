@@ -3,7 +3,7 @@ import { db } from '@/lib/db'
 import {
   employees, leaveRequests, screeningRecords, performanceReviews,
   separationRecords, whsIncidents, grievances, courses, trainingRecords,
-  departments, positions,
+  departments, positions, payrollRecords,
 } from '@/lib/db/schema'
 import { eq, and, gte, lte, count, desc, ne, inArray } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
@@ -248,6 +248,61 @@ export async function GET(req: NextRequest) {
         employeesWithGaps: rows.length,
         employeesCompliant: activeEmployees.length - rows.length,
         totalGaps: rows.reduce((s, r) => s + (r.gapCount as number), 0),
+      },
+    })
+  }
+
+  // ── Payroll report ───────────────────────────────────────────────────────
+  if (report === 'payroll') {
+    const rows = await db.select({
+      id:                payrollRecords.id,
+      employeeId:        payrollRecords.employeeId,
+      periodStart:       payrollRecords.periodStart,
+      periodEnd:         payrollRecords.periodEnd,
+      grossPay:          payrollRecords.grossPay,
+      paygWithholding:   payrollRecords.paygWithholding,
+      medicareLevy:      payrollRecords.medicareLevy,
+      superContribution: payrollRecords.superContribution,
+      netPay:            payrollRecords.netPay,
+      status:            payrollRecords.status,
+      exportedToXero:    payrollRecords.exportedToXero,
+      createdAt:         payrollRecords.createdAt,
+      firstName:         employees.firstName,
+      lastName:          employees.lastName,
+      email:             employees.email,
+    })
+      .from(payrollRecords)
+      .leftJoin(employees, eq(employees.id, payrollRecords.employeeId))
+      .where(and(
+        eq(payrollRecords.tenantId, tenantId),
+        gte(payrollRecords.createdAt, from),
+        lte(payrollRecords.createdAt, to),
+      ))
+      .orderBy(desc(payrollRecords.createdAt))
+
+    const paid = rows.filter(r => r.status === 'paid')
+    return NextResponse.json({
+      report: 'payroll',
+      data: rows.map(r => ({
+        employee:    `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim(),
+        email:       r.email,
+        periodStart: r.periodStart,
+        periodEnd:   r.periodEnd,
+        grossPay:    r.grossPay ? `$${Number(r.grossPay).toFixed(2)}` : '—',
+        paygTax:     r.paygWithholding ? `$${Number(r.paygWithholding).toFixed(2)}` : '—',
+        super:       r.superContribution ? `$${Number(r.superContribution).toFixed(2)}` : '—',
+        netPay:      r.netPay ? `$${Number(r.netPay).toFixed(2)}` : '—',
+        status:      r.status,
+        xeroExported: r.exportedToXero ? 'Yes' : 'No',
+      })),
+      summary: {
+        total:      rows.length,
+        pending:    rows.filter(r => r.status === 'pending').length,
+        approved:   rows.filter(r => r.status === 'approved').length,
+        paid:       paid.length,
+        totalGross: paid.reduce((s, r) => s + Number(r.grossPay ?? 0), 0),
+        totalNet:   paid.reduce((s, r) => s + Number(r.netPay ?? 0), 0),
+        totalSuper: paid.reduce((s, r) => s + Number(r.superContribution ?? 0), 0),
       },
     })
   }

@@ -23,6 +23,7 @@ type PayrollRecord = {
   exportedToXero: boolean
   exportedAt: string | null
   createdAt: string
+  payslipData?: Record<string, unknown> | null
 }
 
 type XeroStatus  = { connected: boolean; orgName?: string; tokenExpired?: boolean }
@@ -78,6 +79,42 @@ export default function PayrollPage() {
   const [previewing, setPreviewing] = useState(false)
   const [saving, setSaving]         = useState(false)
   const [error, setError]           = useState('')
+
+  // Bulk pay run state
+  const [showBulk, setShowBulk]   = useState(false)
+  const [bulkForm, setBulkForm]   = useState({
+    periodStart: '', periodEnd: '',
+    frequency: 'fortnightly' as 'weekly' | 'fortnightly' | 'monthly',
+    allowances: '0', deductions: '0',
+  })
+  const [bulkRunning, setBulkRunning] = useState(false)
+  const [bulkResult,  setBulkResult]  = useState<{
+    summary: { total: number; created: number; skipped: number; failed: number; totalNet: string }
+    results: Array<{ employeeId: string; name: string; status: string; reason?: string; netPay?: number }>
+  } | null>(null)
+  const [bulkError, setBulkError] = useState('')
+
+  async function runBulkPayRun() {
+    if (!bulkForm.periodStart || !bulkForm.periodEnd) { setBulkError('Period start and end are required'); return }
+    setBulkRunning(true); setBulkError(''); setBulkResult(null)
+    try {
+      const res = await fetch('/api/tenant/payroll/bulk', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          periodStart: bulkForm.periodStart,
+          periodEnd:   bulkForm.periodEnd,
+          frequency:   bulkForm.frequency,
+          allowances:  Number(bulkForm.allowances),
+          deductions:  Number(bulkForm.deductions),
+        }),
+      })
+      const d = await res.json()
+      if (!res.ok) { setBulkError(d.error ?? 'Bulk run failed'); return }
+      setBulkResult(d)
+      load()
+    } catch { setBulkError('Request failed — check connection') }
+    finally { setBulkRunning(false) }
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -261,6 +298,10 @@ export default function PayrollPage() {
               </a>
             )
           )}
+          <button onClick={() => { setShowBulk(true); setBulkResult(null); setBulkError('') }}
+            className="px-4 py-2 rounded-xl text-sm font-semibold border border-purple-600 text-purple-300 hover:bg-purple-900/30 transition">
+            ⚡ Bulk Pay Run
+          </button>
           <button onClick={() => { setShowModal(true); setPreview(null); setError('') }}
             className="px-4 py-2 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition"
             style={{ background: 'var(--primary)' }}>
@@ -521,13 +562,149 @@ export default function PayrollPage() {
         </div>
       )}
 
+      {/* Bulk Pay Run Modal */}
+      {showBulk && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-lg shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+              <div>
+                <h2 className="font-semibold text-gray-900 dark:text-white">⚡ Bulk Pay Run</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Creates pay runs for all active employees with salary or hourly rate set</p>
+              </div>
+              <button onClick={() => { setShowBulk(false); setBulkResult(null) }} className="text-gray-400 hover:text-white text-xl">✕</button>
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+              {bulkError && (
+                <div className="bg-red-900/30 border border-red-700 rounded-lg px-3 py-2 text-sm text-red-300">{bulkError}</div>
+              )}
+
+              {!bulkResult ? (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Period Start *</label>
+                      <input type="date" value={bulkForm.periodStart}
+                        onChange={e => setBulkForm(f => ({ ...f, periodStart: e.target.value }))}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Period End *</label>
+                      <input type="date" value={bulkForm.periodEnd}
+                        onChange={e => setBulkForm(f => ({ ...f, periodEnd: e.target.value }))}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">Pay Frequency</label>
+                    <select value={bulkForm.frequency}
+                      onChange={e => setBulkForm(f => ({ ...f, frequency: e.target.value as any }))}
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                      <option value="weekly">Weekly</option>
+                      <option value="fortnightly">Fortnightly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Taxable Allowances</label>
+                      <input type="number" min="0" step="0.01" value={bulkForm.allowances}
+                        onChange={e => setBulkForm(f => ({ ...f, allowances: e.target.value }))}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-400 mb-1">Pre-tax Deductions</label>
+                      <input type="number" min="0" step="0.01" value={bulkForm.deductions}
+                        onChange={e => setBulkForm(f => ({ ...f, deductions: e.target.value }))}
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-900/20 border border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-300">
+                    Hourly employees without hours logged will be calculated using standard period hours (weekly: 38h, fortnightly: 76h, monthly: 164h).
+                  </div>
+
+                  <button onClick={runBulkPayRun} disabled={bulkRunning || !bulkForm.periodStart || !bulkForm.periodEnd}
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition disabled:opacity-60 hover:opacity-90"
+                    style={{ background: 'var(--primary)' }}>
+                    {bulkRunning ? 'Running pay run…' : 'Run Bulk Pay Run'}
+                  </button>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  {/* Summary */}
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { label: 'Total',   value: bulkResult.summary.total,   color: 'text-white' },
+                      { label: 'Created', value: bulkResult.summary.created, color: 'text-green-400' },
+                      { label: 'Skipped', value: bulkResult.summary.skipped, color: 'text-amber-400' },
+                      { label: 'Failed',  value: bulkResult.summary.failed,  color: 'text-red-400' },
+                    ].map(s => (
+                      <div key={s.label} className="bg-gray-800 rounded-xl p-3 text-center">
+                        <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-gray-800 rounded-xl px-4 py-3 flex justify-between items-center">
+                    <span className="text-sm text-gray-400">Total Net Pay Created</span>
+                    <span className="text-lg font-bold text-green-400">${Number(bulkResult.summary.totalNet).toLocaleString('en-AU', { minimumFractionDigits: 2 })}</span>
+                  </div>
+
+                  {/* Per-employee results */}
+                  <div className="max-h-48 overflow-y-auto space-y-1">
+                    {bulkResult.results.map((r, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs px-3 py-2 rounded-lg bg-gray-800/60">
+                        <span className="text-gray-300">{r.name}</span>
+                        <div className="flex items-center gap-2">
+                          {r.netPay != null && <span className="text-green-400 font-mono">${r.netPay.toFixed(2)}</span>}
+                          <span className={`px-2 py-0.5 rounded-full border text-xs ${
+                            r.status === 'created' ? 'bg-green-900/40 border-green-800 text-green-300' :
+                            r.status === 'skipped' ? 'bg-amber-900/40 border-amber-800 text-amber-300' :
+                            'bg-red-900/40 border-red-800 text-red-300'
+                          }`}>
+                            {r.status}{r.reason ? ` — ${r.reason}` : ''}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button onClick={() => { setShowBulk(false); setBulkResult(null) }}
+                      className="flex-1 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition">
+                      Done
+                    </button>
+                    <button onClick={() => { setBulkResult(null); setBulkError('') }}
+                      className="px-4 py-2 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg transition">
+                      Run Again
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Payslip Detail Modal */}
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">Payslip</h2>
-              <button onClick={() => setSelected(null)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl"></button>
+              <div className="flex items-center gap-3">
+                <a
+                  href={`/tenant/payroll/${selected.id}/payslip`}
+                  target="_blank" rel="noreferrer"
+                  className="text-xs px-3 py-1.5 rounded-lg border border-purple-700 text-purple-300 hover:bg-purple-900/30 transition">
+                  🖨 Print / PDF
+                </a>
+                <button onClick={() => setSelected(null)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl"></button>
+              </div>
             </div>
             <div className="px-6 py-5 space-y-3 text-sm">
               <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Employee</span><span className="font-medium text-gray-900 dark:text-white">{selected.employeeFirstName} {selected.employeeLastName}</span></div>

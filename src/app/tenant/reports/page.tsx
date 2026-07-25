@@ -9,10 +9,252 @@ const REPORTS = [
   { id:'turnover',      label:'Turnover / Exits',     icon:'🚪', description:'Separation and exit records' },
   { id:'whs',           label:'WHS Incidents',        icon:'⚠️', description:'Workplace safety incidents summary' },
   { id:'training_gap',  label:'Training Gap',         icon:'📚', description:'Employees missing mandatory courses' },
+  { id:'payroll',       label:'Payroll Summary',      icon:'💰', description:'Pay runs, totals, super by period' },
 ]
 
 type ReportRow = Record<string, unknown>
 type Summary  = Record<string, number>
+
+// ── Inline SVG chart components ─────────────────────────────────────────────
+
+const CHART_COLORS = ['#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#6366f1']
+
+function BarChart({ data, height = 180 }: { data: { label: string; value: number; color?: string }[]; height?: number }) {
+  if (!data.length) return null
+  const max = Math.max(...data.map(d => d.value), 1)
+  const barW = Math.min(48, Math.floor(340 / data.length) - 8)
+  const chartW = data.length * (barW + 8) + 16
+  return (
+    <svg width={chartW} height={height + 32} className="overflow-visible">
+      {data.map((d, i) => {
+        const bh = Math.max(3, Math.round((d.value / max) * height))
+        const x  = 8 + i * (barW + 8)
+        const y  = height - bh
+        const color = d.color ?? CHART_COLORS[i % CHART_COLORS.length]
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width={barW} height={bh} rx={4} fill={color} opacity={0.85} />
+            <text x={x + barW / 2} y={y - 4} textAnchor="middle" fontSize={11} fill="#9ca3af">{d.value}</text>
+            <text x={x + barW / 2} y={height + 16} textAnchor="middle" fontSize={10} fill="#6b7280"
+              style={{ maxWidth: barW }}>{d.label.length > 8 ? d.label.slice(0, 7) + '…' : d.label}</text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+function DonutChart({ data, size = 140 }: { data: { label: string; value: number; color?: string }[]; size?: number }) {
+  const total = data.reduce((s, d) => s + d.value, 0)
+  if (!total) return null
+  const r = size / 2 - 10
+  const cx = size / 2, cy = size / 2
+  let angle = -Math.PI / 2
+  const slices = data.map((d, i) => {
+    const frac = d.value / total
+    const a1 = angle
+    const a2 = angle + frac * 2 * Math.PI
+    angle = a2
+    const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1)
+    const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2)
+    const large = frac > 0.5 ? 1 : 0
+    const ir = r * 0.55
+    const ix1 = cx + ir * Math.cos(a1), iy1 = cy + ir * Math.sin(a1)
+    const ix2 = cx + ir * Math.cos(a2), iy2 = cy + ir * Math.sin(a2)
+    return { ...d, path: `M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${large},0 ${ix1},${iy1} Z`, color: d.color ?? CHART_COLORS[i % CHART_COLORS.length] }
+  })
+  return (
+    <div className="flex items-center gap-4">
+      <svg width={size} height={size}>
+        {slices.map((s, i) => <path key={i} d={s.path} fill={s.color} opacity={0.85} />)}
+        <text x={cx} y={cy + 5} textAnchor="middle" fontSize={16} fontWeight="bold" fill="#e5e7eb">{total}</text>
+      </svg>
+      <div className="space-y-1.5">
+        {slices.map((s, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs text-gray-400">
+            <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: s.color }} />
+            <span>{s.label}</span>
+            <span className="text-gray-500 ml-auto pl-4">{s.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Per-report chart renderers ───────────────────────────────────────────────
+
+function HeadcountCharts({ summary }: { summary: Summary }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Active vs Inactive</p>
+        <BarChart data={[
+          { label: 'Active',   value: summary.active   ?? 0, color: '#10b981' },
+          { label: 'Inactive', value: summary.inactive ?? 0, color: '#6b7280' },
+        ]} />
+      </div>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Employment Type</p>
+        <DonutChart data={[
+          { label: 'Full-time',  value: summary.fullTime   ?? 0, color: '#8b5cf6' },
+          { label: 'Part-time',  value: summary.partTime   ?? 0, color: '#06b6d4' },
+          { label: 'Casual',     value: summary.casual     ?? 0, color: '#f59e0b' },
+          { label: 'Contractor', value: summary.contractor ?? 0, color: '#ec4899' },
+        ].filter(d => d.value > 0)} />
+      </div>
+    </div>
+  )
+}
+
+function LeaveCharts({ summary }: { summary: Summary }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">By Status</p>
+        <DonutChart data={[
+          { label: 'Approved', value: summary.approved ?? 0, color: '#10b981' },
+          { label: 'Pending',  value: summary.pending  ?? 0, color: '#f59e0b' },
+          { label: 'Rejected', value: summary.rejected ?? 0, color: '#ef4444' },
+        ].filter(d => d.value > 0)} />
+      </div>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Days Taken</p>
+        <BarChart data={[
+          { label: 'Approved Days', value: summary.totalDays ?? 0, color: '#10b981' },
+        ]} />
+      </div>
+    </div>
+  )
+}
+
+function ComplianceCharts({ summary }: { summary: Summary }) {
+  return (
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Status Breakdown</p>
+      <div className="flex flex-wrap gap-8 items-start">
+        <DonutChart data={[
+          { label: 'Green',   value: summary.green   ?? 0, color: '#10b981' },
+          { label: 'Amber',   value: summary.amber   ?? 0, color: '#f59e0b' },
+          { label: 'Red',     value: summary.red     ?? 0, color: '#ef4444' },
+          { label: 'Pending', value: summary.pending ?? 0, color: '#6b7280' },
+        ].filter(d => d.value > 0)} />
+        <BarChart data={[
+          { label: 'Green',        value: summary.green        ?? 0, color: '#10b981' },
+          { label: 'Amber',        value: summary.amber        ?? 0, color: '#f59e0b' },
+          { label: 'Red',          value: summary.red          ?? 0, color: '#ef4444' },
+          { label: 'Pending',      value: summary.pending      ?? 0, color: '#6b7280' },
+          { label: 'Expiring 30d', value: summary.expiringSoon ?? 0, color: '#f97316' },
+        ]} />
+      </div>
+    </div>
+  )
+}
+
+function TurnoverCharts({ summary }: { summary: Summary }) {
+  return (
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Separation Type</p>
+      <BarChart data={[
+        { label: 'Voluntary',   value: summary.voluntary   ?? 0, color: '#f59e0b' },
+        { label: 'Involuntary', value: summary.involuntary ?? 0, color: '#ef4444' },
+        { label: 'Other',       value: summary.other       ?? 0, color: '#6b7280' },
+      ]} />
+    </div>
+  )
+}
+
+function WHSCharts({ summary }: { summary: Summary }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Open vs Closed</p>
+        <BarChart data={[
+          { label: 'Open',   value: summary.open   ?? 0, color: '#ef4444' },
+          { label: 'Closed', value: summary.closed ?? 0, color: '#10b981' },
+        ]} />
+      </div>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Severity</p>
+        <BarChart data={[
+          { label: 'Critical', value: summary.critical ?? 0, color: '#7f1d1d' },
+          { label: 'High',     value: summary.high     ?? 0, color: '#ef4444' },
+        ]} />
+      </div>
+    </div>
+  )
+}
+
+function TrainingGapCharts({ summary }: { summary: Summary }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Compliance</p>
+        <DonutChart data={[
+          { label: 'Compliant',   value: summary.employeesCompliant ?? 0, color: '#10b981' },
+          { label: 'Has Gaps',    value: summary.employeesWithGaps  ?? 0, color: '#ef4444' },
+        ].filter(d => d.value > 0)} />
+      </div>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Gap Totals</p>
+        <BarChart data={[
+          { label: 'Mandatory Courses', value: summary.mandatoryCourses  ?? 0, color: '#8b5cf6' },
+          { label: 'Total Gaps',        value: summary.totalGaps         ?? 0, color: '#ef4444' },
+          { label: 'Employees w/ Gaps', value: summary.employeesWithGaps ?? 0, color: '#f59e0b' },
+        ]} />
+      </div>
+    </div>
+  )
+}
+
+function PayrollCharts({ summary }: { summary: Summary }) {
+  const fmt = (n: number) => `$${n.toLocaleString('en-AU', { minimumFractionDigits: 0 })}`
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Pay Run Status</p>
+        <DonutChart data={[
+          { label: 'Pending',  value: summary.pending  ?? 0, color: '#f59e0b' },
+          { label: 'Approved', value: summary.approved ?? 0, color: '#06b6d4' },
+          { label: 'Paid',     value: summary.paid     ?? 0, color: '#10b981' },
+        ].filter(d => d.value > 0)} />
+      </div>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Financials</p>
+        <div className="space-y-3">
+          {[
+            { label: 'Total Gross', value: summary.totalGross ?? 0, color: '#8b5cf6' },
+            { label: 'Total Net',   value: summary.totalNet   ?? 0, color: '#10b981' },
+            { label: 'Total Super', value: summary.totalSuper ?? 0, color: '#ec4899' },
+          ].map(item => {
+            const pct = summary.totalGross ? Math.round((item.value / summary.totalGross) * 100) : 0
+            return (
+              <div key={item.label}>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-500 dark:text-gray-400">{item.label}</span>
+                  <span className="text-gray-200 font-mono">{fmt(item.value)}</span>
+                </div>
+                <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: item.color }} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const CHART_MAP: Record<string, (s: Summary) => JSX.Element | null> = {
+  headcount:    (s) => <HeadcountCharts summary={s} />,
+  leave:        (s) => <LeaveCharts summary={s} />,
+  compliance:   (s) => <ComplianceCharts summary={s} />,
+  turnover:     (s) => <TurnoverCharts summary={s} />,
+  whs:          (s) => <WHSCharts summary={s} />,
+  training_gap: (s) => <TrainingGapCharts summary={s} />,
+  payroll:      (s) => <PayrollCharts summary={s} />,
+}
 
 function downloadCsv(rows: ReportRow[], filename: string) {
   if (!rows.length) return
@@ -155,6 +397,11 @@ export default function ReportsPage() {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {/* Charts */}
+              {Object.keys(summary).length > 0 && CHART_MAP[selected] && (
+                <div>{CHART_MAP[selected](summary)}</div>
               )}
 
               {/* Export + row count */}
