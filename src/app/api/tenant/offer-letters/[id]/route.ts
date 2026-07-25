@@ -26,6 +26,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .where(eq(offerLetterEvents.offerId, id))
     .orderBy(desc(offerLetterEvents.createdAt))
 
+  // Include acceptanceToken so HR can share the candidate link
   return NextResponse.json({ offer, events })
 }
 

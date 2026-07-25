@@ -14,6 +14,14 @@ type Doc = {
 type Stats = { total: number; active: number; expired: number; expiringSoon: number; pendingReview: number }
 type Employee = { id: string; firstName: string; lastName: string }
 
+// Returns false if the URL is a placeholder/demo URL that won't resolve
+function isRealUrl(url: string): boolean {
+  try {
+    const u = new URL(url)
+    return u.hostname !== 'placeholder.blob' && u.hostname !== 'example.com' && u.hostname !== 'localhost'
+  } catch { return false }
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 // Care & property industry document categories
 const DOC_CATEGORIES = [
@@ -393,12 +401,19 @@ export default function DocumentsPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-lg shrink-0">{mimeIcon(d.mimeType)}</span>
                       <div>
-                        <a href={d.blobUrl} target="_blank" rel="noopener noreferrer"
-                          className="text-purple-400 hover:text-purple-300 underline underline-offset-2 text-sm font-medium">
-                          {d.title}
-                        </a>
-                        {d.fileName && (
+                        {isRealUrl(d.blobUrl) ? (
+                          <a href={d.blobUrl} target="_blank" rel="noopener noreferrer"
+                            className="text-purple-400 hover:text-purple-300 underline underline-offset-2 text-sm font-medium">
+                            {d.title}
+                          </a>
+                        ) : (
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{d.title}</span>
+                        )}
+                        {d.fileName && isRealUrl(d.blobUrl) && (
                           <p className="text-xs text-gray-600 dark:text-gray-400">{d.fileName} {fmtSize(d.fileSizeBytes)}</p>
+                        )}
+                        {!isRealUrl(d.blobUrl) && (
+                          <p className="text-xs text-amber-500 mt-0.5">⚠ No file attached — upload a file to enable viewing</p>
                         )}
                       </div>
                     </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { promotionRequests, promotionEvents } from '@/lib/db/schema'
+import { promotionRequests, promotionEvents, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -76,11 +76,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         eventType = 'rejected'
         eventNote = body.reviewNotes ? `Rejected — ${body.reviewNotes}` : 'Promotion rejected'
         break
-      case 'implemented':
+      case 'implemented': {
         updates.implementedAt = new Date()
         eventType = 'implemented'
         eventNote = 'Promotion implemented — employee record updated'
+        // Sync employee salary when a salary was proposed
+        const [promo] = await db
+          .select({ proposedSalary: promotionRequests.proposedSalary, employeeId: promotionRequests.employeeId })
+          .from(promotionRequests)
+          .where(and(eq(promotionRequests.id, id), eq(promotionRequests.tenantId, session.tenantId)))
+        if (promo?.proposedSalary) {
+          await db.update(employees)
+            .set({ annualSalary: String(promo.proposedSalary), updatedAt: new Date() })
+            .where(and(eq(employees.id, promo.employeeId), eq(employees.tenantId, session.tenantId)))
+        }
         break
+      }
     }
   }
 

@@ -8,11 +8,11 @@ type Offer = {
   startDate: string | null; salaryAmount: number | null; salaryCycle: string
   status: string; sentAt: string | null; acceptedAt: string | null
   rejectedAt: string | null; expiresAt: string | null; pdfUrl: string | null
-  notes: string | null; createdBy: string | null; createdAt: string; templateContent: string | null
+  notes: string | null; createdBy: string | null; createdAt: string
+  templateContent: string | null; acceptanceToken: string | null
 }
 type OfferEvent = { id: string; event: string; note: string | null; performedBy: string | null; createdAt: string }
 type Stats = { total: number; draft: number; sent: number; accepted: number; rejected: number; expired: number }
-type Employee = { id: string; firstName: string; lastName: string }
 
 const STATUS_STYLE: Record<string, string> = {
   draft:     'bg-gray-800 text-gray-400 border-gray-700',
@@ -24,8 +24,8 @@ const STATUS_STYLE: Record<string, string> = {
 }
 
 const EVENT_ICON: Record<string, string> = {
-  created:'', sent:'', viewed:'', accepted:'', rejected:'',
-  expired:'⏰', withdrawn:'↩️', pdf_generated:'', note_added:'', updated:'️',
+  created:'📄', sent:'📤', viewed:'👁', accepted:'✅', rejected:'❌',
+  expired:'⏰', withdrawn:'↩️', pdf_generated:'🖨', note_added:'📝', updated:'✏️',
 }
 
 const EMP_TYPES = [
@@ -38,7 +38,11 @@ const EMP_TYPES = [
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
-const DEFAULT_TEMPLATE = (o: Partial<Offer> & { orgName?: string }) => `Dear ${o.candidateName || '[Candidate Name]'},
+// ── Predefined letter templates ───────────────────────────────────────────────
+type TemplateVars = Partial<Offer> & { orgName?: string }
+
+function DEFAULT_TEMPLATE(o: TemplateVars) {
+  return `Dear ${o.candidateName || '[Candidate Name]'},
 
 We are delighted to offer you the position of ${o.position || '[Position Title]'} at ${o.orgName || '[Organisation Name]'}.
 
@@ -51,7 +55,7 @@ Salary:           $${o.salaryAmount?.toLocaleString() || '[Salary]'} ${o.salaryC
 
 This offer is subject to the successful completion of reference and background checks.
 
-Please confirm your acceptance of this offer by replying to this email or signing the attached acceptance form before the expiry date.
+Please confirm your acceptance of this offer by clicking the acceptance link provided or replying to this email before the expiry date.
 
 We look forward to welcoming you to the team.
 
@@ -59,21 +63,131 @@ Yours sincerely,
 [Hiring Manager Name]
 [Title]
 [Organisation Name]`
+}
+
+const TEMPLATES: Array<{ label: string; fn: (o: TemplateVars) => string }> = [
+  {
+    label: 'Default (General)',
+    fn: DEFAULT_TEMPLATE,
+  },
+  {
+    label: 'Yahweh Care — Disability Support Worker',
+    fn: (o) => `Dear ${o.candidateName || '[Candidate Name]'},
+
+We are pleased to offer you employment with Yahweh Care Pty Ltd as a ${o.position || '[Position Title]'} in our ${o.department || 'Community Care'} team.
+
+TERMS OF EMPLOYMENT
+Position:             ${o.position || '[Position Title]'}
+Classification:       SCHADS Award — Level [X], Pay Point [X]
+Employment Type:      ${EMP_TYPES.find(t => t.value === o.employmentType)?.label || 'Full-Time'}
+Commencement Date:    ${o.startDate || '[Start Date]'}
+Remuneration:         $${o.salaryAmount?.toLocaleString() || '[Salary]'} ${o.salaryCycle || 'per annum'} + Superannuation (11.5%)
+Probation Period:     3 months from commencement
+
+ABOUT YOUR ROLE
+You will provide high-quality support services to NDIS participants, including personal care, community access, and daily living assistance, in accordance with the NDIS Practice Standards and the Code of Conduct for Supports under the NDIS Quality and Safeguards Commission.
+
+PRE-EMPLOYMENT REQUIREMENTS
+This offer is conditional on satisfactory completion of:
+• NDIS Worker Screening Check (clearance required prior to commencement)
+• National Police Check (no older than 3 months)
+• Proof of right to work in Australia
+• Valid First Aid Certificate (HLTAID011 or equivalent)
+• Completion of mandatory Yahweh Care induction training
+
+CONFIDENTIALITY
+All information relating to participants, their families and colleagues is strictly confidential and must not be disclosed to any third party.
+
+Please confirm your acceptance by clicking the candidate link provided, or by contacting the HR team before the offer expiry date. If you have any questions, please do not hesitate to reach out.
+
+We look forward to welcoming you to the Yahweh Care family.
+
+Yours sincerely,
+
+[Hiring Manager Name]
+Director of People & Culture
+Yahweh Care Pty Ltd
+[Phone] | [Email]`,
+  },
+  {
+    label: 'Yahweh Property Care — Field Staff',
+    fn: (o) => `Dear ${o.candidateName || '[Candidate Name]'},
+
+Yahweh Property Care Pty Ltd is delighted to offer you the position of ${o.position || '[Position Title]'}, commencing ${o.startDate || '[Start Date]'}.
+
+EMPLOYMENT TERMS
+Position:             ${o.position || '[Position Title]'}
+Division:             ${o.department || 'Property Maintenance'}
+Employment Type:      ${EMP_TYPES.find(t => t.value === o.employmentType)?.label || 'Casual'}
+Remuneration:         $${o.salaryAmount?.toLocaleString() || '[Rate]'} ${o.salaryCycle || 'per hour'} (inclusive of casual loading where applicable)
+Probation Period:     3 months (full-time / part-time positions only)
+
+DUTIES
+Your duties will include property maintenance, lawn and garden care, cleaning services, and minor repairs across client sites, as directed by your supervisor or team leader.
+
+CONDITIONS OF EMPLOYMENT
+• Valid Australian driver's licence (required)
+• National Police Check — satisfactory result prior to commencement
+• Proof of right to work in Australia
+• Compliance with Yahweh Property Care WHS Policy and all site safety requirements
+• Adherence to uniform and personal presentation standards
+
+This offer is subject to the above conditions being satisfied. Please accept this offer by clicking the candidate link provided, or by signing and returning this letter, no later than the offer expiry date.
+
+We are excited to have you on the team.
+
+Yours sincerely,
+
+[Operations Manager]
+Yahweh Property Care Pty Ltd
+[Phone] | [Email]`,
+  },
+  {
+    label: 'SCHADS Casual — Hourly Rate',
+    fn: (o) => `Dear ${o.candidateName || '[Candidate Name]'},
+
+We are pleased to offer you casual employment with Yahweh Care Pty Ltd as a ${o.position || '[Position Title]'}.
+
+CASUAL EMPLOYMENT DETAILS
+Position:             ${o.position || '[Position Title]'}
+SCHADS Classification: Level [X], Pay Point [X]
+Casual Hourly Rate:   $${o.salaryAmount?.toLocaleString() || '[Rate]'} per hour (inclusive of 25% casual loading)
+Weekend / PH Rates:   Refer to SCHADS Award 2010 penalty rate schedule
+Available From:       ${o.startDate || '[Date]'}
+
+NATURE OF CASUAL EMPLOYMENT
+As a casual employee, you will not have a guaranteed minimum number of hours per week. Shifts will be offered based on operational requirements and you may accept or decline shifts at your discretion. There is no entitlement to paid personal/carer's or annual leave.
+
+COMPLIANCE REQUIREMENTS
+You must maintain the following current and valid at all times during employment:
+• NDIS Worker Screening Check clearance
+• National Police Check (renewed every 3 years or as required)
+• First Aid Certificate (HLTAID011 or equivalent)
+
+By accepting this offer, you confirm that you have read, understood and agree to the above terms and conditions.
+
+Yours sincerely,
+
+[Hiring Manager]
+Yahweh Care Pty Ltd`,
+  },
+]
 
 export default function OfferLettersPage() {
-  const [offers,     setOffers]     = useState<Offer[]>([])
-  const [stats,      setStats]      = useState<Stats>({ total:0,draft:0,sent:0,accepted:0,rejected:0,expired:0 })
-  const [employees,  setEmployees]  = useState<Employee[]>([])
-  const [loading,    setLoading]    = useState(true)
+  const [offers,       setOffers]       = useState<Offer[]>([])
+  const [stats,        setStats]        = useState<Stats>({ total:0,draft:0,sent:0,accepted:0,rejected:0,expired:0 })
+  const [loading,      setLoading]      = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
-  const [search,     setSearch]     = useState('')
-  const [showForm,   setShowForm]   = useState(false)
-  const [saving,     setSaving]     = useState(false)
-  const [selected,   setSelected]   = useState<Offer | null>(null)
-  const [events,     setEvents]     = useState<OfferEvent[]>([])
-  const [noteText,   setNoteText]   = useState('')
-  const [addingNote, setAddingNote] = useState(false)
-  const printRef    = useRef<HTMLDivElement>(null)
+  const [search,       setSearch]       = useState('')
+  const [showForm,     setShowForm]     = useState(false)
+  const [saving,       setSaving]       = useState(false)
+  const [selected,     setSelected]     = useState<Offer | null>(null)
+  const [events,       setEvents]       = useState<OfferEvent[]>([])
+  const [noteText,     setNoteText]     = useState('')
+  const [addingNote,   setAddingNote]   = useState(false)
+  const [copied,       setCopied]       = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState(0)
+  const printRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState({
     candidateName: '', candidateEmail: '', position: '', department: '',
@@ -95,15 +209,25 @@ export default function OfferLettersPage() {
 
   useEffect(() => { load() }, [load])
 
-  useEffect(() => {
-    fetch('/api/tenant/employees').then(r=>r.json()).then(d => setEmployees(d.employees ?? []))
-  }, [])
-
   function initForm() {
     setForm({ candidateName:'',candidateEmail:'',position:'',department:'',
       employmentType:'full_time',startDate:'',salaryAmount:'',salaryCycle:'annual',
       notes:'',expiresAt:'',templateContent:'' })
+    setSelectedTemplate(0)
     setShowForm(true)
+  }
+
+  function applyTemplate(idx: number) {
+    const tmpl = TEMPLATES[idx]
+    if (!tmpl) return
+    setSelectedTemplate(idx)
+    const content = tmpl.fn({
+      candidateName: form.candidateName, position: form.position,
+      department: form.department, employmentType: form.employmentType,
+      startDate: form.startDate, salaryAmount: Number(form.salaryAmount) || 0,
+      salaryCycle: form.salaryCycle,
+    })
+    setForm(f => ({ ...f, templateContent: content }))
   }
 
   async function submit(e: React.FormEvent) {
@@ -114,7 +238,7 @@ export default function OfferLettersPage() {
       startDate: form.startDate, salaryAmount: Number(form.salaryAmount) || 0,
       salaryCycle: form.salaryCycle,
     })
-    const res  = await fetch('/api/tenant/offer-letters', {
+    const res = await fetch('/api/tenant/offer-letters', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, salaryAmount: Number(form.salaryAmount)||null, templateContent: content }),
     })
@@ -154,6 +278,35 @@ export default function OfferLettersPage() {
     if (!confirm('Delete this draft offer letter?')) return
     await fetch(`/api/tenant/offer-letters/${id}`, { method: 'DELETE' })
     setSelected(null); load()
+  }
+
+  function candidateUrl(token: string | null) {
+    if (!token || typeof window === 'undefined') return ''
+    return `${window.location.origin}/offer/${token}`
+  }
+
+  function copyLink() {
+    const url = candidateUrl(selected?.acceptanceToken ?? null)
+    if (!url) return
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  function emailSubject() {
+    return encodeURIComponent('Your Offer Letter — Action Required')
+  }
+
+  function emailBody() {
+    if (!selected) return ''
+    const url = candidateUrl(selected.acceptanceToken)
+    const expires = selected.expiresAt
+      ? `This offer expires on ${fmt(selected.expiresAt)}.`
+      : 'Please respond at your earliest convenience.'
+    return encodeURIComponent(
+      `Dear ${selected.candidateName},\n\nPlease review your offer letter for the position of ${selected.position} using the secure link below:\n\n${url}\n\nYou can accept or decline the offer directly from that page.\n\n${expires}\n\nIf you have any questions, please reply to this email.\n\nKind regards`
+    )
   }
 
   function printOffer() {
@@ -237,7 +390,7 @@ export default function OfferLettersPage() {
           ) : offers.length === 0 ? (
             <div className="text-center py-12 text-gray-600 dark:text-gray-400">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
@@ -264,7 +417,7 @@ export default function OfferLettersPage() {
           {!selected ? (
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-10 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
@@ -307,23 +460,23 @@ export default function OfferLettersPage() {
                 <div className="flex flex-wrap gap-2">
                   <button onClick={printOffer}
                     className="flex-1 py-2 text-xs font-medium bg-blue-700 hover:bg-blue-600 text-white rounded-lg transition">
-                    Print / Download PDF
+                    🖨 Print / PDF
                   </button>
                   {selected.status === 'draft' && (
                     <button onClick={() => updateStatus('sent')}
                       className="flex-1 py-2 text-xs font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition">
-                      Mark as Sent
+                      📤 Mark as Sent
                     </button>
                   )}
                   {selected.status === 'sent' && (
                     <>
                       <button onClick={() => updateStatus('accepted')}
                         className="flex-1 py-2 text-xs font-medium bg-green-700 hover:bg-green-600 text-white rounded-lg transition">
-                        Mark Accepted
+                        ✅ Mark Accepted
                       </button>
                       <button onClick={() => updateStatus('rejected')}
                         className="flex-1 py-2 text-xs font-medium bg-red-700 hover:bg-red-600 text-white rounded-lg transition">
-                        Mark Rejected
+                        ❌ Mark Rejected
                       </button>
                     </>
                   )}
@@ -336,10 +489,44 @@ export default function OfferLettersPage() {
                   {selected.status === 'draft' && (
                     <button onClick={() => deleteOffer(selected.id)}
                       className="py-2 px-3 text-xs text-red-400 border border-red-800 hover:bg-red-900/30 rounded-lg transition">
-                      </button>
+                      🗑
+                    </button>
                   )}
                 </div>
               </div>
+
+              {/* Candidate acceptance link */}
+              {selected.acceptanceToken && ['draft','sent'].includes(selected.status) && (
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">📎 Candidate Acceptance Link</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    Share this link with the candidate. They can view, sign and accept or decline the offer online — no login required.
+                  </p>
+                  <div className="flex gap-2 items-center mb-3">
+                    <input
+                      readOnly
+                      value={candidateUrl(selected.acceptanceToken)}
+                      className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-200 font-mono"
+                    />
+                    <button
+                      onClick={copyLink}
+                      className={`shrink-0 px-3 py-2 text-xs font-medium rounded-lg transition ${copied ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}>
+                      {copied ? '✓ Copied' : 'Copy'}
+                    </button>
+                    <a
+                      href={candidateUrl(selected.acceptanceToken)}
+                      target="_blank" rel="noreferrer"
+                      className="shrink-0 px-3 py-2 text-xs font-medium bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition">
+                      ↗
+                    </a>
+                  </div>
+                  <a
+                    href={`mailto:${selected.candidateEmail}?subject=${emailSubject()}&body=${emailBody()}`}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-lg transition">
+                    ✉ Email Candidate
+                  </a>
+                </div>
+              )}
 
               {/* Add note */}
               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
@@ -355,6 +542,16 @@ export default function OfferLettersPage() {
                 </div>
               </div>
 
+              {/* Letter preview */}
+              {selected.templateContent && (
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">Letter Preview</p>
+                  <pre className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-sans leading-relaxed max-h-64 overflow-y-auto">
+                    {selected.templateContent}
+                  </pre>
+                </div>
+              )}
+
               {/* History timeline */}
               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
                 <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">History</p>
@@ -366,7 +563,7 @@ export default function OfferLettersPage() {
                       <div key={ev.id} className="flex gap-3 items-start">
                         <div className="flex flex-col items-center shrink-0">
                           <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center text-sm">
-                            {EVENT_ICON[ev.event] ?? ''}
+                            {EVENT_ICON[ev.event] ?? '📌'}
                           </div>
                           {i < events.length - 1 && <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mt-1" />}
                         </div>
@@ -435,7 +632,7 @@ export default function OfferLettersPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={LABEL}>Annual Salary ($)</label>
+                  <label className={LABEL}>Salary / Rate ($)</label>
                   <input type="number" value={form.salaryAmount} onChange={e=>setForm(f=>({...f,salaryAmount:e.target.value}))} className={INPUT} placeholder="65000" />
                 </div>
                 <div>
@@ -449,10 +646,34 @@ export default function OfferLettersPage() {
                   </select>
                 </div>
               </div>
+
+              {/* Template picker */}
               <div>
-                <label className={LABEL}>Offer Letter Content (leave blank for default template)</label>
-                <textarea value={form.templateContent} onChange={e=>setForm(f=>({...f,templateContent:e.target.value}))}
-                  className={INPUT + ' min-h-[120px] resize-y font-mono text-xs'} placeholder="Leave blank to use default template…" />
+                <label className={LABEL}>Letter Template</label>
+                <div className="flex gap-2">
+                  <select
+                    value={selectedTemplate}
+                    onChange={e => applyTemplate(Number(e.target.value))}
+                    className={INPUT}>
+                    {TEMPLATES.map((t, i) => <option key={i} value={i}>{t.label}</option>)}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => applyTemplate(selectedTemplate)}
+                    className="shrink-0 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium rounded-lg transition">
+                    Apply
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className={LABEL}>Letter Content (edit after applying template)</label>
+                <textarea
+                  value={form.templateContent}
+                  onChange={e=>setForm(f=>({...f,templateContent:e.target.value}))}
+                  className={INPUT + ' min-h-[200px] resize-y font-mono text-xs'}
+                  placeholder="Select a template above or write a custom letter…"
+                />
               </div>
               <div>
                 <label className={LABEL}>Internal Notes</label>

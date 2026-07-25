@@ -49,6 +49,7 @@ const NAV_PERMISSION: Record<string, Permission | null> = {
   'timesheets':         'timesheets:read',
   'screening':          'compliance:read',
   'reports':            'analytics:read',
+  'offer-letters':      'contracts:read',
 }
 
 // Maps SOW module ID → { route slug, sidebar label }
@@ -87,6 +88,7 @@ const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
   31: { key: 'timesheets',            label: 'Timesheets' },
   32: { key: 'screening',             label: 'Screening' },
   33: { key: 'reports',               label: 'Reports' },
+  34: { key: 'offer-letters',         label: 'Offer Letters' },
 }
 
 async function getTenantConfig(slug: string) {

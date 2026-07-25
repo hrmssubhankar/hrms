@@ -63,8 +63,17 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-const TABS = ['Overview', 'Employment', 'Emergency Contacts', 'Compliance', 'Documents', 'Training'] as const
+const TABS = ['Overview', 'Employment', 'Emergency Contacts', 'Compliance', 'Documents', 'Training', 'Promotions'] as const
 type Tab = typeof TABS[number]
+
+type PromotionRecord = {
+  id: string; raisedByName: string | null
+  currentTitle: string | null; currentSalary: number | null
+  proposedTitle: string; proposedSalary: number | null
+  effectiveDate: string | null; justification: string
+  status: string; reviewedBy: string | null; reviewedAt: string | null
+  reviewNotes: string | null; implementedAt: string | null; createdAt: string
+}
 
 type ScreeningRecord = {
   id: string
@@ -126,6 +135,18 @@ export default function EmployeeProfilePage() {
   // Documents state
   const [docs,       setDocs]       = useState<EmployeeDoc[]>([])
   const [docsLoaded, setDocsLoaded] = useState(false)
+
+  // Promotions state
+  const [promotions,       setPromotions]       = useState<PromotionRecord[]>([])
+  const [promotionsLoaded, setPromotionsLoaded] = useState(false)
+  const [showPromoForm,    setShowPromoForm]    = useState(false)
+  const [promoSaving,      setPromoSaving]      = useState(false)
+  const [promoUpdating,    setPromoUpdating]    = useState<string | null>(null)
+  const [promoForm, setPromoForm] = useState({
+    type: 'promotion', proposedTitle: '', proposedSalary: '', effectiveDate: '', justification: '',
+  })
+  const [reviewModal,  setReviewModal]  = useState<{ id: string; action: 'approved' | 'rejected' | 'implemented' } | null>(null)
+  const [reviewNotes,  setReviewNotes]  = useState('')
 
   // Photo upload state
   const [photoUploading, setPhotoUploading] = useState(false)
@@ -205,6 +226,201 @@ export default function EmployeeProfilePage() {
         .catch(() => setDocsLoaded(true))
     }
   }, [tab, id, docsLoaded])
+
+  // Load promotions when Promotions tab is first opened
+  useEffect(() => {
+    if (tab === 'Promotions' && !promotionsLoaded) {
+      fetch(`/api/tenant/promotions?employeeId=${id}`)
+        .then(r => r.json())
+        .then(d => { setPromotions(d.promotions ?? []); setPromotionsLoaded(true) })
+        .catch(() => setPromotionsLoaded(true))
+    }
+  }, [tab, id, promotionsLoaded])
+
+  async function raisePromotion(e: React.FormEvent) {
+    e.preventDefault()
+    if (!emp) return
+    setPromoSaving(true)
+    const isHike = promoForm.type === 'salary_hike'
+    const payload = {
+      employeeId:     id,
+      currentTitle:   emp.positionTitle,
+      currentSalary:  emp.annualSalary ? Math.round(Number(emp.annualSalary)) : null,
+      proposedTitle:  isHike ? emp.positionTitle : promoForm.proposedTitle,
+      proposedSalary: promoForm.proposedSalary ? Number(promoForm.proposedSalary) : null,
+      effectiveDate:  promoForm.effectiveDate || null,
+      justification:  promoForm.justification,
+      raisedByName:   'HR',
+    }
+    const res = await fetch('/api/tenant/promotions', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    setPromoSaving(false)
+    if (res.ok) {
+      setShowPromoForm(false)
+      setPromoForm({ type: 'promotion', proposedTitle: '', proposedSalary: '', effectiveDate: '', justification: '' })
+      setPromotionsLoaded(false) // force reload
+    }
+  }
+
+  async function updatePromoStatus(promoId: string, status: string, notes?: string) {
+    setPromoUpdating(promoId)
+    await fetch(`/api/tenant/promotions/${promoId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, reviewNotes: notes }),
+    })
+    setPromoUpdating(null)
+    setReviewModal(null)
+    setReviewNotes('')
+    setPromotionsLoaded(false) // force reload
+  }
+
+  // ── Letter generation helpers ──────────────────────────────────────────────
+
+  function printWindow(title: string, html: string) {
+    const win = window.open('', '_blank')
+    if (!win) return
+    win.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
+    <style>
+      body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.7;margin:50px 65px;color:#111}
+      h1{font-size:15pt;margin-bottom:2px}.org{font-size:10pt;color:#555;margin-bottom:20px}
+      .divider{border:none;border-top:2px solid #1a4fff;margin:16px 0}
+      pre{font-family:inherit;white-space:pre-wrap}
+      .label{font-weight:bold;min-width:180px;display:inline-block}
+      .row{margin:4px 0}
+      @media print{body{margin:25px 45px}}
+    </style></head><body>${html}
+    <script>window.onload=()=>{window.print()}<\/script></body></html>`)
+    win.document.close()
+  }
+
+  function letterHeader(refId: string) {
+    const date = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
+    return `<h1>Yahweh Care Pty Ltd</h1><div class="org">ABN: [ABN] &nbsp;|&nbsp; [Address] &nbsp;|&nbsp; [Phone]</div>
+    <hr class="divider"/><div class="row"><span class="label">Date:</span>${date}</div>
+    <div class="row"><span class="label">Reference:</span>${refId.slice(0,8).toUpperCase()}</div>`
+  }
+
+  function printNominationLetter(p: PromotionRecord) {
+    const empName = emp ? `${emp.firstName} ${emp.lastName}` : 'Employee'
+    const isHike  = p.proposedTitle === p.currentTitle || p.proposedTitle === emp?.positionTitle
+    const subject = isHike ? 'Annual Salary Review — Recommendation' : `Promotion Nomination — ${p.proposedTitle}`
+    printWindow(subject, `
+      ${letterHeader(p.id)}
+      <br/>
+      <div class="row"><span class="label">To:</span>Hiring Committee / Director</div>
+      <div class="row"><span class="label">Re:</span>${empName} — ${subject}</div>
+      <hr class="divider"/>
+      <p><strong>Dear Committee,</strong></p>
+      <p>I am pleased to nominate <strong>${empName}</strong>${p.currentTitle ? `, currently holding the position of <em>${p.currentTitle}</em>,` : ''} for the following change effective <strong>${p.effectiveDate ? new Date(p.effectiveDate).toLocaleDateString('en-AU') : '[Effective Date]'}</strong>.</p>
+      <br/>
+      <div class="row"><span class="label">Current Title:</span>${p.currentTitle || '—'}</div>
+      <div class="row"><span class="label">Proposed Title:</span>${p.proposedTitle}</div>
+      ${p.currentSalary  ? `<div class="row"><span class="label">Current Salary:</span>$${Number(p.currentSalary).toLocaleString()} p.a.</div>` : ''}
+      ${p.proposedSalary ? `<div class="row"><span class="label">Proposed Salary:</span>$${Number(p.proposedSalary).toLocaleString()} p.a.</div>` : ''}
+      ${(p.currentSalary && p.proposedSalary) ? `<div class="row"><span class="label">Increase:</span>$${(Number(p.proposedSalary)-Number(p.currentSalary)).toLocaleString()} (${(((Number(p.proposedSalary)-Number(p.currentSalary))/Number(p.currentSalary))*100).toFixed(1)}%)</div>` : ''}
+      <br/>
+      <p><strong>Justification:</strong></p>
+      <p>${p.justification}</p>
+      <br/>
+      <p>I trust this nomination will receive favourable consideration.</p>
+      <br/><br/>
+      <p>___________________________</p>
+      <p>[Nominating Manager / HR]<br/>[Title]<br/>Yahweh Care Pty Ltd</p>
+    `)
+  }
+
+  function printApprovalLetter(p: PromotionRecord) {
+    const empName = emp ? `${emp.firstName} ${emp.lastName}` : 'Employee'
+    printWindow(`Promotion Approval — ${empName}`, `
+      ${letterHeader(p.id)}
+      <br/>
+      <div class="row"><span class="label">To:</span>${empName}</div>
+      ${emp?.email ? `<div class="row"><span class="label">Email:</span>${emp.email}</div>` : ''}
+      <hr class="divider"/>
+      <p>Dear <strong>${emp?.firstName || empName}</strong>,</p>
+      <p>On behalf of Yahweh Care Pty Ltd, I am delighted to inform you that your promotion nomination has been <strong>approved</strong>.</p>
+      <br/>
+      <div class="row"><span class="label">New Position:</span><strong>${p.proposedTitle}</strong></div>
+      ${p.currentTitle ? `<div class="row"><span class="label">Previous Position:</span>${p.currentTitle}</div>` : ''}
+      ${p.proposedSalary ? `<div class="row"><span class="label">New Annual Salary:</span><strong>$${Number(p.proposedSalary).toLocaleString()}</strong> per annum</div>` : ''}
+      <div class="row"><span class="label">Effective Date:</span>${p.effectiveDate ? new Date(p.effectiveDate).toLocaleDateString('en-AU') : '[Effective Date]'}</div>
+      ${p.reviewNotes ? `<br/><p><em>Notes: ${p.reviewNotes}</em></p>` : ''}
+      <br/>
+      <p>We congratulate you on this achievement and look forward to your continued contribution to the team.</p>
+      <p>Please sign and return a copy of this letter to acknowledge acceptance of this offer.</p>
+      <br/><br/>
+      <p>Yours sincerely,</p><br/>
+      <p>___________________________</p>
+      <p>[Director / HR Manager]<br/>Yahweh Care Pty Ltd</p>
+      <br/><br/><br/>
+      <p>------- ACKNOWLEDGEMENT -------</p>
+      <p>I, <strong>${empName}</strong>, acknowledge receipt of this promotion letter and accept the terms as stated above.</p>
+      <br/>
+      <p>Signature: ___________________________ &nbsp;&nbsp; Date: _______________</p>
+    `)
+  }
+
+  function printDesignationLetter(p: PromotionRecord) {
+    const empName = emp ? `${emp.firstName} ${emp.lastName}` : 'Employee'
+    printWindow(`New Designation Letter — ${empName}`, `
+      ${letterHeader(p.id)}
+      <br/>
+      <div class="row"><span class="label">To:</span>${empName}</div>
+      ${emp?.email ? `<div class="row"><span class="label">Email:</span>${emp.email}</div>` : ''}
+      <hr class="divider"/>
+      <p>Dear <strong>${emp?.firstName || empName}</strong>,</p>
+      <p>This letter serves to formally confirm your <strong>change of designation</strong> within Yahweh Care Pty Ltd, effective <strong>${p.effectiveDate ? new Date(p.effectiveDate).toLocaleDateString('en-AU') : '[Effective Date]'}</strong>.</p>
+      <br/>
+      <table style="border-collapse:collapse;width:100%">
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Previous Designation</td><td style="padding:6px 12px;border:1px solid #ddd">${p.currentTitle || '—'}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">New Designation</td><td style="padding:6px 12px;border:1px solid #ddd"><strong>${p.proposedTitle}</strong></td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Department</td><td style="padding:6px 12px;border:1px solid #ddd">${emp?.departmentName || '[Department]'}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Entity</td><td style="padding:6px 12px;border:1px solid #ddd">${emp?.entityName || 'Yahweh Care Pty Ltd'}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Effective Date</td><td style="padding:6px 12px;border:1px solid #ddd">${p.effectiveDate ? new Date(p.effectiveDate).toLocaleDateString('en-AU') : '—'}</td></tr>
+      </table>
+      <br/>
+      <p>All other terms and conditions of your employment remain unchanged unless separately notified in writing.</p>
+      <p>Please retain this letter for your records. A copy will be maintained in your personnel file.</p>
+      <br/><br/>
+      <p>Yours sincerely,</p><br/>
+      <p>___________________________</p>
+      <p>[Director / People & Culture]<br/>Yahweh Care Pty Ltd</p>
+    `)
+  }
+
+  function printSalaryLetter(p: PromotionRecord) {
+    const empName  = emp ? `${emp.firstName} ${emp.lastName}` : 'Employee'
+    const isHike   = p.proposedTitle === p.currentTitle || !p.currentTitle || p.proposedTitle === emp?.positionTitle
+    const letterT  = isHike ? 'Annual Salary Review' : 'Salary Increment'
+    const increase = (p.currentSalary && p.proposedSalary) ? Number(p.proposedSalary) - Number(p.currentSalary) : null
+    const pct      = (increase && p.currentSalary) ? ((increase / Number(p.currentSalary)) * 100).toFixed(2) : null
+    printWindow(`${letterT} Letter — ${empName}`, `
+      ${letterHeader(p.id)}
+      <br/>
+      <div class="row"><span class="label">To:</span>${empName}</div>
+      ${emp?.email ? `<div class="row"><span class="label">Email:</span>${emp.email}</div>` : ''}
+      <hr class="divider"/>
+      <p>Dear <strong>${emp?.firstName || empName}</strong>,</p>
+      <p>We are pleased to inform you that following the ${isHike ? 'annual salary review' : 'review of your performance and contribution'}, your remuneration has been revised effective <strong>${p.effectiveDate ? new Date(p.effectiveDate).toLocaleDateString('en-AU') : '[Effective Date]'}</strong>.</p>
+      <br/>
+      <table style="border-collapse:collapse;width:100%">
+        ${p.currentSalary  ? `<tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Previous Annual Salary</td><td style="padding:6px 12px;border:1px solid #ddd">$${Number(p.currentSalary).toLocaleString('en-AU', {minimumFractionDigits:2})}</td></tr>` : ''}
+        ${p.proposedSalary ? `<tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Revised Annual Salary</td><td style="padding:6px 12px;border:1px solid #ddd"><strong>$${Number(p.proposedSalary).toLocaleString('en-AU', {minimumFractionDigits:2})}</strong></td></tr>` : ''}
+        ${increase !== null ? `<tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Increment Amount</td><td style="padding:6px 12px;border:1px solid #ddd">$${increase.toLocaleString('en-AU', {minimumFractionDigits:2})}${pct ? ` (${pct}% increase)` : ''}</td></tr>` : ''}
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Position</td><td style="padding:6px 12px;border:1px solid #ddd">${p.proposedTitle || emp?.positionTitle || '—'}</td></tr>
+        <tr><td style="padding:6px 12px;border:1px solid #ddd;font-weight:bold">Effective Date</td><td style="padding:6px 12px;border:1px solid #ddd">${p.effectiveDate ? new Date(p.effectiveDate).toLocaleDateString('en-AU') : '—'}</td></tr>
+      </table>
+      <br/>
+      <p>This revision reflects our appreciation for your ongoing dedication and contribution to Yahweh Care Pty Ltd. All other terms and conditions of employment remain unchanged.</p>
+      <p>Please do not hesitate to contact the People & Culture team if you have any questions.</p>
+      <br/><br/>
+      <p>Yours sincerely,</p><br/>
+      <p>___________________________</p>
+      <p>[Director / People & Culture]<br/>Yahweh Care Pty Ltd</p>
+    `)
+  }
 
   function openAddContact() {
     setEditingContact(null)
@@ -730,6 +946,322 @@ export default function EmployeeProfilePage() {
             <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
               Training records will appear here once the Training &amp; Development module is enabled.
             </p>
+          </div>
+        )}
+
+        {/* ── Promotions Tab ───────────────────────────────────────────────── */}
+        {tab === 'Promotions' && (
+          <div className="space-y-5">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Promotions, designation changes and salary reviews</p>
+              <button
+                onClick={() => {
+                  setPromoForm({ type: 'promotion', proposedTitle: emp?.positionTitle ?? '', proposedSalary: emp?.annualSalary ?? '', effectiveDate: '', justification: '' })
+                  setShowPromoForm(true)
+                }}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium text-white transition hover:opacity-90"
+                style={{ background: 'var(--primary)' }}>
+                + Raise Request
+              </button>
+            </div>
+
+            {/* List */}
+            {!promotionsLoaded ? (
+              <p className="text-sm text-gray-400 py-8 text-center">Loading…</p>
+            ) : promotions.length === 0 ? (
+              <div className="text-center py-12 text-gray-400 dark:text-gray-500">
+                <p className="text-4xl mb-2">📋</p>
+                <p className="text-sm">No promotion records yet.</p>
+              </div>
+            ) : (
+              promotions.map(p => {
+                const isHike = p.proposedTitle === p.currentTitle || p.proposedTitle === emp?.positionTitle
+                const increase = (p.currentSalary && p.proposedSalary) ? Number(p.proposedSalary) - Number(p.currentSalary) : null
+                const pct = (increase && p.currentSalary) ? ((increase / Number(p.currentSalary)) * 100).toFixed(1) : null
+
+                const STATUS_STYLE: Record<string, string> = {
+                  pending:      'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                  under_review: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+                  approved:     'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+                  rejected:     'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+                  implemented:  'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+                }
+
+                return (
+                  <div key={p.id} className="border border-gray-100 dark:border-gray-800 rounded-xl p-5 space-y-4">
+                    {/* Title row */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                            {isHike ? '💰 Annual Salary Review' : `🏅 ${p.currentTitle ? `${p.currentTitle} → ` : ''}${p.proposedTitle}`}
+                          </p>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLE[p.status] ?? ''}`}>
+                            {p.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          Raised {fmt(p.createdAt)}{p.raisedByName ? ` by ${p.raisedByName}` : ''}
+                          {p.effectiveDate ? ` · Effective ${fmt(p.effectiveDate)}` : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Details grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {p.currentTitle && <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Current Title</p>
+                        <p className="text-xs font-medium text-gray-800 dark:text-white mt-0.5">{p.currentTitle}</p>
+                      </div>}
+                      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Proposed Title</p>
+                        <p className="text-xs font-medium text-gray-800 dark:text-white mt-0.5">{p.proposedTitle}</p>
+                      </div>
+                      {p.currentSalary && <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Current Salary</p>
+                        <p className="text-xs font-medium text-gray-800 dark:text-white mt-0.5">${Number(p.currentSalary).toLocaleString()}</p>
+                      </div>}
+                      {p.proposedSalary && <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Proposed Salary</p>
+                        <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-0.5">
+                          ${Number(p.proposedSalary).toLocaleString()}
+                          {pct ? <span className="text-gray-500 dark:text-gray-400"> (+{pct}%)</span> : null}
+                        </p>
+                      </div>}
+                    </div>
+
+                    {/* Justification */}
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Justification</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{p.justification}</p>
+                    </div>
+
+                    {/* Review notes */}
+                    {p.reviewNotes && (
+                      <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                        <p className="text-xs font-medium text-amber-700 dark:text-amber-400">Review Notes</p>
+                        <p className="text-xs text-amber-800 dark:text-amber-300 mt-0.5">{p.reviewNotes}</p>
+                        {p.reviewedBy && <p className="text-xs text-gray-400 mt-1">— {p.reviewedBy} on {fmt(p.reviewedAt)}</p>}
+                      </div>
+                    )}
+
+                    {/* Workflow actions */}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {p.status === 'pending' && (
+                        <button
+                          onClick={() => updatePromoStatus(p.id, 'under_review')}
+                          disabled={promoUpdating === p.id}
+                          className="px-3 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition disabled:opacity-50">
+                          Submit for Review
+                        </button>
+                      )}
+                      {p.status === 'under_review' && (
+                        <>
+                          <button
+                            onClick={() => { setReviewModal({ id: p.id, action: 'approved' }); setReviewNotes('') }}
+                            className="px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition">
+                            ✓ Approve
+                          </button>
+                          <button
+                            onClick={() => { setReviewModal({ id: p.id, action: 'rejected' }); setReviewNotes('') }}
+                            className="px-3 py-1.5 text-xs font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+                            ✗ Reject
+                          </button>
+                        </>
+                      )}
+                      {p.status === 'approved' && (
+                        <button
+                          onClick={() => { setReviewModal({ id: p.id, action: 'implemented' }); setReviewNotes('') }}
+                          className="px-3 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition">
+                          ⚡ Implement
+                        </button>
+                      )}
+                      {/* Letter buttons */}
+                      <div className="flex flex-wrap gap-1.5 ml-auto">
+                        <button onClick={() => printNominationLetter(p)}
+                          className="px-2.5 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
+                          🖨 Nomination Letter
+                        </button>
+                        {['approved','implemented'].includes(p.status) && (
+                          <>
+                            <button onClick={() => printApprovalLetter(p)}
+                              className="px-2.5 py-1.5 text-xs font-medium border border-green-300 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition">
+                              🖨 Approval Letter
+                            </button>
+                            {!isHike && (
+                              <button onClick={() => printDesignationLetter(p)}
+                                className="px-2.5 py-1.5 text-xs font-medium border border-blue-300 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition">
+                                🖨 Designation Letter
+                              </button>
+                            )}
+                            {p.proposedSalary && (
+                              <button onClick={() => printSalaryLetter(p)}
+                                className="px-2.5 py-1.5 text-xs font-medium border border-purple-300 dark:border-purple-800 text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition">
+                                🖨 {isHike ? 'Hike Letter' : 'Salary Letter'}
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        )}
+
+        {/* ── Review / Implement modal ──────────────────────────────────────── */}
+        {reviewModal && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4">
+              <h3 className="text-base font-bold text-white capitalize">
+                {reviewModal.action === 'implemented' ? 'Implement Promotion' : `${reviewModal.action === 'approved' ? 'Approve' : 'Reject'} Nomination`}
+              </h3>
+              {reviewModal.action === 'implemented' ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  This will update the employee&apos;s salary record to the proposed amount and mark the case as implemented.
+                </p>
+              ) : (
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    {reviewModal.action === 'approved' ? 'Approval Notes (optional)' : 'Reason for Rejection *'}
+                  </label>
+                  <textarea
+                    value={reviewNotes}
+                    onChange={e => setReviewNotes(e.target.value)}
+                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none min-h-[80px] resize-y"
+                    placeholder={reviewModal.action === 'approved' ? 'Any additional conditions or comments…' : 'Reason for rejection…'}
+                  />
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => updatePromoStatus(reviewModal.id, reviewModal.action, reviewNotes || undefined)}
+                  disabled={promoUpdating === reviewModal.id}
+                  className={`flex-1 py-2 text-sm font-medium text-white rounded-lg transition disabled:opacity-50 ${
+                    reviewModal.action === 'approved' ? 'bg-green-600 hover:bg-green-700' :
+                    reviewModal.action === 'rejected' ? 'bg-red-600 hover:bg-red-700' :
+                    'bg-purple-600 hover:bg-purple-700'
+                  }`}>
+                  {promoUpdating === reviewModal.id ? 'Saving…' : reviewModal.action === 'implemented' ? 'Confirm & Implement' : reviewModal.action === 'approved' ? 'Approve' : 'Reject'}
+                </button>
+                <button onClick={() => setReviewModal(null)}
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 text-gray-500 hover:text-white rounded-lg transition">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── New Promotion Form Modal ──────────────────────────────────────── */}
+        {showPromoForm && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-800">
+                <h2 className="text-base font-bold text-white">Raise Promotion / Salary Request</h2>
+                <button onClick={() => setShowPromoForm(false)} className="text-gray-400 hover:text-white text-xl">×</button>
+              </div>
+              <form onSubmit={raisePromotion} className="p-5 space-y-4">
+                {/* Type */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Request Type</label>
+                  <select
+                    value={promoForm.type}
+                    onChange={e => {
+                      const t = e.target.value
+                      setPromoForm(f => ({
+                        ...f, type: t,
+                        proposedTitle: t === 'salary_hike' ? (emp?.positionTitle ?? '') : f.proposedTitle,
+                      }))
+                    }}
+                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+                    <option value="promotion">Promotion (Title + Salary change)</option>
+                    <option value="salary_hike">Annual Salary Hike (salary only)</option>
+                    <option value="designation">Designation Change (title only)</option>
+                  </select>
+                </div>
+
+                {/* Proposed title — hidden for salary_hike */}
+                {promoForm.type !== 'salary_hike' && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Proposed Title *</label>
+                    <input
+                      required
+                      value={promoForm.proposedTitle}
+                      onChange={e => setPromoForm(f => ({ ...f, proposedTitle: e.target.value }))}
+                      className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
+                      placeholder="e.g. Senior Support Worker"
+                    />
+                  </div>
+                )}
+
+                {/* Salary — hidden for designation-only */}
+                {promoForm.type !== 'designation' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Current Salary ($)
+                      </label>
+                      <input
+                        readOnly
+                        value={emp?.annualSalary ? Math.round(Number(emp.annualSalary)) : ''}
+                        className="w-full bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-500 dark:text-gray-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Proposed Salary ($) *
+                      </label>
+                      <input
+                        required={promoForm.type !== 'designation'}
+                        type="number"
+                        value={promoForm.proposedSalary}
+                        onChange={e => setPromoForm(f => ({ ...f, proposedSalary: e.target.value }))}
+                        className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
+                        placeholder="e.g. 72000"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Effective date */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Effective Date</label>
+                  <input
+                    type="date"
+                    value={promoForm.effectiveDate}
+                    onChange={e => setPromoForm(f => ({ ...f, effectiveDate: e.target.value }))}
+                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                {/* Justification */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Justification / Reason *</label>
+                  <textarea
+                    required
+                    value={promoForm.justification}
+                    onChange={e => setPromoForm(f => ({ ...f, justification: e.target.value }))}
+                    className="w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 min-h-[80px] resize-y"
+                    placeholder="Describe the reason for this request (performance, CPI review, restructure, etc.)…"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-1">
+                  <button type="submit" disabled={promoSaving}
+                    className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition">
+                    {promoSaving ? 'Submitting…' : 'Raise Request'}
+                  </button>
+                  <button type="button" onClick={() => setShowPromoForm(false)}
+                    className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-500 hover:text-white text-sm rounded-lg">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>

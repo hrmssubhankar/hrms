@@ -246,15 +246,17 @@ async function run() {
 
   // ── 7. Documents (some expiring soon) ────────────────────────────────────
   console.log('Creating documents...')
+  // Sample PDFs — publicly accessible for demo purposes
+  const SAMPLE_PDF = 'https://www.africau.edu/images/general/sample.pdf'
   const docData = [
-    [YC,  eid['YC-004'], 'screening',    'Police Check — James Williams',        'https://placeholder.blob/police-jw.pdf',   'active', future(15)],
-    [YC,  eid['YC-005'], 'screening',    'NDIS Worker Screening — Amara Ndiaye', 'https://placeholder.blob/ndis-an.pdf',     'active', future(8)],
-    [YC,  eid['YC-008'], 'screening',    'Working With Children Check — Grace M', 'https://placeholder.blob/wwcc-gm.pdf',   'active', past(5)],
-    [YC,  eid['YC-003'], 'certification','First Aid Certificate — Priya Sharma',  'https://placeholder.blob/fa-ps.pdf',      'active', future(45)],
-    [YC,  eid['YC-002'], 'contract',     'Employment Contract — Michael Okonkwo', 'https://placeholder.blob/contract-mo.pdf','active', null],
-    [YC,  eid['YC-001'], 'policy',       'Code of Conduct Acknowledgement',       'https://placeholder.blob/coc-sj.pdf',    'active', null],
-    [YPC, eid['YPC-003'],'certification','White Card — Hassan Ibrahim',            'https://placeholder.blob/wc-hi.pdf',     'active', future(20)],
-    [YPC, eid['YPC-004'],'screening',    'Police Check — Mei Zhang',              'https://placeholder.blob/police-mz.pdf', 'active', past(3)],
+    [YC,  eid['YC-004'], 'screening',    'Police Check — James Williams',         SAMPLE_PDF, 'active', future(15)],
+    [YC,  eid['YC-005'], 'screening',    'NDIS Worker Screening — Amara Ndiaye',  SAMPLE_PDF, 'active', future(8)],
+    [YC,  eid['YC-008'], 'screening',    'Working With Children Check — Grace M', SAMPLE_PDF, 'active', past(5)],
+    [YC,  eid['YC-003'], 'certification','First Aid Certificate — Priya Sharma',  SAMPLE_PDF, 'active', future(45)],
+    [YC,  eid['YC-002'], 'contract',     'Employment Contract — Michael Okonkwo', SAMPLE_PDF, 'active', null],
+    [YC,  eid['YC-001'], 'policy',       'Code of Conduct Acknowledgement',       SAMPLE_PDF, 'active', null],
+    [YPC, eid['YPC-003'],'certification','White Card — Hassan Ibrahim',            SAMPLE_PDF, 'active', future(20)],
+    [YPC, eid['YPC-004'],'screening',    'Police Check — Mei Zhang',              SAMPLE_PDF, 'active', past(3)],
   ]
   for (const [tid, empId, cat, title, url, status, expiry] of docData) {
     if (!empId) continue
