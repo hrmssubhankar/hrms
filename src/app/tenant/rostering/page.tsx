@@ -53,6 +53,24 @@ type ShiftFormData = {
   notes: string
 }
 
+type AvailabilitySlot = {
+  id: string
+  employeeId: string
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  isAvailable: boolean
+  note: string | null
+}
+
+type FillResult = {
+  created: number
+  skipped: number
+  failed: number
+  results: Array<{ shiftId: string; status: string; reason?: string }>
+  message?: string
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -105,10 +123,223 @@ function shiftDuration(start: string, end: string) {
   return `${hrs.toFixed(1)}h`
 }
 
+// ── Availability modal ─────────────────────────────────────────────────────────
+
+function AvailabilityModal({
+  employeeId,
+  employeeName,
+  slots,
+  onSave,
+  onDelete,
+  onClose,
+}: {
+  employeeId: string
+  employeeName: string
+  slots: AvailabilitySlot[]
+  onSave: (dayOfWeek: number, startTime: string, endTime: string, isAvailable: boolean, note: string) => Promise<void>
+  onDelete: (id: string) => Promise<void>
+  onClose: () => void
+}) {
+  const [form, setForm] = useState({
+    dayOfWeek: 0,
+    startTime: '09:00',
+    endTime: '17:00',
+    isAvailable: true,
+    note: '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true); setError('')
+    try {
+      await onSave(form.dayOfWeek, form.startTime, form.endTime, form.isAvailable, form.note)
+      setForm(f => ({ ...f, note: '' }))
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to save')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Availability</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{employeeName}</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400">✕</button>
+        </div>
+
+        {/* Existing slots */}
+        <div className="px-6 pt-4">
+          {slots.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">No availability set yet.</p>
+          ) : (
+            <ul className="space-y-2 mb-4">
+              {slots.map(slot => (
+                <li key={slot.id} className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl border text-sm ${slot.isAvailable ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600 dark:text-red-300'}`}>
+                  <span className="font-medium">{DAYS[slot.dayOfWeek]}</span>
+                  <span>{slot.startTime} – {slot.endTime}</span>
+                  <span className="flex-1 text-xs opacity-70 truncate">{slot.note ?? (slot.isAvailable ? 'Available' : 'Unavailable')}</span>
+                  <button onClick={() => onDelete(slot.id)} className="text-xs opacity-50 hover:opacity-100 hover:text-red-500 transition">✕</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Add slot form */}
+        <form onSubmit={handleSave} className="px-6 pb-6 space-y-4">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Add / update slot</p>
+          {error && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">{error}</p>}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Day</label>
+              <select value={form.dayOfWeek} onChange={e => setForm(f => ({ ...f, dayOfWeek: Number(e.target.value) }))}
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
+                {DAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Status</label>
+              <select value={form.isAvailable ? 'yes' : 'no'} onChange={e => setForm(f => ({ ...f, isAvailable: e.target.value === 'yes' }))}
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none">
+                <option value="yes">Available</option>
+                <option value="no">Unavailable</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">From</label>
+              <input type="time" value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))}
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">To</label>
+              <input type="time" value={form.endTime} onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))}
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide dark:text-gray-400">Note (optional)</label>
+            <input type="text" value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="e.g. Prefer mornings"
+              className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none" />
+          </div>
+
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+              Close
+            </button>
+            <button type="submit" disabled={saving}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition hover:opacity-90"
+              style={{ background: 'var(--primary)' }}>
+              {saving ? 'Saving…' : 'Save slot'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ── Fill Timesheets modal ──────────────────────────────────────────────────────
+
+function FillTimesheetsModal({
+  weekStart,
+  onClose,
+}: {
+  weekStart: Date
+  onClose: () => void
+}) {
+  const [running, setRunning] = useState(false)
+  const [result, setResult]   = useState<FillResult | null>(null)
+  const [error, setError]     = useState('')
+
+  async function run() {
+    setRunning(true); setError('')
+    try {
+      const res = await fetch('/api/tenant/roster/timesheets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weekStart: isoDate(weekStart) }),
+      })
+      const d = await res.json()
+      if (!res.ok) { setError(d.error ?? 'Failed'); return }
+      setResult(d)
+    } catch { setError('Request failed') }
+    finally { setRunning(false) }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Fill Timesheets</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400">✕</button>
+        </div>
+        <div className="p-6 space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Auto-create timesheet entries from <strong>published, confirmed, and completed</strong> shifts for the week of{' '}
+            <strong>{fmtDate(weekStart)} — {fmtDate(addDays(weekStart, 6))}</strong>.
+            Shifts that already have a timesheet are skipped.
+          </p>
+
+          {error && <p className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">{error}</p>}
+
+          {result && (
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="grid grid-cols-3 text-center py-3">
+                <div>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{result.created}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Created</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-500 dark:text-gray-400">{result.skipped}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Skipped</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-500">{result.failed}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Failed</p>
+                </div>
+              </div>
+              {result.message && (
+                <p className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{result.message}</p>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+              {result ? 'Close' : 'Cancel'}
+            </button>
+            {!result && (
+              <button onClick={run} disabled={running}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition hover:opacity-90"
+                style={{ background: 'var(--primary)' }}>
+                {running ? 'Filling…' : 'Fill Timesheets'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Shift modal ────────────────────────────────────────────────────────────────
 
 function ShiftModal({
-  mode, initialData, employees, participants, onSave, onDelete, onClose,
+  mode, initialData, employees, participants, onSave, onDelete, onRepeat, onClose,
 }: {
   mode: 'create' | 'edit'
   initialData: Partial<ShiftFormData> & { id?: string }
@@ -116,6 +347,7 @@ function ShiftModal({
   participants: Participant[]
   onSave: (data: ShiftFormData & { id?: string }) => Promise<void>
   onDelete?: () => Promise<void>
+  onRepeat?: () => Promise<void>
   onClose: () => void
 }) {
   const [form, setForm] = useState<ShiftFormData>({
@@ -131,9 +363,11 @@ function ShiftModal({
     clientSite:    initialData.clientSite    ?? '',
     notes:         initialData.notes         ?? '',
   })
-  const [saving,   setSaving]   = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [error,    setError]    = useState('')
+  const [saving,    setSaving]    = useState(false)
+  const [deleting,  setDeleting]  = useState(false)
+  const [repeating, setRepeating] = useState(false)
+  const [error,     setError]     = useState('')
+  const [repeated,  setRepeated]  = useState(false)
 
   const f = (k: keyof ShiftFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -158,6 +392,19 @@ function ShiftModal({
     try { await onDelete() } finally { setDeleting(false) }
   }
 
+  async function handleRepeat() {
+    if (!onRepeat) return
+    setRepeating(true); setError('')
+    try {
+      await onRepeat()
+      setRepeated(true)
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to repeat')
+    } finally {
+      setRepeating(false)
+    }
+  }
+
   const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
   const mins  = ['00', '15', '30', '45']
 
@@ -168,7 +415,7 @@ function ShiftModal({
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {mode === 'create' ? 'Add Shift' : 'Edit Shift'}
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"></button>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400">✕</button>
         </div>
 
         <form onSubmit={handleSave} className="p-6 space-y-4">
@@ -266,11 +513,17 @@ function ShiftModal({
               className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none resize-none" />
           </div>
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex gap-3 pt-1 flex-wrap">
             {mode === 'edit' && onDelete && (
               <button type="button" onClick={handleDelete} disabled={deleting}
                 className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition">
                 {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            )}
+            {mode === 'edit' && onRepeat && (
+              <button type="button" onClick={handleRepeat} disabled={repeating || repeated}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 disabled:opacity-50 transition">
+                {repeated ? '✓ Repeated' : repeating ? 'Repeating…' : '↻ Repeat next week'}
               </button>
             )}
             <button type="button" onClick={onClose}
@@ -296,8 +549,13 @@ export default function RosteringPage() {
   const [shifts,       setShifts]       = useState<Shift[]>([])
   const [employees,    setEmployees]    = useState<Employee[]>([])
   const [participants, setParticipants] = useState<Participant[]>([])
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>([])
   const [loading,      setLoading]      = useState(true)
   const [publishing,   setPublishing]   = useState(false)
+  const [showAvail,    setShowAvail]    = useState(false) // toggle availability row
+  const [showFill,     setShowFill]     = useState(false) // fill timesheets modal
+  const [availModal,   setAvailModal]   = useState<{ empId: string; empName: string } | null>(null)
+
   const [modal, setModal] = useState<{
     mode: 'create' | 'edit'
     data: Partial<ShiftFormData> & { id?: string }
@@ -318,17 +576,26 @@ export default function RosteringPage() {
     })
     .sort((a, b) => a.firstName.localeCompare(b.firstName))
 
+  // Build availability map: empId → dayOfWeek → slot
+  const availMap = new Map<string, Map<number, AvailabilitySlot>>()
+  for (const slot of availability) {
+    if (!availMap.has(slot.employeeId)) availMap.set(slot.employeeId, new Map())
+    availMap.get(slot.employeeId)!.set(slot.dayOfWeek, slot)
+  }
+
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const [sd, ed, pd] = await Promise.all([
+      const [sd, ed, pd, avd] = await Promise.all([
         fetch(`/api/tenant/roster/shifts?weekStart=${isoDate(weekStart)}`).then(r => r.json()),
         fetch('/api/tenant/employees?limit=200&status=active').then(r => r.json()),
         fetch('/api/tenant/participants').then(r => r.json()),
+        fetch('/api/tenant/roster/availability').then(r => r.json()),
       ])
       setShifts(sd.shifts ?? [])
       setEmployees(ed.employees ?? [])
       setParticipants(pd.participants ?? [])
+      setAvailability(avd.availability ?? [])
     } catch {
       setShifts([])
     } finally {
@@ -408,6 +675,42 @@ export default function RosteringPage() {
     await fetchData()
   }
 
+  async function handleRepeat() {
+    if (!modal?.data.id || !modal.data.date) return
+    const origDate = new Date(modal.data.date)
+    const nextDate = addDays(origDate, 7)
+    const startTime = `${isoDate(nextDate)}T${modal.data.startHour}:${modal.data.startMin}:00`
+    const endTime   = `${isoDate(nextDate)}T${modal.data.endHour}:${modal.data.endMin}:00`
+    await fetch('/api/tenant/roster/shifts', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        employeeId:    modal.data.employeeId,
+        participantId: modal.data.participantId || null,
+        startTime, endTime,
+        shiftType:  modal.data.shiftType  || 'standard',
+        location:   modal.data.location   || null,
+        clientSite: modal.data.clientSite || null,
+        notes:      modal.data.notes      || null,
+      }),
+    })
+    // No modal close — let user see the "✓ Repeated" confirmation
+  }
+
+  // Availability helpers
+  async function saveAvailability(empId: string, dayOfWeek: number, startTime: string, endTime: string, isAvailable: boolean, note: string) {
+    const res = await fetch('/api/tenant/roster/availability', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeId: empId, dayOfWeek, startTime, endTime, isAvailable, note }),
+    })
+    if (!res.ok) throw new Error('Failed to save')
+    await fetchData()
+  }
+
+  async function deleteAvailability(id: string) {
+    await fetch(`/api/tenant/roster/availability?id=${id}`, { method: 'DELETE' })
+    await fetchData()
+  }
+
   function getShiftsFor(empId: string, day: Date) {
     const d = isoDate(day)
     return shifts.filter(s => s.employeeId === empId && s.startTime.startsWith(d))
@@ -421,8 +724,25 @@ export default function RosteringPage() {
           employees={employees} participants={participants}
           onSave={handleSave}
           onDelete={modal.mode === 'edit' ? handleDelete : undefined}
+          onRepeat={modal.mode === 'edit' ? handleRepeat : undefined}
           onClose={() => setModal(null)}
         />
+      )}
+
+      {availModal && (
+        <AvailabilityModal
+          employeeId={availModal.empId}
+          employeeName={availModal.empName}
+          slots={availability.filter(a => a.employeeId === availModal.empId)}
+          onSave={(day, start, end, isAvail, note) =>
+            saveAvailability(availModal.empId, day, start, end, isAvail, note)}
+          onDelete={deleteAvailability}
+          onClose={() => setAvailModal(null)}
+        />
+      )}
+
+      {showFill && (
+        <FillTimesheetsModal weekStart={weekStart} onClose={() => setShowFill(false)} />
       )}
 
       {/* Header */}
@@ -444,8 +764,22 @@ export default function RosteringPage() {
             <button onClick={() => setWeekStart(w => addDays(w, 7))}
               className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm dark:text-gray-400">→</button>
           </div>
+
+          {/* Availability toggle */}
+          <button
+            onClick={() => setShowAvail(v => !v)}
+            className={`px-3 py-2 rounded-xl text-sm font-semibold border transition ${showAvail ? 'bg-teal-600 border-teal-600 text-white' : 'border-teal-500 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20'}`}>
+            {showAvail ? '✓ Availability' : '👁 Availability'}
+          </button>
+
           <PermissionGate permission="rostering:write">
             <>
+              {/* Fill timesheets */}
+              <button onClick={() => setShowFill(true)}
+                className="px-3 py-2 rounded-xl text-sm font-semibold border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                📋 Fill Timesheets
+              </button>
+
               {draftCount > 0 && (
                 <button onClick={publishAll} disabled={publishing}
                   className="px-4 py-2 rounded-xl text-sm font-semibold bg-green-600 text-white hover:bg-green-700 disabled:opacity-60 transition">
@@ -518,52 +852,84 @@ export default function RosteringPage() {
                     </td>
                   </tr>
                 ) : visibleEmployees.map(emp => (
-                  <tr key={emp.id} className="hover:bg-gray-50/40 dark:hover:bg-gray-800/20 transition">
-                    <td className="px-4 py-2 border-r border-gray-100 dark:border-gray-700 w-36">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                          style={{ background: 'var(--primary)' }}>
-                          {emp.firstName[0]}{emp.lastName[0]}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{emp.firstName}</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{emp.lastName}</p>
-                        </div>
-                      </div>
-                    </td>
-                    {weekDays.map((day, di) => {
-                      const dayShifts = getShiftsFor(emp.id, day)
-                      return (
-                        <td key={di} className={`px-1 py-1 align-top min-w-[110px] ${di < 6 ? 'border-r border-gray-100 dark:border-gray-700' : ''}`}>
-                          <div className="space-y-1 min-h-14">
-                            {dayShifts.map(shift => {
-                              const c = SHIFT_COLOURS[shift.shiftType ?? 'standard'] ?? SHIFT_COLOURS.standard
-                              return (
-                                <button key={shift.id} onClick={() => openEdit(shift)}
-                                  className={`w-full text-left px-2 py-1.5 rounded-lg border text-xs transition hover:opacity-80 ${c.bg} ${c.text} ${c.border}`}>
-                                  <div className="font-semibold">{fmtTime(shift.startTime)}–{fmtTime(shift.endTime)}</div>
-                                  <div className="opacity-70">
-                                    {shiftDuration(shift.startTime, shift.endTime)}
-                                    {shift.shiftType && shift.shiftType !== 'standard' && ` · ${shift.shiftType.replace(/_/g,' ')}`}
-                                  </div>
-                                  {shift.partFirst && <div className="opacity-70 truncate">{shift.partFirst} {shift.partLast}</div>}
-                                  <span className={`inline-block mt-0.5 px-1.5 py-px rounded text-[10px] font-medium ${STATUS_BADGE[shift.status] ?? STATUS_BADGE.draft}`}>
-                                    {shift.status}
-                                  </span>
-                                </button>
-                              )
-                            })}
-                            <PermissionGate permission="rostering:write">
-                              <button onClick={() => openCreate(day, emp.id)}
-                                className="w-full py-1 text-[11px] text-gray-600 dark:text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-600 dark:text-gray-400 transition text-center rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                                + add
-                              </button>
-                            </PermissionGate>
+                  <>
+                    {/* Shift row */}
+                    <tr key={emp.id} className="hover:bg-gray-50/40 dark:hover:bg-gray-800/20 transition">
+                      <td className="px-4 py-2 border-r border-gray-100 dark:border-gray-700 w-36">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                            style={{ background: 'var(--primary)' }}>
+                            {emp.firstName[0]}{emp.lastName[0]}
                           </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{emp.firstName}</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{emp.lastName}</p>
+                          </div>
+                        </div>
+                        {/* Availability button under name */}
+                        <button
+                          onClick={() => setAvailModal({ empId: emp.id, empName: `${emp.firstName} ${emp.lastName}` })}
+                          className="mt-1 text-[10px] text-teal-600 dark:text-teal-400 hover:underline">
+                          avail…
+                        </button>
+                      </td>
+                      {weekDays.map((day, di) => {
+                        const dayShifts = getShiftsFor(emp.id, day)
+                        return (
+                          <td key={di} className={`px-1 py-1 align-top min-w-[110px] ${di < 6 ? 'border-r border-gray-100 dark:border-gray-700' : ''}`}>
+                            <div className="space-y-1 min-h-14">
+                              {dayShifts.map(shift => {
+                                const c = SHIFT_COLOURS[shift.shiftType ?? 'standard'] ?? SHIFT_COLOURS.standard
+                                return (
+                                  <button key={shift.id} onClick={() => openEdit(shift)}
+                                    className={`w-full text-left px-2 py-1.5 rounded-lg border text-xs transition hover:opacity-80 ${c.bg} ${c.text} ${c.border}`}>
+                                    <div className="font-semibold">{fmtTime(shift.startTime)}–{fmtTime(shift.endTime)}</div>
+                                    <div className="opacity-70">
+                                      {shiftDuration(shift.startTime, shift.endTime)}
+                                      {shift.shiftType && shift.shiftType !== 'standard' && ` · ${shift.shiftType.replace(/_/g,' ')}`}
+                                    </div>
+                                    {shift.partFirst && <div className="opacity-70 truncate">{shift.partFirst} {shift.partLast}</div>}
+                                    <span className={`inline-block mt-0.5 px-1.5 py-px rounded text-[10px] font-medium ${STATUS_BADGE[shift.status] ?? STATUS_BADGE.draft}`}>
+                                      {shift.status}
+                                    </span>
+                                  </button>
+                                )
+                              })}
+                              <PermissionGate permission="rostering:write">
+                                <button onClick={() => openCreate(day, emp.id)}
+                                  className="w-full py-1 text-[11px] text-gray-400 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition text-center rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                                  + add
+                                </button>
+                              </PermissionGate>
+                            </div>
+                          </td>
+                        )
+                      })}
+                    </tr>
+
+                    {/* Availability row (shown when toggled) */}
+                    {showAvail && (
+                      <tr key={`avail-${emp.id}`} className="bg-teal-50/30 dark:bg-teal-900/10">
+                        <td className="px-4 py-1 border-r border-gray-100 dark:border-gray-700">
+                          <span className="text-[10px] font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider">Avail</span>
                         </td>
-                      )
-                    })}
-                  </tr>
+                        {weekDays.map((_, di) => {
+                          const slot = availMap.get(emp.id)?.get(di)
+                          return (
+                            <td key={di} className={`px-1 py-1 text-center ${di < 6 ? 'border-r border-gray-100 dark:border-gray-700' : ''}`}>
+                              {slot ? (
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${slot.isAvailable ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'}`}>
+                                  {slot.isAvailable ? `${slot.startTime}–${slot.endTime}` : '✕'}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-gray-400 dark:text-gray-600">—</span>
+                              )}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
@@ -578,6 +944,12 @@ export default function RosteringPage() {
             {type.replace(/_/g, ' ')}
           </span>
         ))}
+        {showAvail && (
+          <>
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border bg-teal-100 text-teal-700 border-teal-300 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700">available</span>
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border bg-red-100 text-red-600 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700">unavailable</span>
+          </>
+        )}
       </div>
     </div>
   )

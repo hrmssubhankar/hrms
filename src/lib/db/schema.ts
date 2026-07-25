@@ -657,6 +657,27 @@ export const timesheets = pgTable('timesheets', {
 }))
 
 // ──────────────────────────────────────────────
+// Employee Availability (for rostering)
+// ──────────────────────────────────────────────
+
+/** Weekly recurring availability slots per employee */
+export const employeeAvailability = pgTable('employee_availability', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  tenantId:    uuid('tenant_id').notNull().references(() => tenants.id),
+  employeeId:  uuid('employee_id').notNull().references(() => employees.id),
+  dayOfWeek:   integer('day_of_week').notNull(), // 0=Mon … 6=Sun
+  startTime:   varchar('start_time', { length: 5 }).notNull(),  // HH:MM
+  endTime:     varchar('end_time',   { length: 5 }).notNull(),  // HH:MM
+  isAvailable: boolean('is_available').notNull().default(true),
+  note:        text('note'),
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+  updatedAt:   timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('availability_tenant_idx').on(t.tenantId),
+  empIdx:    index('availability_emp_idx').on(t.employeeId),
+}))
+
+// ──────────────────────────────────────────────
 // Module 28 — Payroll
 // ──────────────────────────────────────────────
 
