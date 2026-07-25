@@ -26,7 +26,13 @@ type Settings = {
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
-type Tab = 'branding' | 'domain' | 'email' | 'notifications' | 'integrations'
+type Tab = 'branding' | 'domain' | 'email' | 'notifications' | 'integrations' | 'leave'
+
+type LeaveTypeConfig = {
+  key: string; label: string; emoji: string; color: string; accrualNote: string
+  entitlementDaysFT: number; entitlementDaysPT: number; entitlementDaysCasual: number
+  isActive: boolean; maxCarryForwardDays: number | null
+}
 
 type XeroStatus = {
   connected: boolean
@@ -54,6 +60,13 @@ export default function TenantSettingsPage() {
   const [logoUploading, setLogoUploading] = useState(false)
   const [error,        setError]        = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+
+  // Leave types state
+  const [leaveTypes,        setLeaveTypes]        = useState<LeaveTypeConfig[]>([])
+  const [leaveTypesLoading, setLeaveTypesLoading] = useState(false)
+  const [leaveTypesSaving,  setLeaveTypesSaving]  = useState(false)
+  const [leaveTypesSaved,   setLeaveTypesSaved]   = useState(false)
+  const [leaveTypesError,   setLeaveTypesError]   = useState('')
 
   // Xero integration state
   const [xeroStatus,      setXeroStatus]      = useState<XeroStatus | null>(null)
@@ -222,6 +235,7 @@ export default function TenantSettingsPage() {
           { id: 'domain',        label: 'Domain' },
           { id: 'email',         label: 'Email' },
           { id: 'notifications', label: 'Notifications' },
+          { id: 'leave',         label: 'Leave' },
           { id: 'integrations',  label: 'Integrations' },
         ] as { id: Tab; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
@@ -593,6 +607,146 @@ export default function TenantSettingsPage() {
                 className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2.5 rounded-lg">
                 {saving ? 'Saving…' : 'Save Notification Settings'}
               </button>
+            </div>
+          )}
+
+          {/* ── LEAVE TAB ── */}
+          {tab === 'leave' && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Configure entitlements and rules for each leave type. Changes apply to all future balance calculations.
+                </p>
+                <button
+                  onClick={async () => {
+                    if (leaveTypesLoading || leaveTypes.length) return
+                    setLeaveTypesLoading(true)
+                    const res = await fetch('/api/tenant/leave/types?all=1')
+                    const d   = await res.json()
+                    setLeaveTypes(d.types ?? [])
+                    setLeaveTypesLoading(false)
+                  }}
+                  className="text-xs text-purple-400 hover:text-purple-300 transition"
+                  style={{ display: leaveTypes.length ? 'none' : undefined }}
+                >
+                  Load
+                </button>
+              </div>
+
+              {/* Auto-load on tab open */}
+              {tab === 'leave' && leaveTypes.length === 0 && !leaveTypesLoading && (() => {
+                fetch('/api/tenant/leave/types?all=1')
+                  .then(r => r.json())
+                  .then(d => setLeaveTypes(d.types ?? []))
+                return null
+              })()}
+
+              {leaveTypesError && (
+                <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-2.5 text-sm text-red-300">{leaveTypesError}</div>
+              )}
+              {leaveTypesSaved && (
+                <div className="bg-green-900/40 border border-green-700 rounded-lg px-4 py-2.5 text-sm text-green-300">✓ Leave configuration saved</div>
+              )}
+
+              {leaveTypesLoading ? (
+                <p className="text-sm text-gray-500 py-8 text-center">Loading…</p>
+              ) : leaveTypes.length === 0 ? (
+                <p className="text-sm text-gray-500 py-8 text-center">No leave types found.</p>
+              ) : (
+                <div className="space-y-3">
+                  {leaveTypes.map((lt, idx) => (
+                    <div key={lt.key} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 space-y-4">
+                      {/* Header row */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xl">{lt.emoji}</span>
+                          <div>
+                            <p className="text-sm font-semibold text-white">{lt.label}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{lt.accrualNote}</p>
+                          </div>
+                        </div>
+                        {/* Active toggle */}
+                        <button
+                          onClick={() => setLeaveTypes(prev => prev.map((t, i) => i === idx ? { ...t, isActive: !t.isActive } : t))}
+                          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${lt.isActive ? 'bg-purple-600' : 'bg-gray-700'}`}
+                        >
+                          <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${lt.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                        </button>
+                      </div>
+
+                      {lt.isActive && (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 border-t border-gray-200 dark:border-gray-800">
+                          <div>
+                            <label className={LABEL}>Full-Time (days/yr)</label>
+                            <input
+                              type="number" min="0" max="365"
+                              value={lt.entitlementDaysFT}
+                              onChange={e => setLeaveTypes(prev => prev.map((t, i) => i === idx ? { ...t, entitlementDaysFT: Number(e.target.value) } : t))}
+                              className={INPUT}
+                            />
+                          </div>
+                          <div>
+                            <label className={LABEL}>Part-Time (days/yr)</label>
+                            <input
+                              type="number" min="0" max="365"
+                              value={lt.entitlementDaysPT}
+                              onChange={e => setLeaveTypes(prev => prev.map((t, i) => i === idx ? { ...t, entitlementDaysPT: Number(e.target.value) } : t))}
+                              className={INPUT}
+                            />
+                          </div>
+                          <div>
+                            <label className={LABEL}>Casual (days/yr)</label>
+                            <input
+                              type="number" min="0" max="365"
+                              value={lt.entitlementDaysCasual}
+                              onChange={e => setLeaveTypes(prev => prev.map((t, i) => i === idx ? { ...t, entitlementDaysCasual: Number(e.target.value) } : t))}
+                              className={INPUT}
+                            />
+                          </div>
+                          <div>
+                            <label className={LABEL}>Max Carry-Forward</label>
+                            <input
+                              type="number" min="0" max="365"
+                              placeholder="∞ (blank = unlimited)"
+                              value={lt.maxCarryForwardDays ?? ''}
+                              onChange={e => setLeaveTypes(prev => prev.map((t, i) => i === idx ? {
+                                ...t, maxCarryForwardDays: e.target.value === '' ? null : Number(e.target.value)
+                              } : t))}
+                              className={INPUT}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      disabled={leaveTypesSaving}
+                      onClick={async () => {
+                        setLeaveTypesSaving(true); setLeaveTypesError(''); setLeaveTypesSaved(false)
+                        try {
+                          const res = await fetch('/api/tenant/leave/types', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ types: leaveTypes }),
+                          })
+                          if (!res.ok) { const d = await res.json(); throw new Error(d.error ?? 'Save failed') }
+                          setLeaveTypesSaved(true)
+                          setTimeout(() => setLeaveTypesSaved(false), 3000)
+                        } catch (err) {
+                          setLeaveTypesError(err instanceof Error ? err.message : 'Save failed')
+                        } finally {
+                          setLeaveTypesSaving(false)
+                        }
+                      }}
+                      className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition"
+                    >
+                      {leaveTypesSaving ? 'Saving…' : 'Save Leave Settings'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
