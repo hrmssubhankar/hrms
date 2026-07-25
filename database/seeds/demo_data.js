@@ -247,7 +247,7 @@ async function run() {
   // ── 7. Documents (some expiring soon) ────────────────────────────────────
   console.log('Creating documents...')
   // Sample PDFs — publicly accessible for demo purposes
-  const SAMPLE_PDF = 'https://www.africau.edu/images/general/sample.pdf'
+  const SAMPLE_PDF = '/api/sample-document'
   const docData = [
     [YC,  eid['YC-004'], 'screening',    'Police Check — James Williams',         SAMPLE_PDF, 'active', future(15)],
     [YC,  eid['YC-005'], 'screening',    'NDIS Worker Screening — Amara Ndiaye',  SAMPLE_PDF, 'active', future(8)],
