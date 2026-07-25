@@ -107,6 +107,15 @@ type EmergencyContact = {
   isPrimary: boolean
 }
 
+type TrainingRecord = {
+  id: string; courseId: string; courseTitle: string | null; courseCategory: string | null
+  courseMandatory: boolean | null; courseValidity: number | null
+  status: string; completedAt: string | null; expiryDate: string | null
+  score: string | null; attempts: number; certificateUrl: string | null; createdAt: string
+}
+
+type Course = { id: string; title: string; category: string | null; isMandatory: boolean }
+
 const BLANK_CONTACT = { name: '', relationship: '', phone: '', email: '', isPrimary: false }
 
 export default function EmployeeProfilePage() {
@@ -147,6 +156,15 @@ export default function EmployeeProfilePage() {
   })
   const [reviewModal,  setReviewModal]  = useState<{ id: string; action: 'approved' | 'rejected' | 'implemented' } | null>(null)
   const [reviewNotes,  setReviewNotes]  = useState('')
+
+  // Training state
+  const [training,        setTraining]        = useState<TrainingRecord[]>([])
+  const [trainingLoaded,  setTrainingLoaded]  = useState(false)
+  const [courses,         setCourses]         = useState<Course[]>([])
+  const [showEnrolModal,  setShowEnrolModal]  = useState(false)
+  const [enrolCourseId,   setEnrolCourseId]   = useState('')
+  const [enrolSaving,     setEnrolSaving]     = useState(false)
+  const [trainingUpdating, setTrainingUpdating] = useState<string | null>(null)
 
   // Photo upload state
   const [photoUploading, setPhotoUploading] = useState(false)
@@ -236,6 +254,45 @@ export default function EmployeeProfilePage() {
         .catch(() => setPromotionsLoaded(true))
     }
   }, [tab, id, promotionsLoaded])
+
+  // Load training records + course library when Training tab is first opened
+  useEffect(() => {
+    if (tab === 'Training' && !trainingLoaded) {
+      Promise.all([
+        fetch(`/api/tenant/training/records?employeeId=${id}`).then(r => r.json()),
+        fetch('/api/tenant/training/courses').then(r => r.json()),
+      ]).then(([recs, crss]) => {
+        setTraining(recs.records ?? [])
+        setCourses(crss.courses ?? [])
+        setTrainingLoaded(true)
+      }).catch(() => setTrainingLoaded(true))
+    }
+  }, [tab, id, trainingLoaded])
+
+  async function enrolEmployee() {
+    if (!enrolCourseId) return
+    setEnrolSaving(true)
+    await fetch('/api/tenant/training/records', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeId: id, courseId: enrolCourseId }),
+    })
+    const res = await fetch(`/api/tenant/training/records?employeeId=${id}`)
+    const d   = await res.json()
+    setTraining(d.records ?? [])
+    setEnrolCourseId(''); setShowEnrolModal(false); setEnrolSaving(false)
+  }
+
+  async function markTrainingComplete(recordId: string) {
+    setTrainingUpdating(recordId)
+    await fetch('/api/tenant/training/records', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: recordId, status: 'completed' }),
+    })
+    const res = await fetch(`/api/tenant/training/records?employeeId=${id}`)
+    const d   = await res.json()
+    setTraining(d.records ?? [])
+    setTrainingUpdating(null)
+  }
 
   async function raisePromotion(e: React.FormEvent) {
     e.preventDefault()
@@ -940,11 +997,145 @@ export default function EmployeeProfilePage() {
           </div>
         )}
 
+        {/* ── Training Tab ─────────────────────────────────────────────────── */}
         {tab === 'Training' && (
-          <div className="text-center py-10">
-            <span className="text-4xl"></span>
-            <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-              Training records will appear here once the Training &amp; Development module is enabled.
+          <div className="space-y-5">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Course enrolments and completion records</p>
+              <button
+                onClick={() => { setEnrolCourseId(''); setShowEnrolModal(true) }}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium text-white transition hover:opacity-90"
+                style={{ background: 'var(--primary)' }}>
+                + Enrol in Course
+              </button>
+            </div>
+
+            {/* Enrol modal */}
+            {showEnrolModal && (
+              <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl w-full max-w-md p-6 space-y-4">
+                  <h3 className="text-base font-bold text-white">Enrol in Course</h3>
+                  <select
+                    value={enrolCourseId}
+                    onChange={e => setEnrolCourseId(e.target.value)}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                    <option value="">Select a course…</option>
+                    {courses
+                      .filter(c => !training.some(t => t.courseId === c.id && t.status !== 'expired'))
+                      .map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.title}{c.isMandatory ? ' ★' : ''}{c.category ? ` — ${c.category}` : ''}
+                        </option>
+                      ))}
+                  </select>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">★ = mandatory training</p>
+                  <div className="flex gap-3">
+                    <button
+                      disabled={!enrolCourseId || enrolSaving}
+                      onClick={enrolEmployee}
+                      className="flex-1 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition">
+                      {enrolSaving ? 'Enrolling…' : 'Enrol'}
+                    </button>
+                    <button onClick={() => setShowEnrolModal(false)}
+                      className="px-5 py-2 border border-gray-700 text-gray-400 hover:text-white text-sm rounded-lg transition">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Summary stats */}
+            {trainingLoaded && training.length > 0 && (() => {
+              const completed = training.filter(t => t.status === 'completed').length
+              const overdue   = training.filter(t => t.status === 'overdue').length
+              const enrolled  = training.filter(t => t.status === 'enrolled').length
+              const mandatory = training.filter(t => t.courseMandatory && t.status !== 'completed').length
+              return (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { label: 'Total',     value: training.length, cls: 'text-gray-300' },
+                    { label: 'Completed', value: completed,        cls: 'text-green-400' },
+                    { label: 'Enrolled',  value: enrolled,         cls: 'text-blue-400' },
+                    { label: 'Overdue',   value: overdue + mandatory, cls: 'text-red-400' },
+                  ].map(s => (
+                    <div key={s.label} className="bg-gray-800 rounded-xl p-3 text-center">
+                      <p className={`text-xl font-bold ${s.cls}`}>{s.value}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
+
+            {/* Records list */}
+            {!trainingLoaded ? (
+              <p className="text-sm text-gray-400 py-8 text-center">Loading…</p>
+            ) : training.length === 0 ? (
+              <div className="text-center py-12 text-gray-400 dark:text-gray-500">
+                <p className="text-4xl mb-2">🎓</p>
+                <p className="text-sm">No training records yet. Click &quot;Enrol in Course&quot; to get started.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {training.map(rec => {
+                  const STATUS_BADGE: Record<string, string> = {
+                    enrolled:  'bg-blue-900/50 text-blue-300 border border-blue-800',
+                    completed: 'bg-green-900/50 text-green-300 border border-green-800',
+                    overdue:   'bg-red-900/50 text-red-300 border border-red-800',
+                    expired:   'bg-gray-800 text-gray-400 border border-gray-700',
+                  }
+                  const daysLeft = rec.expiryDate
+                    ? Math.ceil((new Date(rec.expiryDate).getTime() - Date.now()) / 86400000)
+                    : null
+
+                  return (
+                    <div key={rec.id} className="flex items-start gap-4 p-4 bg-gray-800/50 border border-gray-700 rounded-xl">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-medium text-white">
+                            {rec.courseTitle ?? 'Untitled Course'}
+                            {rec.courseMandatory && <span className="ml-1 text-amber-400 text-xs">★ Mandatory</span>}
+                          </p>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[rec.status] ?? STATUS_BADGE.enrolled}`}>
+                            {rec.status}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-400">
+                          {rec.courseCategory && <span>{rec.courseCategory}</span>}
+                          {rec.completedAt && <span>Completed {fmt(rec.completedAt)}</span>}
+                          {rec.expiryDate && (
+                            <span className={daysLeft !== null && daysLeft < 30 ? 'text-amber-400' : ''}>
+                              Expires {fmt(rec.expiryDate)}{daysLeft !== null && daysLeft >= 0 ? ` (${daysLeft}d)` : ' (expired)'}
+                            </span>
+                          )}
+                          {rec.score && <span>Score: {rec.score}</span>}
+                          {rec.attempts > 1 && <span>{rec.attempts} attempts</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {rec.certificateUrl && (
+                          <a href={rec.certificateUrl} target="_blank" rel="noopener noreferrer"
+                            className="text-xs text-blue-400 hover:underline">Certificate ↗</a>
+                        )}
+                        {rec.status === 'enrolled' && (
+                          <button
+                            disabled={trainingUpdating === rec.id}
+                            onClick={() => markTrainingComplete(rec.id)}
+                            className="px-2.5 py-1 text-xs bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white rounded-lg transition">
+                            {trainingUpdating === rec.id ? '…' : 'Mark Complete'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            <p className="text-xs text-gray-600 dark:text-gray-500 text-right">
+              <a href="/tenant/training" className="hover:text-purple-400 transition">View full Training module →</a>
             </p>
           </div>
         )}
