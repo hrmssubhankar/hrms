@@ -43,10 +43,15 @@ export default function RecruitmentPage() {
   const [showReqForm,  setShowReqForm]  = useState(false)
   const [showAppForm,  setShowAppForm]  = useState(false)
   const [saving,       setSaving]       = useState(false)
-  const [reqForm, setReqForm] = useState({ title: '', description: '' })
+  const [reqForm, setReqForm] = useState({ title: '', description: '', employmentType: 'full_time' })
   const [appForm, setAppForm] = useState({
     firstName:'', lastName:'', email:'', phone:'', source:'', notes:'',
   })
+  // Inline card expand / edit
+  const [expandedId,    setExpandedId]    = useState<string | null>(null)
+  const [editingScore,  setEditingScore]  = useState<Record<string, string>>({})
+  const [editingNotes,  setEditingNotes]  = useState<Record<string, string>>({})
+  const [savingCard,    setSavingCard]    = useState<string | null>(null)
 
   const loadReqs = useCallback(async () => {
     setLoading(true)
@@ -72,7 +77,7 @@ export default function RecruitmentPage() {
   async function createReq(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
     await fetch('/api/tenant/recruitment', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(reqForm) })
-    setShowReqForm(false); setReqForm({ title:'', description:'' }); setSaving(false); loadReqs()
+    setShowReqForm(false); setReqForm({ title:'', description:'', employmentType:'full_time' }); setSaving(false); loadReqs()
   }
 
   async function addCandidate(e: React.FormEvent) {
@@ -100,6 +105,28 @@ export default function RecruitmentPage() {
       body: JSON.stringify({ id: appId, _type: 'application', status }),
     })
     if (selectedReq) loadApps(selectedReq.id)
+  }
+
+  async function saveCardNotes(appId: string) {
+    setSavingCard(appId)
+    await fetch('/api/tenant/recruitment', {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        id: appId, _type: 'application',
+        notes:          editingNotes[appId] ?? '',
+        interviewScore: editingScore[appId] !== '' ? editingScore[appId] : undefined,
+      }),
+    })
+    setSavingCard(null)
+    if (selectedReq) loadApps(selectedReq.id)
+  }
+
+  function openOfferLetter(app: Application) {
+    const params = new URLSearchParams({
+      candidateName:  `${app.candidateFirstName ?? ''} ${app.candidateLastName ?? ''}`.trim(),
+      candidateEmail: app.candidateEmail ?? '',
+    })
+    window.location.href = `/tenant/offer-letters?${params}`
   }
 
   async function updateReqStatus(id: string, status: string) {
@@ -174,10 +201,19 @@ export default function RecruitmentPage() {
             <input required value={reqForm.title} onChange={e => setReqForm(f => ({ ...f, title: e.target.value }))}
               placeholder="e.g. Support Worker — Community" className={INPUT} />
           </div>
-          <div>
-            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Description</label>
-            <textarea value={reqForm.description} onChange={e => setReqForm(f => ({ ...f, description: e.target.value }))}
-              rows={3} placeholder="Role summary, key responsibilities, requirements…" className={INPUT} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Description</label>
+              <textarea value={reqForm.description} onChange={e => setReqForm(f => ({ ...f, description: e.target.value }))}
+                rows={3} placeholder="Role summary, key responsibilities, requirements…" className={INPUT} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employment Type</label>
+              <select value={reqForm.employmentType} onChange={e => setReqForm(f => ({ ...f, employmentType: e.target.value }))} className={INPUT}>
+                {[['full_time','Full-Time'],['part_time','Part-Time'],['casual','Casual'],['contractor','Contractor']].map(([v,l]) =>
+                  <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
           </div>
           <button type="submit" disabled={saving}
             className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2 rounded-lg">
@@ -281,46 +317,132 @@ export default function RecruitmentPage() {
             )
           )}
 
-          {/* Pipeline */}
+          {/* Kanban Pipeline */}
           {tab === 'pipeline' && selectedReq && (
             applications.length === 0 ? (
               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
-                </svg>
-              </div>
                 <p className="text-gray-600 dark:text-gray-300 font-medium">No candidates in pipeline</p>
-                <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Add candidates to begin tracking applications.</p>
+                <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Click &quot;+ Add Candidate&quot; to get started.</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {applications.map(a => (
-                  <div key={a.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-white font-medium text-sm">{a.candidateFirstName} {a.candidateLastName}</span>
-                          <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${appStyle(a.status)}`}>
-                            {appLabel(a.status)}
-                          </span>
+              <div className="overflow-x-auto pb-4">
+                <div className="flex gap-3 min-w-max">
+                  {APP_STATUSES.map(stage => {
+                    const cols = applications.filter(a => a.status === stage.value)
+                    return (
+                      <div key={stage.value} className="w-60 flex-none space-y-2">
+                        {/* Column header */}
+                        <div className="flex items-center justify-between px-1">
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{stage.label}</p>
+                          <span className="text-xs bg-gray-800 text-gray-400 rounded-full px-2 py-0.5 min-w-[20px] text-center">{cols.length}</span>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{a.candidateEmail}</p>
-                        {a.candidateSource && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">Source: {a.candidateSource}</p>}
-                        {a.notes && <p className="text-xs text-gray-500 mt-1 italic dark:text-gray-400">{a.notes}</p>}
+
+                        {/* Cards */}
+                        <div className="space-y-2 min-h-[80px]">
+                          {cols.map(a => {
+                            const isExpanded = expandedId === a.id
+                            const isSaving   = savingCard === a.id
+                            const NEXT_STAGES = APP_STATUSES.filter(s => s.value !== stage.value)
+                            return (
+                              <div key={a.id}
+                                className={`bg-white dark:bg-gray-900 border rounded-xl p-3 space-y-2 transition ${
+                                  stage.value === 'hired'    ? 'border-green-800' :
+                                  stage.value === 'rejected' ? 'border-red-900' :
+                                  stage.value === 'offer'    ? 'border-teal-800' :
+                                  'border-gray-200 dark:border-gray-800'
+                                }`}>
+                                {/* Card header */}
+                                <div className="flex items-start justify-between gap-1">
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-medium text-white truncate">
+                                      {a.candidateFirstName} {a.candidateLastName}
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">{a.candidateEmail}</p>
+                                    {a.candidateSource && (
+                                      <p className="text-xs text-gray-600 dark:text-gray-500 mt-0.5">via {a.candidateSource}</p>
+                                    )}
+                                    {a.interviewScore && (
+                                      <p className="text-xs text-amber-400 mt-0.5">⭐ {a.interviewScore}/10</p>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={() => {
+                                      setExpandedId(isExpanded ? null : a.id)
+                                      if (!isExpanded) {
+                                        setEditingNotes(prev => ({ ...prev, [a.id]: a.notes ?? '' }))
+                                        setEditingScore(prev => ({ ...prev, [a.id]: a.interviewScore ?? '' }))
+                                      }
+                                    }}
+                                    className="text-gray-500 hover:text-white text-xs shrink-0 mt-0.5 transition"
+                                  >
+                                    {isExpanded ? '▲' : '▼'}
+                                  </button>
+                                </div>
+
+                                {/* Expanded notes/score */}
+                                {isExpanded && (
+                                  <div className="space-y-2 pt-1 border-t border-gray-200 dark:border-gray-800">
+                                    <div>
+                                      <label className="text-xs text-gray-500 mb-1 block">Interview Score (0–10)</label>
+                                      <input
+                                        type="number" min="0" max="10" step="0.5"
+                                        value={editingScore[a.id] ?? ''}
+                                        onChange={e => setEditingScore(prev => ({ ...prev, [a.id]: e.target.value }))}
+                                        placeholder="—"
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-purple-500"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs text-gray-500 mb-1 block">Notes</label>
+                                      <textarea
+                                        value={editingNotes[a.id] ?? ''}
+                                        onChange={e => setEditingNotes(prev => ({ ...prev, [a.id]: e.target.value }))}
+                                        rows={3}
+                                        placeholder="Interview notes, feedback…"
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-xs text-white resize-none focus:outline-none focus:border-purple-500"
+                                      />
+                                    </div>
+                                    <button
+                                      disabled={isSaving}
+                                      onClick={() => saveCardNotes(a.id)}
+                                      className="w-full py-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition">
+                                      {isSaving ? 'Saving…' : 'Save Notes'}
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* Create offer letter CTA */}
+                                {stage.value === 'offer' && (
+                                  <button
+                                    onClick={() => openOfferLetter(a)}
+                                    className="w-full py-1.5 text-xs font-medium bg-teal-700 hover:bg-teal-600 text-white rounded-lg transition">
+                                    📄 Create Offer Letter
+                                  </button>
+                                )}
+
+                                {/* Move to stage */}
+                                <div className="relative group">
+                                  <button className="w-full py-1 text-xs text-gray-500 hover:text-white border border-gray-700 hover:border-gray-500 rounded-lg transition">
+                                    Move to stage ▾
+                                  </button>
+                                  <div className="absolute bottom-full left-0 right-0 mb-1 bg-gray-900 border border-gray-700 rounded-xl shadow-xl z-10 overflow-hidden hidden group-hover:block">
+                                    {NEXT_STAGES.map(s => (
+                                      <button key={s.value}
+                                        onClick={() => moveStatus(a.id, s.value)}
+                                        className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-gray-800 transition">
+                                        → {s.label}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                      {/* Status pipeline */}
-                      <div className="flex flex-wrap gap-1 shrink-0">
-                        {APP_STATUSES.filter(s => s.value !== a.status).map(s => (
-                          <button key={s.value} onClick={() => moveStatus(a.id, s.value)}
-                            className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-purple-600 hover:text-purple-300 px-2.5 py-1 rounded-lg transition">
-                            → {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                    )
+                  })}
+                </div>
               </div>
             )
           )}

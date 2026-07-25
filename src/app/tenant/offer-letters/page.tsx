@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 type Offer = {
   id: string; candidateName: string; candidateEmail: string
@@ -319,6 +320,17 @@ export default function OfferLettersPage() {
     } catch { /* non-fatal */ }
   }
   useEffect(() => { loadCustomTemplates() }, [])
+
+  // Pre-fill from recruitment pipeline URL params (?candidateName=…&candidateEmail=…)
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    const name  = searchParams.get('candidateName')
+    const email = searchParams.get('candidateEmail')
+    if (name || email) {
+      setForm(f => ({ ...f, candidateName: name ?? f.candidateName, candidateEmail: email ?? f.candidateEmail }))
+      setShowForm(true)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function initForm() {
     setForm({ candidateName:'',candidateEmail:'',position:'',department:'',
