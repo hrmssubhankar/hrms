@@ -38,6 +38,100 @@ const EMP_TYPES = [
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
+type CustomTemplate = {
+  id: string; name: string; content: string; fileUrl: string | null; createdAt: string
+}
+
+// ── Client-side .docx text extraction (no external packages) ─────────────────
+async function readZipEntry(bytes: Uint8Array, targetName: string): Promise<Uint8Array | null> {
+  const sig = [0x50, 0x4B, 0x03, 0x04]
+  let i = 0
+  while (i < bytes.length - 30) {
+    if (bytes[i]===sig[0] && bytes[i+1]===sig[1] && bytes[i+2]===sig[2] && bytes[i+3]===sig[3]) {
+      const compression = bytes[i+8] | (bytes[i+9] << 8)
+      const compSize    = (bytes[i+18]) | (bytes[i+19]<<8) | (bytes[i+20]<<16) | ((bytes[i+21]<<24)>>>0)
+      const nameLen     = bytes[i+26] | (bytes[i+27] << 8)
+      const extraLen    = bytes[i+28] | (bytes[i+29] << 8)
+      const name        = new TextDecoder().decode(bytes.slice(i+30, i+30+nameLen))
+      const dataStart   = i + 30 + nameLen + extraLen
+      if (name === targetName) {
+        const compData = bytes.slice(dataStart, dataStart + compSize)
+        if (compression === 0) return compData
+        if (compression === 8) {
+          const ds     = new DecompressionStream('deflate-raw')
+          const writer = ds.writable.getWriter()
+          const reader = ds.readable.getReader()
+          writer.write(compData); writer.close()
+          const chunks: Uint8Array[] = []
+          for (;;) { const { done, value } = await reader.read(); if (done) break; chunks.push(value) }
+          const len = chunks.reduce((a, b) => a + b.length, 0)
+          const out = new Uint8Array(len); let off = 0
+          for (const c of chunks) { out.set(c, off); off += c.length }
+          return out
+        }
+      }
+      i = dataStart + compSize
+    } else { i++ }
+  }
+  return null
+}
+
+async function extractDocxText(file: File): Promise<string> {
+  const buf   = await file.arrayBuffer()
+  const bytes = new Uint8Array(buf)
+  const xml   = await readZipEntry(bytes, 'word/document.xml')
+  if (!xml) throw new Error('word/document.xml not found in .docx')
+  const decoded = new TextDecoder().decode(xml)
+  const paras = decoded.split('</w:p>').map(para => {
+    const texts = (para.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) ?? []).map(t => t.replace(/<[^>]+>/g, ''))
+    return texts.join('')
+  }).filter(p => p.trim())
+  return paras.join('\n').replace(/\n{3,}/g, '\n\n').trim()
+}
+
+type PdfjsLib = {
+  getDocument: (o: object) => { promise: Promise<{ numPages: number; getPage: (n: number) => Promise<{ getTextContent: () => Promise<{ items: { str: string }[] }> }> }> }
+  GlobalWorkerOptions: { workerSrc: string }
+}
+declare global { interface Window { pdfjsLib: PdfjsLib } }
+
+async function extractPdfText(file: File): Promise<string> {
+  if (!window.pdfjsLib) {
+    await new Promise<void>((resolve, reject) => {
+      const s = document.createElement('script')
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
+      s.onload = () => resolve(); s.onerror = () => reject(new Error('PDF.js load failed'))
+      document.head.appendChild(s)
+    })
+    ;(window as { pdfjsLib: PdfjsLib }).pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+  }
+  const buf  = await file.arrayBuffer()
+  const pdf  = await window.pdfjsLib.getDocument({ data: buf }).promise
+  const parts: string[] = []
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const page    = await pdf.getPage(n)
+    const content = await page.getTextContent()
+    parts.push(content.items.map(item => item.str).join(' '))
+  }
+  return parts.join('\n').replace(/\n{3,}/g, '\n\n').trim()
+}
+
+function applyMergeTags(content: string, vars: {
+  candidateName: string; position: string; department: string
+  employmentType: string; startDate: string; salaryAmount: string; salaryCycle: string
+}): string {
+  const empLabel = EMP_TYPES.find(t => t.value === vars.employmentType)?.label ?? vars.employmentType
+  return content
+    .replace(/\{\{candidateName\}\}/g, vars.candidateName || '[Candidate Name]')
+    .replace(/\{\{position\}\}/g,      vars.position      || '[Position]')
+    .replace(/\{\{department\}\}/g,    vars.department    || '[Department]')
+    .replace(/\{\{employmentType\}\}/g, empLabel)
+    .replace(/\{\{startDate\}\}/g,     vars.startDate     || '[Start Date]')
+    .replace(/\{\{salary\}\}/g,        vars.salaryAmount  ? `$${Number(vars.salaryAmount).toLocaleString()}` : '[Salary]')
+    .replace(/\{\{salaryCycle\}\}/g,   vars.salaryCycle   || 'per annum')
+}
+
 // ── Predefined letter templates ───────────────────────────────────────────────
 type TemplateVars = Partial<Offer> & { orgName?: string }
 
@@ -185,8 +279,16 @@ export default function OfferLettersPage() {
   const [events,       setEvents]       = useState<OfferEvent[]>([])
   const [noteText,     setNoteText]     = useState('')
   const [addingNote,   setAddingNote]   = useState(false)
-  const [copied,       setCopied]       = useState(false)
-  const [selectedTemplate, setSelectedTemplate] = useState(0)
+  const [copied,          setCopied]          = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState('0')
+  const [customTemplates, setCustomTemplates]   = useState<CustomTemplate[]>([])
+  const [showUpload,      setShowUpload]        = useState(false)
+  const [uploadName,      setUploadName]        = useState('')
+  const [uploadFile,      setUploadFile]        = useState<File | null>(null)
+  const [uploadExtracted, setUploadExtracted]   = useState('')
+  const [extracting,      setExtracting]        = useState(false)
+  const [uploading,       setUploading]         = useState(false)
+  const [uploadError,     setUploadError]       = useState('')
   const printRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState({
@@ -209,25 +311,47 @@ export default function OfferLettersPage() {
 
   useEffect(() => { load() }, [load])
 
+  async function loadCustomTemplates() {
+    try {
+      const res  = await fetch('/api/tenant/offer-letter-templates')
+      const data = await res.json()
+      setCustomTemplates(data.templates ?? [])
+    } catch { /* non-fatal */ }
+  }
+  useEffect(() => { loadCustomTemplates() }, [])
+
   function initForm() {
     setForm({ candidateName:'',candidateEmail:'',position:'',department:'',
       employmentType:'full_time',startDate:'',salaryAmount:'',salaryCycle:'annual',
       notes:'',expiresAt:'',templateContent:'' })
-    setSelectedTemplate(0)
+    setSelectedTemplate('0')
     setShowForm(true)
   }
 
-  function applyTemplate(idx: number) {
-    const tmpl = TEMPLATES[idx]
-    if (!tmpl) return
-    setSelectedTemplate(idx)
-    const content = tmpl.fn({
-      candidateName: form.candidateName, position: form.position,
-      department: form.department, employmentType: form.employmentType,
-      startDate: form.startDate, salaryAmount: Number(form.salaryAmount) || 0,
-      salaryCycle: form.salaryCycle,
-    })
-    setForm(f => ({ ...f, templateContent: content }))
+  function applyTemplate(key: string) {
+    setSelectedTemplate(key)
+    const idx = parseInt(key, 10)
+    if (!isNaN(idx) && idx >= 0 && idx < TEMPLATES.length) {
+      // Built-in template
+      const content = TEMPLATES[idx].fn({
+        candidateName: form.candidateName, position: form.position,
+        department: form.department, employmentType: form.employmentType,
+        startDate: form.startDate, salaryAmount: Number(form.salaryAmount) || 0,
+        salaryCycle: form.salaryCycle,
+      })
+      setForm(f => ({ ...f, templateContent: content }))
+    } else {
+      // Custom template — substitute merge tags
+      const tmpl = customTemplates.find(t => t.id === key)
+      if (!tmpl) return
+      const content = applyMergeTags(tmpl.content, {
+        candidateName: form.candidateName, position: form.position,
+        department: form.department, employmentType: form.employmentType,
+        startDate: form.startDate, salaryAmount: form.salaryAmount,
+        salaryCycle: form.salaryCycle,
+      })
+      setForm(f => ({ ...f, templateContent: content }))
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -649,13 +773,28 @@ export default function OfferLettersPage() {
 
               {/* Template picker */}
               <div>
-                <label className={LABEL}>Letter Template</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className={LABEL + ' mb-0'}>Letter Template</label>
+                  <button
+                    type="button"
+                    onClick={() => { setUploadName(''); setUploadFile(null); setUploadExtracted(''); setUploadError(''); setShowUpload(true) }}
+                    className="text-xs text-purple-400 hover:text-purple-300 transition">
+                    📎 Upload Template
+                  </button>
+                </div>
                 <div className="flex gap-2">
                   <select
                     value={selectedTemplate}
-                    onChange={e => applyTemplate(Number(e.target.value))}
+                    onChange={e => applyTemplate(e.target.value)}
                     className={INPUT}>
-                    {TEMPLATES.map((t, i) => <option key={i} value={i}>{t.label}</option>)}
+                    <optgroup label="Built-in Templates">
+                      {TEMPLATES.map((t, i) => <option key={i} value={String(i)}>{t.label}</option>)}
+                    </optgroup>
+                    {customTemplates.length > 0 && (
+                      <optgroup label="Your Templates">
+                        {customTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                      </optgroup>
+                    )}
                   </select>
                   <button
                     type="button"
@@ -693,6 +832,128 @@ export default function OfferLettersPage() {
           </div>
         </div>
       )}
+      {/* Upload Template Modal */}
+      {showUpload && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-800">
+              <h2 className="text-base font-bold text-white">Upload Offer Template</h2>
+              <button onClick={() => setShowUpload(false)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl">×</button>
+            </div>
+            <div className="p-5 space-y-4">
+              {/* Merge tag guide */}
+              <div className="bg-purple-900/20 border border-purple-800 rounded-lg p-3 text-xs text-purple-300 space-y-1">
+                <p className="font-semibold text-purple-200">Available merge tags</p>
+                <p><code>{'{{candidateName}}'}</code> · <code>{'{{position}}'}</code> · <code>{'{{department}}'}</code></p>
+                <p><code>{'{{employmentType}}'}</code> · <code>{'{{startDate}}'}</code> · <code>{'{{salary}}'}</code> · <code>{'{{salaryCycle}}'}</code></p>
+                <p className="text-purple-400">Place these tags anywhere in your .docx or .pdf template file.</p>
+              </div>
+
+              {/* Template name */}
+              <div>
+                <label className={LABEL}>Template Name *</label>
+                <input
+                  value={uploadName}
+                  onChange={e => setUploadName(e.target.value)}
+                  className={INPUT}
+                  placeholder="e.g. Senior Care Coordinator — Full-Time"
+                />
+              </div>
+
+              {/* File picker */}
+              <div>
+                <label className={LABEL}>Template File (.docx or .pdf) *</label>
+                <input
+                  type="file"
+                  accept=".docx,.pdf"
+                  className="w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-gray-700 file:text-white file:text-xs hover:file:bg-gray-600 cursor-pointer"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0]
+                    if (!f) return
+                    setUploadFile(f)
+                    setUploadExtracted('')
+                    setUploadError('')
+                    setExtracting(true)
+                    try {
+                      let text = ''
+                      if (f.name.endsWith('.docx')) {
+                        text = await extractDocxText(f)
+                      } else if (f.name.endsWith('.pdf')) {
+                        text = await extractPdfText(f)
+                      } else {
+                        throw new Error('Only .docx and .pdf files are supported')
+                      }
+                      if (!text.trim()) throw new Error('No text could be extracted from this file')
+                      setUploadExtracted(text)
+                    } catch (err) {
+                      setUploadError(err instanceof Error ? err.message : 'Extraction failed')
+                      setUploadFile(null)
+                    } finally {
+                      setExtracting(false)
+                    }
+                  }}
+                />
+                {extracting && <p className="text-xs text-purple-400 mt-1">Extracting text…</p>}
+                {uploadError && <p className="text-xs text-red-400 mt-1">{uploadError}</p>}
+              </div>
+
+              {/* Extracted preview */}
+              {uploadExtracted && (
+                <div>
+                  <label className={LABEL}>Extracted Content (edit if needed)</label>
+                  <textarea
+                    value={uploadExtracted}
+                    onChange={e => setUploadExtracted(e.target.value)}
+                    className={INPUT + ' min-h-[160px] resize-y font-mono text-xs'}
+                  />
+                </div>
+              )}
+
+              {uploadError === '' && uploadFile && !uploadExtracted && !extracting && (
+                <p className="text-xs text-gray-500">Waiting for file selection…</p>
+              )}
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  disabled={uploading || !uploadName.trim() || !uploadExtracted.trim()}
+                  onClick={async () => {
+                    if (!uploadName.trim() || !uploadExtracted.trim()) return
+                    setUploading(true)
+                    setUploadError('')
+                    try {
+                      const fd = new FormData()
+                      fd.append('name', uploadName.trim())
+                      fd.append('content', uploadExtracted.trim())
+                      if (uploadFile) fd.append('file', uploadFile)
+                      const res = await fetch('/api/tenant/offer-letter-templates', { method: 'POST', body: fd })
+                      if (!res.ok) {
+                        const d = await res.json()
+                        throw new Error(d.error ?? 'Upload failed')
+                      }
+                      await loadCustomTemplates()
+                      setShowUpload(false)
+                    } catch (err) {
+                      setUploadError(err instanceof Error ? err.message : 'Upload failed')
+                    } finally {
+                      setUploading(false)
+                    }
+                  }}
+                  className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition">
+                  {uploading ? 'Saving…' : 'Save Template'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowUpload(false)}
+                  className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg transition">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hidden printable div */}
       <div ref={printRef} className="hidden" />
     </div>
