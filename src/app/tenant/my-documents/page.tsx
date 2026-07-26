@@ -90,6 +90,7 @@ export default function MyDocumentsPage() {
   const [showForm,   setShowForm]   = useState(false)
   const [saving,     setSaving]     = useState(false)
   const [saveError,  setSaveError]  = useState<string | null>(null)
+  const [withdrawing, setWithdrawing] = useState<string | null>(null)
   const [form, setForm] = useState({
     title: '', category: 'Police Check', blobUrl: '',
     fileName: '', fileSizeBytes: 0, mimeType: '',
@@ -135,6 +136,20 @@ export default function MyDocumentsPage() {
     } catch {
       setSaveError('Network error — please try again.')
     } finally { setSaving(false) }
+  }
+
+  async function withdraw(id: string) {
+    if (!confirm('Withdraw this document? It will be permanently deleted.')) return
+    setWithdrawing(id)
+    try {
+      const res = await fetch(`/api/tenant/my-documents?id=${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setDocs(d => d.filter(x => x.id !== id))
+      } else {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error ?? 'Could not withdraw document')
+      }
+    } finally { setWithdrawing(null) }
   }
 
   // Split docs by urgency
@@ -279,7 +294,7 @@ export default function MyDocumentsPage() {
 
           {/* Pending review */}
           {pendingDocs.length > 0 && (
-            <DocSection title="⏳ Pending HR Review" docs={pendingDocs} note="HR will review and activate these documents." />
+            <DocSection title="⏳ Pending HR Review" docs={pendingDocs} note="HR will review and activate these documents." onWithdraw={withdraw} withdrawing={withdrawing} />
           )}
 
           {/* Active */}
@@ -298,7 +313,15 @@ export default function MyDocumentsPage() {
 }
 
 // ── Doc section component ──────────────────────────────────────────────────────
-function DocSection({ title, docs, note }: { title: string; docs: MyDoc[]; note?: string }) {
+function DocSection({
+  title, docs, note, onWithdraw, withdrawing,
+}: {
+  title: string
+  docs: MyDoc[]
+  note?: string
+  onWithdraw?: (id: string) => void
+  withdrawing?: string | null
+}) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
@@ -334,8 +357,19 @@ function DocSection({ title, docs, note }: { title: string; docs: MyDoc[]; note?
                 )}
                 {d.notes && <p className="text-xs text-gray-600 mt-1 italic dark:text-gray-400">{d.notes}</p>}
               </div>
-              <div className="text-xs text-gray-600 shrink-0 dark:text-gray-400">
-                {new Date(d.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  {new Date(d.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+                {onWithdraw && d.status === 'pending_review' && (
+                  <button
+                    onClick={() => onWithdraw(d.id)}
+                    disabled={withdrawing === d.id}
+                    className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50 transition"
+                    title="Withdraw this document">
+                    {withdrawing === d.id ? 'Withdrawing…' : 'Withdraw'}
+                  </button>
+                )}
               </div>
             </div>
           )

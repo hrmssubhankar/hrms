@@ -155,7 +155,7 @@ export default function MyPayslipsPage() {
                       <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Created {fmtDate(p.createdAt)}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0">
                     <div className="text-right">
                       <p className="text-sm font-bold text-green-400">{fmt(p.netPay)}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">net pay</p>
@@ -163,8 +163,18 @@ export default function MyPayslipsPage() {
                     <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[p.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                       {p.status}
                     </span>
+                    <a
+                      href={`/tenant/payroll/${p.id}/payslip`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      className="text-xs px-2.5 py-1 rounded-lg border border-gray-600 dark:border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition"
+                      title="Print / Save as PDF"
+                    >
+                      🖨
+                    </a>
                     <svg
-                      className={`w-4 h-4 text-gray-500 transition-transform  dark:text-gray-400${isOpen ? 'rotate-180' : ''}`}
+                      className={`w-4 h-4 text-gray-500 transition-transform dark:text-gray-400 ${isOpen ? 'rotate-180' : ''}`}
                       fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />

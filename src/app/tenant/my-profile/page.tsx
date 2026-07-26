@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 
 type Profile = {
   id:             string
@@ -197,6 +197,9 @@ function TwoFactorSection() {
   )
 }
 
+// ── Emergency contact form (blank state) ────────────────────────────────────
+const BLANK_CONTACT = { name: '', relationship: '', phone: '', email: '', isPrimary: false }
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function MyProfilePage() {
   const [profile,    setProfile]    = useState<Profile | null>(null)
@@ -209,6 +212,16 @@ export default function MyProfilePage() {
   const [form,       setForm]       = useState({ preferredName: '', phone: '', address: '' })
   const [saving,     setSaving]     = useState(false)
   const [msg,        setMsg]        = useState('')
+
+  // Photo upload
+  const [photoSaving, setPhotoSaving] = useState(false)
+  const photoInputRef = useRef<HTMLInputElement>(null)
+
+  // Emergency contacts
+  const [contactForm,    setContactForm]    = useState(BLANK_CONTACT)
+  const [editingContact, setEditingContact] = useState<string | null>(null) // id or 'new'
+  const [contactSaving,  setContactSaving]  = useState(false)
+  const [contactError,   setContactError]   = useState('')
 
   useEffect(() => {
     fetch('/api/tenant/my-profile')
@@ -240,13 +253,78 @@ export default function MyProfilePage() {
       const data = await res.json()
       if (!res.ok) { setMsg(data.error ?? 'Save failed'); return }
       setProfile(prev => prev ? { ...prev, ...data.profile } : prev)
-      setMsg('Profile updated successfully.')
+      setMsg('✓ Profile updated successfully.')
       setEditing(false)
     } catch {
       setMsg('Save failed — please try again.')
     } finally {
       setSaving(false)
     }
+  }
+
+  async function savePhoto(file: File) {
+    setPhotoSaving(true)
+    try {
+      // Upload to Vercel Blob via the existing upload endpoint
+      const fd = new FormData()
+      fd.append('file', file)
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
+      if (!uploadRes.ok) { setMsg('Photo upload failed'); return }
+      const { url } = await uploadRes.json()
+      const res = await fetch('/api/tenant/my-profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoUrl: url }),
+      })
+      const data = await res.json()
+      if (res.ok) setProfile(prev => prev ? { ...prev, photoUrl: data.profile.photoUrl } : prev)
+    } catch {
+      setMsg('Photo upload failed')
+    } finally {
+      setPhotoSaving(false)
+    }
+  }
+
+  async function saveContact(e: React.FormEvent) {
+    e.preventDefault()
+    if (!contactForm.name.trim()) { setContactError('Name is required'); return }
+    setContactSaving(true); setContactError('')
+    try {
+      const isNew = editingContact === 'new'
+      const res = await fetch(
+        isNew
+          ? '/api/tenant/my-profile/emergency-contacts'
+          : '/api/tenant/my-profile/emergency-contacts',
+        {
+          method: isNew ? 'POST' : 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(isNew ? contactForm : { id: editingContact, ...contactForm }),
+        }
+      )
+      const data = await res.json()
+      if (!res.ok) { setContactError(data.error ?? 'Failed'); return }
+      if (isNew) {
+        setContacts(c => [...c, data.contact])
+      } else {
+        setContacts(c => c.map(x => x.id === editingContact ? data.contact : x))
+      }
+      setEditingContact(null)
+      setContactForm(BLANK_CONTACT)
+    } catch { setContactError('Request failed') }
+    finally { setContactSaving(false) }
+  }
+
+  async function deleteContact(id: string) {
+    if (!confirm('Remove this emergency contact?')) return
+    await fetch(`/api/tenant/my-profile/emergency-contacts?id=${id}`, { method: 'DELETE' })
+    setContacts(c => c.filter(x => x.id !== id))
+    if (editingContact === id) setEditingContact(null)
+  }
+
+  function openEditContact(c: EmergencyContact) {
+    setEditingContact(c.id)
+    setContactForm({ name: c.name, relationship: c.relationship ?? '', phone: c.phone ?? '', email: c.email ?? '', isPrimary: c.isPrimary })
+    setContactError('')
   }
 
   function fmt(dateStr: string | null | undefined) {
@@ -296,13 +374,31 @@ export default function MyProfilePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {profile.photoUrl ? (
-            <img src={profile.photoUrl} alt={profile.firstName} className="w-16 h-16 rounded-full object-cover border-2 border-purple-500" />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-2xl font-bold text-white">
-              {profile.firstName[0]}{profile.lastName[0]}
-            </div>
-          )}
+          {/* Avatar with photo upload */}
+          <div className="flex flex-col items-center gap-1">
+            {profile.photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.photoUrl} alt={profile.firstName} className="w-16 h-16 rounded-full object-cover border-2 border-purple-500" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-2xl font-bold text-white">
+                {profile.firstName[0]}{profile.lastName[0]}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={photoSaving}
+              className="text-[10px] text-purple-400 hover:text-purple-300 disabled:opacity-50 transition">
+              {photoSaving ? 'Uploading…' : '📷 Change'}
+            </button>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={e => { const f = e.target.files?.[0]; if (f) savePhoto(f) }}
+            />
+          </div>
           <div>
             <h1 className="text-2xl font-bold text-white">
               {profile.preferredName || profile.firstName} {profile.lastName}
@@ -398,18 +494,83 @@ export default function MyProfilePage() {
 
       {/* Emergency Contacts */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
-        <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Emergency Contacts</h2>
-        {contacts.length === 0 ? (
-          <p className="text-gray-600 text-sm text-center py-4 dark:text-gray-400">No emergency contacts on file. Contact HR to add them.</p>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Emergency Contacts</h2>
+          {editingContact !== 'new' && (
+            <button
+              onClick={() => { setEditingContact('new'); setContactForm(BLANK_CONTACT); setContactError('') }}
+              className="text-xs px-3 py-1.5 rounded-lg border border-purple-600 text-purple-400 hover:bg-purple-900/20 transition">
+              + Add contact
+            </button>
+          )}
+        </div>
+
+        {/* Inline add/edit form */}
+        {editingContact && (
+          <form onSubmit={saveContact} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-4 space-y-3">
+            <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+              {editingContact === 'new' ? 'New Emergency Contact' : 'Edit Contact'}
+            </p>
+            {contactError && <p className="text-xs text-red-400 bg-red-900/20 border border-red-800 rounded-lg px-3 py-2">{contactError}</p>}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={LABEL}>Full Name *</label>
+                <input value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="Jane Smith" className={INPUT} required />
+              </div>
+              <div>
+                <label className={LABEL}>Relationship</label>
+                <input value={contactForm.relationship} onChange={e => setContactForm(f => ({ ...f, relationship: e.target.value }))}
+                  placeholder="Partner, Parent…" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Phone</label>
+                <input type="tel" value={contactForm.phone} onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))}
+                  placeholder="+61 4XX XXX XXX" className={INPUT} />
+              </div>
+              <div>
+                <label className={LABEL}>Email</label>
+                <input type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="jane@example.com" className={INPUT} />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+              <input type="checkbox" checked={contactForm.isPrimary} onChange={e => setContactForm(f => ({ ...f, isPrimary: e.target.checked }))}
+                className="rounded border-gray-600" />
+              Set as primary contact
+            </label>
+            <div className="flex gap-3">
+              <button type="submit" disabled={contactSaving}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition">
+                {contactSaving ? 'Saving…' : editingContact === 'new' ? 'Add Contact' : 'Save Changes'}
+              </button>
+              <button type="button" onClick={() => { setEditingContact(null); setContactForm(BLANK_CONTACT) }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 text-sm rounded-lg hover:text-white transition">
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
+        {contacts.length === 0 && editingContact !== 'new' ? (
+          <p className="text-gray-600 text-sm text-center py-4 dark:text-gray-400">No emergency contacts on file. Add one using the button above.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {contacts.map(c => (
               <div key={c.id} className="bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="font-medium text-white text-sm">{c.name}</p>
-                  {c.isPrimary && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-purple-900/40 border border-purple-700 text-purple-300">Primary</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-white text-sm">{c.name}</p>
+                    {c.isPrimary && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-purple-900/40 border border-purple-700 text-purple-300">Primary</span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => openEditContact(c)}
+                      className="text-xs text-gray-500 hover:text-purple-400 transition dark:text-gray-400">Edit</button>
+                    <button onClick={() => deleteContact(c.id)}
+                      className="text-xs text-gray-500 hover:text-red-400 transition dark:text-gray-400">Remove</button>
+                  </div>
                 </div>
                 {c.relationship && <p className="text-xs text-gray-500 mb-1 dark:text-gray-400">{c.relationship}</p>}
                 <div className="flex gap-4 text-xs text-gray-600 dark:text-gray-400">

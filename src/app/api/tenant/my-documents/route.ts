@@ -112,3 +112,54 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ record }, { status: 201 })
 }
+
+/**
+ * DELETE /api/tenant/my-documents?id=
+ *
+ * Employees can only withdraw their own documents that are still in 'pending_review'.
+ * Active / approved documents cannot be self-deleted — contact HR.
+ */
+export async function DELETE(req: NextRequest) {
+  const guard = await apiAuth()
+  if (guard.error) return guard.error
+  const { session } = guard
+
+  const [emp] = await db
+    .select({ id: employees.id })
+    .from(employees)
+    .where(and(
+      eq(employees.tenantId, session.tenantId),
+      eq(employees.userId, session.sub as string),
+    ))
+
+  if (!emp) return NextResponse.json({ error: 'Employee record not found' }, { status: 404 })
+
+  const id = req.nextUrl.searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  // Fetch the document and verify ownership + status
+  const [doc] = await db
+    .select({ id: documents.id, status: documents.status, employeeId: documents.employeeId })
+    .from(documents)
+    .where(and(
+      eq(documents.id, id),
+      eq(documents.tenantId, session.tenantId),
+      eq(documents.employeeId, emp.id),
+    ))
+    .limit(1)
+
+  if (!doc) return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+
+  if (doc.status !== 'pending_review') {
+    return NextResponse.json(
+      { error: 'Only pending_review documents can be withdrawn. Contact HR to remove active documents.' },
+      { status: 403 },
+    )
+  }
+
+  await db
+    .delete(documents)
+    .where(and(eq(documents.id, id), eq(documents.employeeId, emp.id)))
+
+  return NextResponse.json({ ok: true })
+}

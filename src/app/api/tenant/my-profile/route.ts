@@ -80,11 +80,12 @@ export async function PATCH(req: NextRequest) {
 
   const body = await req.json()
   // Only self-editable fields — HR fields are intentionally excluded
-  const { preferredName, phone, address } = body
+  const { preferredName, phone, address, photoUrl } = body
   const updates: Record<string, unknown> = { updatedAt: new Date() }
   if (preferredName !== undefined) updates.preferredName = preferredName || null
   if (phone         !== undefined) updates.phone         = phone || null
   if (address       !== undefined) updates.address       = address || null
+  if (photoUrl      !== undefined) updates.photoUrl      = photoUrl || null
 
   const [updated] = await db
     .update(employees)
