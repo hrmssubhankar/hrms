@@ -71,17 +71,36 @@ export async function PATCH(req: NextRequest) {
     const session = await getSession()
     if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const body = await req.json()
-    const { id, status, currentCount, vacancyCount, notes } = body
+    const { id, status, plannedCount, currentCount, vacancyCount, targetDate, notes, departmentId, positionId } = body
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
     const updates: Record<string, unknown> = {}
     if (status       !== undefined) updates.status       = status
+    if (plannedCount !== undefined) updates.plannedCount = plannedCount
     if (currentCount !== undefined) updates.currentCount = currentCount
     if (vacancyCount !== undefined) updates.vacancyCount = vacancyCount
-    if (notes        !== undefined) updates.notes        = notes
+    if (targetDate   !== undefined) updates.targetDate   = targetDate || null
+    if (notes        !== undefined) updates.notes        = notes || null
+    if (departmentId !== undefined) updates.departmentId = departmentId || null
+    if (positionId   !== undefined) updates.positionId   = positionId || null
     const [updated] = await db.update(headcountPlan).set(updates)
       .where(and(eq(headcountPlan.id, id), eq(headcountPlan.tenantId, session.tenantId))).returning()
     return NextResponse.json({ record: updated })
   } catch (err) {
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const guard = await apiGuard('workforce_planning:write')
+    if (guard.error) return guard.error
+    const { session } = guard
+    const { id } = await req.json()
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+    await db.delete(headcountPlan)
+      .where(and(eq(headcountPlan.id, id), eq(headcountPlan.tenantId, session.tenantId)))
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
   }
 }
