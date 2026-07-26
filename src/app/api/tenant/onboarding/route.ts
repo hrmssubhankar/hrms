@@ -16,10 +16,12 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = req.nextUrl
     const status = searchParams.get('status')
+    const stage  = searchParams.get('stage')
     const search = searchParams.get('search') ?? ''
 
     const conditions = [eq(onboardingRecords.tenantId, session.tenantId)]
     if (status) conditions.push(eq(onboardingRecords.status, status))
+    if (stage)  conditions.push(eq(onboardingRecords.stage, stage))
 
     const records = await db
       .select({
@@ -52,9 +54,9 @@ export async function GET(req: NextRequest) {
         )
       : records
 
-    // Stats
+    // Stats always use full tenant scope (no filters)
     const all = await db
-      .select({ status: onboardingRecords.status })
+      .select({ status: onboardingRecords.status, stage: onboardingRecords.stage, completedAt: onboardingRecords.completedAt, createdAt: onboardingRecords.createdAt })
       .from(onboardingRecords)
       .where(eq(onboardingRecords.tenantId, session.tenantId))
 
@@ -65,7 +67,24 @@ export async function GET(req: NextRequest) {
       completed:   all.filter(r => r.status === 'completed').length,
     }
 
-    return NextResponse.json({ records: filtered, stats })
+    // Stage breakdown
+    const stageBreakdown: Record<string, number> = {}
+    for (const r of all) {
+      stageBreakdown[r.stage] = (stageBreakdown[r.stage] ?? 0) + 1
+    }
+
+    // Avg days to complete
+    const completedWithDates = all.filter(r => r.status === 'completed' && r.completedAt && r.createdAt)
+    const avgDaysToComplete = completedWithDates.length
+      ? Math.round(
+          completedWithDates.reduce((sum, r) => {
+            const diff = new Date(r.completedAt!).getTime() - new Date(r.createdAt).getTime()
+            return sum + diff / (1000 * 60 * 60 * 24)
+          }, 0) / completedWithDates.length
+        )
+      : null
+
+    return NextResponse.json({ records: filtered, stats, stageBreakdown, avgDaysToComplete })
   } catch (err) {
     console.error('GET /api/tenant/onboarding', err)
     return NextResponse.json({ error: 'Failed to fetch onboarding records' }, { status: 500 })
@@ -127,7 +146,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (emailErr) { console.error('Onboarding email error:', emailErr) }
 
-    // In-app notification → HR + managers that a new onboarding has started
+    // In-app notification → HR + managers
     ;(async () => {
       try {
         const [emp] = await db
@@ -147,5 +166,25 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('POST /api/tenant/onboarding', err)
     return NextResponse.json({ error: 'Failed to create onboarding record' }, { status: 500 })
+  }
+}
+
+// DELETE /api/tenant/onboarding
+export async function DELETE(req: NextRequest) {
+  try {
+    const guard = await apiGuard('onboarding:write')
+    if (guard.error) return guard.error
+    const { session } = guard
+
+    const { id } = await req.json()
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+    await db.delete(onboardingRecords)
+      .where(and(eq(onboardingRecords.id, id), eq(onboardingRecords.tenantId, session.tenantId)))
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('DELETE /api/tenant/onboarding', err)
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
   }
 }

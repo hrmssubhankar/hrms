@@ -16,13 +16,22 @@ type Stats = { total: number; pending: number; active: number; completed: number
 type Employee = { id: string; firstName: string; lastName: string }
 
 const SEP_TYPES = [
-  { value: 'resignation',    label: '️  Resignation' },
-  { value: 'termination',    label: 'Termination' },
-  { value: 'redundancy',     label: 'Redundancy' },
-  { value: 'contract_end',   label: 'Contract End' },
-  { value: 'retirement',     label: 'Retirement' },
-  { value: 'abandonment',    label: 'Abandonment' },
+  { value: 'resignation',  label: 'Resignation' },
+  { value: 'termination',  label: 'Termination' },
+  { value: 'redundancy',   label: 'Redundancy' },
+  { value: 'contract_end', label: 'Contract End' },
+  { value: 'retirement',   label: 'Retirement' },
+  { value: 'abandonment',  label: 'Abandonment' },
 ]
+
+const TYPE_COLORS: Record<string, string> = {
+  resignation:  'bg-blue-900/50 text-blue-300 border-blue-800',
+  termination:  'bg-red-900/50 text-red-300 border-red-800',
+  redundancy:   'bg-amber-900/50 text-amber-300 border-amber-800',
+  contract_end: 'bg-gray-700 text-gray-300 border-gray-600',
+  retirement:   'bg-purple-900/50 text-purple-300 border-purple-800',
+  abandonment:  'bg-orange-900/50 text-orange-300 border-orange-800',
+}
 
 const STATUS_STYLE: Record<string, string> = {
   pending:   'bg-blue-900/50 text-blue-300 border-blue-800',
@@ -30,9 +39,25 @@ const STATUS_STYLE: Record<string, string> = {
   completed: 'bg-green-900/50 text-green-300 border-green-800',
 }
 
+const EVENT_ICON: Record<string, string> = {
+  initiated:                '🚀',
+  notice_received:          '📩',
+  exit_interview_scheduled: '📅',
+  exit_interview_done:      '✅',
+  assets_returned:          '📦',
+  access_revoked:           '🔐',
+  completed:                '🎉',
+  checklist_completed:      '☑️',
+  updated:                  '✏️',
+}
+
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const TABS = ['Overview', 'Records'] as const
+type Tab = typeof TABS[number]
 
 export default function SeparationPage() {
+  const [tab, setTab] = useState<Tab>('Overview')
+
   const [records,   setRecords]   = useState<SeparationRecord[]>([])
   const [stats,     setStats]     = useState<Stats>({ total:0, pending:0, active:0, completed:0, resignation:0, termination:0 })
   const [employees, setEmployees] = useState<Employee[]>([])
@@ -40,27 +65,33 @@ export default function SeparationPage() {
   const [showForm,  setShowForm]  = useState(false)
   const [saving,    setSaving]    = useState(false)
   const [expanded,  setExpanded]  = useState<string | null>(null)
+  const [search,       setSearch]       = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterType,   setFilterType]   = useState('')
+  const [deleting,  setDeleting]  = useState<string | null>(null)
+
   const [form, setForm] = useState({
     employeeId: '', type: 'resignation', reason: '', noticeDate: '', lastWorkingDay: '',
   })
+  const [editFields,      setEditFields]      = useState<Record<string, { reason: string; noticeDate: string; lastWorkingDay: string }>>({})
+  const [editingId,       setEditingId]       = useState<string | null>(null)
   const [interviewFields, setInterviewFields] = useState<Record<string, { at: string; notes: string }>>({})
-  const [sepEvents,   setSepEvents]   = useState<Record<string, SeparationEvent[]>>({})
-  const [noteFields,  setNoteFields]  = useState<Record<string, string>>({})
-  const [savingNote,  setSavingNote]  = useState<string | null>(null)
+  const [sepEvents,       setSepEvents]       = useState<Record<string, SeparationEvent[]>>({})
+  const [noteFields,      setNoteFields]      = useState<Record<string, string>>({})
+  const [savingNote,      setSavingNote]      = useState<string | null>(null)
 
-  const load = useCallback(async (st = filterStatus, t = filterType) => {
+  const load = useCallback(async (st = filterStatus, t = filterType, s = search) => {
     setLoading(true)
     const p = new URLSearchParams()
     if (st) p.set('status', st)
     if (t)  p.set('type', t)
+    if (s)  p.set('search', s)
     const res  = await fetch(`/api/tenant/separation?${p}`)
     const data = await res.json()
     setRecords(data.records ?? [])
     setStats(data.stats ?? { total:0, pending:0, active:0, completed:0, resignation:0, termination:0 })
     setLoading(false)
-  }, [filterStatus, filterType])
+  }, [filterStatus, filterType, search])
 
   useEffect(() => {
     load()
@@ -87,6 +118,25 @@ export default function SeparationPage() {
     })
     load()
     loadEvents(id)
+  }
+
+  async function saveEdit(id: string) {
+    const f = editFields[id]
+    if (!f) return
+    await patch(id, { reason: f.reason, noticeDate: f.noticeDate || null, lastWorkingDay: f.lastWorkingDay || null })
+    setEditingId(null)
+  }
+
+  async function deleteRecord(id: string) {
+    if (!confirm('Delete this separation record? This cannot be undone.')) return
+    setDeleting(id)
+    await fetch('/api/tenant/separation', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    setDeleting(null)
+    setExpanded(null)
+    load()
   }
 
   async function loadEvents(id: string) {
@@ -122,28 +172,51 @@ export default function SeparationPage() {
     return Math.round((done / 3) * 100)
   }
 
+  // ── Overview helpers ──────────────────────────────────────────────
+  const allRecords = records  // stats always use all records (load without filters for overview)
+  const typeBreakdown = SEP_TYPES.map(t => ({
+    ...t,
+    count: allRecords.filter(r => r.type === t.value).length,
+  })).filter(t => t.count > 0)
+
+  const avgDays = (() => {
+    const completed = allRecords.filter(r => r.status === 'completed' && r.createdAt && r.lastWorkingDay)
+    if (!completed.length) return null
+    const total = completed.reduce((sum, r) => {
+      const diff = new Date(r.lastWorkingDay!).getTime() - new Date(r.createdAt).getTime()
+      return sum + diff / (1000 * 60 * 60 * 24)
+    }, 0)
+    return Math.round(total / completed.length)
+  })()
+
+  const recent = [...allRecords]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5)
+
+  // ─────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Separation & Exit Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage employee departures, offboarding checklists, and exit interviews</p>
         </div>
-        <button onClick={() => setShowForm(v => !v)}
+        <button onClick={() => { setShowForm(v => !v); setTab('Records') }}
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
           {showForm ? 'Cancel' : '+ Initiate Separation'}
         </button>
       </div>
 
-      {/* Stats */}
+      {/* Stats bar */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: 'Total',       value: stats.total,       color: 'text-white' },
-          { label: 'Pending',     value: stats.pending,     color: 'text-blue-400' },
-          { label: 'Active',      value: stats.active,      color: 'text-amber-400' },
-          { label: 'Completed',   value: stats.completed,   color: 'text-green-400' },
-          { label: 'Resignations',value: stats.resignation, color: 'text-purple-400' },
-          { label: 'Terminations',value: stats.termination, color: 'text-red-400' },
+          { label: 'Total',        value: stats.total,       color: 'text-white' },
+          { label: 'Pending',      value: stats.pending,     color: 'text-blue-400' },
+          { label: 'Active',       value: stats.active,      color: 'text-amber-400' },
+          { label: 'Completed',    value: stats.completed,   color: 'text-green-400' },
+          { label: 'Resignations', value: stats.resignation, color: 'text-purple-400' },
+          { label: 'Terminations', value: stats.termination, color: 'text-red-400' },
         ].map(s => (
           <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
@@ -152,300 +225,520 @@ export default function SeparationPage() {
         ))}
       </div>
 
-      {/* Initiate form */}
-      {showForm && (
-        <form onSubmit={initiate} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-purple-300">Initiate Separation Process</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
-              <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
-                <option value="">— Select —</option>
-                {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Separation Type *</label>
-              <select required value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
-                {SEP_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notice Date</label>
-              <input type="date" value={form.noticeDate} onChange={e => setForm(f => ({ ...f, noticeDate: e.target.value }))} className={INPUT} />
-            </div>
-            <div>
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Last Working Day</label>
-              <input type="date" value={form.lastWorkingDay} onChange={e => setForm(f => ({ ...f, lastWorkingDay: e.target.value }))} className={INPUT} />
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Reason</label>
-            <textarea value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))}
-              rows={2} placeholder="Brief reason for separation…" className={INPUT} />
-          </div>
-          {form.type === 'termination' && (
-            <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
-              ️ Termination — ensure proper documentation and HR sign-off before proceeding. Seek legal advice if required.
-            </div>
-          )}
-          <button type="submit" disabled={saving}
-            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2 rounded-lg transition">
-            {saving ? 'Initiating…' : 'Begin Separation'}
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-gray-200 dark:border-gray-800">
+        {TABS.map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition ${
+              tab === t
+                ? 'border-purple-500 text-purple-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}>
+            {t}
           </button>
-        </form>
-      )}
-
-      {/* Filters */}
-      <div className="flex gap-3 flex-wrap">
-        <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(e.target.value, filterType) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="active">Active</option>
-          <option value="completed">Completed</option>
-        </select>
-        <select value={filterType} onChange={e => { setFilterType(e.target.value); load(filterStatus, e.target.value) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
-          <option value="">All types</option>
-          {SEP_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
+        ))}
       </div>
 
-      {/* Records */}
-      {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      {/* ── OVERVIEW TAB ────────────────────────────────────────────── */}
+      {tab === 'Overview' && (
+        <div className="space-y-6">
+          {/* Key metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Active Offboardings</p>
+              <p className="text-3xl font-bold text-amber-400">{stats.active + stats.pending}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stats.pending} pending · {stats.active} in progress</p>
+            </div>
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Avg. Offboarding Days</p>
+              <p className="text-3xl font-bold text-purple-400">{avgDays !== null ? avgDays : '—'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Based on {stats.completed} completed</p>
+            </div>
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Completion Rate</p>
+              <p className="text-3xl font-bold text-green-400">
+                {stats.total ? Math.round((stats.completed / stats.total) * 100) : 0}%
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stats.completed} of {stats.total} fully offboarded</p>
+            </div>
+          </div>
+
+          {/* Type breakdown */}
+          {typeBreakdown.length > 0 && (
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Separation by Type</h3>
+              <div className="space-y-3">
+                {typeBreakdown.map(t => (
+                  <div key={t.value}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-gray-600 dark:text-gray-300">{t.label}</span>
+                      <span className="text-gray-500 dark:text-gray-400">{t.count} ({stats.total ? Math.round((t.count / stats.total) * 100) : 0}%)</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full">
+                      <div
+                        className="h-2 rounded-full bg-purple-500 transition-all"
+                        style={{ width: stats.total ? `${(t.count / stats.total) * 100}%` : '0%' }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming last working days */}
+          {(() => {
+            const upcoming = allRecords
+              .filter(r => r.lastWorkingDay && r.status !== 'completed' && new Date(r.lastWorkingDay) >= new Date())
+              .sort((a, b) => new Date(a.lastWorkingDay!).getTime() - new Date(b.lastWorkingDay!).getTime())
+              .slice(0, 5)
+            if (!upcoming.length) return null
+            return (
+              <div className="bg-amber-950/30 border border-amber-800/50 rounded-xl p-5">
+                <h3 className="text-sm font-semibold text-amber-300 mb-3">⏰ Upcoming Last Working Days</h3>
+                <div className="space-y-2">
+                  {upcoming.map(r => {
+                    const days = Math.ceil((new Date(r.lastWorkingDay!).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                    return (
+                      <div key={r.id} className="flex items-center justify-between text-sm">
+                        <span className="text-gray-200">{r.employeeFirstName} {r.employeeLastName}</span>
+                        <span className={`text-xs font-medium ${days <= 7 ? 'text-red-400' : 'text-amber-300'}`}>
+                          {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`} · {new Date(r.lastWorkingDay!).toLocaleDateString('en-AU')}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* Recent separations table */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Recent Separations</h3>
+            </div>
+            {recent.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">No separation records yet.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-800">
+                    {['Employee', 'Type', 'Status', 'Last Working Day', 'Progress'].map(h => (
+                      <th key={h} className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {recent.map((r, i) => {
+                    const pct = progress(r)
+                    return (
+                      <tr key={r.id}
+                        className={`border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition cursor-pointer ${i % 2 !== 0 ? 'bg-white dark:bg-gray-900/50' : ''}`}
+                        onClick={() => { setTab('Records'); setTimeout(() => { setExpanded(r.id); loadEvents(r.id) }, 50) }}>
+                        <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">
+                          {r.employeeFirstName} {r.employeeLastName}
+                          {r.employeeEmail && <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">{r.employeeEmail}</p>}
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TYPE_COLORS[r.type] ?? 'bg-gray-700 text-gray-300 border-gray-600'}`}>
+                            {SEP_TYPES.find(t => t.value === r.type)?.label ?? r.type}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                            {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-gray-600 dark:text-gray-300 text-xs">
+                          {r.lastWorkingDay ? new Date(r.lastWorkingDay).toLocaleDateString('en-AU') : '—'}
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="h-1.5 w-24 bg-gray-100 dark:bg-gray-800 rounded-full">
+                              <div className={`h-1.5 rounded-full ${pct === 100 ? 'bg-green-500' : 'bg-purple-500'}`} style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{pct}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── RECORDS TAB ─────────────────────────────────────────────── */}
+      {tab === 'Records' && (
+        <div className="space-y-4">
+          {/* Initiate form */}
+          {showForm && (
+            <form onSubmit={initiate} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+              <h3 className="text-sm font-semibold text-purple-300">Initiate Separation Process</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
+                  <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
+                    <option value="">— Select —</option>
+                    {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Separation Type *</label>
+                  <select required value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
+                    {SEP_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notice Date</label>
+                  <input type="date" value={form.noticeDate} onChange={e => setForm(f => ({ ...f, noticeDate: e.target.value }))} className={INPUT} />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Last Working Day</label>
+                  <input type="date" value={form.lastWorkingDay} onChange={e => setForm(f => ({ ...f, lastWorkingDay: e.target.value }))} className={INPUT} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Reason</label>
+                <textarea value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))}
+                  rows={2} placeholder="Brief reason for separation…" className={INPUT} />
+              </div>
+              {form.type === 'termination' && (
+                <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
+                  ⚠️ Termination — ensure proper documentation and HR sign-off before proceeding. Seek legal advice if required.
+                </div>
+              )}
+              <div className="flex gap-2">
+                <button type="submit" disabled={saving}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2 rounded-lg transition">
+                  {saving ? 'Initiating…' : 'Begin Separation'}
+                </button>
+                <button type="button" onClick={() => setShowForm(false)}
+                  className="text-sm px-4 py-2 rounded-lg border border-gray-600 text-gray-400 hover:bg-gray-800 transition">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Filters + search */}
+          <div className="flex gap-3 flex-wrap">
+            <input
+              type="search"
+              placeholder="Search by name…"
+              value={search}
+              onChange={e => { setSearch(e.target.value); load(filterStatus, filterType, e.target.value) }}
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 w-52"
+            />
+            <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(e.target.value, filterType, search) }}
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              <option value="">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+            </select>
+            <select value={filterType} onChange={e => { setFilterType(e.target.value); load(filterStatus, e.target.value, search) }}
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              <option value="">All types</option>
+              {SEP_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+          </div>
+
+          {/* Records list */}
+          {loading ? (
+            <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
+          ) : records.length === 0 ? (
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
+                <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <p className="text-gray-600 dark:text-gray-300 font-medium">No separation records</p>
-          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Initiate a separation to begin the offboarding process.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {records.map(r => {
-            const isOpen = expanded === r.id
-            const pct    = progress(r)
-            const iField = interviewFields[r.id] ?? { at: r.exitInterviewAt?.split('T')[0] ?? '', notes: r.exitInterviewNotes ?? '' }
-            return (
-              <div key={r.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden ${
-                r.status === 'completed' ? 'border-green-900' : r.type === 'termination' ? 'border-red-900/50' : 'border-gray-800'
-              }`}>
-                <div className="flex items-center gap-4 px-5 py-4 cursor-pointer" onClick={() => { const next = isOpen ? null : r.id; setExpanded(next); if (next) loadEvents(next) }}>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-white font-medium text-sm">
-                        {r.employeeFirstName} {r.employeeLastName}
-                      </span>
-                      <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-                        {SEP_TYPES.find(t => t.value === r.type)?.label ?? r.type}
-                      </span>
-                      <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
-                        {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
-                      </span>
-                    </div>
-                    {r.employeeEmail && <p className="text-xs text-gray-500 dark:text-gray-400">{r.employeeEmail}</p>}
+              <p className="text-gray-900 dark:text-gray-300 font-medium">No separation records</p>
+              <p className="text-gray-500 text-sm mt-1">Initiate a separation to begin the offboarding process.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {records.map(r => {
+                const isOpen = expanded === r.id
+                const pct    = progress(r)
+                const iField = interviewFields[r.id] ?? { at: r.exitInterviewAt?.split('T')[0] ?? '', notes: r.exitInterviewNotes ?? '' }
+                const eField = editFields[r.id] ?? { reason: r.reason ?? '', noticeDate: r.noticeDate ?? '', lastWorkingDay: r.lastWorkingDay ?? '' }
 
-                    {/* Progress bar */}
-                    {r.status !== 'completed' && (
-                      <div className="mt-2">
-                        <div className="flex justify-between mb-0.5">
-                          <span className="text-xs text-gray-500 dark:text-gray-400">Offboarding progress</span>
-                          <span className={`text-xs font-medium ${pct === 100 ? 'text-green-400' : 'text-gray-400'}`}>{pct}%</span>
+                return (
+                  <div key={r.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden ${
+                    r.status === 'completed' ? 'border-green-900' : r.type === 'termination' ? 'border-red-900/50' : 'border-gray-200 dark:border-gray-800'
+                  }`}>
+                    {/* Card header row */}
+                    <div className="flex items-center gap-4 px-5 py-4">
+                      <div className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => { const next = isOpen ? null : r.id; setExpanded(next); if (next) loadEvents(next) }}>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="text-gray-900 dark:text-white font-medium text-sm">
+                            {r.employeeFirstName} {r.employeeLastName}
+                          </span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TYPE_COLORS[r.type] ?? 'bg-gray-700 text-gray-300 border-gray-600'}`}>
+                            {SEP_TYPES.find(t => t.value === r.type)?.label ?? r.type}
+                          </span>
+                          <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                            {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                          </span>
                         </div>
-                        <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full">
-                          <div className={`h-1.5 rounded-full transition-all ${pct === 100 ? 'bg-green-500' : 'bg-purple-600'}`}
-                            style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-right shrink-0">
-                    {r.lastWorkingDay && (
-                      <p className="text-xs text-amber-400 font-medium">LWD {new Date(r.lastWorkingDay).toLocaleDateString('en-AU')}</p>
-                    )}
-                    <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{isOpen ? '▲' : '▼'}</p>
-                  </div>
-                </div>
-
-                {isOpen && (
-                  <div className="border-t border-gray-200 dark:border-gray-800 px-5 py-4 space-y-5">
-                    {/* Key dates */}
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { label: 'Notice Date', value: r.noticeDate },
-                        { label: 'Last Working Day', value: r.lastWorkingDay },
-                        { label: 'Entity', value: r.employeeEntityName },
-                      ].map(d => (
-                        <div key={d.label} className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-3">
-                          <p className="text-xs text-gray-500 mb-0.5 dark:text-gray-400">{d.label}</p>
-                          <p className="text-sm text-gray-700 dark:text-gray-200">{d.value ? (d.value.includes('-') ? new Date(d.value).toLocaleDateString('en-AU') : d.value) : '—'}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {r.reason && (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 dark:text-gray-400">Reason</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{r.reason}</p>
-                      </div>
-                    )}
-
-                    {/* Offboarding checklist */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Offboarding Checklist</p>
-                      <div className="space-y-2">
-                        {[
-                          {
-                            label: 'Assets Returned',
-                            desc: 'Laptop, access cards, keys, uniforms, PPE',
-                            done: r.assetsReturned,
-                            key: 'assetsReturned',
-                          },
-                          {
-                            label: 'System Access Revoked',
-                            desc: 'Email, payroll, HR systems, facility access',
-                            done: r.systemAccessRevoked,
-                            key: 'systemAccessRevoked',
-                          },
-                        ].map(item => (
-                          <label key={item.key}
-                            className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
-                              item.done
-                                ? 'bg-green-950/40 border-green-800/60'
-                                : 'bg-gray-800/40 border-gray-700 hover:border-gray-600'
-                            } ${r.status === 'completed' ? 'pointer-events-none' : ''}`}>
-                            <input
-                              type="checkbox"
-                              checked={item.done}
-                              disabled={r.status === 'completed'}
-                              onChange={e => patch(r.id, { [item.key]: e.target.checked })}
-                              className="mt-0.5 accent-green-500 w-4 h-4 shrink-0"
-                            />
-                            <div>
-                              <p className={`text-sm font-medium ${item.done ? 'text-green-300 line-through' : 'text-gray-200'}`}>{item.label}</p>
-                              <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{item.desc}</p>
+                        {r.employeeEmail && <p className="text-xs text-gray-500 dark:text-gray-400">{r.employeeEmail}</p>}
+                        {r.status !== 'completed' && (
+                          <div className="mt-2">
+                            <div className="flex justify-between mb-0.5">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">Offboarding progress</span>
+                              <span className={`text-xs font-medium ${pct === 100 ? 'text-green-400' : 'text-gray-400'}`}>{pct}%</span>
                             </div>
-                            {item.done && <span className="ml-auto text-green-400 text-sm"></span>}
-                          </label>
-                        ))}
+                            <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full">
+                              <div className={`h-1.5 rounded-full transition-all ${pct === 100 ? 'bg-green-500' : 'bg-purple-600'}`}
+                                style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      {r.assetsReturned && r.systemAccessRevoked && !r.checklistComplete && (
-                        <p className="text-xs text-green-400 mt-2">Both items complete — offboarding will auto-close</p>
-                      )}
-                      {r.checklistComplete && (
-                        <p className="text-xs text-green-400 mt-2">Offboarding checklist complete</p>
-                      )}
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {r.lastWorkingDay && (
+                          <p className="text-xs text-amber-400 font-medium hidden sm:block">
+                            LWD {new Date(r.lastWorkingDay).toLocaleDateString('en-AU')}
+                          </p>
+                        )}
+                        {r.status === 'pending' && (
+                          <button onClick={() => patch(r.id, { status: 'active' })}
+                            className="text-xs bg-amber-600/20 border border-amber-700 text-amber-300 hover:bg-amber-600/40 px-2.5 py-1.5 rounded-lg transition">
+                            Mark Active
+                          </button>
+                        )}
+                        {r.status === 'completed' && (
+                          <button onClick={() => patch(r.id, { status: 'active' })}
+                            className="text-xs bg-gray-700 border border-gray-600 text-gray-300 hover:bg-gray-600 px-2.5 py-1.5 rounded-lg transition">
+                            Reopen
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteRecord(r.id)}
+                          disabled={deleting === r.id}
+                          title="Delete record"
+                          className="text-xs text-red-400 hover:text-red-300 disabled:opacity-40 px-1 py-1 rounded transition">
+                          {deleting === r.id ? '…' : '🗑'}
+                        </button>
+                        <button
+                          onClick={() => { const next = isOpen ? null : r.id; setExpanded(next); if (next) loadEvents(next) }}
+                          className="text-gray-500 dark:text-gray-400 ml-1 text-sm">
+                          {isOpen ? '▲' : '▼'}
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Exit interview */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Exit Interview</p>
-                      {r.exitInterviewAt && r.status === 'completed' ? (
-                        <div className="bg-gray-100 dark:bg-gray-800/40 rounded-lg p-3 space-y-1">
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Conducted {new Date(r.exitInterviewAt).toLocaleDateString('en-AU')}</p>
-                          {r.exitInterviewNotes && <p className="text-sm text-gray-600 dark:text-gray-300">{r.exitInterviewNotes}</p>}
+                    {/* Expanded detail */}
+                    {isOpen && (
+                      <div className="border-t border-gray-200 dark:border-gray-800 px-5 py-4 space-y-5">
+
+                        {/* Edit toggle */}
+                        <div className="flex justify-end">
+                          {editingId === r.id ? (
+                            <div className="flex gap-2">
+                              <button onClick={() => saveEdit(r.id)}
+                                className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg transition">
+                                Save Changes
+                              </button>
+                              <button onClick={() => setEditingId(null)}
+                                className="text-xs border border-gray-600 text-gray-400 hover:bg-gray-800 px-3 py-1.5 rounded-lg transition">
+                                Cancel
+                              </button>
+                            </div>
+                          ) : r.status !== 'completed' ? (
+                            <button
+                              onClick={() => { setEditingId(r.id); setEditFields(p => ({ ...p, [r.id]: eField })) }}
+                              className="text-xs border border-gray-600 text-gray-400 hover:bg-gray-800 px-3 py-1.5 rounded-lg transition">
+                              ✏️ Edit Details
+                            </button>
+                          ) : null}
                         </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <div className="grid grid-cols-2 gap-2">
+
+                        {/* Key dates — edit or read */}
+                        {editingId === r.id ? (
+                          <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Interview Date</label>
-                              <input type="date"
-                                value={iField.at}
-                                onChange={e => setInterviewFields(prev => ({ ...prev, [r.id]: { ...iField, at: e.target.value } }))}
+                              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notice Date</label>
+                              <input type="date" value={eField.noticeDate}
+                                onChange={e => setEditFields(p => ({ ...p, [r.id]: { ...eField, noticeDate: e.target.value } }))}
+                                className={INPUT} />
+                            </div>
+                            <div>
+                              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Last Working Day</label>
+                              <input type="date" value={eField.lastWorkingDay}
+                                onChange={e => setEditFields(p => ({ ...p, [r.id]: { ...eField, lastWorkingDay: e.target.value } }))}
+                                className={INPUT} />
+                            </div>
+                            <div className="col-span-2">
+                              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Reason</label>
+                              <textarea value={eField.reason} rows={2}
+                                onChange={e => setEditFields(p => ({ ...p, [r.id]: { ...eField, reason: e.target.value } }))}
                                 className={INPUT} />
                             </div>
                           </div>
-                          <div>
-                            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notes / Summary</label>
-                            <textarea
-                              value={iField.notes}
-                              onChange={e => setInterviewFields(prev => ({ ...prev, [r.id]: { ...iField, notes: e.target.value } }))}
-                              rows={3} placeholder="Key themes, feedback, suggestions from exit interview…"
-                              className={INPUT} />
-                          </div>
-                          <button onClick={() => saveInterview(r.id)}
-                            className="text-xs bg-purple-600/20 border border-purple-700 text-purple-300 hover:bg-purple-600/40 px-3 py-1.5 rounded-lg transition">
-                            Save Interview
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-3 gap-3">
+                              {[
+                                { label: 'Notice Date',      value: r.noticeDate },
+                                { label: 'Last Working Day', value: r.lastWorkingDay },
+                                { label: 'Entity',           value: r.employeeEntityName },
+                              ].map(d => (
+                                <div key={d.label} className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-3">
+                                  <p className="text-xs text-gray-500 mb-0.5 dark:text-gray-400">{d.label}</p>
+                                  <p className="text-sm text-gray-700 dark:text-gray-200">
+                                    {d.value
+                                      ? (d.value.length === 10 && d.value.includes('-')
+                                          ? new Date(d.value + 'T00:00:00').toLocaleDateString('en-AU')
+                                          : d.value)
+                                      : '—'}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                            {r.reason && (
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 dark:text-gray-400">Reason</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">{r.reason}</p>
+                              </div>
+                            )}
+                          </>
+                        )}
 
-                    {/* Completion badge */}
-                    {r.status === 'completed' && (
-                      <div className="bg-green-950/40 border border-green-800/50 rounded-lg p-3 flex items-center gap-3">
-                        <span className="text-2xl"></span>
+                        {/* Offboarding checklist */}
                         <div>
-                          <p className="text-sm font-semibold text-green-300">Offboarding Complete</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">All checklist items confirmed. Employee has been fully offboarded.</p>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Offboarding Checklist</p>
+                          <div className="space-y-2">
+                            {[
+                              { label: 'Assets Returned',       desc: 'Laptop, access cards, keys, uniforms, PPE', done: r.assetsReturned,      key: 'assetsReturned' },
+                              { label: 'System Access Revoked', desc: 'Email, payroll, HR systems, facility access', done: r.systemAccessRevoked, key: 'systemAccessRevoked' },
+                            ].map(item => (
+                              <label key={item.key}
+                                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
+                                  item.done
+                                    ? 'bg-green-950/40 border-green-800/60'
+                                    : 'bg-gray-100 dark:bg-gray-800/40 border-gray-200 dark:border-gray-700 hover:border-gray-600'
+                                } ${r.status === 'completed' ? 'pointer-events-none' : ''}`}>
+                                <input type="checkbox" checked={item.done} disabled={r.status === 'completed'}
+                                  onChange={e => patch(r.id, { [item.key]: e.target.checked })}
+                                  className="mt-0.5 accent-green-500 w-4 h-4 shrink-0" />
+                                <div>
+                                  <p className={`text-sm font-medium ${item.done ? 'text-green-300 line-through' : 'text-gray-700 dark:text-gray-200'}`}>{item.label}</p>
+                                  <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{item.desc}</p>
+                                </div>
+                                {item.done && <span className="ml-auto text-green-400 text-sm">✓</span>}
+                              </label>
+                            ))}
+                          </div>
+                          {r.assetsReturned && r.systemAccessRevoked && !r.checklistComplete && (
+                            <p className="text-xs text-green-400 mt-2">Both items complete — offboarding will auto-complete</p>
+                          )}
+                          {r.checklistComplete && (
+                            <p className="text-xs text-green-400 mt-2">✓ Offboarding checklist complete</p>
+                          )}
+                        </div>
+
+                        {/* Exit interview */}
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Exit Interview</p>
+                          {r.exitInterviewAt && r.status === 'completed' ? (
+                            <div className="bg-gray-100 dark:bg-gray-800/40 rounded-lg p-3 space-y-1">
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Conducted {new Date(r.exitInterviewAt).toLocaleDateString('en-AU')}</p>
+                              {r.exitInterviewNotes && <p className="text-sm text-gray-600 dark:text-gray-300">{r.exitInterviewNotes}</p>}
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Interview Date</label>
+                                  <input type="date" value={iField.at}
+                                    onChange={e => setInterviewFields(prev => ({ ...prev, [r.id]: { ...iField, at: e.target.value } }))}
+                                    className={INPUT} />
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Notes / Summary</label>
+                                <textarea value={iField.notes}
+                                  onChange={e => setInterviewFields(prev => ({ ...prev, [r.id]: { ...iField, notes: e.target.value } }))}
+                                  rows={3} placeholder="Key themes, feedback, suggestions from exit interview…"
+                                  className={INPUT} />
+                              </div>
+                              <button onClick={() => saveInterview(r.id)}
+                                className="text-xs bg-purple-600/20 border border-purple-700 text-purple-300 hover:bg-purple-600/40 px-3 py-1.5 rounded-lg transition">
+                                Save Interview
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Completion badge */}
+                        {r.status === 'completed' && (
+                          <div className="bg-green-950/40 border border-green-800/50 rounded-lg p-3 flex items-center gap-3">
+                            <span className="text-2xl">🎉</span>
+                            <div>
+                              <p className="text-sm font-semibold text-green-300">Offboarding Complete</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">All checklist items confirmed. Employee has been fully offboarded.</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Event history */}
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">History & Notes</p>
+                          <div className="flex gap-2 mb-4">
+                            <input value={noteFields[r.id] ?? ''}
+                              onChange={e => setNoteFields(prev => ({ ...prev, [r.id]: e.target.value }))}
+                              onKeyDown={e => { if (e.key === 'Enter') addNote(r.id) }}
+                              placeholder="Add a note or comment…"
+                              className={INPUT} />
+                            <button
+                              disabled={savingNote === r.id || !noteFields[r.id]?.trim()}
+                              onClick={() => addNote(r.id)}
+                              className="shrink-0 px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition">
+                              Add
+                            </button>
+                          </div>
+                          {(sepEvents[r.id] ?? []).length === 0 ? (
+                            <p className="text-xs text-gray-600 text-center py-3 dark:text-gray-400">No events recorded yet.</p>
+                          ) : (
+                            <div className="space-y-3">
+                              {(sepEvents[r.id] ?? []).map((ev, i, arr) => (
+                                <div key={ev.id} className="flex gap-3 items-start">
+                                  <div className="flex flex-col items-center shrink-0">
+                                    <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center text-xs">
+                                      {EVENT_ICON[ev.event] ?? '📝'}
+                                    </div>
+                                    {i < arr.length - 1 && <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 mt-1" />}
+                                  </div>
+                                  <div className="flex-1 pb-1">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <p className="text-xs font-medium text-gray-900 dark:text-white capitalize">{ev.event.replace(/_/g, ' ')}</p>
+                                      <p className="text-xs text-gray-600 shrink-0 dark:text-gray-400">
+                                        {new Date(ev.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                      </p>
+                                    </div>
+                                    {ev.note        && <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{ev.note}</p>}
+                                    {ev.performedBy && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">by {ev.performedBy}</p>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
-
-                    {/* ── Event History ─────────────────────────────── */}
-                    <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">History & Notes</p>
-
-                      {/* Add note */}
-                      <div className="flex gap-2 mb-4">
-                        <input
-                          value={noteFields[r.id] ?? ''}
-                          onChange={e => setNoteFields(prev => ({ ...prev, [r.id]: e.target.value }))}
-                          placeholder="Add a note or comment…"
-                          className={INPUT} />
-                        <button
-                          disabled={savingNote === r.id || !noteFields[r.id]?.trim()}
-                          onClick={() => addNote(r.id)}
-                          className="shrink-0 px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition">
-                          Add
-                        </button>
-                      </div>
-
-                      {/* Timeline */}
-                      {(sepEvents[r.id] ?? []).length === 0 ? (
-                        <p className="text-xs text-gray-600 text-center py-3 dark:text-gray-400">No events recorded yet.</p>
-                      ) : (
-                        <div className="space-y-3">
-                          {(sepEvents[r.id] ?? []).map((ev, i, arr) => (
-                            <div key={ev.id} className="flex gap-3 items-start">
-                              <div className="flex flex-col items-center shrink-0">
-                                <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center text-xs">
-                                  {ev.event === 'initiated'                ? ''
-                                   : ev.event === 'notice_received'        ? ''
-                                   : ev.event === 'exit_interview_scheduled' ? ''
-                                   : ev.event === 'exit_interview_done'    ? ''
-                                   : ev.event === 'assets_returned'        ? ''
-                                   : ev.event === 'access_revoked'         ? ''
-                                   : ev.event === 'completed'              ? ''
-                                   : ev.event === 'checklist_completed'    ? '️'
-                                   : ''}
-                                </div>
-                                {i < arr.length - 1 && <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 mt-1" />}
-                              </div>
-                              <div className="flex-1 pb-1">
-                                <div className="flex items-center justify-between gap-2">
-                                  <p className="text-xs font-medium text-white capitalize">{ev.event.replace(/_/g, ' ')}</p>
-                                  <p className="text-xs text-gray-600 shrink-0 dark:text-gray-400">
-                                    {new Date(ev.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}
-                                  </p>
-                                </div>
-                                {ev.note        && <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{ev.note}</p>}
-                                {ev.performedBy && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">by {ev.performedBy}</p>}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
                   </div>
-                )}
-              </div>
-            )
-          })}
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>

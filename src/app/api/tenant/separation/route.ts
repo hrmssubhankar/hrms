@@ -122,6 +122,25 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function DELETE(req: NextRequest) {
+  try {
+    const guard = await apiGuard('separation:write')
+    if (guard.error) return guard.error
+    const { session } = guard
+
+    const { id } = await req.json()
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+    await db.delete(separationRecords)
+      .where(and(eq(separationRecords.id, id), eq(separationRecords.tenantId, session.tenantId)))
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('DELETE /api/tenant/separation', err)
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+  }
+}
+
 export async function PATCH(req: NextRequest) {
   try {
     const guard = await apiGuard('separation:write')
