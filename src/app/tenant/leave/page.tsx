@@ -130,6 +130,9 @@ export default function LeavePage() {
   const [reviewing,   setReviewing]   = useState<string | null>(null)
   const [formError,   setFormError]   = useState<string | null>(null)
   const [holidays,    setHolidays]    = useState<{ name: string; date: string }[]>([])
+  // ── Bulk actions ──
+  const [selected,    setSelected]    = useState<Set<string>>(new Set())
+  const [bulkBusy,    setBulkBusy]    = useState(false)
   const overlappingHolidays = (form.startDate && form.endDate)
     ? holidays.filter(h => h.date >= form.startDate && h.date <= form.endDate)
     : []
@@ -254,6 +257,33 @@ export default function LeavePage() {
     setReviewing(null); loadRequests()
   }
 
+  async function bulkReview(action: 'approve' | 'reject') {
+    if (selected.size === 0) return
+    const label = action === 'approve' ? 'approve' : 'reject'
+    if (!confirm(`${label.charAt(0).toUpperCase() + label.slice(1)} ${selected.size} selected request${selected.size > 1 ? 's' : ''}?`)) return
+    setBulkBusy(true)
+    await Promise.all([...selected].map(id =>
+      fetch('/api/tenant/leave', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action }),
+      })
+    ))
+    setSelected(new Set())
+    setBulkBusy(false)
+    loadRequests()
+  }
+
+  const pendingRequests = requests.filter(r => r.status === 'pending')
+  const allPendingSelected = pendingRequests.length > 0 && pendingRequests.every(r => selected.has(r.id))
+
+  function toggleSelectAll() {
+    if (allPendingSelected) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(pendingRequests.map(r => r.id)))
+    }
+  }
+
   // ── Calendar helpers ──
   function calendarDays(year: number, month: number) {
     const firstDate = new Date(year, month - 1, 1)
@@ -348,10 +378,10 @@ export default function LeavePage() {
             ))}
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-3">
+          {/* Filters + bulk actions */}
+          <div className="flex flex-wrap gap-3 items-center">
             <select value={filterStatus}
-              onChange={e => { setFilterStatus(e.target.value); loadRequests(e.target.value, filterType) }}
+              onChange={e => { setFilterStatus(e.target.value); loadRequests(e.target.value, filterType); setSelected(new Set()) }}
               className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
               <option value="">All statuses</option>
               {['pending','approved','rejected','cancelled'].map(s => (
@@ -359,16 +389,42 @@ export default function LeavePage() {
               ))}
             </select>
             <select value={filterType}
-              onChange={e => { setFilterType(e.target.value); loadRequests(filterStatus, e.target.value) }}
+              onChange={e => { setFilterType(e.target.value); loadRequests(filterStatus, e.target.value); setSelected(new Set()) }}
               className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
               <option value="">All types</option>
               {leaveTypes.map(t => <option key={t.key} value={t.key}>{t.emoji} {t.label}</option>)}
             </select>
             {(filterStatus || filterType) && (
-              <button onClick={() => { setFilterStatus(''); setFilterType(''); loadRequests('', '') }}
+              <button onClick={() => { setFilterStatus(''); setFilterType(''); loadRequests('', ''); setSelected(new Set()) }}
                 className="text-xs text-gray-600 dark:text-gray-400 hover:text-white px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg">
                 Clear filters
               </button>
+            )}
+            {/* Bulk action bar — only for managers when pending requests exist */}
+            {canApprove && pendingRequests.length > 0 && (
+              <div className="flex items-center gap-2 ml-auto">
+                <button onClick={toggleSelectAll}
+                  className={`text-xs px-3 py-2 rounded-lg border transition ${allPendingSelected ? 'border-purple-600 text-purple-400 bg-purple-900/20' : 'border-gray-700 text-gray-400 hover:border-gray-500'}`}>
+                  {allPendingSelected ? '✓ All selected' : `Select all pending (${pendingRequests.length})`}
+                </button>
+                {selected.size > 0 && (
+                  <>
+                    <span className="text-xs text-gray-500">{selected.size} selected</span>
+                    <button onClick={() => bulkReview('approve')} disabled={bulkBusy}
+                      className="text-xs px-3 py-2 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white rounded-lg transition font-medium">
+                      {bulkBusy ? '…' : '✓ Approve All'}
+                    </button>
+                    <button onClick={() => bulkReview('reject')} disabled={bulkBusy}
+                      className="text-xs px-3 py-2 bg-red-800 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition font-medium">
+                      {bulkBusy ? '…' : '✕ Reject All'}
+                    </button>
+                    <button onClick={() => setSelected(new Set())}
+                      className="text-xs px-2 py-2 text-gray-400 hover:text-white transition">
+                      ✕
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
 
@@ -390,13 +446,27 @@ export default function LeavePage() {
           ) : (
             <div className="space-y-3">
               {requests.map(r => {
-                const isExpanded = expanded === r.id
-                const isBusy     = reviewing === r.id
+                const isExpanded   = expanded === r.id
+                const isBusy       = reviewing === r.id
+                const isSelected   = selected.has(r.id)
+                const isPending    = r.status === 'pending'
                 return (
-                  <div key={r.id} className="bg-gray-100 dark:bg-gray-800/70 border border-gray-300 dark:border-gray-700 rounded-xl overflow-hidden">
+                  <div key={r.id} className={`bg-gray-100 dark:bg-gray-800/70 border rounded-xl overflow-hidden transition ${isSelected ? 'border-purple-600' : 'border-gray-300 dark:border-gray-700'}`}>
+                    <div className="flex items-center gap-3 px-4 py-4">
+                      {/* Checkbox — only for pending, managers only */}
+                      {canApprove && isPending && (
+                        <input type="checkbox" checked={isSelected}
+                          onChange={e => {
+                            const next = new Set(selected)
+                            if (e.target.checked) next.add(r.id); else next.delete(r.id)
+                            setSelected(next)
+                          }}
+                          className="w-4 h-4 accent-purple-500 shrink-0 cursor-pointer" />
+                      )}
+                      {canApprove && !isPending && <div className="w-4 shrink-0" />}
                     <button
                       onClick={() => setExpanded(isExpanded ? null : r.id)}
-                      className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-100 dark:bg-gray-800 transition-colors"
+                      className="flex-1 flex items-center gap-4 text-left"
                     >
                       <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {(r.employeeFirstName?.[0] ?? '?').toUpperCase()}
@@ -420,6 +490,7 @@ export default function LeavePage() {
                         <span className="text-gray-600 text-xs dark:text-gray-400">{isExpanded ? '▲' : '▼'}</span>
                       </div>
                     </button>
+                    </div>
 
                     {isExpanded && (
                       <div className="px-5 pb-5 border-t border-gray-300 dark:border-gray-700 pt-4 space-y-4">
