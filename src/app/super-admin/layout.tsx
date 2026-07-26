@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import AdminDropdown from '@/components/auth/AdminDropdown'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import AdminSidebar from '@/components/super-admin/AdminSidebar'
@@ -8,8 +9,13 @@ export const metadata: Metadata = { title: 'Super Admin | HRMS' }
 
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()
-  const name    = session?.name  ?? 'Super Admin'
-  const email   = session?.email ?? ''
+
+  if (!session || session.role !== 'super_admin') {
+    redirect('/login')
+  }
+
+  const name  = session.name  ?? 'Super Admin'
+  const email = session.email ?? ''
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white overflow-hidden">
