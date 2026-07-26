@@ -137,13 +137,13 @@ export async function PATCH(req: NextRequest) {
     const { session } = guard
 
     const body = await req.json()
-    const { id, _type = 'requisition', status, notes, interviewScore, approvedBy } = body
+    const { id, _type = 'requisition', status, notes, interviewScore, approvedBy, title, description } = body
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
     if (_type === 'application') {
       const updates: Record<string, unknown> = { updatedAt: new Date() }
-      if (status        !== undefined) updates.status        = status
-      if (notes         !== undefined) updates.notes         = notes
+      if (status         !== undefined) updates.status         = status
+      if (notes          !== undefined) updates.notes          = notes
       if (interviewScore !== undefined) updates.interviewScore = interviewScore
       const [updated] = await db.update(applications).set(updates)
         .where(and(eq(applications.id, id), eq(applications.tenantId, session.tenantId))).returning()
@@ -152,14 +152,44 @@ export async function PATCH(req: NextRequest) {
 
     // Requisition
     const updates: Record<string, unknown> = {}
-    if (status     !== undefined) updates.status     = status
-    if (approvedBy !== undefined) { updates.approvedBy = approvedBy; updates.approvedAt = new Date() }
-    if (status === 'closed')       updates.closedAt   = new Date()
+    if (title       !== undefined) updates.title       = title
+    if (description !== undefined) updates.description = description || null
+    if (status      !== undefined) updates.status      = status
+    if (approvedBy  !== undefined) { updates.approvedBy = approvedBy; updates.approvedAt = new Date() }
+    if (status === 'closed')        updates.closedAt   = new Date()
     const [updated] = await db.update(jobRequisitions).set(updates)
       .where(and(eq(jobRequisitions.id, id), eq(jobRequisitions.tenantId, session.tenantId))).returning()
     return NextResponse.json({ record: updated })
   } catch (err) {
     console.error('PATCH /api/tenant/recruitment', err)
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
+  }
+}
+
+// DELETE — remove a requisition (cascade) or a single application
+export async function DELETE(req: NextRequest) {
+  try {
+    const guard = await apiGuard('recruitment:write')
+    if (guard.error) return guard.error
+    const { session } = guard
+
+    const { id, _type = 'requisition' } = await req.json()
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+    if (_type === 'application') {
+      await db.delete(applications)
+        .where(and(eq(applications.id, id), eq(applications.tenantId, session.tenantId)))
+      return NextResponse.json({ ok: true })
+    }
+
+    // Delete applications first, then requisition
+    await db.delete(applications)
+      .where(and(eq(applications.requisitionId, id), eq(applications.tenantId, session.tenantId)))
+    await db.delete(jobRequisitions)
+      .where(and(eq(jobRequisitions.id, id), eq(jobRequisitions.tenantId, session.tenantId)))
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('DELETE /api/tenant/recruitment', err)
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
   }
 }
