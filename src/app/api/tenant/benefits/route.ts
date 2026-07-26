@@ -47,6 +47,30 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PATCH(req: NextRequest) {
+  try {
+    const guard = await apiGuard('benefits:write')
+    if (guard.error) return guard.error
+    const { session } = guard
+    const { id, type, description, startDate, endDate, notes } = await req.json()
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+    const updates: Record<string, any> = {}
+    if (type        !== undefined) updates.type        = type
+    if (description !== undefined) updates.description = description || null
+    if (startDate   !== undefined) updates.startDate   = startDate   || null
+    if (endDate     !== undefined) updates.endDate     = endDate     || null
+    if (notes       !== undefined) updates.notes       = notes       || null
+    const [updated] = await db.update(employeeBenefits)
+      .set(updates)
+      .where(and(eq(employeeBenefits.id, id), eq(employeeBenefits.tenantId, session.tenantId)))
+      .returning()
+    if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    return NextResponse.json({ record: updated })
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getSession()

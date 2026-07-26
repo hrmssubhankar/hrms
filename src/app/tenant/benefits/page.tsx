@@ -1,149 +1,401 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 type Benefit = {
-  id: string; employeeId: string; type: string; description: string | null
-  startDate: string | null; endDate: string | null; notes: string | null; createdAt: string
-  employeeFirstName: string | null; employeeLastName: string | null
+  id: string
+  employeeId: string
+  type: string
+  description: string | null
+  startDate: string | null
+  endDate: string | null
+  notes: string | null
+  createdAt: string
+  employeeFirstName: string | null
+  employeeLastName: string | null
 }
+
 type Employee = { id: string; firstName: string; lastName: string }
 
 const BENEFIT_TYPES = [
-  { value: 'eap',            label: 'Employee Assistance Program' },
-  { value: 'study_support',  label: 'Study Support' },
-  { value: 'discount',       label: 'Employee Discount' },
-  { value: 'wellbeing',      label: 'Wellbeing Allowance' },
-  { value: 'salary_packaging', label: 'Salary Packaging' },
-  { value: 'extra_leave',    label: 'Extra Leave' },
-  { value: 'flexible_work',  label: 'Flexible Work' },
-  { value: 'other',          label: 'Other' },
+  { value: 'eap',               label: 'Employee Assistance Program', emoji: '🧠', color: '#8b5cf6' },
+  { value: 'study_support',     label: 'Study Support',               emoji: '📚', color: '#3b82f6' },
+  { value: 'discount',          label: 'Employee Discount',           emoji: '🏷️', color: '#f59e0b' },
+  { value: 'wellbeing',         label: 'Wellbeing Allowance',         emoji: '💚', color: '#10b981' },
+  { value: 'salary_packaging',  label: 'Salary Packaging',            emoji: '💼', color: '#6366f1' },
+  { value: 'extra_leave',       label: 'Extra Leave',                 emoji: '🌴', color: '#14b8a6' },
+  { value: 'flexible_work',     label: 'Flexible Work',               emoji: '🏠', color: '#f97316' },
+  { value: 'other',             label: 'Other',                       emoji: '⭐', color: '#94a3b8' },
 ]
 
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
+
+const BLANK_FORM = { employeeId: '', type: 'eap', description: '', startDate: '', endDate: '', notes: '' }
+
+function getStatus(b: Benefit): 'active' | 'expiring' | 'expired' | 'permanent' {
+  const today = new Date().toISOString().slice(0, 10)
+  if (!b.endDate) return 'permanent'
+  if (b.endDate < today) return 'expired'
+  const soon = new Date()
+  soon.setDate(soon.getDate() + 30)
+  if (b.endDate <= soon.toISOString().slice(0, 10)) return 'expiring'
+  return 'active'
+}
+
+const STATUS_STYLE: Record<string, string> = {
+  active:    'bg-green-900/40 text-green-300 border-green-800',
+  expiring:  'bg-amber-900/40 text-amber-300 border-amber-800',
+  expired:   'bg-gray-800 text-gray-500 border-gray-700',
+  permanent: 'bg-blue-900/40 text-blue-300 border-blue-800',
+}
+const STATUS_LABEL: Record<string, string> = {
+  active: 'Active', expiring: 'Expiring Soon', expired: 'Expired', permanent: 'Ongoing',
+}
+
+function fmt(d: string | null): string {
+  if (!d) return '—'
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 export default function BenefitsPage() {
-  const [benefits,  setBenefits]  = useState<Benefit[]>([])
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [showForm,  setShowForm]  = useState(false)
-  const [saving,    setSaving]    = useState(false)
-  const [filterEmp, setFilterEmp] = useState('')
-  const [form, setForm] = useState({ employeeId:'', type:'eap', description:'', startDate:'', endDate:'', notes:'' })
+  const [benefits,   setBenefits]   = useState<Benefit[]>([])
+  const [employees,  setEmployees]  = useState<Employee[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [showForm,   setShowForm]   = useState(false)
+  const [saving,     setSaving]     = useState(false)
+  const [editingId,  setEditingId]  = useState<string | null>(null)
+  const [form,       setForm]       = useState(BLANK_FORM)
+  const [filterEmp,  setFilterEmp]  = useState('')
+  const [filterType, setFilterType] = useState('')
+  const [filterStatus, setFilterStatus] = useState('')
+  const [view,       setView]       = useState<'list' | 'grouped'>('list')
 
-  const load = async (empId = filterEmp) => {
+  const load = useCallback(async (empId = filterEmp) => {
     setLoading(true)
     const p = empId ? `?employeeId=${empId}` : ''
     const data = await fetch(`/api/tenant/benefits${p}`).then(r => r.json())
     setBenefits(data.benefits ?? [])
     setLoading(false)
-  }
+  }, [filterEmp])
 
   useEffect(() => {
     load()
     fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
-  async function create(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/benefits', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
-    setShowForm(false); setSaving(false); load()
+    if (editingId) {
+      await fetch('/api/tenant/benefits', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingId, ...form }),
+      })
+    } else {
+      await fetch('/api/tenant/benefits', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+    }
+    setShowForm(false); setEditingId(null); setForm(BLANK_FORM); setSaving(false); load()
+  }
+
+  function openEdit(b: Benefit) {
+    setForm({
+      employeeId:  b.employeeId,
+      type:        b.type,
+      description: b.description ?? '',
+      startDate:   b.startDate ?? '',
+      endDate:     b.endDate ?? '',
+      notes:       b.notes ?? '',
+    })
+    setEditingId(b.id)
+    setShowForm(true)
+  }
+
+  function cancelForm() {
+    setShowForm(false); setEditingId(null); setForm(BLANK_FORM)
   }
 
   async function remove(id: string) {
-    await fetch('/api/tenant/benefits', { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ id }) })
+    if (!confirm('Remove this benefit?')) return
+    await fetch('/api/tenant/benefits', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
     load()
   }
 
+  // Filter + derived stats
+  const filtered = benefits.filter(b => {
+    if (filterType && b.type !== filterType) return false
+    if (filterStatus) {
+      const s = getStatus(b)
+      if (s !== filterStatus) return false
+    }
+    return true
+  })
+
+  const stats = {
+    total:    benefits.length,
+    active:   benefits.filter(b => getStatus(b) === 'active' || getStatus(b) === 'permanent').length,
+    expiring: benefits.filter(b => getStatus(b) === 'expiring').length,
+    expired:  benefits.filter(b => getStatus(b) === 'expired').length,
+  }
+
+  // Grouped view: by benefit type
+  const grouped = BENEFIT_TYPES.map(t => ({
+    ...t,
+    items: filtered.filter(b => b.type === t.value),
+  })).filter(g => g.items.length > 0)
+
+  const typeInfo = (type: string) => BENEFIT_TYPES.find(t => t.value === type)
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Employee Benefits</h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track benefits, entitlements, and support programs assigned to employees</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track and manage benefit assignments across the team</p>
         </div>
-        <button onClick={() => setShowForm(v => !v)} className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">
-          {showForm ? 'Cancel' : '+ Assign Benefit'}
+        <button onClick={() => { setForm(BLANK_FORM); setEditingId(null); setShowForm(v => !v) }}
+          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+          {showForm && !editingId ? 'Cancel' : '+ Assign Benefit'}
         </button>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: 'Total Assigned', value: stats.total,    color: 'text-white' },
+          { label: 'Active',         value: stats.active,   color: 'text-green-400' },
+          { label: 'Expiring Soon',  value: stats.expiring, color: 'text-amber-400' },
+          { label: 'Expired',        value: stats.expired,  color: 'text-gray-500' },
+        ].map(s => (
+          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
+            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Add / Edit form */}
       {showForm && (
-        <form onSubmit={create} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={save} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+          <h3 className="text-sm font-semibold text-purple-300">{editingId ? 'Edit Benefit' : 'Assign Benefit'}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Employee *</label>
-              <select required value={form.employeeId} onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} className={INPUT}>
+              <label className={LABEL}>Employee *</label>
+              <select required value={form.employeeId}
+                onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))}
+                disabled={!!editingId} className={INPUT}>
                 <option value="">— Select —</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Benefit Type *</label>
-              <select required value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
-                {BENEFIT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              <label className={LABEL}>Benefit Type *</label>
+              <select required value={form.type}
+                onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className={INPUT}>
+                {BENEFIT_TYPES.map(t => <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Start Date</label>
-              <input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={INPUT} />
+              <label className={LABEL}>Start Date</label>
+              <input type="date" value={form.startDate}
+                onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={INPUT} />
             </div>
             <div>
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">End Date</label>
-              <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={INPUT} />
+              <label className={LABEL}>End Date <span className="text-gray-500">(leave blank = ongoing)</span></label>
+              <input type="date" value={form.endDate} min={form.startDate}
+                onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={INPUT} />
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Description</label>
-              <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                rows={2} placeholder="Details of the benefit…" className={INPUT} />
+              <label className={LABEL}>Description</label>
+              <textarea rows={2} value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="Details of the benefit…" className={INPUT} />
+            </div>
+            <div className="col-span-2">
+              <label className={LABEL}>Internal Notes</label>
+              <input value={form.notes}
+                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                placeholder="HR notes (not visible to employee)…" className={INPUT} />
             </div>
           </div>
-          <button type="submit" disabled={saving}
-            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2 rounded-lg">
-            {saving ? 'Saving…' : 'Assign Benefit'}
-          </button>
+          <div className="flex gap-2">
+            <button type="submit" disabled={saving}
+              className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm px-5 py-2 rounded-lg transition font-medium">
+              {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Assign Benefit'}
+            </button>
+            <button type="button" onClick={cancelForm}
+              className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg transition">
+              Cancel
+            </button>
+          </div>
         </form>
       )}
 
-      <select value={filterEmp} onChange={e => { setFilterEmp(e.target.value); load(e.target.value) }}
-        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
-        <option value="">All employees</option>
-        {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
-      </select>
+      {/* Filters + view toggle */}
+      <div className="flex flex-wrap items-center gap-3">
+        <select value={filterEmp} onChange={e => { setFilterEmp(e.target.value); load(e.target.value) }}
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          <option value="">All employees</option>
+          {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
+        </select>
+        <select value={filterType} onChange={e => setFilterType(e.target.value)}
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          <option value="">All types</option>
+          {BENEFIT_TYPES.map(t => <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>)}
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="permanent">Ongoing</option>
+          <option value="expiring">Expiring Soon</option>
+          <option value="expired">Expired</option>
+        </select>
+        {(filterType || filterStatus) && (
+          <button onClick={() => { setFilterType(''); setFilterStatus('') }}
+            className="text-xs text-gray-400 hover:text-white border border-gray-700 px-3 py-2 rounded-lg transition">
+            Clear
+          </button>
+        )}
+        <div className="ml-auto flex gap-1 bg-gray-100 dark:bg-gray-800/60 rounded-lg p-1">
+          {(['list', 'grouped'] as const).map(v => (
+            <button key={v} onClick={() => setView(v)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition capitalize ${
+                view === v ? 'bg-white dark:bg-gray-900 text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-300'
+              }`}>
+              {v === 'list' ? '☰ List' : '⊞ Grouped'}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : benefits.length === 0 ? (
+      {/* Content */}
+      {loading ? (
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
+      ) : filtered.length === 0 ? (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
-                </svg>
-              </div>
-          <p className="text-gray-600 dark:text-gray-300 font-medium">No benefits assigned</p>
+          <div className="text-4xl mb-3">🎁</div>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">No benefits found</p>
+          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">
+            {benefits.length > 0 ? 'Try adjusting your filters' : 'Assign a benefit to get started'}
+          </p>
+        </div>
+      ) : view === 'list' ? (
+        /* ── LIST VIEW ── */
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                {['Employee', 'Benefit', 'Status', 'Period', 'Description', 'Actions'].map(h => (
+                  <th key={h} className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(b => {
+                const status = getStatus(b)
+                const info   = typeInfo(b.type)
+                return (
+                  <tr key={b.id} className="border-b border-gray-100 dark:border-gray-800/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/20 transition">
+                    <td className="px-4 py-3.5">
+                      <p className="text-white font-medium">{b.employeeFirstName} {b.employeeLastName}</p>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="flex items-center gap-1.5 text-sm text-gray-300">
+                        <span>{info?.emoji}</span>
+                        <span>{info?.label ?? b.type}</span>
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLE[status]}`}>
+                        {STATUS_LABEL[status]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-gray-500 dark:text-gray-400">
+                      {b.startDate ? fmt(b.startDate) : '—'}
+                      {b.endDate ? ` → ${fmt(b.endDate)}` : b.startDate ? ' → ongoing' : ''}
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-gray-400 max-w-xs truncate">
+                      {b.description ?? '—'}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(b)}
+                          className="text-xs border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 px-2.5 py-1 rounded-lg transition">
+                          Edit
+                        </button>
+                        <button onClick={() => remove(b.id)}
+                          className="text-xs border border-red-900 text-red-400 hover:bg-red-900/20 px-2.5 py-1 rounded-lg transition">
+                          Remove
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       ) : (
-        <div className="space-y-2">
-          {benefits.map(b => (
-            <div key={b.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-white font-medium text-sm">{b.employeeFirstName} {b.employeeLastName}</span>
-                  <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-                    {BENEFIT_TYPES.find(t => t.value === b.type)?.label ?? b.type}
-                  </span>
-                </div>
-                {b.description && <p className="text-xs text-gray-600 dark:text-gray-400">{b.description}</p>}
-                {(b.startDate || b.endDate) && (
-                  <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">
-                    {b.startDate && new Date(b.startDate + 'T00:00:00').toLocaleDateString('en-AU')}
-                    {b.endDate && ` → ${new Date(b.endDate + 'T00:00:00').toLocaleDateString('en-AU')}`}
-                  </p>
-                )}
+        /* ── GROUPED VIEW ── */
+        <div className="space-y-4">
+          {grouped.map(group => (
+            <div key={group.value} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+              <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 dark:border-gray-800"
+                style={{ borderLeft: `4px solid ${group.color}` }}>
+                <span className="text-xl">{group.emoji}</span>
+                <p className="text-sm font-semibold text-white">{group.label}</p>
+                <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">{group.items.length} assigned</span>
               </div>
-              <button onClick={() => remove(b.id)}
-                className="text-xs text-gray-600 hover:text-red-400 transition px-2 py-1 rounded border border-transparent hover:border-red-800 dark:text-gray-400">
-                Remove
-              </button>
+              <div className="divide-y divide-gray-100 dark:divide-gray-800/50">
+                {group.items.map(b => {
+                  const status = getStatus(b)
+                  return (
+                    <div key={b.id} className="flex items-center gap-4 px-5 py-3.5">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-white font-medium">{b.employeeFirstName} {b.employeeLastName}</p>
+                        {b.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{b.description}</p>}
+                        <p className="text-xs text-gray-600 dark:text-gray-500 mt-0.5">
+                          {b.startDate ? fmt(b.startDate) : 'No start'}
+                          {b.endDate ? ` → ${fmt(b.endDate)}` : ' → ongoing'}
+                        </p>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium shrink-0 ${STATUS_STYLE[status]}`}>
+                        {STATUS_LABEL[status]}
+                      </span>
+                      <div className="flex gap-2 shrink-0">
+                        <button onClick={() => openEdit(b)}
+                          className="text-xs border border-gray-700 text-gray-400 hover:text-white px-2 py-1 rounded-lg transition">
+                          Edit
+                        </button>
+                        <button onClick={() => remove(b.id)}
+                          className="text-xs border border-red-900 text-red-400 hover:bg-red-900/20 px-2 py-1 rounded-lg transition">
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Expiry alert banner */}
+      {stats.expiring > 0 && (
+        <div className="bg-amber-900/20 border border-amber-800 rounded-xl px-5 py-3.5 flex items-center gap-3">
+          <span className="text-amber-400 text-lg">⚠️</span>
+          <p className="text-sm text-amber-300">
+            <span className="font-semibold">{stats.expiring} benefit{stats.expiring > 1 ? 's' : ''}</span> expiring within 30 days.
+            Filter by <button onClick={() => setFilterStatus('expiring')} className="underline hover:text-amber-200">Expiring Soon</button> to review.
+          </p>
         </div>
       )}
     </div>
