@@ -68,15 +68,24 @@ function ConfirmModal({ state, onConfirm, onCancel }: {
 export default function ClientsPage() {
   const [clients, setClients]           = useState<Client[]>([])
   const [loading, setLoading]           = useState(true)
+  const [apiError, setApiError]         = useState<string | null>(null)
   const [search, setSearch]             = useState('')
   const [impersonating, setImpersonating] = useState<string | null>(null)
   const [confirm, setConfirm]           = useState<ConfirmState>(null)
 
   useEffect(() => {
     fetch('/api/super-admin/clients')
-      .then(r => r.json())
-      .then(d => { setClients(d.clients ?? []); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then(async r => {
+        const d = await r.json()
+        if (!r.ok) {
+          setApiError(`Error ${r.status}: ${d.error ?? 'Unknown error'}`)
+          setLoading(false)
+          return
+        }
+        setClients(d.clients ?? [])
+        setLoading(false)
+      })
+      .catch(err => { setApiError(String(err)); setLoading(false) })
   }, [])
 
   async function toggleActive(id: string, current: boolean) {
@@ -172,9 +181,21 @@ export default function ClientsPage() {
         className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500"
       />
 
+      {apiError && (
+        <div className="bg-red-900/30 border border-red-700 rounded-xl px-5 py-4 text-sm text-red-300">
+          <strong>Failed to load clients:</strong> {apiError}
+          {apiError.includes('401') && (
+            <p className="mt-1 text-red-400 text-xs">
+              Your session is not recognized as super admin. Try{' '}
+              <a href="/login" className="underline">logging out and back in</a>.
+            </p>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <div className="text-gray-600 dark:text-gray-400 text-sm">Loading clients…</div>
-      ) : (
+      ) : !apiError && (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
