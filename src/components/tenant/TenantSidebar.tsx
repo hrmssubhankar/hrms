@@ -73,6 +73,7 @@ const NAV_ICONS: Record<string, IconName> = {
   'my-payslips':        'payslip',
   'my-documents':       'folder',
   'my-schedule':        'rostering',
+  'my-performance':     'performance',
 }
 
 export default function TenantSidebar({
@@ -178,10 +179,11 @@ export default function TenantSidebar({
             My Portal
           </p>
           {[
-            { key: 'my-schedule',  label: 'My Schedule' },
-            { key: 'my-profile',   label: 'My Profile' },
-            { key: 'my-payslips',  label: 'My Payslips' },
-            { key: 'my-documents', label: 'My Documents' },
+            { key: 'my-schedule',     label: 'My Schedule' },
+            { key: 'my-profile',      label: 'My Profile' },
+            { key: 'my-payslips',     label: 'My Payslips' },
+            { key: 'my-documents',    label: 'My Documents' },
+            { key: 'my-performance',  label: 'My Performance' },
           ].map(({ key, label }) => (
             <NavLink key={key} navKey={key} label={label} />
           ))}
