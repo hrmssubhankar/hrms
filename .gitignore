@@ -56,3 +56,8 @@ next-env.d.ts
 # Drizzle
 drizzle/meta/
 .env*
+
+# .NET local overrides — NEVER commit these
+api/**/appsettings.Development.json
+api/**/appsettings.Production.json
+api/**/secrets.json

@@ -1,0 +1,15 @@
+# Railway configuration
+# https://docs.railway.app/reference/config-as-code
+
+[build]
+# Dockerfile at project root builds the .NET API
+dockerfilePath = "Dockerfile"
+# Only trigger rebuilds when API code changes
+watchPatterns = ["api/**", "Dockerfile", ".dockerignore"]
+
+[deploy]
+# Health check endpoint (from Program.cs: app.MapHealthChecks("/health"))
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

@@ -1,0 +1,25 @@
+# Next.js
+node_modules
+.next
+out
+.npm
+.vercel
+
+# .NET build outputs — never needed in image
+api/**/bin
+api/**/obj
+api/**/.vs
+api/**/*.user
+
+# Local secrets — NEVER in Docker image
+api/**/appsettings.Development.json
+api/**/appsettings.Production.json
+api/**/secrets.json
+*.env
+.env.*
+
+# OS / IDE
+.DS_Store
+**/.DS_Store
+.idea/
+.vscode/
