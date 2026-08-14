@@ -13,11 +13,10 @@ RUN dotnet restore YahwehHrms.API/YahwehHrms.API.csproj
 # Copy all API source code
 COPY api/ .
 
-# Publish release build
+# Publish release build (restore included to avoid stale cache issues)
 RUN dotnet publish YahwehHrms.API/YahwehHrms.API.csproj \
     -c Release \
-    -o /app/publish \
-    --no-restore
+    -o /app/publish
 
 # ── Stage 2: Runtime ──────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
