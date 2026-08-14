@@ -8,6 +8,7 @@ using YahwehHrms.Infrastructure;
 using YahwehHrms.Infrastructure.Data;
 using YahwehHrms.Infrastructure.Hubs;
 using YahwehHrms.Infrastructure.Services;
+using YahwehHrms.Infrastructure.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
