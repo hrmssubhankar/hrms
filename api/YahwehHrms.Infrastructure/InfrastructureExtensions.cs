@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using YahwehHrms.Core.Interfaces;
 using YahwehHrms.Infrastructure.Data;
 using YahwehHrms.Infrastructure.Services;
 

@@ -38,12 +38,12 @@ public class SuperAdminAuthService : ISuperAdminAuthService
         if (await _db.SuperAdminUsers.AnyAsync(ct)) return;
         _db.SuperAdminUsers.Add(new SuperAdminUser
         {
-            Id = Guid.NewGuid(),
-            Email = "admin@yahwehhrms.com",
+            Id          = Guid.NewGuid(),
+            Email       = "admin@yahwehhrms.com",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123456"),
-            Name = "System Administrator",
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            DisplayName = "System Administrator",
+            IsActive    = true,
+            CreatedAt   = DateTime.UtcNow
         });
         await _db.SaveChangesAsync(ct);
     }
