@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using YahwehHrms.Core.Interfaces;
+using StackExchange.Redis;
 using YahwehHrms.Infrastructure.Data;
 using YahwehHrms.Infrastructure.Services;
 
@@ -10,16 +9,6 @@ namespace YahwehHrms.Infrastructure;
 
 public static class InfrastructureExtensions
 {
-    /// <summary>
-    /// Registers all Infrastructure-layer services: EF Core (Npgsql), caching,
-    /// domain services, and health checks.
-    ///
-    /// Required configuration keys:
-    ///   ConnectionStrings:DefaultConnection   — PostgreSQL connection string
-    ///
-    /// Optional configuration keys:
-    ///   Redis:ConnectionString                — if present, distributed cache is added
-    /// </summary>
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration config)
@@ -27,24 +16,35 @@ public static class InfrastructureExtensions
         // ── Database ──────────────────────────────────────────────────────────
         var connStr = config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException(
-                "ConnectionStrings:DefaultConnection is required. " +
-                "Set it in appsettings.json or as an environment variable.");
+                "ConnectionStrings:DefaultConnection is required.");
 
         services.AddDbContext<HrmsDbContext>(opts =>
             opts.UseNpgsql(connStr, npgsql =>
             {
-                npgsql.MigrationsHistoryTable("__ef_migrations_history", "public");
+                npgsql.MigrationsAssembly("YahwehHrms.Infrastructure");
                 npgsql.EnableRetryOnFailure(maxRetryCount: 3);
             }));
 
         // ── Caching ───────────────────────────────────────────────────────────
-        // IMemoryCache is used by ModuleService for per-tenant enabled module keys.
-        // If you add a Redis connection string, IDistributedCache is also registered.
         services.AddMemoryCache();
 
-        var redisConn = config["Redis:ConnectionString"];
+        // ── Redis (optional) ──────────────────────────────────────────────────
+        var redisConn = config.GetConnectionString("Redis");
         if (!string.IsNullOrWhiteSpace(redisConn))
-            services.AddStackExchangeRedisCache(opts => opts.Configuration = redisConn);
+        {
+            var redisOptions = ConfigurationOptions.Parse(redisConn);
+            redisOptions.AbortOnConnectFail = false;
+            redisOptions.ConnectTimeout     = 5000;
+            redisOptions.SyncTimeout        = 5000;
+            services.AddSingleton<IConnectionMultiplexer>(
+                ConnectionMultiplexer.Connect(redisOptions));
+        }
+
+        // ── Auth & JWT services ───────────────────────────────────────────────
+        services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ISuperAdminAuthService, SuperAdminAuthService>();
 
         // ── Domain services ───────────────────────────────────────────────────
         services.AddScoped<IModuleService, ModuleService>();
@@ -52,10 +52,10 @@ public static class InfrastructureExtensions
 
         // ── Health checks ─────────────────────────────────────────────────────
         var hc = services.AddHealthChecks()
-            .AddNpgSql(connStr, name: "postgres", tags: ["db", "ready"]);
+            .AddNpgSql(connStr, name: "postgres", tags: new[] { "db", "ready" });
 
         if (!string.IsNullOrWhiteSpace(redisConn))
-            hc.AddRedis(redisConn, name: "redis", tags: ["cache", "ready"]);
+            hc.AddRedis(redisConn, name: "redis", tags: new[] { "cache", "ready" });
 
         return services;
     }

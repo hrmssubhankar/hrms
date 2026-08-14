@@ -4,6 +4,7 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Serilog;
 using System.Text;
+using YahwehHrms.Infrastructure;
 using YahwehHrms.Infrastructure.Data;
 using YahwehHrms.Infrastructure.Hubs;
 using YahwehHrms.Infrastructure.Services;
@@ -36,7 +37,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"]
     ?? throw new InvalidOperationException("JWT secret not configured");
 
@@ -51,7 +51,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ClockSkew = TimeSpan.Zero,
         };
-        // Allow token via query string for SignalR
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = ctx =>
@@ -68,17 +67,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-
-// SignalR
 builder.Services.AddSignalR();
 
-// Hangfire (background jobs)
 builder.Services.AddHangfire(config =>
     config.UsePostgreSqlStorage(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddHangfireServer();
 
-// CORS — allow Next.js frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -92,10 +87,16 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
-// Infrastructure (DB, Repos, Services) — see Infrastructure project
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+// ── Seed default super admin ──────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var superAdminAuth = scope.ServiceProvider.GetRequiredService<ISuperAdminAuthService>();
+    await superAdminAuth.SeedDefaultAdminIfNoneExistsAsync();
+}
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
@@ -109,8 +110,8 @@ app.UseCors("Frontend");
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ModuleGuardMiddleware>();
 
-// Hangfire dashboard (dev only)
 if (app.Environment.IsDevelopment())
 {
     app.UseHangfireDashboard("/hangfire");
