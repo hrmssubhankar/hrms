@@ -21,7 +21,7 @@ public class SafetyERController : ControllerBase
     {
         var q = _db.WhsIncidents.AsNoTracking().Where(i => i.TenantId == TenantId).Include(i => i.Employee).AsQueryable();
         if (!string.IsNullOrWhiteSpace(severity)) q = q.Where(i => i.Severity == severity);
-        return Ok(await q.OrderByDescending(i => i.IncidentDate).ToListAsync(ct));
+        return Ok(await q.OrderByDescending(i => i.OccurredAt).ToListAsync(ct));
     }
 
     [HttpGet("whs-incidents/{id:guid}")]
@@ -44,9 +44,9 @@ public class SafetyERController : ControllerBase
     {
         var item = await _db.WhsIncidents.FirstOrDefaultAsync(i => i.TenantId == TenantId && i.Id == id, ct);
         if (item is null) return NotFound();
-        item.IncidentType = update.IncidentType; item.Description = update.Description; item.Severity = update.Severity;
-        item.IncidentDate = update.IncidentDate; item.Location = update.Location; item.Status = update.Status;
-        item.CorrectiveAction = update.CorrectiveAction; item.ResolvedAt = update.ResolvedAt;
+        item.Type = update.Type; item.Description = update.Description; item.Severity = update.Severity;
+        item.OccurredAt = update.OccurredAt; item.Location = update.Location; item.Status = update.Status;
+        item.CorrectiveActions = update.CorrectiveActions; item.ClosedOn = update.ClosedOn;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -63,7 +63,7 @@ public class SafetyERController : ControllerBase
     {
         var q = _db.Grievances.AsNoTracking().Where(g => g.TenantId == TenantId).Include(g => g.Employee).AsQueryable();
         if (!string.IsNullOrWhiteSpace(status)) q = q.Where(g => g.Status == status);
-        return Ok(await q.OrderByDescending(g => g.SubmittedAt).ToListAsync(ct));
+        return Ok(await q.OrderByDescending(g => g.CreatedAt).ToListAsync(ct));
     }
 
     [HttpGet("grievances/{id:guid}")]
@@ -76,7 +76,7 @@ public class SafetyERController : ControllerBase
     [HttpPost("grievances")]
     public async Task<IActionResult> CreateGrievance([FromBody] Grievance grievance, CancellationToken ct = default)
     {
-        grievance.Id = Guid.NewGuid(); grievance.TenantId = TenantId; grievance.SubmittedAt = DateTime.UtcNow;
+        grievance.Id = Guid.NewGuid(); grievance.TenantId = TenantId; grievance.CreatedAt = DateTimeOffset.UtcNow;
         _db.Grievances.Add(grievance); await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetGrievance), new { id = grievance.Id }, grievance);
     }
@@ -87,7 +87,7 @@ public class SafetyERController : ControllerBase
         var item = await _db.Grievances.FirstOrDefaultAsync(g => g.TenantId == TenantId && g.Id == id, ct);
         if (item is null) return NotFound();
         item.Category = update.Category; item.Description = update.Description; item.Status = update.Status;
-        item.Resolution = update.Resolution; item.ResolvedAt = update.ResolvedAt;
+        item.Resolution = update.Resolution; item.ResolvedOn = update.ResolvedOn;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -104,7 +104,7 @@ public class SafetyERController : ControllerBase
     {
         var q = _db.SeparationRecords.AsNoTracking().Where(s => s.TenantId == TenantId).Include(s => s.Employee).AsQueryable();
         if (employeeId.HasValue) q = q.Where(s => s.EmployeeId == employeeId.Value);
-        return Ok(await q.OrderByDescending(s => s.SeparationDate).ToListAsync(ct));
+        return Ok(await q.OrderByDescending(s => s.EffectiveDate).ToListAsync(ct));
     }
 
     [HttpGet("separations/{id:guid}")]
@@ -127,8 +127,8 @@ public class SafetyERController : ControllerBase
     {
         var item = await _db.SeparationRecords.FirstOrDefaultAsync(s => s.TenantId == TenantId && s.Id == id, ct);
         if (item is null) return NotFound();
-        item.SeparationType = update.SeparationType; item.SeparationDate = update.SeparationDate;
-        item.Reason = update.Reason; item.ExitInterviewCompleted = update.ExitInterviewCompleted; item.Notes = update.Notes;
+        item.Type = update.Type; item.EffectiveDate = update.EffectiveDate;
+        item.Reason = update.Reason; item.ExitInterviewDone = update.ExitInterviewDone; item.ExitNotes = update.ExitNotes;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 

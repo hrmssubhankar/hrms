@@ -51,9 +51,13 @@ public class AuthController : ControllerBase
                 u.Id, u.TenantId, u.Email, u.Role, u.IsActive, u.CreatedAt,
                 Employee = u.Employee == null ? null : new
                 {
-                    u.Employee.Id, u.Employee.FirstName, u.Employee.LastName,
-                    u.Employee.JobTitle, u.Employee.DepartmentId, u.Employee.PositionId,
-                    u.Employee.EmploymentStatus, u.Employee.HireDate
+                    u.Employee.Id,
+                    u.Employee.FirstName,
+                    u.Employee.LastName,
+                    u.Employee.DepartmentId,
+                    u.Employee.PositionId,
+                    Status = u.Employee.Status,
+                    StartDate = u.Employee.StartDate
                 }
             })
             .FirstOrDefaultAsync(ct);
@@ -79,7 +83,7 @@ public class AuthController : ControllerBase
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Role = string.IsNullOrWhiteSpace(request.Role) ? "employee" : request.Role.Trim().ToLower(),
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTimeOffset.UtcNow
         };
         _db.Users.Add(user);
         await _db.SaveChangesAsync(ct);

@@ -23,14 +23,14 @@ public class ExperienceController : ControllerBase
     [HttpGet("surveys/{id:guid}")]
     public async Task<IActionResult> GetSurvey(Guid id, CancellationToken ct = default)
     {
-        var item = await _db.Surveys.AsNoTracking().Include(s => s.SurveyResponses).FirstOrDefaultAsync(s => s.TenantId == TenantId && s.Id == id, ct);
+        var item = await _db.Surveys.AsNoTracking().Include(s => s.Responses).FirstOrDefaultAsync(s => s.TenantId == TenantId && s.Id == id, ct);
         return item is null ? NotFound() : Ok(item);
     }
 
     [HttpPost("surveys")]
     public async Task<IActionResult> CreateSurvey([FromBody] Survey survey, CancellationToken ct = default)
     {
-        survey.Id = Guid.NewGuid(); survey.TenantId = TenantId; survey.CreatedAt = DateTime.UtcNow;
+        survey.Id = Guid.NewGuid(); survey.TenantId = TenantId; survey.CreatedAt = DateTimeOffset.UtcNow;
         _db.Surveys.Add(survey); await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetSurvey), new { id = survey.Id }, survey);
     }
@@ -40,7 +40,7 @@ public class ExperienceController : ControllerBase
     {
         var item = await _db.Surveys.FirstOrDefaultAsync(s => s.TenantId == TenantId && s.Id == id, ct);
         if (item is null) return NotFound();
-        item.Title = update.Title; item.Description = update.Description; item.Status = update.Status; item.CloseDate = update.CloseDate;
+        item.Title = update.Title; item.Description = update.Description; item.Status = update.Status; item.EndsAt = update.EndsAt;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -63,26 +63,26 @@ public class ExperienceController : ControllerBase
     public async Task<IActionResult> SubmitResponse(Guid id, [FromBody] SurveyResponse response, CancellationToken ct = default)
     {
         if (!await _db.Surveys.AsNoTracking().AnyAsync(s => s.TenantId == TenantId && s.Id == id, ct)) return NotFound();
-        response.Id = Guid.NewGuid(); response.TenantId = TenantId; response.SurveyId = id; response.SubmittedAt = DateTime.UtcNow;
+        response.Id = Guid.NewGuid(); response.TenantId = TenantId; response.SurveyId = id; response.SubmittedAt = DateTimeOffset.UtcNow;
         _db.SurveyResponses.Add(response); await _db.SaveChangesAsync(ct);
         return Ok(response);
     }
 
     [HttpGet("recognitions")]
     public async Task<IActionResult> GetRecognitions(CancellationToken ct = default) =>
-        Ok(await _db.Recognitions.AsNoTracking().Where(r => r.TenantId == TenantId).Include(r => r.Employee).OrderByDescending(r => r.RecognisedAt).ToListAsync(ct));
+        Ok(await _db.Recognitions.AsNoTracking().Where(r => r.TenantId == TenantId).Include(r => r.Giver).Include(r => r.Recipient).OrderByDescending(r => r.CreatedAt).ToListAsync(ct));
 
     [HttpGet("recognitions/{id:guid}")]
     public async Task<IActionResult> GetRecognition(Guid id, CancellationToken ct = default)
     {
-        var item = await _db.Recognitions.AsNoTracking().Include(r => r.Employee).FirstOrDefaultAsync(r => r.TenantId == TenantId && r.Id == id, ct);
+        var item = await _db.Recognitions.AsNoTracking().Include(r => r.Giver).Include(r => r.Recipient).FirstOrDefaultAsync(r => r.TenantId == TenantId && r.Id == id, ct);
         return item is null ? NotFound() : Ok(item);
     }
 
     [HttpPost("recognitions")]
     public async Task<IActionResult> CreateRecognition([FromBody] Recognition recognition, CancellationToken ct = default)
     {
-        recognition.Id = Guid.NewGuid(); recognition.TenantId = TenantId; recognition.RecognisedAt = DateTime.UtcNow;
+        recognition.Id = Guid.NewGuid(); recognition.TenantId = TenantId; recognition.CreatedAt = DateTimeOffset.UtcNow;
         _db.Recognitions.Add(recognition); await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetRecognition), new { id = recognition.Id }, recognition);
     }
@@ -97,12 +97,12 @@ public class ExperienceController : ControllerBase
 
     [HttpGet("referrals")]
     public async Task<IActionResult> GetReferrals(CancellationToken ct = default) =>
-        Ok(await _db.Referrals.AsNoTracking().Where(r => r.TenantId == TenantId).Include(r => r.Employee).OrderByDescending(r => r.ReferredAt).ToListAsync(ct));
+        Ok(await _db.Referrals.AsNoTracking().Where(r => r.TenantId == TenantId).Include(r => r.Referrer).OrderByDescending(r => r.CreatedAt).ToListAsync(ct));
 
     [HttpPost("referrals")]
     public async Task<IActionResult> CreateReferral([FromBody] Referral referral, CancellationToken ct = default)
     {
-        referral.Id = Guid.NewGuid(); referral.TenantId = TenantId; referral.ReferredAt = DateTime.UtcNow;
+        referral.Id = Guid.NewGuid(); referral.TenantId = TenantId; referral.CreatedAt = DateTimeOffset.UtcNow;
         _db.Referrals.Add(referral); await _db.SaveChangesAsync(ct);
         return Ok(referral);
     }
@@ -112,7 +112,7 @@ public class ExperienceController : ControllerBase
     {
         var item = await _db.Referrals.FirstOrDefaultAsync(r => r.TenantId == TenantId && r.Id == id, ct);
         if (item is null) return NotFound();
-        item.Status = update.Status; item.Notes = update.Notes;
+        item.Status = update.Status;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -133,7 +133,7 @@ public class ExperienceController : ControllerBase
         if (!Guid.TryParse(sub, out var userId)) return Unauthorized();
         var item = await _db.Notifications.FirstOrDefaultAsync(n => n.TenantId == TenantId && n.Id == id && n.UserId == userId, ct);
         if (item is null) return NotFound();
-        item.IsRead = true; item.ReadAt = DateTime.UtcNow;
+        item.IsRead = true; item.ReadAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -143,7 +143,7 @@ public class ExperienceController : ControllerBase
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
         if (!Guid.TryParse(sub, out var userId)) return Unauthorized();
         var unread = await _db.Notifications.Where(n => n.TenantId == TenantId && n.UserId == userId && !n.IsRead).ToListAsync(ct);
-        foreach (var n in unread) { n.IsRead = true; n.ReadAt = DateTime.UtcNow; }
+        foreach (var n in unread) { n.IsRead = true; n.ReadAt = DateTimeOffset.UtcNow; }
         await _db.SaveChangesAsync(ct);
         return Ok(new { updated = unread.Count });
     }

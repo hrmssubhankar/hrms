@@ -9,8 +9,6 @@ namespace YahwehHrms.Api.Controllers.SuperAdmin;
 /// <summary>
 /// Super Admin — Tenant management.
 /// Base route: /api/superadmin/tenants
-///
-/// All endpoints require the "SuperAdmin" role claim.
 /// </summary>
 [ApiController]
 [Route("api/superadmin/tenants")]
@@ -27,8 +25,6 @@ public sealed class TenantsController : ControllerBase
         _modules = modules;
     }
 
-    // ── GET /api/superadmin/tenants ───────────────────────────────────────────
-    /// <summary>Returns all active tenants ordered by name.</summary>
     [HttpGet]
     [ProducesResponseType<IEnumerable<TenantDto>>(200)]
     public async Task<IActionResult> GetAll(CancellationToken ct)
@@ -37,8 +33,6 @@ public sealed class TenantsController : ControllerBase
         return Ok(list.Select(TenantDto.From));
     }
 
-    // ── GET /api/superadmin/tenants/{id} ──────────────────────────────────────
-    /// <summary>Returns a single tenant by ID.</summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<TenantDto>(200)]
     [ProducesResponseType(404)]
@@ -48,8 +42,6 @@ public sealed class TenantsController : ControllerBase
         return tenant is null ? NotFound() : Ok(TenantDto.From(tenant));
     }
 
-    // ── GET /api/superadmin/tenants/by-subdomain/{subdomain} ─────────────────
-    /// <summary>Looks up a tenant by its subdomain slug.</summary>
     [HttpGet("by-subdomain/{subdomain}")]
     [ProducesResponseType<TenantDto>(200)]
     [ProducesResponseType(404)]
@@ -59,10 +51,6 @@ public sealed class TenantsController : ControllerBase
         return tenant is null ? NotFound() : Ok(TenantDto.From(tenant));
     }
 
-    // ── POST /api/superadmin/tenants ──────────────────────────────────────────
-    /// <summary>
-    /// Creates a new tenant and auto-provisions plan-default modules.
-    /// </summary>
     [HttpPost]
     [ProducesResponseType<TenantDto>(201)]
     [ProducesResponseType<ValidationProblemDetails>(400)]
@@ -72,25 +60,15 @@ public sealed class TenantsController : ControllerBase
 
         var tenant = new Tenant
         {
-            Name         = req.Name,
-            Subdomain    = req.Subdomain.ToLowerInvariant().Trim(),
-            Plan         = req.Plan,
-            ContactEmail = req.ContactEmail,
-            ContactPhone = req.ContactPhone,
-            CountryCode  = req.CountryCode ?? "AU",
-            Timezone     = req.Timezone    ?? "Australia/Sydney",
-            MaxEmployees = req.MaxEmployees ?? 50
+            Name      = req.Name,
+            Subdomain = req.Subdomain.ToLowerInvariant().Trim(),
+            Plan      = req.Plan
         };
 
         var created = await _tenants.CreateTenantAsync(tenant, SuperAdminId, ct);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, TenantDto.From(created));
     }
 
-    // ── PUT /api/superadmin/tenants/{id} ─────────────────────────────────────
-    /// <summary>
-    /// Updates tenant metadata. If the plan changes, new plan-default modules
-    /// are auto-provisioned.
-    /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType<TenantDto>(200)]
     [ProducesResponseType<ValidationProblemDetails>(400)]
@@ -119,8 +97,6 @@ public sealed class TenantsController : ControllerBase
         }
     }
 
-    // ── DELETE /api/superadmin/tenants/{id} ───────────────────────────────────
-    /// <summary>Soft-deactivates a tenant (sets IsActive = false).</summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -137,8 +113,6 @@ public sealed class TenantsController : ControllerBase
         }
     }
 
-    // ── GET /api/superadmin/tenants/{id}/modules ──────────────────────────────
-    /// <summary>Returns all module subscriptions for a tenant.</summary>
     [HttpGet("{id:guid}/modules")]
     [ProducesResponseType<IEnumerable<ModuleSubscription>>(200)]
     public async Task<IActionResult> GetModules(Guid id, CancellationToken ct)
@@ -147,14 +121,12 @@ public sealed class TenantsController : ControllerBase
         return Ok(subs);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
     private Guid SuperAdminId =>
         Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id
         : throw new InvalidOperationException("SuperAdmin ID claim missing from token.");
 }
 
-// ── Request / Response DTOs ───────────────────────────────────────────────────
+// ── Request / Response DTOs ────────────────────────────────────────────────────
 
 public sealed record TenantDto(
     Guid   Id,
@@ -163,17 +135,11 @@ public sealed record TenantDto(
     string Plan,
     bool   IsActive,
     string? LogoUrl,
-    string? ContactEmail,
-    string? ContactPhone,
-    string  CountryCode,
-    string  Timezone,
-    int     MaxEmployees,
     DateTimeOffset CreatedAt)
 {
     public static TenantDto From(Tenant t) => new(
         t.Id, t.Name, t.Subdomain, t.Plan, t.IsActive,
-        t.LogoUrl, t.ContactEmail, t.ContactPhone,
-        t.CountryCode, t.Timezone, t.MaxEmployees, t.CreatedAt);
+        t.LogoUrl, t.CreatedAt);
 }
 
 public sealed record CreateTenantRequest(
@@ -191,13 +157,7 @@ public sealed record CreateTenantRequest(
     [property: System.ComponentModel.DataAnnotations.RegularExpression(
         "^(starter|professional|enterprise)$",
         ErrorMessage = "Plan must be starter, professional, or enterprise.")]
-    string Plan,
-
-    string? ContactEmail,
-    string? ContactPhone,
-    string? CountryCode,
-    string? Timezone,
-    int?    MaxEmployees);
+    string Plan);
 
 public sealed record UpdateTenantRequest(
     [property: System.ComponentModel.DataAnnotations.Required]

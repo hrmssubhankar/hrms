@@ -57,7 +57,7 @@ public class CompetenciesSupervisionController : ControllerBase
     {
         var q = _db.CompetencyAssessments.AsNoTracking().Where(a => a.TenantId == TenantId).Include(a => a.Competency).Include(a => a.Employee).AsQueryable();
         if (employeeId.HasValue) q = q.Where(a => a.EmployeeId == employeeId.Value);
-        return Ok(await q.OrderByDescending(a => a.AssessmentDate).ToListAsync(ct));
+        return Ok(await q.OrderByDescending(a => a.AssessedOn).ToListAsync(ct));
     }
 
     [HttpGet("competency-assessments/{id:guid}")]
@@ -80,7 +80,7 @@ public class CompetenciesSupervisionController : ControllerBase
     {
         var item = await _db.CompetencyAssessments.FirstOrDefaultAsync(a => a.TenantId == TenantId && a.Id == id, ct);
         if (item is null) return NotFound();
-        item.Score = update.Score; item.Notes = update.Notes; item.AssessmentDate = update.AssessmentDate; item.AssessedBy = update.AssessedBy;
+        item.Level = update.Level; item.Notes = update.Notes; item.AssessedOn = update.AssessedOn; item.AssessedBy = update.AssessedBy;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -120,7 +120,8 @@ public class CompetenciesSupervisionController : ControllerBase
     {
         var item = await _db.SupervisionRecords.FirstOrDefaultAsync(s => s.TenantId == TenantId && s.Id == id, ct);
         if (item is null) return NotFound();
-        item.SessionDate = update.SessionDate; item.SupervisorId = update.SupervisorId; item.Notes = update.Notes; item.NextSessionDate = update.NextSessionDate;
+        item.SessionDate = update.SessionDate; item.SupervisorId = update.SupervisorId;
+        item.Notes = update.Notes; item.ActionItems = update.ActionItems; item.IsCompleted = update.IsCompleted;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 

@@ -19,7 +19,7 @@ public class ComplianceController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? employeeId, [FromQuery] string? status, [FromQuery] string? category, CancellationToken ct = default)
     {
-        var q = _db.ComplianceTrackings.AsNoTracking().Where(c => c.TenantId == TenantId).AsQueryable();
+        var q = _db.ComplianceTracking.AsNoTracking().Where(c => c.TenantId == TenantId).AsQueryable();
         if (employeeId.HasValue) q = q.Where(c => c.EmployeeId == employeeId.Value);
         if (!string.IsNullOrWhiteSpace(status)) q = q.Where(c => c.Status == status);
         if (!string.IsNullOrWhiteSpace(category)) q = q.Where(c => c.Category == category);
@@ -29,15 +29,20 @@ public class ComplianceController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct = default)
     {
-        var r = await _db.ComplianceTrackings.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id && c.TenantId == TenantId, ct);
+        var r = await _db.ComplianceTracking.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id && c.TenantId == TenantId, ct);
         return r is null ? NotFound() : Ok(r);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateComplianceRequest req, CancellationToken ct = default)
     {
-        var r = new ComplianceTracking { Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId, Requirement = req.Requirement, Category = req.Category, Status = req.Status, DueDate = req.DueDate, CompletedOn = req.CompletedOn, Notes = req.Notes };
-        _db.ComplianceTrackings.Add(r);
+        var r = new ComplianceTracking
+        {
+            Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId,
+            Requirement = req.Requirement, Category = req.Category, Status = req.Status,
+            DueDate = req.DueDate, CompletedOn = req.CompletedOn, Notes = req.Notes
+        };
+        _db.ComplianceTracking.Add(r);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetById), new { id = r.Id }, r);
     }
@@ -45,15 +50,16 @@ public class ComplianceController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] CreateComplianceRequest req, CancellationToken ct = default)
     {
-        var r = await _db.ComplianceTrackings.FirstOrDefaultAsync(c => c.Id == id && c.TenantId == TenantId, ct);
+        var r = await _db.ComplianceTracking.FirstOrDefaultAsync(c => c.Id == id && c.TenantId == TenantId, ct);
         if (r is null) return NotFound();
-        r.Requirement = req.Requirement; r.Category = req.Category; r.Status = req.Status; r.DueDate = req.DueDate; r.CompletedOn = req.CompletedOn; r.Notes = req.Notes;
+        r.Requirement = req.Requirement; r.Category = req.Category; r.Status = req.Status;
+        r.DueDate = req.DueDate; r.CompletedOn = req.CompletedOn; r.Notes = req.Notes;
         await _db.SaveChangesAsync(ct);
         return Ok(r);
     }
 }
 
-public record CreateComplianceRequest(Guid EmployeeId, string Requirement, string Category, string Status, DateTime? DueDate, DateTime? CompletedOn, string? Notes);
+public record CreateComplianceRequest(Guid EmployeeId, string Requirement, string Category, string Status, DateOnly? DueDate, DateOnly? CompletedOn, string? Notes);
 
 [ApiController]
 [Authorize]
@@ -84,7 +90,11 @@ public class OnboardingController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateOnboardingRequest req, CancellationToken ct = default)
     {
-        var r = new OnboardingRecord { Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId, Stage = req.Stage, Status = req.Status, Notes = req.Notes, Checklist = req.Checklist };
+        var r = new OnboardingRecord
+        {
+            Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId,
+            Stage = req.Stage, Status = req.Status, Notes = req.Notes, Checklist = req.Checklist
+        };
         _db.OnboardingRecords.Add(r);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetById), new { id = r.Id }, r);
@@ -95,11 +105,12 @@ public class OnboardingController : ControllerBase
     {
         var r = await _db.OnboardingRecords.FirstOrDefaultAsync(o => o.Id == id && o.TenantId == TenantId, ct);
         if (r is null) return NotFound();
-        r.Stage = req.Stage; r.Status = req.Status; r.Notes = req.Notes; r.CompletedOn = req.CompletedOn; r.Checklist = req.Checklist; r.AssignedTo = req.AssignedTo;
+        r.Stage = req.Stage; r.Status = req.Status; r.Notes = req.Notes;
+        r.CompletedOn = req.CompletedOn; r.Checklist = req.Checklist; r.AssignedTo = req.AssignedTo;
         await _db.SaveChangesAsync(ct);
         return Ok(r);
     }
 }
 
 public record CreateOnboardingRequest(Guid EmployeeId, string Stage, string Status, string? Notes, string? Checklist);
-public record UpdateOnboardingRequest(string Stage, string Status, string? Notes, DateTime? CompletedOn, string? Checklist, Guid? AssignedTo);
+public record UpdateOnboardingRequest(string Stage, string Status, string? Notes, DateOnly? CompletedOn, string? Checklist, Guid? AssignedTo);

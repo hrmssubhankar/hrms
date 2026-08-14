@@ -35,7 +35,13 @@ public class CoursesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCourseRequest req, CancellationToken ct = default)
     {
-        var course = new Course { Id = Guid.NewGuid(), TenantId = TenantId, Title = req.Title, Description = req.Description, Category = req.Category, Provider = req.Provider, DurationMins = req.DurationMins, IsMandatory = req.IsMandatory, ContentUrl = req.ContentUrl, IsActive = true, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        var course = new Course
+        {
+            Id = Guid.NewGuid(), TenantId = TenantId, Title = req.Title, Description = req.Description,
+            Category = req.Category ?? "general", Provider = req.Provider, DurationMins = req.DurationMins,
+            IsMandatory = req.IsMandatory, ContentUrl = req.ContentUrl, IsActive = true,
+            CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow
+        };
         _db.Courses.Add(course);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetById), new { id = course.Id }, course);
@@ -46,8 +52,9 @@ public class CoursesController : ControllerBase
     {
         var c = await _db.Courses.FirstOrDefaultAsync(c => c.TenantId == TenantId && c.Id == id, ct);
         if (c is null) return NotFound();
-        c.Title = req.Title; c.Description = req.Description; c.Category = req.Category; c.Provider = req.Provider;
-        c.DurationMins = req.DurationMins; c.IsMandatory = req.IsMandatory; c.ContentUrl = req.ContentUrl; c.IsActive = req.IsActive; c.UpdatedAt = DateTime.UtcNow;
+        c.Title = req.Title; c.Description = req.Description; c.Category = req.Category ?? c.Category;
+        c.Provider = req.Provider; c.DurationMins = req.DurationMins; c.IsMandatory = req.IsMandatory;
+        c.ContentUrl = req.ContentUrl; c.IsActive = req.IsActive; c.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync(ct);
         return NoContent();
     }
@@ -57,7 +64,7 @@ public class CoursesController : ControllerBase
     {
         var c = await _db.Courses.FirstOrDefaultAsync(c => c.TenantId == TenantId && c.Id == id, ct);
         if (c is null) return NotFound();
-        c.IsActive = false; c.UpdatedAt = DateTime.UtcNow;
+        c.IsActive = false; c.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync(ct);
         return NoContent();
     }
@@ -95,7 +102,12 @@ public class TrainingController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTrainingRecordRequest req, CancellationToken ct = default)
     {
-        var r = new TrainingRecord { Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId, CourseId = req.CourseId, Status = req.Status, StartedOn = req.StartedOn, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        var r = new TrainingRecord
+        {
+            Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId,
+            CourseId = req.CourseId, Status = req.Status, StartedOn = req.StartedOn,
+            CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow
+        };
         _db.TrainingRecords.Add(r);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetById), new { id = r.Id }, r);
@@ -106,11 +118,13 @@ public class TrainingController : ControllerBase
     {
         var r = await _db.TrainingRecords.FirstOrDefaultAsync(t => t.TenantId == TenantId && t.Id == id, ct);
         if (r is null) return NotFound();
-        r.Status = req.Status; r.ScorePercent = req.ScorePercent; r.StartedOn = req.StartedOn; r.CompletedAt = req.CompletedOn; r.ExpiresOn = req.ExpiresOn; r.CertificateUrl = req.CertificateUrl; r.UpdatedAt = DateTime.UtcNow;
+        r.Status = req.Status; r.ScorePercent = req.ScorePercent; r.StartedOn = req.StartedOn;
+        r.CompletedOn = req.CompletedOn; r.ExpiresOn = req.ExpiresOn; r.CertificateUrl = req.CertificateUrl;
+        r.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync(ct);
         return NoContent();
     }
 }
 
-public record CreateTrainingRecordRequest(Guid EmployeeId, Guid CourseId, string Status, DateTime? StartedOn);
-public record UpdateTrainingRecordRequest(string Status, decimal? ScorePercent, DateTime? StartedOn, DateTime? CompletedOn, DateTime? ExpiresOn, string? CertificateUrl);
+public record CreateTrainingRecordRequest(Guid EmployeeId, Guid CourseId, string Status, DateOnly? StartedOn);
+public record UpdateTrainingRecordRequest(string Status, int? ScorePercent, DateOnly? StartedOn, DateOnly? CompletedOn, DateOnly? ExpiresOn, string? CertificateUrl);

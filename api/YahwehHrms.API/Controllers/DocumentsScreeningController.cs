@@ -34,7 +34,14 @@ public class DocumentsController : ControllerBase
     [HttpPost("api/documents")]
     public async Task<IActionResult> Create([FromBody] CreateDocumentRequest req, CancellationToken ct = default)
     {
-        var doc = new Document { Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId, Name = req.Name, Category = req.Category, StorageUrl = req.StorageUrl, ContentType = req.ContentType, SizeBytes = req.SizeBytes, ExpiresOn = req.ExpiresOn, IsConfidential = req.IsConfidential, CreatedAt = DateTime.UtcNow };
+        var doc = new Document
+        {
+            Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId,
+            Name = req.Name, Category = req.Category, StorageUrl = req.StorageUrl,
+            ContentType = req.ContentType, SizeBytes = req.SizeBytes,
+            ExpiresOn = req.ExpiresOn, IsConfidential = req.IsConfidential,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
         _db.Documents.Add(doc);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetById), new { id = doc.Id }, doc);
@@ -61,8 +68,8 @@ public class DocumentsController : ControllerBase
     }
 }
 
-public sealed record CreateDocumentRequest(string Name, string Category, string StorageUrl, string ContentType, long SizeBytes, Guid EmployeeId, DateTime? ExpiresOn, bool IsConfidential);
-public sealed record UpdateDocumentRequest(string Name, string Category, DateTime? ExpiresOn, bool IsConfidential);
+public sealed record CreateDocumentRequest(string Name, string Category, string StorageUrl, string? ContentType, long SizeBytes, Guid? EmployeeId, DateOnly? ExpiresOn, bool IsConfidential);
+public sealed record UpdateDocumentRequest(string Name, string Category, DateOnly? ExpiresOn, bool IsConfidential);
 
 [ApiController]
 [Authorize]
@@ -91,7 +98,13 @@ public class ScreeningController : ControllerBase
     [HttpPost("api/screening")]
     public async Task<IActionResult> Create([FromBody] CreateScreeningRequest req, CancellationToken ct = default)
     {
-        var r = new ScreeningRecord { Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId, Type = req.Type, Status = req.Status, CompletedOn = req.CompletedOn, ExpiresOn = req.ExpiresOn, Notes = req.Notes, DocumentUrl = req.DocumentUrl, VerifiedBy = req.VerifiedBy, CreatedAt = DateTime.UtcNow };
+        var r = new ScreeningRecord
+        {
+            Id = Guid.NewGuid(), TenantId = TenantId, EmployeeId = req.EmployeeId,
+            Type = req.Type, Status = req.Status, CompletedOn = req.CompletedOn,
+            ExpiresOn = req.ExpiresOn, Notes = req.Notes, DocumentUrl = req.DocumentUrl,
+            VerifiedBy = req.VerifiedBy, CreatedAt = DateTimeOffset.UtcNow
+        };
         _db.ScreeningRecords.Add(r);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetById), new { id = r.Id }, r);
@@ -102,7 +115,8 @@ public class ScreeningController : ControllerBase
     {
         var r = await _db.ScreeningRecords.FirstOrDefaultAsync(s => s.Id == id && s.TenantId == TenantId, ct);
         if (r is null) return NotFound();
-        r.Type = req.Type; r.Status = req.Status; r.CompletedOn = req.CompletedOn; r.ExpiresOn = req.ExpiresOn; r.Notes = req.Notes; r.DocumentUrl = req.DocumentUrl; r.VerifiedBy = req.VerifiedBy;
+        r.Type = req.Type; r.Status = req.Status; r.CompletedOn = req.CompletedOn;
+        r.ExpiresOn = req.ExpiresOn; r.Notes = req.Notes; r.DocumentUrl = req.DocumentUrl; r.VerifiedBy = req.VerifiedBy;
         await _db.SaveChangesAsync(ct);
         return Ok(r);
     }
@@ -118,4 +132,4 @@ public class ScreeningController : ControllerBase
     }
 }
 
-public sealed record CreateScreeningRequest(Guid EmployeeId, string Type, string Status, DateTime? CompletedOn, DateTime? ExpiresOn, string? Notes, string? DocumentUrl, string? VerifiedBy);
+public sealed record CreateScreeningRequest(Guid EmployeeId, string Type, string Status, DateOnly? CompletedOn, DateOnly? ExpiresOn, string? Notes, string? DocumentUrl, Guid? VerifiedBy);

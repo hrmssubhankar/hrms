@@ -25,7 +25,7 @@ public class EmployeesController : ControllerBase
         if (!string.IsNullOrWhiteSpace(status)) query = query.Where(e => e.Status == status);
         if (departmentId.HasValue) query = query.Where(e => e.DepartmentId == departmentId.Value);
         if (positionId.HasValue) query = query.Where(e => e.PositionId == positionId.Value);
-        return Ok(await query.OrderBy(e => e.Name).ToListAsync(ct));
+        return Ok(await query.OrderBy(e => e.FirstName).ThenBy(e => e.LastName).ToListAsync(ct));
     }
 
     [HttpGet("{id:guid}")]
@@ -55,7 +55,8 @@ public class EmployeesController : ControllerBase
     {
         var emp = await _db.Employees.FirstOrDefaultAsync(e => e.TenantId == TenantId && e.Id == id, ct);
         if (emp is null) return NotFound();
-        if (req.Name is not null) emp.Name = req.Name;
+        if (req.FirstName is not null) emp.FirstName = req.FirstName;
+        if (req.LastName is not null) emp.LastName = req.LastName;
         if (req.Email is not null) emp.Email = req.Email;
         if (req.Phone is not null) emp.Phone = req.Phone;
         if (req.Status is not null) emp.Status = req.Status;
@@ -99,20 +100,21 @@ public class EmployeesController : ControllerBase
     public async Task<IActionResult> GetTraining(Guid id, CancellationToken ct = default)
     {
         if (!await _db.Employees.AsNoTracking().AnyAsync(e => e.TenantId == TenantId && e.Id == id, ct)) return NotFound();
-        return Ok(await _db.TrainingRecords.AsNoTracking().Where(t => t.TenantId == TenantId && t.EmployeeId == id).Include(t => t.Course).OrderByDescending(t => t.CompletedAt).ToListAsync(ct));
+        return Ok(await _db.TrainingRecords.AsNoTracking().Where(t => t.TenantId == TenantId && t.EmployeeId == id).Include(t => t.Course).OrderByDescending(t => t.CompletedOn).ToListAsync(ct));
     }
 
     [HttpGet("{id:guid}/performance")]
     public async Task<IActionResult> GetPerformance(Guid id, CancellationToken ct = default)
     {
         if (!await _db.Employees.AsNoTracking().AnyAsync(e => e.TenantId == TenantId && e.Id == id, ct)) return NotFound();
-        return Ok(await _db.PerformanceReviews.AsNoTracking().Where(r => r.TenantId == TenantId && r.EmployeeId == id).OrderByDescending(r => r.ReviewDate).ToListAsync(ct));
+        return Ok(await _db.PerformanceReviews.AsNoTracking().Where(r => r.TenantId == TenantId && r.EmployeeId == id).OrderByDescending(r => r.DueDate).ToListAsync(ct));
     }
 }
 
 public sealed class UpdateEmployeeRequest
 {
-    public string? Name { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
     public string? Status { get; set; }

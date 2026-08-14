@@ -27,7 +27,7 @@ public class OperationsController : ControllerBase
     [HttpGet("assets/{id:guid}")]
     public async Task<IActionResult> GetAsset(Guid id, CancellationToken ct = default)
     {
-        var item = await _db.Assets.AsNoTracking().Include(a => a.AssetAssignments).ThenInclude(aa => aa.Employee).FirstOrDefaultAsync(a => a.TenantId == TenantId && a.Id == id, ct);
+        var item = await _db.Assets.AsNoTracking().Include(a => a.Assignments).ThenInclude(aa => aa.Employee).FirstOrDefaultAsync(a => a.TenantId == TenantId && a.Id == id, ct);
         return item is null ? NotFound() : Ok(item);
     }
 
@@ -45,7 +45,7 @@ public class OperationsController : ControllerBase
         var item = await _db.Assets.FirstOrDefaultAsync(a => a.TenantId == TenantId && a.Id == id, ct);
         if (item is null) return NotFound();
         item.Name = update.Name; item.Category = update.Category; item.SerialNumber = update.SerialNumber;
-        item.Status = update.Status; item.PurchaseDate = update.PurchaseDate; item.PurchaseCost = update.PurchaseCost; item.Notes = update.Notes;
+        item.Status = update.Status; item.PurchaseDate = update.PurchaseDate; item.PurchasePrice = update.PurchasePrice; item.Notes = update.Notes;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -62,24 +62,25 @@ public class OperationsController : ControllerBase
     {
         var asset = await _db.Assets.FirstOrDefaultAsync(a => a.TenantId == TenantId && a.Id == id, ct);
         if (asset is null) return NotFound();
-        assignment.Id = Guid.NewGuid(); assignment.AssetId = id; assignment.TenantId = TenantId; assignment.AssignedAt = DateTime.UtcNow;
+        assignment.Id = Guid.NewGuid(); assignment.AssetId = id; assignment.TenantId = TenantId;
+        assignment.AssignedOn = DateOnly.FromDateTime(DateTime.UtcNow);
         asset.Status = "assigned";
         _db.AssetAssignments.Add(assignment); await _db.SaveChangesAsync(ct);
         return Ok(assignment);
     }
 
     [HttpGet("shifts")]
-    public async Task<IActionResult> GetShifts([FromQuery] Guid? employeeId, CancellationToken ct = default)
+    public async Task<IActionResult> GetShifts([FromQuery] Guid? departmentId, CancellationToken ct = default)
     {
-        var q = _db.Shifts.AsNoTracking().Where(s => s.TenantId == TenantId).Include(s => s.Employee).AsQueryable();
-        if (employeeId.HasValue) q = q.Where(s => s.EmployeeId == employeeId.Value);
-        return Ok(await q.OrderByDescending(s => s.StartTime).ToListAsync(ct));
+        var q = _db.Shifts.AsNoTracking().Where(s => s.TenantId == TenantId).AsQueryable();
+        if (departmentId.HasValue) q = q.Where(s => s.DepartmentId == departmentId.Value);
+        return Ok(await q.OrderBy(s => s.Name).ToListAsync(ct));
     }
 
     [HttpGet("shifts/{id:guid}")]
     public async Task<IActionResult> GetShift(Guid id, CancellationToken ct = default)
     {
-        var item = await _db.Shifts.AsNoTracking().Include(s => s.Employee).FirstOrDefaultAsync(s => s.TenantId == TenantId && s.Id == id, ct);
+        var item = await _db.Shifts.AsNoTracking().FirstOrDefaultAsync(s => s.TenantId == TenantId && s.Id == id, ct);
         return item is null ? NotFound() : Ok(item);
     }
 
@@ -96,7 +97,8 @@ public class OperationsController : ControllerBase
     {
         var item = await _db.Shifts.FirstOrDefaultAsync(s => s.TenantId == TenantId && s.Id == id, ct);
         if (item is null) return NotFound();
-        item.StartTime = update.StartTime; item.EndTime = update.EndTime; item.ShiftType = update.ShiftType; item.Notes = update.Notes;
+        item.Name = update.Name; item.StartTime = update.StartTime; item.EndTime = update.EndTime;
+        item.DayOfWeek = update.DayOfWeek; item.IsActive = update.IsActive;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -114,7 +116,7 @@ public class OperationsController : ControllerBase
         var q = _db.Timesheets.AsNoTracking().Where(t => t.TenantId == TenantId).Include(t => t.Employee).AsQueryable();
         if (employeeId.HasValue) q = q.Where(t => t.EmployeeId == employeeId.Value);
         if (!string.IsNullOrWhiteSpace(status)) q = q.Where(t => t.Status == status);
-        return Ok(await q.OrderByDescending(t => t.PeriodStart).ToListAsync(ct));
+        return Ok(await q.OrderByDescending(t => t.WorkDate).ToListAsync(ct));
     }
 
     [HttpGet("timesheets/{id:guid}")]
@@ -137,8 +139,8 @@ public class OperationsController : ControllerBase
     {
         var item = await _db.Timesheets.FirstOrDefaultAsync(t => t.TenantId == TenantId && t.Id == id, ct);
         if (item is null) return NotFound();
-        item.TotalHours = update.TotalHours; item.OvertimeHours = update.OvertimeHours;
-        item.Status = update.Status; item.ApprovedBy = update.ApprovedBy; item.ApprovedAt = update.ApprovedAt; item.Notes = update.Notes;
+        item.HoursWorked = update.HoursWorked; item.OvertimeHours = update.OvertimeHours;
+        item.Status = update.Status; item.ApprovedBy = update.ApprovedBy; item.Notes = update.Notes;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -147,7 +149,7 @@ public class OperationsController : ControllerBase
     {
         var q = _db.PayrollRecords.AsNoTracking().Where(p => p.TenantId == TenantId).Include(p => p.Employee).AsQueryable();
         if (employeeId.HasValue) q = q.Where(p => p.EmployeeId == employeeId.Value);
-        return Ok(await q.OrderByDescending(p => p.PayDate).ToListAsync(ct));
+        return Ok(await q.OrderByDescending(p => p.PaidOn).ToListAsync(ct));
     }
 
     [HttpGet("payroll/{id:guid}")]
@@ -170,7 +172,7 @@ public class OperationsController : ControllerBase
     {
         var item = await _db.PayrollRecords.FirstOrDefaultAsync(p => p.TenantId == TenantId && p.Id == id, ct);
         if (item is null) return NotFound();
-        item.GrossPay = update.GrossPay; item.NetPay = update.NetPay; item.TaxWithheld = update.TaxWithheld;
+        item.GrossPay = update.GrossPay; item.NetPay = update.NetPay; item.Tax = update.Tax;
         item.Superannuation = update.Superannuation; item.Deductions = update.Deductions; item.Status = update.Status;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }

@@ -19,7 +19,7 @@ public class RecruitmentController : ControllerBase
     [HttpGet("job-requisitions")]
     public async Task<IActionResult> GetRequisitions([FromQuery] string? status, CancellationToken ct = default)
     {
-        var q = _db.JobRequisitions.AsNoTracking().Where(r => r.TenantId == TenantId).Include(r => r.Department).Include(r => r.Position).AsQueryable();
+        var q = _db.JobRequisitions.AsNoTracking().Where(r => r.TenantId == TenantId).Include(r => r.Department).AsQueryable();
         if (!string.IsNullOrWhiteSpace(status)) q = q.Where(r => r.Status == status);
         return Ok(await q.OrderByDescending(r => r.CreatedAt).ToListAsync(ct));
     }
@@ -27,14 +27,14 @@ public class RecruitmentController : ControllerBase
     [HttpGet("job-requisitions/{id:guid}")]
     public async Task<IActionResult> GetRequisition(Guid id, CancellationToken ct = default)
     {
-        var item = await _db.JobRequisitions.AsNoTracking().Include(r => r.Department).Include(r => r.Position).Include(r => r.Applications).FirstOrDefaultAsync(r => r.TenantId == TenantId && r.Id == id, ct);
+        var item = await _db.JobRequisitions.AsNoTracking().Include(r => r.Department).Include(r => r.Applications).FirstOrDefaultAsync(r => r.TenantId == TenantId && r.Id == id, ct);
         return item is null ? NotFound() : Ok(item);
     }
 
     [HttpPost("job-requisitions")]
     public async Task<IActionResult> CreateRequisition([FromBody] JobRequisition req, CancellationToken ct = default)
     {
-        req.Id = Guid.NewGuid(); req.TenantId = TenantId; req.CreatedAt = DateTime.UtcNow;
+        req.Id = Guid.NewGuid(); req.TenantId = TenantId; req.CreatedAt = DateTimeOffset.UtcNow;
         _db.JobRequisitions.Add(req); await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetRequisition), new { id = req.Id }, req);
     }
@@ -45,7 +45,7 @@ public class RecruitmentController : ControllerBase
         var item = await _db.JobRequisitions.FirstOrDefaultAsync(r => r.TenantId == TenantId && r.Id == id, ct);
         if (item is null) return NotFound();
         item.Title = update.Title; item.Description = update.Description; item.Status = update.Status;
-        item.DepartmentId = update.DepartmentId; item.PositionId = update.PositionId; item.CloseDate = update.CloseDate; item.Headcount = update.Headcount;
+        item.DepartmentId = update.DepartmentId; item.PositionId = update.PositionId; item.ClosingDate = update.ClosingDate; item.Headcount = update.Headcount;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -54,14 +54,13 @@ public class RecruitmentController : ControllerBase
     {
         var item = await _db.JobRequisitions.FirstOrDefaultAsync(r => r.TenantId == TenantId && r.Id == id, ct);
         if (item is null) return NotFound();
-        item.Status = "closed"; await _db.SaveChangesAsync(ct); return NoContent();
+        item.Status = "cancelled"; await _db.SaveChangesAsync(ct); return NoContent();
     }
 
     [HttpGet("candidates")]
-    public async Task<IActionResult> GetCandidates([FromQuery] string? status, CancellationToken ct = default)
+    public async Task<IActionResult> GetCandidates(CancellationToken ct = default)
     {
         var q = _db.Candidates.AsNoTracking().Where(c => c.TenantId == TenantId).AsQueryable();
-        if (!string.IsNullOrWhiteSpace(status)) q = q.Where(c => c.Status == status);
         return Ok(await q.OrderByDescending(c => c.CreatedAt).ToListAsync(ct));
     }
 
@@ -75,7 +74,7 @@ public class RecruitmentController : ControllerBase
     [HttpPost("candidates")]
     public async Task<IActionResult> CreateCandidate([FromBody] Candidate candidate, CancellationToken ct = default)
     {
-        candidate.Id = Guid.NewGuid(); candidate.TenantId = TenantId; candidate.CreatedAt = DateTime.UtcNow;
+        candidate.Id = Guid.NewGuid(); candidate.TenantId = TenantId; candidate.CreatedAt = DateTimeOffset.UtcNow;
         _db.Candidates.Add(candidate); await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetCandidate), new { id = candidate.Id }, candidate);
     }
@@ -86,7 +85,7 @@ public class RecruitmentController : ControllerBase
         var item = await _db.Candidates.FirstOrDefaultAsync(c => c.TenantId == TenantId && c.Id == id, ct);
         if (item is null) return NotFound();
         item.FirstName = update.FirstName; item.LastName = update.LastName; item.Email = update.Email;
-        item.Phone = update.Phone; item.Status = update.Status; item.ResumeUrl = update.ResumeUrl; item.Notes = update.Notes;
+        item.Phone = update.Phone; item.ResumeUrl = update.ResumeUrl; item.Source = update.Source;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -104,7 +103,7 @@ public class RecruitmentController : ControllerBase
         var q = _db.Applications.AsNoTracking().Where(a => a.TenantId == TenantId).Include(a => a.Candidate).Include(a => a.JobRequisition).AsQueryable();
         if (requisitionId.HasValue) q = q.Where(a => a.JobRequisitionId == requisitionId.Value);
         if (!string.IsNullOrWhiteSpace(status)) q = q.Where(a => a.Status == status);
-        return Ok(await q.OrderByDescending(a => a.AppliedAt).ToListAsync(ct));
+        return Ok(await q.OrderByDescending(a => a.CreatedAt).ToListAsync(ct));
     }
 
     [HttpGet("applications/{id:guid}")]
@@ -117,7 +116,7 @@ public class RecruitmentController : ControllerBase
     [HttpPost("applications")]
     public async Task<IActionResult> CreateApplication([FromBody] Application application, CancellationToken ct = default)
     {
-        application.Id = Guid.NewGuid(); application.TenantId = TenantId; application.AppliedAt = DateTime.UtcNow;
+        application.Id = Guid.NewGuid(); application.TenantId = TenantId; application.CreatedAt = DateTimeOffset.UtcNow;
         _db.Applications.Add(application); await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(GetApplication), new { id = application.Id }, application);
     }
@@ -127,7 +126,8 @@ public class RecruitmentController : ControllerBase
     {
         var item = await _db.Applications.FirstOrDefaultAsync(a => a.TenantId == TenantId && a.Id == id, ct);
         if (item is null) return NotFound();
-        item.Status = update.Status; item.Stage = update.Stage; item.Notes = update.Notes; item.InterviewDate = update.InterviewDate;
+        item.Status = update.Status; item.Notes = update.Notes; item.InterviewDate = update.InterviewDate;
+        item.OfferedSalary = update.OfferedSalary; item.OfferExpiry = update.OfferExpiry;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -136,6 +136,6 @@ public class RecruitmentController : ControllerBase
     {
         var item = await _db.Applications.FirstOrDefaultAsync(a => a.TenantId == TenantId && a.Id == id, ct);
         if (item is null) return NotFound();
-        item.Status = "withdrawn"; await _db.SaveChangesAsync(ct); return NoContent();
+        item.Status = "rejected"; await _db.SaveChangesAsync(ct); return NoContent();
     }
 }

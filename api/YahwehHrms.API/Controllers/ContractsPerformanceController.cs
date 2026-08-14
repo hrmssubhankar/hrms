@@ -45,8 +45,9 @@ public class ContractsPerformanceController : ControllerBase
     {
         var item = await _db.Contracts.FirstOrDefaultAsync(c => c.TenantId == TenantId && c.Id == id, ct);
         if (item is null) return NotFound();
-        item.ContractType = update.ContractType; item.StartDate = update.StartDate; item.EndDate = update.EndDate;
-        item.Status = update.Status; item.Salary = update.Salary; item.HoursPerWeek = update.HoursPerWeek; item.DocumentUrl = update.DocumentUrl;
+        item.Type = update.Type; item.StartDate = update.StartDate; item.EndDate = update.EndDate;
+        item.Status = update.Status; item.Salary = update.Salary; item.PayFrequency = update.PayFrequency;
+        item.DocumentUrl = update.DocumentUrl; item.IsSigned = update.IsSigned;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
@@ -63,7 +64,7 @@ public class ContractsPerformanceController : ControllerBase
     {
         var q = _db.PerformanceReviews.AsNoTracking().Where(r => r.TenantId == TenantId).Include(r => r.Employee).AsQueryable();
         if (employeeId.HasValue) q = q.Where(r => r.EmployeeId == employeeId.Value);
-        return Ok(await q.OrderByDescending(r => r.ReviewDate).ToListAsync(ct));
+        return Ok(await q.OrderByDescending(r => r.DueDate).ToListAsync(ct));
     }
 
     [HttpGet("performance-reviews/{id:guid}")]
@@ -86,8 +87,9 @@ public class ContractsPerformanceController : ControllerBase
     {
         var item = await _db.PerformanceReviews.FirstOrDefaultAsync(r => r.TenantId == TenantId && r.Id == id, ct);
         if (item is null) return NotFound();
-        item.ReviewType = update.ReviewType; item.ReviewDate = update.ReviewDate; item.ReviewerId = update.ReviewerId;
-        item.Rating = update.Rating; item.Comments = update.Comments; item.Goals = update.Goals; item.Status = update.Status;
+        item.Type = update.Type; item.DueDate = update.DueDate; item.ReviewerId = update.ReviewerId;
+        item.OverallScore = update.OverallScore; item.ManagerNotes = update.ManagerNotes;
+        item.Goals = update.Goals; item.Status = update.Status; item.CompletedOn = update.CompletedOn;
         await _db.SaveChangesAsync(ct); return Ok(item);
     }
 
