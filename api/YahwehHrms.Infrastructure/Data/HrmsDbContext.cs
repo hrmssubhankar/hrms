@@ -85,6 +85,84 @@ public class HrmsDbContext : DbContext
         // Default schema for all tables not explicitly mapped
         mb.HasDefaultSchema("public");
 
+        // ── Core HR relationships (explicit to resolve ambiguous navigations) ─────
+
+        // Tenant collections
+        mb.Entity<Tenant>(e =>
+        {
+            e.HasMany(x => x.Users)
+             .WithOne()
+             .HasForeignKey(u => u.TenantId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(x => x.Employees)
+             .WithOne()
+             .HasForeignKey(emp => emp.TenantId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(x => x.Modules)
+             .WithOne(m => m.Tenant)
+             .HasForeignKey(m => m.TenantId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Employee relationships
+        mb.Entity<Employee>(e =>
+        {
+            // Employee → Department (many employees, one department)
+            e.HasOne(x => x.Department)
+             .WithMany(d => d.Employees)
+             .HasForeignKey(x => x.DepartmentId)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            // Employee → Position
+            e.HasOne(x => x.Position)
+             .WithMany(p => p.Employees)
+             .HasForeignKey(x => x.PositionId)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            // Employee self-reference: Manager / DirectReports
+            e.HasOne(x => x.Manager)
+             .WithMany(x => x.DirectReports)
+             .HasForeignKey(x => x.ManagerId)
+             .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Department relationships
+        mb.Entity<Department>(e =>
+        {
+            // Department manager → Employee (separate from Employees collection)
+            e.HasOne(x => x.Manager)
+             .WithMany()
+             .HasForeignKey(x => x.ManagerId)
+             .OnDelete(DeleteBehavior.SetNull);
+
+            // Department self-reference: Parent / Children
+            e.HasOne(x => x.Parent)
+             .WithMany(x => x.Children)
+             .HasForeignKey(x => x.ParentId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Position → Department
+        mb.Entity<Position>(e =>
+        {
+            e.HasOne(x => x.Department)
+             .WithMany(d => d.Positions)
+             .HasForeignKey(x => x.DepartmentId)
+             .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // User → Employee
+        mb.Entity<User>(e =>
+        {
+            e.HasOne(x => x.Employee)
+             .WithMany()
+             .HasForeignKey(x => x.EmployeeId)
+             .OnDelete(DeleteBehavior.SetNull);
+        });
+
+
         // ── iam.super_admin_users ─────────────────────────────────────────────
         mb.Entity<SuperAdminUser>(e =>
         {
