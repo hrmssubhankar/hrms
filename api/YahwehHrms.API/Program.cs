@@ -9,7 +9,6 @@ using YahwehHrms.Infrastructure.Data;
 using YahwehHrms.Infrastructure.Hubs;
 using YahwehHrms.Infrastructure.Services;
 using YahwehHrms.Infrastructure.Middleware;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Serilog ──────────────────────────────────────────────────────────────────
@@ -95,8 +94,16 @@ var app = builder.Build();
 // ── Seed default super admin ──────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
-    var superAdminAuth = scope.ServiceProvider.GetRequiredService<ISuperAdminAuthService>();
-    await superAdminAuth.SeedDefaultAdminIfNoneExistsAsync();
+        try
+        {
+        var superAdminAuth = scope.ServiceProvider.GetRequiredService<ISuperAdminAuthService>();
+        await superAdminAuth.SeedDefaultAdminIfNoneExistsAsync();
+        }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetService<ILogger<Program>>();
+        logger?.LogWarning(ex, "Startup seeding failed - app will continue without seeding.");
+    }
 }
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────
