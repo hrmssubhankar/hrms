@@ -50,6 +50,9 @@ public static class InfrastructureExtensions
         // ── Domain services ───────────────────────────────────────────────────
         services.AddScoped<IModuleService, ModuleService>();
         services.AddScoped<ITenantService, TenantService>();
+        services.AddScoped<IEmployeeService, EmployeeService>();
+        services.AddScoped<IDepartmentService, DepartmentService>();
+        services.AddScoped<IDashboardService, DashboardService>();
 
         // ── Health checks ─────────────────────────────────────────────────────
         var hc = services.AddHealthChecks()
