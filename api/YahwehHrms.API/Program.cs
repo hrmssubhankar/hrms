@@ -3,17 +3,55 @@ using Microsoft.IdentityModel.Tokens;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Serilog;
+using System.Net.Sockets;
 using System.Text;
 using YahwehHrms.Infrastructure;
 using YahwehHrms.Infrastructure.Data;
 using YahwehHrms.Infrastructure.Hubs;
 using YahwehHrms.Infrastructure.Services;
 using YahwehHrms.Infrastructure.Middleware;
+
 var builder = WebApplication.CreateBuilder(args);
+
 // ── Force IPv4: Railway does not support IPv6 ─────────────────────────────────
-var rawConn = builder.Configuration.GetConnectionString("DefaultConnection");
-if (rawConn != null && !rawConn.Contains("Prefer IP Version", StringComparison.OrdinalIgnoreCase))
-    builder.Configuration["ConnectionStrings:DefaultConnection"] = rawConn.TrimEnd(';') + ";Prefer IP Version=IPv4";    
+// Npgsql has no "Prefer IP Version" connection-string keyword.
+// Instead, resolve the DB hostname to an IPv4 address via DNS before any
+// service is registered, so EF Core, Hangfire, and health-checks all use it.
+{
+    var rawConn = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (rawConn != null)
+    {
+        try
+        {
+            var hostMatch = System.Text.RegularExpressions.Regex.Match(
+                rawConn,
+                @"(?:^|;)\s*(?:Host|Server)\s*=\s*([^;]+)",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (hostMatch.Success)
+            {
+                var hostname = hostMatch.Groups[1].Value.Trim();
+                if (!System.Net.IPAddress.TryParse(hostname, out _))
+                {
+                    var addrs = await System.Net.Dns.GetHostAddressesAsync(hostname);
+                    var ipv4 = addrs.FirstOrDefault(
+                        a => a.AddressFamily == AddressFamily.InterNetwork);
+                    if (ipv4 is not null)
+                    {
+                        var newConn = rawConn.Replace(
+                            hostname, ipv4.ToString(),
+                            StringComparison.OrdinalIgnoreCase);
+                        builder.Configuration["ConnectionStrings:DefaultConnection"] = newConn;
+                        Console.WriteLine("[IPv4] Resolved " + hostname + " -> " + ipv4);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("[IPv4] DNS resolution failed: " + ex.Message);
+        }
+    }
+}
 
 // ── Serilog ──────────────────────────────────────────────────────────────────
 Log.Logger = new LoggerConfiguration()
@@ -98,11 +136,11 @@ var app = builder.Build();
 // ── Seed default super admin ──────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
-        try
-        {
+    try
+    {
         var superAdminAuth = scope.ServiceProvider.GetRequiredService<ISuperAdminAuthService>();
         await superAdminAuth.SeedDefaultAdminIfNoneExistsAsync();
-        }
+    }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetService<ILogger<Program>>();
