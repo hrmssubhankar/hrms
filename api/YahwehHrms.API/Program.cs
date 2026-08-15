@@ -12,7 +12,7 @@ using YahwehHrms.Infrastructure.Data;
 using YahwehHrms.Infrastructure.Hubs;
 using YahwehHrms.Infrastructure.Services;
 using YahwehHrms.Infrastructure.Middleware;
-
+// Railway healthcheck uses /health/live (liveness probe — always returns 200)
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Force IPv4: Railway does not support IPv6 ─────────────────────────────────
