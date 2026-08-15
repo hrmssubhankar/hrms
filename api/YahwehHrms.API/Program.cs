@@ -10,6 +10,10 @@ using YahwehHrms.Infrastructure.Hubs;
 using YahwehHrms.Infrastructure.Services;
 using YahwehHrms.Infrastructure.Middleware;
 var builder = WebApplication.CreateBuilder(args);
+// ── Force IPv4: Railway does not support IPv6 ─────────────────────────────────
+var rawConn = builder.Configuration.GetConnectionString("DefaultConnection");
+if (rawConn != null && !rawConn.Contains("Prefer IP Version", StringComparison.OrdinalIgnoreCase))
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = rawConn.TrimEnd(';') + ";Prefer IP Version=IPv4";    
 
 // ── Serilog ──────────────────────────────────────────────────────────────────
 Log.Logger = new LoggerConfiguration()
