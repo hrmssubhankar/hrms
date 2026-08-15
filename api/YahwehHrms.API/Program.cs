@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks
 using Microsoft.IdentityModel.Tokens;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -155,7 +157,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+        app.UseHttpsRedirection();
 app.UseCors("Frontend");
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
@@ -166,6 +169,24 @@ if (app.Environment.IsDevelopment())
 {
     app.UseHangfireDashboard("/hangfire");
 }
+
+// /health/live — liveness probe; always returns 200 (no DB dependency).
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+                    {
+                        Predicate = _ => false,
+                            ResultStatusCodes =
+                                {
+                                        [HealthStatus.Healthy]   = StatusCodes.Status200OK,
+                                                [HealthStatus.Degraded]  = StatusCodes.Status200OK,
+                                                        [HealthStatus.Unhealthy] = StatusCodes.Status200OK,
+                                                            }
+                                                            });
+                                                            
+// /health/ready — readiness probe; checks DB (and Redis if configured).
+app.MapHealthChecks("/health/ready");
+
+// Root endpoint — Railway default healthcheck probe hits GET /.
+app.MapGet("/", () => Results.Ok(new { status = "ok" }));
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notifications");
