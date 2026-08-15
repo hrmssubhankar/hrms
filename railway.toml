@@ -9,7 +9,7 @@ watchPatterns = ["api/**", "Dockerfile", ".dockerignore"]
 
 [deploy]
 # Health check endpoint (from Program.cs: app.MapHealthChecks("/health"))
-healthcheckPath = "/health"
+healthcheckPath = "/health/live"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
