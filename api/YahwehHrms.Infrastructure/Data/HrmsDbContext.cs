@@ -8,19 +8,19 @@ namespace YahwehHrms.Infrastructure.Data;
 /// EF Core DbContext for the Yahweh HRMS PostgreSQL database.
 ///
 /// Schema layout (maps 1:1 to Supabase / Azure PostgreSQL):
-///   public  — legacy default; existing tables stay here until a migration moves them
-///   iam     — Identity &amp; Access Management  (tenants, super_admin_users)
-///   catalog — Product catalog               (modules, plan_default_modules)
-///   tenant  — Per-tenant config             (module_subscriptions, settings)
-///   audit   — Immutable event log           (super_admin_events)
+///   public  — core HR tables, all prefixed hrms_
+///   iam     — Identity &amp; Access Management  (hrms_super_admin_users)
+///   catalog — Product catalog               (hrms_modules, hrms_plan_default_modules)
+///   tenant  — Per-tenant config             (hrms_module_subscriptions, hrms_settings)
+///   audit   — Immutable event log           (hrms_super_admin_events)
 /// </summary>
 public class HrmsDbContext : DbContext
 {
     public HrmsDbContext(DbContextOptions<HrmsDbContext> options) : base(options) { }
 
-    // ── public schema (existing) ──────────────────────────────────────────────
+    // ── public schema ─────────────────────────────────────────────────────────
     public DbSet<Tenant>     Tenants     { get; set; } = null!;
-    public DbSet<TenantModule> TenantModules { get; set; } = null!;   // legacy — superseded by ModuleSubscriptions
+    public DbSet<TenantModule> TenantModules { get; set; } = null!;
     public DbSet<User>       Users       { get; set; } = null!;
     public DbSet<Employee>   Employees   { get; set; } = null!;
     public DbSet<Department> Departments { get; set; } = null!;
@@ -84,6 +84,50 @@ public class HrmsDbContext : DbContext
 
         // Default schema for all tables not explicitly mapped
         mb.HasDefaultSchema("public");
+
+        // ── public schema — hrms_ prefixed table names ────────────────────────
+
+        mb.Entity<Tenant>().ToTable("hrms_tenants");
+        mb.Entity<TenantModule>().ToTable("hrms_tenant_modules");
+        mb.Entity<User>().ToTable("hrms_users");
+        mb.Entity<Employee>().ToTable("hrms_employees");
+        mb.Entity<Department>().ToTable("hrms_departments");
+        mb.Entity<Position>().ToTable("hrms_positions");
+        mb.Entity<AuditLog>().ToTable("hrms_audit_logs");
+        mb.Entity<Document>().ToTable("hrms_documents");
+
+        mb.Entity<ScreeningRecord>().ToTable("hrms_screening_records");
+        mb.Entity<ComplianceTracking>().ToTable("hrms_compliance_tracking");
+        mb.Entity<OnboardingRecord>().ToTable("hrms_onboarding_records");
+
+        mb.Entity<Course>().ToTable("hrms_courses");
+        mb.Entity<TrainingRecord>().ToTable("hrms_training_records");
+        mb.Entity<Competency>().ToTable("hrms_competencies");
+        mb.Entity<CompetencyAssessment>().ToTable("hrms_competency_assessments");
+        mb.Entity<SupervisionRecord>().ToTable("hrms_supervision_records");
+
+        mb.Entity<JobRequisition>().ToTable("hrms_job_requisitions");
+        mb.Entity<Candidate>().ToTable("hrms_candidates");
+        mb.Entity<Application>().ToTable("hrms_applications");
+        mb.Entity<Contract>().ToTable("hrms_contracts");
+
+        mb.Entity<PerformanceReview>().ToTable("hrms_performance_reviews");
+
+        mb.Entity<WhsIncident>().ToTable("hrms_whs_incidents");
+        mb.Entity<Grievance>().ToTable("hrms_grievances");
+        mb.Entity<SeparationRecord>().ToTable("hrms_separation_records");
+
+        mb.Entity<Asset>().ToTable("hrms_assets");
+        mb.Entity<AssetAssignment>().ToTable("hrms_asset_assignments");
+        mb.Entity<Shift>().ToTable("hrms_shifts");
+        mb.Entity<Timesheet>().ToTable("hrms_timesheets");
+        mb.Entity<PayrollRecord>().ToTable("hrms_payroll_records");
+
+        mb.Entity<Survey>().ToTable("hrms_surveys");
+        mb.Entity<SurveyResponse>().ToTable("hrms_survey_responses");
+        mb.Entity<Recognition>().ToTable("hrms_recognitions");
+        mb.Entity<Referral>().ToTable("hrms_referrals");
+        mb.Entity<Notification>().ToTable("hrms_notifications");
 
         // ── Core HR relationships (explicit to resolve ambiguous navigations) ─────
 
@@ -162,21 +206,20 @@ public class HrmsDbContext : DbContext
              .OnDelete(DeleteBehavior.SetNull);
         });
 
-
-        // ── iam.super_admin_users ─────────────────────────────────────────────
+        // ── iam.hrms_super_admin_users ────────────────────────────────────────
         mb.Entity<SuperAdminUser>(e =>
         {
-            e.ToTable("super_admin_users", "iam");
+            e.ToTable("hrms_super_admin_users", "iam");
             e.HasKey(x => x.Id);
             e.Property(x => x.Email).IsRequired().HasMaxLength(320);
             e.HasIndex(x => x.Email).IsUnique();
             e.Property(x => x.DisplayName).HasMaxLength(200);
         });
 
-        // ── catalog.modules ───────────────────────────────────────────────────
+        // ── catalog.hrms_modules ──────────────────────────────────────────────
         mb.Entity<Module>(e =>
         {
-            e.ToTable("modules", "catalog");
+            e.ToTable("hrms_modules", "catalog");
             e.HasKey(x => x.Id);
             e.Property(x => x.ModuleKey).IsRequired().HasMaxLength(80);
             e.HasIndex(x => x.ModuleKey).IsUnique();
@@ -184,10 +227,10 @@ public class HrmsDbContext : DbContext
             e.Property(x => x.Category).HasMaxLength(40).HasDefaultValue("core");
         });
 
-        // ── catalog.plan_default_modules ──────────────────────────────────────
+        // ── catalog.hrms_plan_default_modules ─────────────────────────────────
         mb.Entity<PlanDefaultModule>(e =>
         {
-            e.ToTable("plan_default_modules", "catalog");
+            e.ToTable("hrms_plan_default_modules", "catalog");
             e.HasKey(x => x.Id);
             e.HasIndex(x => new { x.Plan, x.ModuleId }).IsUnique();
             e.Property(x => x.Plan).IsRequired().HasMaxLength(40);
@@ -197,10 +240,10 @@ public class HrmsDbContext : DbContext
              .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // ── tenant.module_subscriptions ───────────────────────────────────────
+        // ── tenant.hrms_module_subscriptions ──────────────────────────────────
         mb.Entity<ModuleSubscription>(e =>
         {
-            e.ToTable("module_subscriptions", "tenant");
+            e.ToTable("hrms_module_subscriptions", "tenant");
             e.HasKey(x => x.Id);
             e.HasIndex(x => new { x.TenantId, x.ModuleId }).IsUnique();
 
@@ -225,10 +268,10 @@ public class HrmsDbContext : DbContext
              .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // ── tenant.settings ───────────────────────────────────────────────────
+        // ── tenant.hrms_settings ──────────────────────────────────────────────
         mb.Entity<TenantSetting>(e =>
         {
-            e.ToTable("settings", "tenant");
+            e.ToTable("hrms_settings", "tenant");
             e.HasKey(x => x.Id);
             e.HasIndex(x => new { x.TenantId, x.SettingKey }).IsUnique();
             e.Property(x => x.SettingKey).IsRequired().HasMaxLength(200);
@@ -244,14 +287,13 @@ public class HrmsDbContext : DbContext
              .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // ── audit.super_admin_events ──────────────────────────────────────────
+        // ── audit.hrms_super_admin_events ─────────────────────────────────────
         mb.Entity<SuperAdminEvent>(e =>
         {
-            e.ToTable("super_admin_events", "audit");
+            e.ToTable("hrms_super_admin_events", "audit");
             e.HasKey(x => x.Id);
             e.Property(x => x.Action).IsRequired().HasMaxLength(80);
             e.Property(x => x.EntityType).IsRequired().HasMaxLength(80);
-            // OldValue / NewValue stored as JSON text (Npgsql maps string to text by default)
 
             e.HasOne(x => x.SuperAdmin)
              .WithMany(a => a.AuditEvents)

@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback } from 'react'
 import PermissionGate from '@/components/auth/PermissionGate'
@@ -267,7 +268,7 @@ function FillTimesheetsModal({
   async function run() {
     setRunning(true); setError('')
     try {
-      const res = await fetch('/api/tenant/roster/timesheets', {
+      const res = await fetchWithAuth('/api/tenant/roster/timesheets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ weekStart: isoDate(weekStart) }),
@@ -588,9 +589,9 @@ export default function RosteringPage() {
     try {
       const [sd, ed, pd, avd] = await Promise.all([
         fetch(`/api/tenant/roster/shifts?weekStart=${isoDate(weekStart)}`).then(r => r.json()),
-        fetch('/api/tenant/employees?limit=200&status=active').then(r => r.json()),
-        fetch('/api/tenant/participants').then(r => r.json()),
-        fetch('/api/tenant/roster/availability').then(r => r.json()),
+        fetchWithAuth('/api/tenant/employees?limit=200&status=active').then(r => r.json()),
+        fetchWithAuth('/api/tenant/participants').then(r => r.json()),
+        fetchWithAuth('/api/tenant/roster/availability').then(r => r.json()),
       ])
       setShifts(sd.shifts ?? [])
       setEmployees(ed.employees ?? [])
@@ -660,7 +661,7 @@ export default function RosteringPage() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       })
     } else {
-      await fetch('/api/tenant/roster/shifts', {
+      await fetchWithAuth('/api/tenant/roster/shifts', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       })
     }
@@ -681,7 +682,7 @@ export default function RosteringPage() {
     const nextDate = addDays(origDate, 7)
     const startTime = `${isoDate(nextDate)}T${modal.data.startHour}:${modal.data.startMin}:00`
     const endTime   = `${isoDate(nextDate)}T${modal.data.endHour}:${modal.data.endMin}:00`
-    await fetch('/api/tenant/roster/shifts', {
+    await fetchWithAuth('/api/tenant/roster/shifts', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         employeeId:    modal.data.employeeId,
@@ -698,7 +699,7 @@ export default function RosteringPage() {
 
   // Availability helpers
   async function saveAvailability(empId: string, dayOfWeek: number, startTime: string, endTime: string, isAvailable: boolean, note: string) {
-    const res = await fetch('/api/tenant/roster/availability', {
+    const res = await fetchWithAuth('/api/tenant/roster/availability', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ employeeId: empId, dayOfWeek, startTime, endTime, isAvailable, note }),
     })

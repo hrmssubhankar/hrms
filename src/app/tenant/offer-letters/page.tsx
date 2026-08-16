@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -314,7 +315,7 @@ export default function OfferLettersPage() {
 
   async function loadCustomTemplates() {
     try {
-      const res  = await fetch('/api/tenant/offer-letter-templates')
+      const res  = await fetchWithAuth('/api/tenant/offer-letter-templates')
       const data = await res.json()
       setCustomTemplates(data.templates ?? [])
     } catch { /* non-fatal */ }
@@ -374,7 +375,7 @@ export default function OfferLettersPage() {
       startDate: form.startDate, salaryAmount: Number(form.salaryAmount) || 0,
       salaryCycle: form.salaryCycle,
     })
-    const res = await fetch('/api/tenant/offer-letters', {
+    const res = await fetchWithAuth('/api/tenant/offer-letters', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, salaryAmount: Number(form.salaryAmount)||null, templateContent: content }),
     })
@@ -938,7 +939,7 @@ export default function OfferLettersPage() {
                       fd.append('name', uploadName.trim())
                       fd.append('content', uploadExtracted.trim())
                       if (uploadFile) fd.append('file', uploadFile)
-                      const res = await fetch('/api/tenant/offer-letter-templates', { method: 'POST', body: fd })
+                      const res = await fetchWithAuth('/api/tenant/offer-letter-templates', { method: 'POST', body: fd })
                       if (!res.ok) {
                         const d = await res.json()
                         throw new Error(d.error ?? 'Upload failed')

@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 
@@ -30,19 +31,19 @@ export default function RecognitionPage() {
 
   const load = async () => {
     setLoading(true)
-    const data = await fetch('/api/tenant/recognition').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/recognition').then(r => r.json())
     setRecs(data.recognitions ?? [])
     setLoading(false)
   }
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function nominate(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/recognition', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
+    await fetchWithAuth('/api/tenant/recognition', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
     setShowForm(false); setSaving(false); load()
   }
 

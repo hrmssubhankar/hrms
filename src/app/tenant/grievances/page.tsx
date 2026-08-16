@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -84,13 +85,13 @@ export default function GrievancesPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function lodge(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/grievances', {
+    await fetchWithAuth('/api/tenant/grievances', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
@@ -104,7 +105,7 @@ export default function GrievancesPage() {
     const idx  = STATUS_FLOW.findIndex(s => s.value === currentStatus)
     const next = STATUS_FLOW[idx + 1]?.value
     if (!next) return
-    await fetch('/api/tenant/grievances', {
+    await fetchWithAuth('/api/tenant/grievances', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status: next }),
     })
@@ -113,7 +114,7 @@ export default function GrievancesPage() {
 
   async function close(id: string) {
     const text = outcomeText[id] ?? ''
-    await fetch('/api/tenant/grievances', {
+    await fetchWithAuth('/api/tenant/grievances', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status: 'closed', outcome: text }),
     })

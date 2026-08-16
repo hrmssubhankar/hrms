@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 
@@ -30,7 +31,7 @@ export default function ReferralsPage() {
 
   const load = async () => {
     setLoading(true)
-    const data = await fetch('/api/tenant/referrals').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/referrals').then(r => r.json())
     setReferrals(data.referrals ?? [])
     setStats(data.stats ?? { total:0, pending:0, hired:0, bonusPaid:0 })
     setLoading(false)
@@ -38,22 +39,22 @@ export default function ReferralsPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/referrals', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
+    await fetchWithAuth('/api/tenant/referrals', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
     setShowForm(false); setSaving(false); load()
   }
 
   async function advance(id: string, status: string) {
-    await fetch('/api/tenant/referrals', { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ id, status }) })
+    await fetchWithAuth('/api/tenant/referrals', { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ id, status }) })
     load()
   }
 
   async function payBonus(id: string) {
-    await fetch('/api/tenant/referrals', { method:'PATCH', headers:{'Content-Type':'application/json'},
+    await fetchWithAuth('/api/tenant/referrals', { method:'PATCH', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ id, bonusPaidAt: new Date().toISOString() }) })
     load()
   }

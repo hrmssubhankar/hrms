@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 
@@ -57,7 +58,7 @@ export default function AnalyticsPage() {
   const [denied,  setDenied]  = useState(false)
 
   useEffect(() => {
-    fetch('/api/tenant/analytics')
+    fetchWithAuth('/api/tenant/analytics')
       .then(r => {
         if (r.status === 403) { setDenied(true); setLoading(false); return null }
         return r.json()

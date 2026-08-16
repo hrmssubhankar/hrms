@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -36,7 +37,7 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
 
   const fetchNotifications = useCallback((showLoader = false) => {
     if (showLoader) setLoading(true)
-    fetch('/api/tenant/notifications')
+    fetchWithAuth('/api/tenant/notifications')
       .then(r => r.json())
       .then(d => setNotifications(d.notifications ?? []))
       .catch(() => {})
@@ -61,12 +62,12 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
   }, [])
 
   async function markAllRead() {
-    await fetch('/api/tenant/notifications', { method: 'PATCH' })
+    await fetchWithAuth('/api/tenant/notifications', { method: 'PATCH' })
     setNotifications(n => n.map(x => ({ ...x, isRead: true })))
   }
 
   async function markRead(id: string) {
-    await fetch('/api/tenant/notifications', {
+    await fetchWithAuth('/api/tenant/notifications', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),

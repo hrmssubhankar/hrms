@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -127,14 +128,14 @@ export default function WorkforcePlanningPage() {
 
   const loadWorkforce = useCallback(async () => {
     setWfLoading(true)
-    const data = await fetch('/api/tenant/workforce').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/workforce').then(r => r.json())
     setWf(data)
     setWfLoading(false)
   }, [])
 
   const loadPlans = useCallback(async () => {
     setPlansLoading(true)
-    const data = await fetch('/api/tenant/workforce-planning').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/workforce-planning').then(r => r.json())
     setPlans(data.plans ?? [])
     setPlanStats(data.stats ?? { totalPlanned: 0, totalCurrent: 0, totalVacancies: 0, openRoles: 0 })
     setPlansLoading(false)
@@ -187,12 +188,12 @@ export default function WorkforcePlanningPage() {
       notes:        form.notes        || null,
     }
     if (editingId) {
-      await fetch('/api/tenant/workforce-planning', {
+      await fetchWithAuth('/api/tenant/workforce-planning', {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: editingId, ...body }),
       })
     } else {
-      await fetch('/api/tenant/workforce-planning', {
+      await fetchWithAuth('/api/tenant/workforce-planning', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
@@ -203,7 +204,7 @@ export default function WorkforcePlanningPage() {
   }
 
   async function markFilled(id: string) {
-    await fetch('/api/tenant/workforce-planning', {
+    await fetchWithAuth('/api/tenant/workforce-planning', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status: 'filled' }),
     })
@@ -213,7 +214,7 @@ export default function WorkforcePlanningPage() {
   async function deletePlan(id: string) {
     if (!confirm('Delete this headcount plan?')) return
     setDeleting(id)
-    await fetch('/api/tenant/workforce-planning', {
+    await fetchWithAuth('/api/tenant/workforce-planning', {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })

@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -24,7 +25,7 @@ export default function NewOnboardingPage() {
   const [error,    setError]    = useState('')
 
   useEffect(() => {
-    fetch('/api/tenant/employees?status=active&limit=200')
+    fetchWithAuth('/api/tenant/employees?status=active&limit=200')
       .then(r => r.json())
       .then(d => { setEmployees(d.employees ?? []); setFetching(false) })
   }, [])
@@ -35,7 +36,7 @@ export default function NewOnboardingPage() {
     setLoading(true)
     setError('')
     try {
-      const res  = await fetch('/api/tenant/onboarding', {
+      const res  = await fetchWithAuth('/api/tenant/onboarding', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({

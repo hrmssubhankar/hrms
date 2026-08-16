@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 
@@ -40,7 +41,7 @@ export default function MyPayslipsPage() {
   const [expanded, setExpanded] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/tenant/my-payslips')
+    fetchWithAuth('/api/tenant/my-payslips')
       .then(r => r.json())
       .then(d => {
         setLinked(d.employeeLinked)

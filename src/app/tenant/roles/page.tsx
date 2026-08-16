@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import PermissionGate from '@/components/auth/PermissionGate'
@@ -52,7 +53,7 @@ export default function RolesPage() {
 
   const load = async () => {
     setLoading(true)
-    const res  = await fetch('/api/tenant/roles')
+    const res  = await fetchWithAuth('/api/tenant/roles')
     if (res.status === 403) { setDenied(true); setLoading(false); return }
     const data = await res.json()
     setUsers(data.users ?? [])
@@ -63,7 +64,7 @@ export default function RolesPage() {
 
   async function invite(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/roles', {
+    await fetchWithAuth('/api/tenant/roles', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
@@ -71,7 +72,7 @@ export default function RolesPage() {
   }
 
   async function changeRole(id: string, role: string) {
-    await fetch('/api/tenant/roles', {
+    await fetchWithAuth('/api/tenant/roles', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, role }),
     })
@@ -79,7 +80,7 @@ export default function RolesPage() {
   }
 
   async function toggleActive(id: string, isActive: boolean) {
-    await fetch('/api/tenant/roles', {
+    await fetchWithAuth('/api/tenant/roles', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, isActive }),
     })

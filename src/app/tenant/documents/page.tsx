@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import FileUpload, { type UploadResult } from '@/components/ui/FileUpload'
@@ -147,14 +148,14 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function create(e: React.FormEvent) {
     e.preventDefault()
     if (!form.blobUrl) return
     setSaving(true)
-    await fetch('/api/tenant/documents', {
+    await fetchWithAuth('/api/tenant/documents', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title:         form.title,
@@ -175,7 +176,7 @@ export default function DocumentsPage() {
   }
 
   async function updateStatus(id: string, status: string) {
-    await fetch('/api/tenant/documents', {
+    await fetchWithAuth('/api/tenant/documents', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
@@ -197,7 +198,7 @@ export default function DocumentsPage() {
 
   async function saveEdit(id: string) {
     setEditSaving(true)
-    await fetch('/api/tenant/documents', {
+    await fetchWithAuth('/api/tenant/documents', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id,

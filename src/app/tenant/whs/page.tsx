@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -68,13 +69,13 @@ export default function WhsPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function reportIncident(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/whs', {
+    await fetchWithAuth('/api/tenant/whs', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, employeeId: form.employeeId || null }),
     })
@@ -85,7 +86,7 @@ export default function WhsPage() {
   }
 
   async function updateStatus(id: string, status: string) {
-    await fetch('/api/tenant/whs', {
+    await fetchWithAuth('/api/tenant/whs', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
@@ -97,7 +98,7 @@ export default function WhsPage() {
       ...incident.correctiveActions,
       { id: Date.now().toString(), action, assignedTo: '', dueDate: '', done: false },
     ]
-    await fetch('/api/tenant/whs', {
+    await fetchWithAuth('/api/tenant/whs', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: incident.id, correctiveActions: actions }),
     })
@@ -108,7 +109,7 @@ export default function WhsPage() {
     const actions = incident.correctiveActions.map(a =>
       a.id === actionId ? { ...a, done: !a.done } : a
     )
-    await fetch('/api/tenant/whs', {
+    await fetchWithAuth('/api/tenant/whs', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: incident.id, correctiveActions: actions }),
     })

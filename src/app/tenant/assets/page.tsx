@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 
@@ -32,7 +33,7 @@ export default function AssetsPage() {
 
   const load = async () => {
     setLoading(true)
-    const data = await fetch('/api/tenant/assets').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/assets').then(r => r.json())
     setAssets(data.assets ?? [])
     setAssignments(data.assignments ?? [])
     setStats(data.stats ?? { total:0, available:0, assigned:0, retired:0 })
@@ -41,30 +42,30 @@ export default function AssetsPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function createAsset(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/assets', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(assetForm) })
+    await fetchWithAuth('/api/tenant/assets', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(assetForm) })
     setShowAssetForm(false); setSaving(false); load()
   }
 
   async function assign(assetId: string) {
     setSaving(true)
-    await fetch('/api/tenant/assets', { method:'POST', headers:{'Content-Type':'application/json'},
+    await fetchWithAuth('/api/tenant/assets', { method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ _type:'assignment', assetId, ...assignForm }) })
     setShowAssignForm(null); setAssignForm({ employeeId:'', condition:'good', notes:'' }); setSaving(false); load()
   }
 
   async function returnAsset(assignmentId: string) {
-    await fetch('/api/tenant/assets', { method:'PATCH', headers:{'Content-Type':'application/json'},
+    await fetchWithAuth('/api/tenant/assets', { method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id: assignmentId, _type:'return' }) })
     load()
   }
 
   async function retire(id: string) {
-    await fetch('/api/tenant/assets', { method:'PATCH', headers:{'Content-Type':'application/json'},
+    await fetchWithAuth('/api/tenant/assets', { method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id, status:'retired' }) })
     load()
   }

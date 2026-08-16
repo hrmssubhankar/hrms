@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback } from 'react'
 
@@ -128,7 +129,7 @@ export default function MySchedulePage() {
 
   // Check for open clock-in on mount
   useEffect(() => {
-    fetch('/api/tenant/timesheets?status=pending')
+    fetchWithAuth('/api/tenant/timesheets?status=pending')
       .then(r => r.json())
       .then(data => {
         const open = (data.timesheets ?? []).find((t: any) => !t.clockOut)
@@ -148,7 +149,7 @@ export default function MySchedulePage() {
     setClocking(true)
     setClockMsg('')
     try {
-      const res = await fetch('/api/tenant/timesheets/clock-in', {
+      const res = await fetchWithAuth('/api/tenant/timesheets/clock-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ shiftId: shiftId ?? null }),
@@ -173,7 +174,7 @@ export default function MySchedulePage() {
     setClocking(true)
     setClockMsg('')
     try {
-      const res = await fetch('/api/tenant/timesheets/clock-out', {
+      const res = await fetchWithAuth('/api/tenant/timesheets/clock-out', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ breakMinutes: breakMins }),

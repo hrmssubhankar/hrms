@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -54,9 +55,9 @@ export default function NewEmployeePage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/tenant/departments').then(r => r.json()),
-      fetch('/api/tenant/positions').then(r => r.json()),
-      fetch('/api/tenant/config').then(r => r.json()),
+      fetchWithAuth('/api/tenant/departments').then(r => r.json()),
+      fetchWithAuth('/api/tenant/positions').then(r => r.json()),
+      fetchWithAuth('/api/tenant/config').then(r => r.json()),
     ]).then(([d, p, cfg]) => {
       setDepartments(d.departments ?? [])
       setPositions(p.positions ?? [])
@@ -93,7 +94,7 @@ export default function NewEmployeePage() {
         awardClassification: form.awardClassification || null,
         payLevel:        form.payLevel        || null,
       }
-      const res  = await fetch('/api/tenant/employees', {
+      const res  = await fetchWithAuth('/api/tenant/employees', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),

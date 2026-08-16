@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -109,7 +110,7 @@ export default function MyLeavePage() {
 
   const loadRequests = useCallback(async () => {
     setLoading(true)
-    const res  = await fetch('/api/tenant/my-leave')
+    const res  = await fetchWithAuth('/api/tenant/my-leave')
     const data = await res.json()
     setLinked(data.employeeLinked !== false)
     setRequests(data.requests ?? [])
@@ -128,7 +129,7 @@ export default function MyLeavePage() {
 
   useEffect(() => {
     loadRequests()
-    fetch('/api/tenant/leave/types')
+    fetchWithAuth('/api/tenant/leave/types')
       .then(r => r.json())
       .then(d => {
         const types: LeaveTypeConfig[] = d.types ?? []
@@ -148,7 +149,7 @@ export default function MyLeavePage() {
     if (computedDays <= 0) return
     setSaving(true); setFormError(null)
     try {
-      const res = await fetch('/api/tenant/leave', {
+      const res = await fetchWithAuth('/api/tenant/leave', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, totalDays: computedDays }),
       })
@@ -171,7 +172,7 @@ export default function MyLeavePage() {
   async function cancelRequest(id: string) {
     if (!confirm('Cancel this leave request?')) return
     setCancelling(id)
-    await fetch('/api/tenant/leave', {
+    await fetchWithAuth('/api/tenant/leave', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, action: 'cancel' }),
     })

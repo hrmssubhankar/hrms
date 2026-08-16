@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import FileUpload, { type UploadResult } from '@/components/ui/FileUpload'
@@ -99,7 +100,7 @@ export default function MyDocumentsPage() {
 
   async function load() {
     setLoading(true)
-    const data = await fetch('/api/tenant/my-documents').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/my-documents').then(r => r.json())
     setLinked(data.employeeLinked !== false)
     setDocs(data.documents ?? [])
     setLoading(false)
@@ -112,7 +113,7 @@ export default function MyDocumentsPage() {
     if (!form.blobUrl) return
     setSaving(true); setSaveError(null)
     try {
-      const res = await fetch('/api/tenant/my-documents', {
+      const res = await fetchWithAuth('/api/tenant/my-documents', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title:         form.title,

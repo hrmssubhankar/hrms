@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
@@ -161,12 +162,12 @@ export default function LeavePage() {
       })
       .catch(() => {})
 
-    fetch('/api/tenant/leave/types')
+    fetchWithAuth('/api/tenant/leave/types')
       .then(r => r.json())
       .then(d => setLeaveTypes(d.types ?? []))
       .catch(() => {})
 
-    fetch('/api/tenant/employees?status=active&limit=500')
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500')
       .then(r => r.json())
       .then(d => setEmployees(d.employees ?? []))
       .catch(() => {})
@@ -222,7 +223,7 @@ export default function LeavePage() {
     if (computedDays <= 0) return
     setSaving(true); setFormError(null)
     try {
-      const res = await fetch('/api/tenant/leave', {
+      const res = await fetchWithAuth('/api/tenant/leave', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body:   JSON.stringify({ ...form, totalDays: computedDays }),
       })
@@ -241,7 +242,7 @@ export default function LeavePage() {
 
   async function review(id: string, action: 'approve' | 'reject') {
     setReviewing(id)
-    await fetch('/api/tenant/leave', {
+    await fetchWithAuth('/api/tenant/leave', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body:   JSON.stringify({ id, action, reviewNote: reviewNote[id] ?? '' }),
     })
@@ -250,7 +251,7 @@ export default function LeavePage() {
 
   async function cancel(id: string) {
     setReviewing(id)
-    await fetch('/api/tenant/leave', {
+    await fetchWithAuth('/api/tenant/leave', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body:   JSON.stringify({ id, action: 'cancel' }),
     })
@@ -263,7 +264,7 @@ export default function LeavePage() {
     if (!confirm(`${label.charAt(0).toUpperCase() + label.slice(1)} ${selected.size} selected request${selected.size > 1 ? 's' : ''}?`)) return
     setBulkBusy(true)
     await Promise.all([...selected].map(id =>
-      fetch('/api/tenant/leave', {
+      fetchWithAuth('/api/tenant/leave', {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, action }),
       })

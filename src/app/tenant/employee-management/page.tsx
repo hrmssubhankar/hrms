@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
@@ -26,7 +27,7 @@ function CsvImportModal({ onClose, onDone }: { onClose: () => void; onDone: () =
     const form = new FormData()
     form.append('file', file)
     try {
-      const res  = await fetch('/api/tenant/employees/import', { method: 'POST', body: form })
+      const res  = await fetchWithAuth('/api/tenant/employees/import', { method: 'POST', body: form })
       const data = await res.json()
       if (!res.ok) { setErrMsg(data.error ?? 'Upload failed'); setStatus('error'); return }
       setResult(data)

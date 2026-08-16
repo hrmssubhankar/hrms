@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -142,7 +143,7 @@ export default function PerformancePage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   useEffect(() => { if (tab === 'goals') loadGoals() }, [tab])
@@ -151,7 +152,7 @@ export default function PerformancePage() {
   async function createReview(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/performance', {
+    await fetchWithAuth('/api/tenant/performance', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
@@ -167,7 +168,7 @@ export default function PerformancePage() {
     const avgRating = editing.kpis.filter(k => k.rating).length
       ? editing.kpis.reduce((s, k) => s + (k.rating ?? 0), 0) / editing.kpis.filter(k => k.rating).length
       : null
-    await fetch('/api/tenant/performance', {
+    await fetchWithAuth('/api/tenant/performance', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: editing.id, status: 'completed', kpis: editing.kpis,
@@ -194,7 +195,7 @@ export default function PerformancePage() {
   async function saveSelfAssess() {
     if (!selfAssessModal) return
     setSelfSaving(true)
-    await fetch('/api/tenant/performance', {
+    await fetchWithAuth('/api/tenant/performance', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: selfAssessModal.id, employeeInput: selfAssessForm }),
     })
@@ -207,7 +208,7 @@ export default function PerformancePage() {
   async function createGoal(e: React.FormEvent) {
     e.preventDefault()
     setGoalSaving(true)
-    await fetch('/api/tenant/performance-goals', {
+    await fetchWithAuth('/api/tenant/performance-goals', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...goalForm,
@@ -226,7 +227,7 @@ export default function PerformancePage() {
   async function saveGoalEdit() {
     if (!editingGoal) return
     setGoalSaving(true)
-    await fetch('/api/tenant/performance-goals', {
+    await fetchWithAuth('/api/tenant/performance-goals', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id:            editingGoal.id,

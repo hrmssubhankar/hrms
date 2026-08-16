@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect } from 'react'
 
@@ -13,7 +14,7 @@ export default function WorkforcePage() {
   const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
-    fetch('/api/tenant/workforce').then(r => r.json()).then(d => {
+    fetchWithAuth('/api/tenant/workforce').then(r => r.json()).then(d => {
       setSummary(d.summary ?? null)
       setDepts(d.headcountByDepartment ?? [])
       setPositions(d.positions ?? [])

@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback } from 'react'
 
@@ -26,24 +27,24 @@ export default function ReferralPage() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const res = await fetch('/api/tenant/referral')
+    const res = await fetchWithAuth('/api/tenant/referral')
     if (res.ok) { const d = await res.json(); setReferrals(d.referrals??[]); setStats(d.stats??{}) }
     setLoading(false)
   }, [])
 
   useEffect(() => { load() }, [load])
   useEffect(() => {
-    fetch('/api/tenant/employees?limit=200').then(r=>r.json()).then(d=>setEmployees(d.employees??[]))
+    fetchWithAuth('/api/tenant/employees?limit=200').then(r=>r.json()).then(d=>setEmployees(d.employees??[]))
   }, [])
 
   async function create() {
     setSaving(true)
-    await fetch('/api/tenant/referral', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
+    await fetchWithAuth('/api/tenant/referral', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
     setShowCreate(false); setSaving(false); load()
   }
 
   async function patch(id:string, updates:Record<string,unknown>) {
-    await fetch('/api/tenant/referral', { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id,...updates}) })
+    await fetchWithAuth('/api/tenant/referral', { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id,...updates}) })
     load()
   }
 

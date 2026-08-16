@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback } from 'react'
 
@@ -30,7 +31,7 @@ export default function CompetencyPage() {
   const [assessForm, setAssessForm]     = useState({ competencyId:'', outcome:'competent', assessedAt:'', expiryDate:'', evidence:'', notes:'' })
 
   const loadLibrary = useCallback(async () => {
-    const res = await fetch('/api/tenant/competency?view=library')
+    const res = await fetchWithAuth('/api/tenant/competency?view=library')
     if (res.ok) { const d = await res.json(); setCompetencies(d.competencies ?? []) }
   }, [])
 
@@ -44,20 +45,20 @@ export default function CompetencyPage() {
 
   useEffect(() => {
     loadLibrary()
-    fetch('/api/tenant/employees?limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [loadLibrary])
 
   useEffect(() => { if (selectedEmp) loadAssessments(selectedEmp) }, [selectedEmp, loadAssessments])
 
   async function addCompetency() {
     setSaving(true)
-    await fetch('/api/tenant/competency', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({_type:'competency',...compForm}) })
+    await fetchWithAuth('/api/tenant/competency', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({_type:'competency',...compForm}) })
     setShowAddComp(false); setSaving(false); loadLibrary()
   }
 
   async function addAssessment() {
     setSaving(true)
-    await fetch('/api/tenant/competency', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({employeeId:selectedEmp,...assessForm}) })
+    await fetchWithAuth('/api/tenant/competency', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({employeeId:selectedEmp,...assessForm}) })
     setShowAssess(false); setSaving(false); loadAssessments(selectedEmp)
   }
 

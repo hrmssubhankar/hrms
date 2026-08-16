@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
@@ -87,7 +88,7 @@ export default function OnboardingPage() {
   async function deleteRecord(id: string) {
     if (!confirm('Delete this onboarding record? This cannot be undone.')) return
     setDeleting(id)
-    await fetch('/api/tenant/onboarding', {
+    await fetchWithAuth('/api/tenant/onboarding', {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })

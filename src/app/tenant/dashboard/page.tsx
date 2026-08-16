@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -166,9 +167,9 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/tenant/leave').then(r => r.json()).catch(() => ({ requests: [] })),
-      fetch('/api/tenant/public-holidays').then(r => r.json()).catch(() => ({ holidays: [] })),
-      fetch('/api/tenant/leave/balances').then(r => r.json()).catch(() => ({ balances: [], employeeLinked: false })),
+      fetchWithAuth('/api/tenant/leave').then(r => r.json()).catch(() => ({ requests: [] })),
+      fetchWithAuth('/api/tenant/public-holidays').then(r => r.json()).catch(() => ({ holidays: [] })),
+      fetchWithAuth('/api/tenant/leave/balances').then(r => r.json()).catch(() => ({ balances: [], employeeLinked: false })),
     ]).then(([leaveData, holidayData, balanceData]) => {
       const today = new Date().toISOString().slice(0, 10)
       const reqs: LeaveRequest[] = (leaveData.requests ?? [])
@@ -372,14 +373,14 @@ export default function DashboardPage() {
       }
     }).catch(() => {})
 
-    fetch('/api/tenant/config').then(r => r.json()).then(d => {
+    fetchWithAuth('/api/tenant/config').then(r => r.json()).then(d => {
       setTenantName(d.name ?? '')
       setPrimaryColor(d.primaryColor ?? '#6d28d9')
     }).catch(() => {})
 
     loadDashboard()
     // Celebrations widget (fire-and-forget; failure is silent)
-    fetch('/api/tenant/dashboard/celebrations')
+    fetchWithAuth('/api/tenant/dashboard/celebrations')
       .then(r => r.ok ? r.json() : { celebrations: [] })
       .then(d => setCelebrations(d.celebrations ?? []))
       .catch(() => {})
@@ -387,7 +388,7 @@ export default function DashboardPage() {
 
   function loadDashboard() {
     setLoading(true)
-    fetch('/api/tenant/dashboard')
+    fetchWithAuth('/api/tenant/dashboard')
       .then(r => {
         if (r.status === 403) { setIsPersonal(true); setLoading(false); return null }
         if (!r.ok) throw new Error(String(r.status))

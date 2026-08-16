@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -67,9 +68,9 @@ export default function EditEmployeePage() {
   useEffect(() => {
     Promise.all([
       fetch(`/api/tenant/employees/${id}`).then(r => r.json()),
-      fetch('/api/tenant/departments').then(r => r.json()),
-      fetch('/api/tenant/positions').then(r => r.json()),
-      fetch('/api/tenant/config').then(r => r.json()),
+      fetchWithAuth('/api/tenant/departments').then(r => r.json()),
+      fetchWithAuth('/api/tenant/positions').then(r => r.json()),
+      fetchWithAuth('/api/tenant/config').then(r => r.json()),
     ]).then(([empData, deptData, posData, cfg]) => {
       const e = empData.employee
       if (e) {

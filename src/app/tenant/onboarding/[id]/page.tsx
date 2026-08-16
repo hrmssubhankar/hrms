@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -329,7 +330,7 @@ export default function OnboardingDetailPage() {
             <button onClick={() => {
               setBuddyDraft(rec.buddyId ?? '')
               if (allEmployees.length === 0) {
-                fetch('/api/tenant/employees?limit=200').then(r => r.json()).then(d => setAllEmployees(d.employees ?? []))
+                fetchWithAuth('/api/tenant/employees?limit=200').then(r => r.json()).then(d => setAllEmployees(d.employees ?? []))
               }
               setShowBuddyEdit(b => !b)
             }} className="text-xs text-purple-400 hover:text-purple-300 transition">

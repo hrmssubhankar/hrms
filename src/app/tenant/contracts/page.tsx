@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import FileUpload from '@/components/ui/FileUpload'
@@ -55,18 +56,18 @@ export default function ContractsPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function create(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/contracts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(form) })
+    await fetchWithAuth('/api/tenant/contracts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(form) })
     setShowForm(false); setForm({ employeeId:'', type:'employment', pdfUrl:'', superFund:'', tfnProvided:false })
     setSaving(false); load()
   }
 
   async function patch(id: string, updates: Record<string, unknown>) {
-    await fetch('/api/tenant/contracts', {
+    await fetchWithAuth('/api/tenant/contracts', {
       method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id, ...updates }),
     })

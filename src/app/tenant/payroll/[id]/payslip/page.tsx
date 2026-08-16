@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
@@ -43,7 +44,7 @@ export default function PayslipPrintPage() {
   useEffect(() => {
     Promise.all([
       fetch(`/api/tenant/payroll/${id}`).then(r => r.json()),
-      fetch('/api/tenant/config').then(r => r.json()).catch(() => ({})),
+      fetchWithAuth('/api/tenant/config').then(r => r.json()).catch(() => ({})),
     ]).then(([pd, td]) => {
       if (pd.error) { setError(pd.error); return }
       setRec(pd.record)

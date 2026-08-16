@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -53,19 +54,19 @@ export default function SupervisionPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function schedule(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/supervision', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
+    await fetchWithAuth('/api/tenant/supervision', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
     setShowForm(false); setForm({ employeeId:'', supervisorId:'', scheduledDate:'', type:'regular', notes:'' })
     setSaving(false); load()
   }
 
   async function complete(id: string, notes: string) {
-    await fetch('/api/tenant/supervision', {
+    await fetchWithAuth('/api/tenant/supervision', {
       method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id, status:'completed', notes }),
     })
@@ -76,7 +77,7 @@ export default function SupervisionPage() {
     const text = actionDraft[id]?.trim()
     if (!text) return
     const updated = [...current, text]
-    await fetch('/api/tenant/supervision', {
+    await fetchWithAuth('/api/tenant/supervision', {
       method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id, actionItems: updated }),
     })
@@ -86,7 +87,7 @@ export default function SupervisionPage() {
 
   async function removeAction(id: string, current: string[], idx: number) {
     const updated = current.filter((_, i) => i !== idx)
-    await fetch('/api/tenant/supervision', {
+    await fetchWithAuth('/api/tenant/supervision', {
       method:'PATCH', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id, actionItems: updated }),
     })

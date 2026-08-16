@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -33,7 +34,7 @@ export default function LeaveSettingsPage() {
   useEffect(() => {
     setLoading(true)
     // Load all types including inactive — use ?all=1 to bypass active filter
-    fetch('/api/tenant/leave/types?all=1')
+    fetchWithAuth('/api/tenant/leave/types?all=1')
       .then(r => r.json())
       .then(d => setTypes((d.types ?? []).map((t: LeaveTypeRow) => ({ ...t, _dirty: false }))))
       .catch(() => setError('Failed to load leave types.'))
@@ -51,7 +52,7 @@ export default function LeaveSettingsPage() {
     setSaving(true); setError(null); setSaved(false)
     try {
       const payload = types.map(({ _dirty: _, ...rest }) => rest)
-      const res  = await fetch('/api/tenant/leave/types', {
+      const res  = await fetchWithAuth('/api/tenant/leave/types', {
         method:  'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ types: payload }),

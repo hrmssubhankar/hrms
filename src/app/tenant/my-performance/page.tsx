@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -75,8 +76,8 @@ export default function MyPerformancePage() {
   const loadData = useCallback(async () => {
     setLoading(true)
     const [revRes, goalRes] = await Promise.all([
-      fetch('/api/tenant/my-performance'),
-      fetch('/api/tenant/performance-goals'),
+      fetchWithAuth('/api/tenant/my-performance'),
+      fetchWithAuth('/api/tenant/performance-goals'),
     ])
     const [revData, goalData] = await Promise.all([revRes.json(), goalRes.json()])
     setReviews(revData.reviews ?? [])
@@ -100,7 +101,7 @@ export default function MyPerformancePage() {
   async function saveSelfAssess() {
     if (!selfAssessModal) return
     setSelfSaving(true)
-    await fetch('/api/tenant/performance', {
+    await fetchWithAuth('/api/tenant/performance', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: selfAssessModal.id, employeeInput: selfAssessForm }),
     })
@@ -112,7 +113,7 @@ export default function MyPerformancePage() {
   async function saveGoalProgress() {
     if (!updatingGoal) return
     setGoalSaving(true)
-    await fetch('/api/tenant/performance-goals', {
+    await fetchWithAuth('/api/tenant/performance-goals', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: updatingGoal.id, progress: updatingGoal.progress, selfRating: updatingGoal.selfRating }),
     })

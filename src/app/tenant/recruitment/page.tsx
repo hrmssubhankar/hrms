@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -98,7 +99,7 @@ export default function RecruitmentPage() {
 
   const loadReqs = useCallback(async () => {
     setLoading(true)
-    const data = await fetch('/api/tenant/recruitment').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/recruitment').then(r => r.json())
     setRequisitions(data.requisitions ?? [])
     setStats(data.stats ?? { total:0, open:0, draft:0, closed:0, totalApps:0, hired:0 })
     setLoading(false)
@@ -110,7 +111,7 @@ export default function RecruitmentPage() {
   }, [])
 
   const loadCandidates = useCallback(async () => {
-    const data = await fetch('/api/tenant/recruitment?view=candidates').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/recruitment?view=candidates').then(r => r.json())
     setCandidates(data.candidates ?? [])
   }, [])
 
@@ -124,7 +125,7 @@ export default function RecruitmentPage() {
 
   async function createReq(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/recruitment', {
+    await fetchWithAuth('/api/tenant/recruitment', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reqForm),
     })
@@ -135,7 +136,7 @@ export default function RecruitmentPage() {
 
   async function saveEditReq(e: React.FormEvent) {
     e.preventDefault(); if (!editingReq) return; setSavingEdit(true)
-    await fetch('/api/tenant/recruitment', {
+    await fetchWithAuth('/api/tenant/recruitment', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: editingReq.id, title: editForm.title, description: editForm.description }),
     })
@@ -145,7 +146,7 @@ export default function RecruitmentPage() {
   async function deleteReq(id: string) {
     if (!confirm('Delete this requisition and all its applications?')) return
     setDeletingReq(id)
-    await fetch('/api/tenant/recruitment', {
+    await fetchWithAuth('/api/tenant/recruitment', {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })
@@ -155,7 +156,7 @@ export default function RecruitmentPage() {
   }
 
   async function updateReqStatus(id: string, status: string) {
-    await fetch('/api/tenant/recruitment', {
+    await fetchWithAuth('/api/tenant/recruitment', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
@@ -164,13 +165,13 @@ export default function RecruitmentPage() {
 
   async function addCandidate(e: React.FormEvent) {
     e.preventDefault(); if (!selectedReq) return; setSaving(true)
-    const cRes  = await fetch('/api/tenant/recruitment', {
+    const cRes  = await fetchWithAuth('/api/tenant/recruitment', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ _type: 'candidate', ...appForm }),
     })
     const cData = await cRes.json()
     if (cData.record?.id) {
-      await fetch('/api/tenant/recruitment', {
+      await fetchWithAuth('/api/tenant/recruitment', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ _type: 'application', requisitionId: selectedReq.id, candidateId: cData.record.id, notes: appForm.notes }),
       })
@@ -181,7 +182,7 @@ export default function RecruitmentPage() {
   }
 
   async function moveStatus(appId: string, status: string) {
-    await fetch('/api/tenant/recruitment', {
+    await fetchWithAuth('/api/tenant/recruitment', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: appId, _type: 'application', status }),
     })
@@ -190,7 +191,7 @@ export default function RecruitmentPage() {
 
   async function saveCardNotes(appId: string) {
     setSavingCard(appId)
-    await fetch('/api/tenant/recruitment', {
+    await fetchWithAuth('/api/tenant/recruitment', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: appId, _type: 'application',
@@ -205,7 +206,7 @@ export default function RecruitmentPage() {
   async function deleteApp(appId: string) {
     if (!confirm('Remove this candidate from the pipeline?')) return
     setDeletingApp(appId)
-    await fetch('/api/tenant/recruitment', {
+    await fetchWithAuth('/api/tenant/recruitment', {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: appId, _type: 'application' }),
     })

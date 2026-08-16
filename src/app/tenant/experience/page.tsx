@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect } from 'react'
 
@@ -18,7 +19,7 @@ export default function ExperiencePage() {
   const [loading, setLoading]     = useState(true)
 
   useEffect(() => {
-    fetch('/api/tenant/employees?limit=200&status=active').then(r=>r.json()).then(d=>{
+    fetchWithAuth('/api/tenant/employees?limit=200&status=active').then(r=>r.json()).then(d=>{
       setEmployees(d.employees??[])
       setLoading(false)
     })

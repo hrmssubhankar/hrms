@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 
@@ -30,7 +31,7 @@ export default function EngagementPage() {
 
   const load = async () => {
     setLoading(true)
-    const data = await fetch('/api/tenant/engagement').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/engagement').then(r => r.json())
     setSurveys(data.surveys ?? [])
     setLoading(false)
   }
@@ -42,18 +43,18 @@ export default function EngagementPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function createSurvey(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/engagement', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
+    await fetchWithAuth('/api/tenant/engagement', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
     setShowForm(false); setSaving(false); load()
   }
 
   async function submitResponse(e: React.FormEvent) {
     e.preventDefault(); if (!selected) return; setSaving(true)
-    await fetch('/api/tenant/engagement', {
+    await fetchWithAuth('/api/tenant/engagement', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ _type:'response', surveyId: selected.id, employeeId: respForm.employeeId, answers: { feedback: respForm.freeText } }),
     })
@@ -62,7 +63,7 @@ export default function EngagementPage() {
   }
 
   async function toggleActive(id: string, isActive: boolean) {
-    await fetch('/api/tenant/engagement', { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ id, isActive }) })
+    await fetchWithAuth('/api/tenant/engagement', { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ id, isActive }) })
     load()
   }
 

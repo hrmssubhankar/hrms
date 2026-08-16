@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -97,13 +98,13 @@ function LibraryTab() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function createCourse(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/training/courses', {
+    await fetchWithAuth('/api/tenant/training/courses', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, validityMonths: form.validityMonths ? Number(form.validityMonths) : null }),
     })
@@ -116,7 +117,7 @@ function LibraryTab() {
   async function enrol() {
     if (!enrollCourse || !enrollIds.length) return
     setEnrolling(true)
-    await fetch('/api/tenant/training/records', {
+    await fetchWithAuth('/api/tenant/training/records', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ courseId: enrollCourse.id, employeeIds: enrollIds }),
     })
@@ -127,7 +128,7 @@ function LibraryTab() {
 
   async function archiveCourse(id: string) {
     if (!confirm('Archive this course?')) return
-    await fetch('/api/tenant/training/courses', {
+    await fetchWithAuth('/api/tenant/training/courses', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, isActive: false }),
     })
@@ -305,7 +306,7 @@ function RecordsTab() {
   async function markComplete(id: string) {
     const score = prompt('Enter score (0-100) or leave blank:')
     setUpdating(id)
-    await fetch('/api/tenant/training/records', {
+    await fetchWithAuth('/api/tenant/training/records', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status: 'completed', score: score ? Number(score) : null }),
     })

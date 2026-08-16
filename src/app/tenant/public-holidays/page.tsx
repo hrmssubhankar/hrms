@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -89,7 +90,7 @@ export default function PublicHolidaysPage() {
       .then(r => r.json())
       .then(d => setCanManage(MANAGER_ROLES.includes(d.userRole ?? '')))
       .catch(() => {})
-    fetch('/api/tenant/config')
+    fetchWithAuth('/api/tenant/config')
       .then(r => r.json())
       .then(d => {
         const s = d.tenant?.settings ?? {}
@@ -119,7 +120,7 @@ export default function PublicHolidaysPage() {
   async function importHolidays() {
     setImporting(true); setImportMsg('')
     try {
-      const res = await fetch('/api/tenant/public-holidays/import', {
+      const res = await fetchWithAuth('/api/tenant/public-holidays/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ year, countryCode: tenantCountry }),
@@ -149,11 +150,11 @@ export default function PublicHolidaysPage() {
     try {
       const payload = { ...form, state: form.state || null }
       const res = editing
-        ? await fetch('/api/tenant/public-holidays', {
+        ? await fetchWithAuth('/api/tenant/public-holidays', {
             method: 'PATCH', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: editing.id, ...payload }),
           })
-        : await fetch('/api/tenant/public-holidays', {
+        : await fetchWithAuth('/api/tenant/public-holidays', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
           })
@@ -174,7 +175,7 @@ export default function PublicHolidaysPage() {
   async function deleteHoliday(id: string) {
     setDeleting(id)
     try {
-      await fetch('/api/tenant/public-holidays', {
+      await fetchWithAuth('/api/tenant/public-holidays', {
         method: 'DELETE', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       })

@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 
@@ -59,7 +60,7 @@ export default function NotificationsPage() {
 
   async function load() {
     setLoading(true)
-    const res = await fetch('/api/tenant/notifications')
+    const res = await fetchWithAuth('/api/tenant/notifications')
     if (res.ok) {
       const d = await res.json()
       setNotifications(d.notifications ?? [])
@@ -70,12 +71,12 @@ export default function NotificationsPage() {
   useEffect(() => { load() }, [])
 
   async function markAllRead() {
-    await fetch('/api/tenant/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+    await fetchWithAuth('/api/tenant/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
     setNotifications(n => n.map(x => ({ ...x, isRead: true })))
   }
 
   async function markRead(id: string) {
-    await fetch('/api/tenant/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
+    await fetchWithAuth('/api/tenant/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
     setNotifications(n => n.map(x => x.id === id ? { ...x, isRead: true } : x))
   }
 
@@ -86,14 +87,14 @@ export default function NotificationsPage() {
 
   async function clearAll() {
     if (!confirm('Clear all notifications? This cannot be undone.')) return
-    await fetch('/api/tenant/notifications', { method: 'DELETE' })
+    await fetchWithAuth('/api/tenant/notifications', { method: 'DELETE' })
     setNotifications([])
   }
 
   async function runExpiryCheck() {
     setRunning(true); setError(''); setResult(null)
     try {
-      const res = await fetch('/api/tenant/notifications/send', {
+      const res = await fetchWithAuth('/api/tenant/notifications/send', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ daysAhead }),
       })

@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -95,13 +96,13 @@ export default function SeparationPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function initiate(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/separation', {
+    await fetchWithAuth('/api/tenant/separation', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
@@ -130,7 +131,7 @@ export default function SeparationPage() {
   async function deleteRecord(id: string) {
     if (!confirm('Delete this separation record? This cannot be undone.')) return
     setDeleting(id)
-    await fetch('/api/tenant/separation', {
+    await fetchWithAuth('/api/tenant/separation', {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })

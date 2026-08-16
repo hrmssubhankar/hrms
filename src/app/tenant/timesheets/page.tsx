@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback } from 'react'
 import PermissionGate from '@/components/auth/PermissionGate'
@@ -127,7 +128,7 @@ function ClockCard({ onAction }: { onAction: () => void }) {
 
   async function fetchStatus() {
     try {
-      const r = await fetch('/api/tenant/timesheets?status=pending&limit=1')
+      const r = await fetchWithAuth('/api/tenant/timesheets?status=pending&limit=1')
       const d = await r.json()
       const open = (d.timesheets ?? []).find((t: Timesheet) => t.clockIn && !t.clockOut)
       if (open) {
@@ -160,7 +161,7 @@ function ClockCard({ onAction }: { onAction: () => void }) {
   async function clockIn() {
     setError('')
     try {
-      const r = await fetch('/api/tenant/timesheets/clock-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+      const r = await fetchWithAuth('/api/tenant/timesheets/clock-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
       const d = await r.json()
       if (!r.ok) { setError(d.error ?? 'Failed to clock in'); return }
       setStatus('clocked_in'); setClockInTime(d.clockIn); onAction()
@@ -170,7 +171,7 @@ function ClockCard({ onAction }: { onAction: () => void }) {
   async function clockOut() {
     setError('')
     try {
-      const r = await fetch('/api/tenant/timesheets/clock-out', {
+      const r = await fetchWithAuth('/api/tenant/timesheets/clock-out', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ breakMinutes: Number(breakMins) || 0, notes: notes || undefined }),
@@ -381,7 +382,7 @@ export default function TimesheetsPage() {
   async function bulkApprove() {
     if (selected.size === 0) return
     setBulkApproving(true)
-    await fetch('/api/tenant/timesheets/bulk-approve', {
+    await fetchWithAuth('/api/tenant/timesheets/bulk-approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids: Array.from(selected) }),

@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useRef, useState } from 'react'
 
@@ -83,7 +84,7 @@ export default function TenantSettingsPage() {
   const [myobMsg,         setMyobMsg]         = useState('')
 
   useEffect(() => {
-    fetch('/api/tenant/config').then(r => r.json()).then(d => {
+    fetchWithAuth('/api/tenant/config').then(r => r.json()).then(d => {
       const t = d.tenant ?? {}
       const s = t.settings ?? {}
       setPortalName(t.name ?? '')
@@ -104,13 +105,13 @@ export default function TenantSettingsPage() {
     if (params.get('myob_error'))   setMyobMsg(`MYOB error: ${params.get('myob_error')}`)
 
     setXeroLoading(true)
-    fetch('/api/tenant/xero/status')
+    fetchWithAuth('/api/tenant/xero/status')
       .then(r => r.json())
       .then(d => setXeroStatus(d))
       .finally(() => setXeroLoading(false))
 
     setMyobLoading(true)
-    fetch('/api/tenant/myob/status')
+    fetchWithAuth('/api/tenant/myob/status')
       .then(r => r.json())
       .then(d => setMyobStatus(d))
       .finally(() => setMyobLoading(false))
@@ -119,7 +120,7 @@ export default function TenantSettingsPage() {
   async function connectXero() {
     setXeroConnecting(true); setXeroMsg('')
     try {
-      const res = await fetch('/api/tenant/xero/connect')
+      const res = await fetchWithAuth('/api/tenant/xero/connect')
       const d   = await res.json()
       if (!res.ok) { setXeroMsg(d.error); setXeroConnecting(false); return }
       window.location.href = d.url   // redirect to Xero
@@ -129,7 +130,7 @@ export default function TenantSettingsPage() {
   async function disconnectXero() {
     if (!confirm('Disconnect Xero? Payroll records already exported will remain exported.')) return
     setXeroDisconnecting(true); setXeroMsg('')
-    await fetch('/api/tenant/xero/status', { method: 'DELETE' })
+    await fetchWithAuth('/api/tenant/xero/status', { method: 'DELETE' })
     setXeroStatus({ connected: false })
     setXeroMsg('Xero disconnected.')
     setXeroDisconnecting(false)
@@ -138,7 +139,7 @@ export default function TenantSettingsPage() {
   async function connectMyob() {
     setMyobConnecting(true); setMyobMsg('')
     try {
-      const res = await fetch('/api/tenant/myob/connect')
+      const res = await fetchWithAuth('/api/tenant/myob/connect')
       const d   = await res.json()
       if (!res.ok) { setMyobMsg(d.error); setMyobConnecting(false); return }
       window.location.href = d.url   // redirect to MYOB
@@ -148,7 +149,7 @@ export default function TenantSettingsPage() {
   async function disconnectMyob() {
     if (!confirm('Disconnect MYOB? Payroll records already exported will remain exported.')) return
     setMyobDisconnecting(true); setMyobMsg('')
-    await fetch('/api/tenant/myob/status', { method: 'DELETE' })
+    await fetchWithAuth('/api/tenant/myob/status', { method: 'DELETE' })
     setMyobStatus({ connected: false })
     setMyobMsg('MYOB disconnected.')
     setMyobDisconnecting(false)
@@ -164,7 +165,7 @@ export default function TenantSettingsPage() {
     const reader = new FileReader()
     reader.onload = async ev => {
       const dataUrl = ev.target?.result as string
-      const res  = await fetch('/api/tenant/config', {
+      const res  = await fetchWithAuth('/api/tenant/config', {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ logoUrl: dataUrl }),
       })
@@ -177,7 +178,7 @@ export default function TenantSettingsPage() {
   }
 
   async function removeLogo() {
-    await fetch('/api/tenant/config', {
+    await fetchWithAuth('/api/tenant/config', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ logoUrl: null }),
     })
@@ -186,7 +187,7 @@ export default function TenantSettingsPage() {
 
   async function saveBranding() {
     setSaving(true); setError('')
-    const res = await fetch('/api/tenant/config', {
+    const res = await fetchWithAuth('/api/tenant/config', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: portalName }),
     })
@@ -199,7 +200,7 @@ export default function TenantSettingsPage() {
   async function save(patch: Partial<Settings>) {
     setSaving(true)
     const merged = { ...settings, ...patch }
-    await fetch('/api/tenant/config', {
+    await fetchWithAuth('/api/tenant/config', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ settings: patch }),
@@ -621,7 +622,7 @@ export default function TenantSettingsPage() {
                   onClick={async () => {
                     if (leaveTypesLoading || leaveTypes.length) return
                     setLeaveTypesLoading(true)
-                    const res = await fetch('/api/tenant/leave/types?all=1')
+                    const res = await fetchWithAuth('/api/tenant/leave/types?all=1')
                     const d   = await res.json()
                     setLeaveTypes(d.types ?? [])
                     setLeaveTypesLoading(false)
@@ -635,7 +636,7 @@ export default function TenantSettingsPage() {
 
               {/* Auto-load on tab open */}
               {tab === 'leave' && leaveTypes.length === 0 && !leaveTypesLoading && (() => {
-                fetch('/api/tenant/leave/types?all=1')
+                fetchWithAuth('/api/tenant/leave/types?all=1')
                   .then(r => r.json())
                   .then(d => setLeaveTypes(d.types ?? []))
                 return null
@@ -726,7 +727,7 @@ export default function TenantSettingsPage() {
                       onClick={async () => {
                         setLeaveTypesSaving(true); setLeaveTypesError(''); setLeaveTypesSaved(false)
                         try {
-                          const res = await fetch('/api/tenant/leave/types', {
+                          const res = await fetchWithAuth('/api/tenant/leave/types', {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ types: leaveTypes }),

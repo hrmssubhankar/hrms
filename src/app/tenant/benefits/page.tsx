@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -81,18 +82,18 @@ export default function BenefitsPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function save(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
     if (editingId) {
-      await fetch('/api/tenant/benefits', {
+      await fetchWithAuth('/api/tenant/benefits', {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: editingId, ...form }),
       })
     } else {
-      await fetch('/api/tenant/benefits', {
+      await fetchWithAuth('/api/tenant/benefits', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
@@ -119,7 +120,7 @@ export default function BenefitsPage() {
 
   async function remove(id: string) {
     if (!confirm('Remove this benefit?')) return
-    await fetch('/api/tenant/benefits', {
+    await fetchWithAuth('/api/tenant/benefits', {
       method: 'DELETE', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })

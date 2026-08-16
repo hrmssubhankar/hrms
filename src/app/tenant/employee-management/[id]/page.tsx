@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -260,7 +261,7 @@ export default function EmployeeProfilePage() {
     if (tab === 'Training' && !trainingLoaded) {
       Promise.all([
         fetch(`/api/tenant/training/records?employeeId=${id}`).then(r => r.json()),
-        fetch('/api/tenant/training/courses').then(r => r.json()),
+        fetchWithAuth('/api/tenant/training/courses').then(r => r.json()),
       ]).then(([recs, crss]) => {
         setTraining(recs.records ?? [])
         setCourses(crss.courses ?? [])
@@ -272,7 +273,7 @@ export default function EmployeeProfilePage() {
   async function enrolEmployee() {
     if (!enrolCourseId) return
     setEnrolSaving(true)
-    await fetch('/api/tenant/training/records', {
+    await fetchWithAuth('/api/tenant/training/records', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ employeeId: id, courseId: enrolCourseId }),
     })
@@ -284,7 +285,7 @@ export default function EmployeeProfilePage() {
 
   async function markTrainingComplete(recordId: string) {
     setTrainingUpdating(recordId)
-    await fetch('/api/tenant/training/records', {
+    await fetchWithAuth('/api/tenant/training/records', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: recordId, status: 'completed' }),
     })
@@ -309,7 +310,7 @@ export default function EmployeeProfilePage() {
       justification:  promoForm.justification,
       raisedByName:   'HR',
     }
-    const res = await fetch('/api/tenant/promotions', {
+    const res = await fetchWithAuth('/api/tenant/promotions', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })

@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 
@@ -27,7 +28,7 @@ export default function DEIPage() {
 
   const load = async () => {
     setLoading(true)
-    const data = await fetch('/api/tenant/dei').then(r => r.json())
+    const data = await fetchWithAuth('/api/tenant/dei').then(r => r.json())
     setRecords(data.records ?? [])
     setSummary(data.summary ?? { total:0, byGender:{}, indigenous:0, disability:0, adjustments:0 })
     setLoading(false)
@@ -35,12 +36,12 @@ export default function DEIPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function save(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    await fetch('/api/tenant/dei', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
+    await fetchWithAuth('/api/tenant/dei', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
     setShowForm(false); setSaving(false); load()
   }
 

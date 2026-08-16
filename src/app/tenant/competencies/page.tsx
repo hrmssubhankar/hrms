@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -50,20 +51,20 @@ export default function CompetencyPage() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function createComp(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/competencies', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(compForm) })
+    await fetchWithAuth('/api/tenant/competencies', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(compForm) })
     setShowCompForm(false); setCompForm({ name:'', description:'', category:'' }); setSaving(false); load()
   }
 
   async function createAss(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/competencies', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(assForm) })
+    await fetchWithAuth('/api/tenant/competencies', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(assForm) })
     setShowAssForm(false)
     setAssForm({ employeeId:'', competencyId:'', assessorId:'', outcome:'competent', assessedAt:'', expiryDate:'', evidence:'', notes:'' })
     setSaving(false); load()

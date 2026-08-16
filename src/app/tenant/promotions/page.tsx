@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -71,7 +72,7 @@ export default function PromotionsPage() {
 
   useEffect(() => { load() }, [load])
   useEffect(() => {
-    fetch('/api/tenant/employees').then(r=>r.json()).then(d=>setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees').then(r=>r.json()).then(d=>setEmployees(d.employees ?? []))
   }, [])
 
   async function selectPromotion(p: Promotion) {
@@ -84,7 +85,7 @@ export default function PromotionsPage() {
 
   async function submitForm(e: React.FormEvent) {
     e.preventDefault(); setSaving(true)
-    const res = await fetch('/api/tenant/promotions', {
+    const res = await fetchWithAuth('/api/tenant/promotions', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,

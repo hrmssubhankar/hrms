@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 
@@ -224,7 +225,7 @@ export default function MyProfilePage() {
   const [contactError,   setContactError]   = useState('')
 
   useEffect(() => {
-    fetch('/api/tenant/my-profile')
+    fetchWithAuth('/api/tenant/my-profile')
       .then(r => r.json())
       .then(d => {
         setLinked(d.employeeLinked)
@@ -245,7 +246,7 @@ export default function MyProfilePage() {
     e.preventDefault()
     setSaving(true); setMsg('')
     try {
-      const res  = await fetch('/api/tenant/my-profile', {
+      const res  = await fetchWithAuth('/api/tenant/my-profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -271,7 +272,7 @@ export default function MyProfilePage() {
       const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
       if (!uploadRes.ok) { setMsg('Photo upload failed'); return }
       const { url } = await uploadRes.json()
-      const res = await fetch('/api/tenant/my-profile', {
+      const res = await fetchWithAuth('/api/tenant/my-profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photoUrl: url }),

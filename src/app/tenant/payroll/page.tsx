@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -98,7 +99,7 @@ export default function PayrollPage() {
     if (!bulkForm.periodStart || !bulkForm.periodEnd) { setBulkError('Period start and end are required'); return }
     setBulkRunning(true); setBulkError(''); setBulkResult(null)
     try {
-      const res = await fetch('/api/tenant/payroll/bulk', {
+      const res = await fetchWithAuth('/api/tenant/payroll/bulk', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           periodStart: bulkForm.periodStart,
@@ -132,17 +133,17 @@ export default function PayrollPage() {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    fetch('/api/tenant/employees?limit=200&status=active')
+    fetchWithAuth('/api/tenant/employees?limit=200&status=active')
       .then(r => r.json())
       .then(d => setEmployees(d.employees ?? []))
   }, [])
 
   useEffect(() => {
-    fetch('/api/tenant/xero/status')
+    fetchWithAuth('/api/tenant/xero/status')
       .then(r => r.json())
       .then(d => setXeroStatus(d))
       .catch(() => {})
-    fetch('/api/tenant/myob/status')
+    fetchWithAuth('/api/tenant/myob/status')
       .then(r => r.json())
       .then(d => setMyobStatus(d))
       .catch(() => {})
@@ -156,7 +157,7 @@ export default function PayrollPage() {
     setExporting(new Set(ids))
     setExportMsg('')
     try {
-      const res = await fetch('/api/tenant/xero/export', {
+      const res = await fetchWithAuth('/api/tenant/xero/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids }),
@@ -178,7 +179,7 @@ export default function PayrollPage() {
     setMyobExporting(new Set(ids))
     setExportMsg('')
     try {
-      const res = await fetch('/api/tenant/myob/export', {
+      const res = await fetchWithAuth('/api/tenant/myob/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids }),
@@ -206,7 +207,7 @@ export default function PayrollPage() {
       } else {
         body.annualSalary = Number(form.annualSalary)
       }
-      const res = await fetch('/api/tenant/payroll/calculate', {
+      const res = await fetchWithAuth('/api/tenant/payroll/calculate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
@@ -230,7 +231,7 @@ export default function PayrollPage() {
       } else {
         body.annualSalary = Number(form.annualSalary)
       }
-      const res = await fetch('/api/tenant/payroll', {
+      const res = await fetchWithAuth('/api/tenant/payroll', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
@@ -244,7 +245,7 @@ export default function PayrollPage() {
   }
 
   async function updateStatus(id: string, status: string) {
-    await fetch('/api/tenant/payroll', {
+    await fetchWithAuth('/api/tenant/payroll', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })

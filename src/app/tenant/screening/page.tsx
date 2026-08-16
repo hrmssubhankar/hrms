@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback } from 'react'
 
@@ -53,17 +54,17 @@ export default function ScreeningPage() {
 
   useEffect(() => { load() }, [load])
   useEffect(() => {
-    fetch('/api/tenant/employees?limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function create() {
     setSaving(true)
-    await fetch('/api/tenant/screening', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(form) })
+    await fetchWithAuth('/api/tenant/screening', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(form) })
     setShowCreate(false); setSaving(false); load()
   }
 
   async function patch(id: string, updates: Record<string, unknown>) {
-    await fetch('/api/tenant/screening', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id,...updates}) })
+    await fetchWithAuth('/api/tenant/screening', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id,...updates}) })
     load(); if (selected?.id === id) setSelected(s => s ? {...s,...updates as any} : s)
   }
 

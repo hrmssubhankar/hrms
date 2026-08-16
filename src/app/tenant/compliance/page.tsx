@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -116,13 +117,13 @@ function ScreeningTab() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/compliance/screening', {
+    await fetchWithAuth('/api/tenant/compliance/screening', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
@@ -133,7 +134,7 @@ function ScreeningTab() {
   }
 
   async function updateStatus(id: string, status: string) {
-    await fetch('/api/tenant/compliance/screening', {
+    await fetchWithAuth('/api/tenant/compliance/screening', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
@@ -313,7 +314,7 @@ function TrackingTab() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const res  = await fetch('/api/tenant/compliance/tracking')
+    const res  = await fetchWithAuth('/api/tenant/compliance/tracking')
     const data = await res.json()
     setRecords(data.records ?? [])
     setStats(data.stats ?? { total:0,green:0,amber:0,red:0,pending:0 })
@@ -322,13 +323,13 @@ function TrackingTab() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/compliance/tracking', {
+    await fetchWithAuth('/api/tenant/compliance/tracking', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
@@ -339,7 +340,7 @@ function TrackingTab() {
   }
 
   async function updateStatus(id: string, status: string) {
-    await fetch('/api/tenant/compliance/tracking', {
+    await fetchWithAuth('/api/tenant/compliance/tracking', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
@@ -473,7 +474,7 @@ function LockTab() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const res  = await fetch('/api/tenant/compliance/lock')
+    const res  = await fetchWithAuth('/api/tenant/compliance/lock')
     const data = await res.json()
     setRecords(data.records ?? [])
     setLoading(false)
@@ -481,13 +482,13 @@ function LockTab() {
 
   useEffect(() => {
     load()
-    fetch('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
+    fetchWithAuth('/api/tenant/employees?status=active&limit=200').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
   }, [])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/tenant/compliance/lock', {
+    await fetchWithAuth('/api/tenant/compliance/lock', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
@@ -499,7 +500,7 @@ function LockTab() {
 
   async function revoke(id: string) {
     if (!confirm('Revoke this exception?')) return
-    await fetch('/api/tenant/compliance/lock', {
+    await fetchWithAuth('/api/tenant/compliance/lock', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, isActive: false }),
     })
