@@ -108,6 +108,9 @@ export type Permission =
   | 'expenses:read'
   | 'expenses:write'
   | 'expenses:approve'
+  // NDIS Audits
+  | 'ndis_audits:read'
+  | 'ndis_audits:write'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -145,6 +148,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'leave:read', 'leave:write', 'leave:approve',
     'crm:read', 'crm:write',
     'expenses:read', 'expenses:write', 'expenses:approve',
+    'ndis_audits:read', 'ndis_audits:write',
     'settings:read', 'settings:write',
   ],
 
@@ -176,6 +180,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'leave:read', 'leave:write', 'leave:approve',
     'crm:read', 'crm:write',
     'expenses:read', 'expenses:write', 'expenses:approve',
+    'ndis_audits:read', 'ndis_audits:write',
     'settings:read',
   ],
 
@@ -188,6 +193,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'training:read',
     'performance:read',
     'analytics:read',
+    'ndis_audits:read', 'ndis_audits:write',
     'settings:read',
   ],
 
@@ -242,6 +248,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'whs:read',
     'training:read',
     'performance:read',
+    'ndis_audits:read',
   ],
 
   it_admin: [

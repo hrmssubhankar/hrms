@@ -86,6 +86,10 @@ const MODULES = [
   { id: 31, name: 'Timesheets' },
   { id: 32, name: 'Screening' },
   { id: 33, name: 'Reports' },
+  { id: 34, name: 'CRM' },
+  { id: 35, name: 'Expenses' },
+  { id: 36, name: 'CRM' },
+  { id: 37, name: 'NDIS Practice Standards Audit' },
 ]
 
 const SUPER_ADMIN = {

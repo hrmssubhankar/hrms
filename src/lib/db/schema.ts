@@ -1154,6 +1154,56 @@ export const crmActivities = pgTable('crm_activities', {
   assignedIdx: index('crm_activities_assigned_idx').on(t.assignedTo),
 }))
 
+// ─── NDIS Practice Standards Audit ──────────────────────────────────────────
+
+export const ndisAudits = pgTable('ndis_audits', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  title:        varchar('title', { length: 255 }).notNull(),
+  auditType:    varchar('audit_type', { length: 100 }).notNull(), // internal, external, certification, surveillance
+  standard:     varchar('standard', { length: 255 }).notNull(),   // e.g. "NDIS Practice Standard 1.1 — Person-centred Supports"
+  outcomeGroup: varchar('outcome_group', { length: 100 }),        // rights_protection, governance, support_provision, workforce
+  status:       varchar('status', { length: 50 }).notNull().default('scheduled'), // scheduled, in_progress, completed, overdue
+  result:       varchar('result', { length: 50 }),                // conformant, non_conformant, not_applicable, partial
+  riskRating:   varchar('risk_rating', { length: 50 }),           // low, medium, high, critical
+  scheduledDate: date('scheduled_date').notNull(),
+  completedDate: date('completed_date'),
+  nextReviewDate: date('next_review_date'),
+  auditorName:  varchar('auditor_name', { length: 255 }),
+  auditorOrg:   varchar('auditor_org', { length: 255 }),
+  findingSummary: text('finding_summary'),
+  correctiveActions: text('corrective_actions'),
+  evidenceUrl:  varchar('evidence_url', { length: 1000 }),
+  notes:        text('notes'),
+  assignedTo:   varchar('assigned_to', { length: 255 }),
+  createdBy:    varchar('created_by', { length: 255 }),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:  index('ndis_audits_tenant_idx').on(t.tenantId),
+  statusIdx:  index('ndis_audits_status_idx').on(t.status),
+  dateIdx:    index('ndis_audits_date_idx').on(t.scheduledDate),
+}))
+
+export const ndisAuditActions = pgTable('ndis_audit_actions', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  auditId:     uuid('audit_id').notNull().references(() => ndisAudits.id, { onDelete: 'cascade' }),
+  description: text('description').notNull(),
+  priority:    varchar('priority', { length: 50 }).notNull().default('medium'), // low, medium, high, critical
+  status:      varchar('status', { length: 50 }).notNull().default('open'),     // open, in_progress, resolved, closed
+  dueDate:     date('due_date'),
+  resolvedAt:  timestamp('resolved_at'),
+  assignedTo:  varchar('assigned_to', { length: 255 }),
+  notes:       text('notes'),
+  createdBy:   varchar('created_by', { length: 255 }),
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+  updatedAt:   timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('ndis_audit_actions_tenant_idx').on(t.tenantId),
+  auditIdx:  index('ndis_audit_actions_audit_idx').on(t.auditId),
+}))
+
 // ─── Expense Management ──────────────────────────────────────────────────────
 
 export const expenseClaims = pgTable('expense_claims', {

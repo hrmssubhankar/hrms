@@ -47,6 +47,7 @@ const NAV_PERMISSION: Record<string, Permission | null> = {
   'public-holidays':    'leave:read',
   'crm':                'crm:read',
   'expenses':           'expenses:read',
+  'ndis-audits':        'ndis_audits:read',
   // Built-in routes (IDs 31+) — not controlled by tenant module toggles
   'timesheets':         'timesheets:read',
   'screening':          'compliance:read',
@@ -93,6 +94,7 @@ const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
   34: { key: 'offer-letters',         label: 'Offer Letters' },
   35: { key: 'crm',                   label: 'CRM' },
   36: { key: 'expenses',              label: 'Expenses' },
+  37: { key: 'ndis-audits',           label: 'NDIS Audits' },
 }
 
 async function getTenantConfig(slug: string) {
