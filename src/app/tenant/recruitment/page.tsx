@@ -95,6 +95,12 @@ export default function RecruitmentPage() {
   // Candidate search
   const [candSearch, setCandSearch] = useState('')
 
+  // Convert to employee
+  const [convertApp,        setConvertApp]        = useState<Application | null>(null)
+  const [convertForm,       setConvertForm]        = useState({ startDate: '', employmentType: 'full_time', createOnboarding: true })
+  const [convertSaving,     setConvertSaving]      = useState(false)
+  const [convertResult,     setConvertResult]      = useState<{ employeeId: string; employeeNumber: string } | null>(null)
+
   // ── Loaders ──────────────────────────────────────────────────────────────────
 
   const loadReqs = useCallback(async () => {
@@ -220,6 +226,29 @@ export default function RecruitmentPage() {
       candidateEmail: app.candidateEmail ?? '',
     })
     window.location.href = `/tenant/offer-letters?${params}`
+  }
+
+  async function convertCandidate() {
+    if (!convertApp) return
+    setConvertSaving(true)
+    const res = await fetchWithAuth('/api/tenant/recruitment/convert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ applicationId: convertApp.id, ...convertForm }),
+    })
+    const data = await res.json()
+    setConvertSaving(false)
+    if (res.ok) {
+      setConvertResult({ employeeId: data.employee.id, employeeNumber: data.employee.employeeNumber })
+      if (selectedReq) loadApps(selectedReq.id)
+    } else {
+      // employee already exists case (409)
+      if (res.status === 409 && data.employeeId) {
+        setConvertResult({ employeeId: data.employeeId, employeeNumber: '' })
+      } else {
+        alert(data.error ?? 'Failed to convert')
+      }
+    }
   }
 
   // ── Filtered data ─────────────────────────────────────────────────────────────
@@ -622,6 +651,15 @@ export default function RecruitmentPage() {
                                 </button>
                               )}
 
+                              {/* Convert to employee CTA */}
+                              {stage.value === 'hired' && (
+                                <button
+                                  onClick={() => { setConvertApp(a); setConvertResult(null); setConvertForm({ startDate: '', employmentType: 'full_time', createOnboarding: true }) }}
+                                  className="w-full py-1.5 text-xs font-medium bg-green-700 hover:bg-green-600 text-white rounded-lg transition">
+                                  👤 Convert to Employee
+                                </button>
+                              )}
+
                               {/* Move to stage */}
                               <div className="relative group">
                                 <button className="w-full py-1 text-xs text-gray-500 hover:text-white border border-gray-700 hover:border-gray-500 rounded-lg transition">
@@ -702,6 +740,92 @@ export default function RecruitmentPage() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Convert to Employee Modal ─────────────────────────────────────── */}
+      {convertApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl w-full max-w-md p-6 space-y-4">
+            {convertResult ? (
+              /* Success state */
+              <div className="text-center space-y-4">
+                <div className="text-5xl">🎉</div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Employee Created!</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <strong>{convertApp.candidateFirstName} {convertApp.candidateLastName}</strong> has been added as an employee
+                  {convertResult.employeeNumber ? ` (${convertResult.employeeNumber})` : ''}.
+                </p>
+                <p className="text-xs text-gray-500">An onboarding record has been created in the Onboarding module.</p>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setConvertApp(null)}
+                    className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                  >Close</button>
+                  <a
+                    href="/tenant/employees"
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium text-center transition"
+                  >View in Employees →</a>
+                </div>
+              </div>
+            ) : (
+              /* Form state */
+              <>
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">Convert to Employee</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    Create an employee record for <strong>{convertApp.candidateFirstName} {convertApp.candidateLastName}</strong>
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Start Date *</label>
+                    <input
+                      type="date" required
+                      value={convertForm.startDate}
+                      onChange={e => setConvertForm(f => ({ ...f, startDate: e.target.value }))}
+                      className={INPUT}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">Employment Type</label>
+                    <select
+                      value={convertForm.employmentType}
+                      onChange={e => setConvertForm(f => ({ ...f, employmentType: e.target.value }))}
+                      className={INPUT}
+                    >
+                      <option value="full_time">Full-time</option>
+                      <option value="part_time">Part-time</option>
+                      <option value="casual">Casual</option>
+                      <option value="contractor">Contractor</option>
+                    </select>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={convertForm.createOnboarding}
+                      onChange={e => setConvertForm(f => ({ ...f, createOnboarding: e.target.checked }))}
+                    />
+                    Create onboarding checklist automatically
+                  </label>
+                </div>
+
+                <div className="flex gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setConvertApp(null)}
+                    className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                  >Cancel</button>
+                  <button
+                    disabled={!convertForm.startDate || convertSaving}
+                    onClick={convertCandidate}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition"
+                  >{convertSaving ? 'Creating…' : '👤 Create Employee'}</button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
