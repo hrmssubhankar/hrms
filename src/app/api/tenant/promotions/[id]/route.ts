@@ -80,14 +80,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         updates.implementedAt = new Date()
         eventType = 'implemented'
         eventNote = 'Promotion implemented — employee record updated'
-        // Sync employee salary when a salary was proposed
+        // Sync employee salary AND job title when implemented
         const [promo] = await db
-          .select({ proposedSalary: promotionRequests.proposedSalary, employeeId: promotionRequests.employeeId })
+          .select({
+            proposedSalary: promotionRequests.proposedSalary,
+            proposedTitle:  promotionRequests.proposedTitle,
+            employeeId:     promotionRequests.employeeId,
+          })
           .from(promotionRequests)
           .where(and(eq(promotionRequests.id, id), eq(promotionRequests.tenantId, session.tenantId)))
-        if (promo?.proposedSalary) {
+        if (promo) {
+          const empUpdates: Record<string, unknown> = { updatedAt: new Date() }
+          if (promo.proposedSalary) empUpdates.annualSalary = String(promo.proposedSalary)
+          if (promo.proposedTitle)  empUpdates.jobTitle     = promo.proposedTitle
           await db.update(employees)
-            .set({ annualSalary: String(promo.proposedSalary), updatedAt: new Date() })
+            .set(empUpdates)
             .where(and(eq(employees.id, promo.employeeId), eq(employees.tenantId, session.tenantId)))
         }
         break
