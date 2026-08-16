@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
+import { SignJWT, jwtVerify } from 'jose'
 
 /**
  * Middleware — multi-tenant routing + JWT auth guard.
@@ -18,6 +18,9 @@ import { jwtVerify } from 'jose'
  */
 
 const SESSION_COOKIE = 'hrms_session'
+
+// Sliding-window refresh: re-issue the token when < this many seconds remain
+const REFRESH_THRESHOLD_SECS = 60 * 60 // 1 hour
 
 // Subdomains that identify the super admin portal (used in subdomain mode)
 const SUPER_ADMIN_SUBDOMAINS = ['superadmin', 'admin']
@@ -43,13 +46,58 @@ function getSecret() {
   return new TextEncoder().encode(secret)
 }
 
-async function verifySession(token: string) {
+type SessionPayload = {
+  role: string
+  tenantId?: string
+  tenantSlug?: string
+  [key: string]: unknown
+}
+
+/**
+ * Verify the JWT and return the payload.
+ * Also returns a refreshed token string if the token is within the
+ * REFRESH_THRESHOLD_SECS window — caller should set it as the new cookie.
+ */
+async function verifySession(
+  token: string,
+): Promise<{ payload: SessionPayload | null; refreshedToken: string | null }> {
   try {
     const { payload } = await jwtVerify(token, getSecret())
-    return payload as { role: string; tenantId?: string; tenantSlug?: string }
+    const sessionPayload = payload as unknown as SessionPayload
+
+    // Sliding-window: re-sign if expiry is within 1 hour
+    const exp = typeof payload.exp === 'number' ? payload.exp : 0
+    const now = Math.floor(Date.now() / 1000)
+    const remaining = exp - now
+
+    let refreshedToken: string | null = null
+    if (remaining > 0 && remaining < REFRESH_THRESHOLD_SECS) {
+      // Re-sign with all the same claims, fresh 8h window
+      const { exp: _exp, iat: _iat, ...claims } = payload as Record<string, unknown>
+      void _exp; void _iat
+      refreshedToken = await new SignJWT(claims)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime('8h')
+        .sign(getSecret())
+    }
+
+    return { payload: sessionPayload, refreshedToken }
   } catch {
-    return null
+    return { payload: null, refreshedToken: null }
   }
+}
+
+/** Apply the refreshed session cookie to a response (if one was issued). */
+function applyRefreshedToken(res: NextResponse, token: string | null) {
+  if (!token) return
+  res.cookies.set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 8,
+  })
 }
 
 function extractSubdomain(hostname: string): string | null {
@@ -78,7 +126,6 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Deployment-level tenant (NEXT_PUBLIC_TENANT_SLUG env var) ─────────────
-  // Set per-project in Vercel. Takes priority over everything else.
   const deploymentTenant = process.env.NEXT_PUBLIC_TENANT_SLUG ?? ''
 
   // ── Subdomain detection (future custom domain support) ─────────────────────
@@ -91,8 +138,10 @@ export async function middleware(request: NextRequest) {
 
   // ── Super Admin routing + auth guard ──────────────────────────────────────
   if (isSuperAdmin || pathname.startsWith('/super-admin')) {
-    const token   = request.cookies.get(SESSION_COOKIE)?.value
-    const session = token ? await verifySession(token) : null
+    const token = request.cookies.get(SESSION_COOKIE)?.value
+    const { payload: session, refreshedToken } = token
+      ? await verifySession(token)
+      : { payload: null, refreshedToken: null }
 
     if (!session || session.role !== 'super_admin') {
       const url = request.nextUrl.clone()
@@ -104,10 +153,14 @@ export async function middleware(request: NextRequest) {
     if (isSuperAdmin && !pathname.startsWith('/super-admin') && !pathname.startsWith('/api')) {
       const url = request.nextUrl.clone()
       url.pathname = `/super-admin${pathname === '/' ? '' : pathname}`
-      return NextResponse.rewrite(url)
+      const res = NextResponse.rewrite(url)
+      applyRefreshedToken(res, refreshedToken)
+      return res
     }
 
-    return NextResponse.next()
+    const res = NextResponse.next()
+    applyRefreshedToken(res, refreshedToken)
+    return res
   }
 
   // ── Tenant routing + auth guard ───────────────────────────────────────────
@@ -122,17 +175,19 @@ export async function middleware(request: NextRequest) {
   if (!tenantSlug) {
     const token = request.cookies.get(SESSION_COOKIE)?.value
     if (token) {
-      const jwtPayload = await verifySession(token)
+      const { payload: jwtPayload } = await verifySession(token)
       if (jwtPayload?.role === 'tenant_user' && jwtPayload.tenantSlug) {
-        tenantSlug = jwtPayload.tenantSlug
+        tenantSlug = jwtPayload.tenantSlug as string
       }
     }
   }
 
   if (tenantSlug) {
     if (pathname.startsWith('/tenant') || !pathname.startsWith('/api')) {
-      const token   = request.cookies.get(SESSION_COOKIE)?.value
-      const session = token ? await verifySession(token) : null
+      const token = request.cookies.get(SESSION_COOKIE)?.value
+      const { payload: session, refreshedToken } = token
+        ? await verifySession(token)
+        : { payload: null, refreshedToken: null }
 
       if (!session || session.role !== 'tenant_user') {
         const url = request.nextUrl.clone()
@@ -140,20 +195,20 @@ export async function middleware(request: NextRequest) {
         url.searchParams.set('tenant', tenantSlug)
         return NextResponse.redirect(url)
       }
-    }
 
-    if (pathname.startsWith('/tenant') || pathname.startsWith('/api/tenant')) {
-      // Forward tenantSlug as a REQUEST header so Server Components can read it via headers()
-      const reqHeaders = new Headers(request.headers)
-      reqHeaders.set('x-tenant-slug', tenantSlug)
-      const res = NextResponse.next({ request: { headers: reqHeaders } })
-      // Refresh the cookie so it stays alive across navigation
-      res.cookies.set('tenant_slug', tenantSlug, {
-        path: '/', httpOnly: false, sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 8,
-      })
-      return res
+      if (pathname.startsWith('/tenant') || pathname.startsWith('/api/tenant')) {
+        const reqHeaders = new Headers(request.headers)
+        reqHeaders.set('x-tenant-slug', tenantSlug)
+        const res = NextResponse.next({ request: { headers: reqHeaders } })
+        // Refresh tenant_slug cookie so it stays alive across navigation
+        res.cookies.set('tenant_slug', tenantSlug, {
+          path: '/', httpOnly: false, sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 60 * 60 * 8,
+        })
+        applyRefreshedToken(res, refreshedToken)
+        return res
+      }
     }
 
     const url = request.nextUrl.clone()
