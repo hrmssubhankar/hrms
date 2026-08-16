@@ -266,8 +266,9 @@ export async function POST(req: NextRequest, ctx: RouteContext) {
                 primaryColor:  ctx2.primaryColor,
                 periodStart:   fmtDate(row.periodStart),
                 periodEnd:     fmtDate(row.periodEnd),
-                netPay:        `$${Number(row.netPay ?? 0).toLocaleString('en-AU', { minimumFractionDigits: 2 })}`,
-                payslipUrl:    blob.url,
+                grossPay:      Number(row.grossPay ?? 0),
+                netPay:        Number(row.netPay ?? 0),
+                superAmount:   Number(row.superContribution ?? 0),
                 loginUrl:      ctx2.loginUrl,
               }),
             })
