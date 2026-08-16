@@ -1204,6 +1204,78 @@ export const ndisAuditActions = pgTable('ndis_audit_actions', {
   auditIdx:  index('ndis_audit_actions_audit_idx').on(t.auditId),
 }))
 
+// ─── NDIS Reportable Incidents ───────────────────────────────────────────────
+
+export const ndisIncidents = pgTable('ndis_incidents', {
+  id:               uuid('id').primaryKey().defaultRandom(),
+  tenantId:         uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  // Classification
+  incidentType:     varchar('incident_type', { length: 100 }).notNull(), // death, serious_injury, abuse, neglect, unlawful_sexual, unauthorised_restrictive_practice, other
+  incidentCategory: varchar('incident_category', { length: 100 }),       // sub-category
+  isReportable:     boolean('is_reportable').notNull().default(true),     // must be reported to NDIS Commission
+  // Status & workflow
+  status:           varchar('status', { length: 50 }).notNull().default('open'), // open, under_review, reported_to_commission, closed
+  severity:         varchar('severity', { length: 50 }).notNull().default('medium'), // low, medium, high, critical
+  // People involved
+  participantId:    uuid('participant_id').references(() => participants.id, { onDelete: 'set null' }),
+  participantName:  varchar('participant_name', { length: 255 }),         // fallback if not in DB
+  workerName:       varchar('worker_name', { length: 255 }),
+  workerRole:       varchar('worker_role', { length: 100 }),
+  witnessNames:     text('witness_names'),
+  // Incident details
+  title:            varchar('title', { length: 255 }).notNull(),
+  description:      text('description').notNull(),
+  location:         varchar('location', { length: 500 }),
+  incidentDate:     timestamp('incident_date').notNull(),
+  discoveredDate:   timestamp('discovered_date'),
+  reportedInternally: boolean('reported_internally').notNull().default(false),
+  internalReportDate: date('internal_report_date'),
+  // NDIS Commission reporting
+  commissionNotified: boolean('commission_notified').notNull().default(false),
+  commissionNotifyDate: date('commission_notify_date'),
+  commissionRefNumber:  varchar('commission_ref_number', { length: 100 }),
+  // Police / external
+  policeNotified:   boolean('police_notified').notNull().default(false),
+  policeReportNumber: varchar('police_report_number', { length: 100 }),
+  // Response & outcome
+  immediateActions: text('immediate_actions'),
+  rootCause:        text('root_cause'),
+  outcomeDescription: text('outcome_description'),
+  // Evidence & docs
+  evidenceUrl:      varchar('evidence_url', { length: 1000 }),
+  // Meta
+  assignedTo:       varchar('assigned_to', { length: 255 }),
+  notes:            text('notes'),
+  createdBy:        varchar('created_by', { length: 255 }),
+  createdAt:        timestamp('created_at').notNull().defaultNow(),
+  updatedAt:        timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:    index('ndis_incidents_tenant_idx').on(t.tenantId),
+  statusIdx:    index('ndis_incidents_status_idx').on(t.status),
+  dateIdx:      index('ndis_incidents_date_idx').on(t.incidentDate),
+  participantIdx: index('ndis_incidents_participant_idx').on(t.participantId),
+}))
+
+export const ndisIncidentActions = pgTable('ndis_incident_actions', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  incidentId:   uuid('incident_id').notNull().references(() => ndisIncidents.id, { onDelete: 'cascade' }),
+  description:  text('description').notNull(),
+  actionType:   varchar('action_type', { length: 100 }).default('corrective'), // corrective, preventive, notification, investigation
+  priority:     varchar('priority', { length: 50 }).notNull().default('medium'),
+  status:       varchar('status', { length: 50 }).notNull().default('open'),
+  dueDate:      date('due_date'),
+  resolvedAt:   timestamp('resolved_at'),
+  assignedTo:   varchar('assigned_to', { length: 255 }),
+  notes:        text('notes'),
+  createdBy:    varchar('created_by', { length: 255 }),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:    index('ndis_incident_actions_tenant_idx').on(t.tenantId),
+  incidentIdx:  index('ndis_incident_actions_incident_idx').on(t.incidentId),
+}))
+
 // ─── Expense Management ──────────────────────────────────────────────────────
 
 export const expenseClaims = pgTable('expense_claims', {
