@@ -2,10 +2,10 @@
 
 /**
  * Public offer letter page — no login required.
- * URL: /offer/:token  (token = contract UUID)
+ * URL: /offer/:token  (token = offerLetters.acceptanceToken)
  *
  * Candidates can:
- *   1. View the offer letter (PDF embed or plain-text fallback)
+ *   1. View the offer letter (PDF embed or formatted content fallback)
  *   2. Provide a drawn/typed signature
  *   3. Accept or decline the offer
  */
@@ -13,52 +13,84 @@ import { useState, useEffect, useRef } from 'react'
 import { use } from 'react'
 
 type OfferData = {
-  id:            string
-  type:          string
-  status:        string
-  pdfUrl:        string | null
-  sentAt:        string | null
-  signedAt:      string | null
-  candidateName: string
-  orgName:       string | null
-  logoUrl:       string | null
-  primaryColor:  string
+  id:              string
+  type:            string
+  status:          string
+  candidateName:   string
+  candidateEmail:  string | null
+  position:        string
+  department:      string | null
+  employmentType:  string
+  startDate:       string | null
+  salaryAmount:    number | null
+  salaryCycle:     string
+  templateContent: string | null
+  pdfUrl:          string | null
+  sentAt:          string | null
+  acceptedAt:      string | null
+  rejectedAt:      string | null
+  expiresAt:       string | null
+  orgName:         string | null
+  logoUrl:         string | null
+  primaryColor:    string
+}
+
+const EMP_TYPE_LABELS: Record<string, string> = {
+  full_time:  'Full Time',
+  part_time:  'Part Time',
+  casual:     'Casual',
+  contractor: 'Contractor',
+}
+
+function fmtSalary(amount: number | null, cycle: string) {
+  if (!amount) return null
+  const formatted = amount.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 })
+  const cycleLabel = cycle === 'annual' ? 'per annum' : cycle === 'hourly' ? 'per hour' : `per ${cycle}`
+  return `${formatted} ${cycleLabel}`
+}
+
+function fmtDate(d: string | null) {
+  if (!d) return null
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 export default function OfferPage({ params }: { params: Promise<{ token: string }> }) {
-  const { token }   = use(params)
-  const [offer,   setOffer]   = useState<OfferData | null>(null)
-  const [error,   setError]   = useState('')
-  const [loading, setLoading] = useState(true)
-  const [step,    setStep]    = useState<'view' | 'sign' | 'done' | 'declined'>('view')
-  const [action,  setAction]  = useState<'accept' | 'reject' | null>(null)
+  const { token }    = use(params)
+  const [offer,      setOffer]      = useState<OfferData | null>(null)
+  const [error,      setError]      = useState('')
+  const [loading,    setLoading]    = useState(true)
+  const [step,       setStep]       = useState<'view' | 'sign' | 'done' | 'declined' | 'expired'>('view')
   const [submitting, setSubmitting] = useState(false)
-  const [sigMode, setSigMode] = useState<'draw' | 'type'>('draw')
-  const [typedSig, setTypedSig] = useState('')
+  const [sigMode,    setSigMode]    = useState<'draw' | 'type'>('draw')
+  const [typedSig,   setTypedSig]   = useState('')
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawing   = useRef(false)
 
   useEffect(() => {
-    fetch(`/api/offer/${token}`)
+    fetch(`/api/offer-letter/${token}`)
       .then(r => r.json())
       .then(d => {
         if (d.error) { setError(d.error); setLoading(false); return }
         setOffer(d)
-        // If already responded, skip to done/declined
-        if (d.status === 'signed')   setStep('done')
+        if (d.status === 'accepted') setStep('done')
         if (d.status === 'rejected') setStep('declined')
+        if (d.status === 'expired')  setStep('expired')
+        if (d.status === 'withdrawn') setError('This offer has been withdrawn.')
         setLoading(false)
       })
       .catch(() => { setError('Failed to load offer. Please try again.'); setLoading(false) })
   }, [token])
 
-  // Canvas drawing handlers
+  // ── Canvas drawing ─────────────────────────────────────────────────────────
+
   function getPos(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
     const rect = canvasRef.current!.getBoundingClientRect()
+    const scaleX = canvasRef.current!.width  / rect.width
+    const scaleY = canvasRef.current!.height / rect.height
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-    return { x: clientX - rect.left, y: clientY - rect.top }
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY }
   }
 
   function startDraw(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
@@ -81,6 +113,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
     ctx.strokeStyle = '#1a1a1a'
     ctx.lineWidth   = 2.5
     ctx.lineCap     = 'round'
+    ctx.lineJoin    = 'round'
     ctx.stroke()
   }
 
@@ -92,31 +125,32 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
   function clearCanvas() {
     const canvas = canvasRef.current
     if (!canvas) return
-    canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
   }
 
   function getSignatureData(): string | undefined {
     if (sigMode === 'type') {
       if (!typedSig.trim()) return undefined
-      // Render typed sig to canvas offscreen
-      const canvas = document.createElement('canvas')
-      canvas.width  = 400; canvas.height = 100
+      const canvas  = document.createElement('canvas')
+      canvas.width  = 560; canvas.height = 120
       const ctx = canvas.getContext('2d')!
-      ctx.font         = 'italic 36px Georgia, serif'
-      ctx.fillStyle    = '#1a1a1a'
-      ctx.fillText(typedSig.trim(), 20, 65)
+      ctx.fillStyle = '#fff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.font      = 'italic 40px Georgia, serif'
+      ctx.fillStyle = '#1a1a1a'
+      ctx.fillText(typedSig.trim(), 20, 75)
       return canvas.toDataURL('image/png')
     }
     return canvasRef.current?.toDataURL('image/png')
   }
 
   async function handleSubmit(a: 'accept' | 'reject') {
-    setAction(a)
     setSubmitting(true)
     const signature = a === 'accept' ? getSignatureData() : undefined
-
     try {
-      const res  = await fetch(`/api/offer/${token}`, {
+      const res  = await fetch(`/api/offer-letter/${token}`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ action: a, signature }),
@@ -136,7 +170,7 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center dark:bg-gray-800">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-400 text-sm animate-pulse">Loading your offer…</p>
       </div>
     )
@@ -144,11 +178,11 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 dark:bg-gray-800">
-        <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-200 text-center max-w-md dark:bg-gray-900 dark:border-gray-700">
-          <div className="text-5xl mb-4">️</div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2 dark:text-white">Link unavailable</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-200 text-center max-w-md">
+          <div className="text-5xl mb-4">🔗</div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Link unavailable</h1>
+          <p className="text-sm text-gray-500">{error}</p>
         </div>
       </div>
     )
@@ -156,20 +190,20 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
 
   if (!offer) return null
 
-  // ── Already signed ─────────────────────────────────────────────────────────
+  // ── Terminal states ────────────────────────────────────────────────────────
 
   if (step === 'done') {
     return (
       <PageShell offer={offer} color={color}>
         <div className="text-center py-8">
-          <div className="text-6xl mb-4"></div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 dark:text-white">Offer accepted!</h2>
-          <p className="text-gray-500 text-sm leading-relaxed dark:text-gray-400">
-            Thank you, <strong>{offer.candidateName}</strong>. You've accepted your {offer.type} offer
-            {offer.orgName ? ` with ${offer.orgName}` : ''}.
-            {offer.signedAt && (
+          <div className="text-6xl mb-4">🎉</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Offer accepted!</h2>
+          <p className="text-gray-500 text-sm leading-relaxed">
+            Thank you, <strong>{offer.candidateName}</strong>. You've accepted the offer for <strong>{offer.position}</strong>
+            {offer.orgName ? ` at ${offer.orgName}` : ''}.
+            {offer.acceptedAt && (
               <span className="block mt-1 text-gray-400">
-                Signed {new Date(offer.signedAt).toLocaleString('en-AU', { dateStyle: 'long', timeStyle: 'short' })}
+                Accepted {new Date(offer.acceptedAt).toLocaleString('en-AU', { dateStyle: 'long', timeStyle: 'short' })}
               </span>
             )}
           </p>
@@ -183,12 +217,26 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
     return (
       <PageShell offer={offer} color={color}>
         <div className="text-center py-8">
-          <div className="text-6xl mb-4"></div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 dark:text-white">Offer declined</h2>
-          <p className="text-gray-500 text-sm dark:text-gray-400">
+          <div className="text-5xl mb-4">👋</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Offer declined</h2>
+          <p className="text-gray-500 text-sm">
             Thank you for letting us know, <strong>{offer.candidateName}</strong>. The HR team has been notified.
           </p>
           <p className="mt-4 text-xs text-gray-400">You may close this window.</p>
+        </div>
+      </PageShell>
+    )
+  }
+
+  if (step === 'expired') {
+    return (
+      <PageShell offer={offer} color={color}>
+        <div className="text-center py-8">
+          <div className="text-5xl mb-4">⏰</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Offer expired</h2>
+          <p className="text-gray-500 text-sm">
+            This offer letter has passed its expiry date. Please contact HR if you'd like to discuss further.
+          </p>
         </div>
       </PageShell>
     )
@@ -199,31 +247,29 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
   if (step === 'sign') {
     return (
       <PageShell offer={offer} color={color}>
-        <div className="space-y-6">
+        <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Sign your offer</h2>
-            <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
-              By signing, you confirm acceptance of the {offer.type} offer from {offer.orgName ?? 'the organisation'}.
+            <h2 className="text-xl font-bold text-gray-900">Sign your offer</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              By signing, you confirm your acceptance of the offer for <strong>{offer.position}</strong>
+              {offer.orgName ? ` at ${offer.orgName}` : ''}.
             </p>
           </div>
 
-          {/* Sig mode toggle */}
-          <div className="flex bg-gray-100 rounded-xl p-1 w-fit dark:bg-gray-800">
+          {/* Mode toggle */}
+          <div className="flex bg-gray-100 rounded-xl p-1 w-fit">
             {(['draw', 'type'] as const).map(m => (
-              <button
-                key={m}
-                onClick={() => setSigMode(m)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${sigMode === m ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-              >
-                {m === 'draw' ? '️ Draw' : '⌨️ Type'}
+              <button key={m} onClick={() => setSigMode(m)}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${sigMode === m ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
+                {m === 'draw' ? '✏️ Draw' : '⌨️ Type'}
               </button>
             ))}
           </div>
 
           {sigMode === 'draw' ? (
             <div className="space-y-2">
-              <p className="text-xs text-gray-400">Draw your signature in the box below:</p>
-              <div className="border-2 border-gray-200 rounded-xl overflow-hidden bg-white relative dark:bg-gray-900 dark:border-gray-700">
+              <p className="text-xs text-gray-400">Draw your signature below:</p>
+              <div className="border-2 border-gray-200 rounded-xl overflow-hidden bg-white relative">
                 <canvas
                   ref={canvasRef}
                   width={560}
@@ -237,8 +283,8 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
                   onTouchMove={draw}
                   onTouchEnd={endDraw}
                 />
-                <div className="absolute bottom-2 left-3 right-3 border-t border-dashed border-gray-200 pointer-events-none dark:border-gray-700" />
-                <p className="absolute bottom-1.5 left-3 text-[10px] text-gray-300 pointer-events-none">Sign here</p>
+                <div className="absolute bottom-8 left-4 right-4 border-t border-dashed border-gray-200 pointer-events-none" />
+                <p className="absolute bottom-2 left-4 text-[10px] text-gray-300 pointer-events-none">Sign here</p>
               </div>
               <button onClick={clearCanvas} className="text-xs text-gray-400 hover:text-gray-600">Clear</button>
             </div>
@@ -250,37 +296,31 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
                 value={typedSig}
                 onChange={e => setTypedSig(e.target.value)}
                 placeholder={offer.candidateName}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-2xl italic font-serif text-gray-800 focus:outline-none focus:border-blue-400 dark:text-gray-100 dark:border-gray-700"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-2xl italic text-gray-800 focus:outline-none focus:border-blue-400"
                 style={{ fontFamily: 'Georgia, serif' }}
               />
             </div>
           )}
 
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-700">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800 leading-relaxed">
             By clicking <strong>Accept Offer</strong> you agree that this electronic signature is legally binding and represents your acceptance of all terms in the offer letter.
           </div>
 
           <div className="flex gap-3">
-            <button
-              onClick={() => setStep('view')}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition dark:text-gray-400 dark:border-gray-700"
-            >
+            <button onClick={() => setStep('view')}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
               ← Back
             </button>
-            <button
-              onClick={() => handleSubmit('reject')}
-              disabled={submitting}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50"
-            >
+            <button onClick={() => handleSubmit('reject')} disabled={submitting}
+              className="flex-1 py-3 rounded-xl text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50">
               Decline offer
             </button>
             <button
               onClick={() => handleSubmit('accept')}
-              disabled={submitting || (sigMode === 'draw' ? false : !typedSig.trim())}
+              disabled={submitting || (sigMode === 'type' && !typedSig.trim())}
               className="flex-1 py-3 rounded-xl text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-              style={{ background: color }}
-            >
-              {submitting ? 'Submitting…' : 'Accept offer '}
+              style={{ background: color }}>
+              {submitting ? 'Submitting…' : 'Accept offer ✓'}
             </button>
           </div>
         </div>
@@ -294,46 +334,50 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
     <PageShell offer={offer} color={color}>
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your offer letter</h2>
-          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
-            Please review the offer carefully before accepting or declining.
-          </p>
+          <h2 className="text-xl font-bold text-gray-900">Your offer letter</h2>
+          <p className="text-sm text-gray-500 mt-1">Please review carefully before accepting or declining.</p>
         </div>
 
+        {/* Key offer details */}
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: 'Position',   value: offer.position },
+            { label: 'Employment', value: EMP_TYPE_LABELS[offer.employmentType] ?? offer.employmentType },
+            offer.department ? { label: 'Department', value: offer.department } : null,
+            offer.startDate  ? { label: 'Start Date',  value: fmtDate(offer.startDate) } : null,
+            offer.salaryAmount ? { label: 'Remuneration', value: fmtSalary(offer.salaryAmount, offer.salaryCycle) } : null,
+            offer.expiresAt  ? { label: 'Offer Expires', value: fmtDate(offer.expiresAt) } : null,
+          ].filter(Boolean).map((item, i) => (
+            <div key={i} className="bg-gray-50 rounded-xl p-3">
+              <p className="text-xs text-gray-400 mb-0.5">{item!.label}</p>
+              <p className="text-sm font-semibold text-gray-800">{item!.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* PDF or template content */}
         {offer.pdfUrl ? (
-          <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-800 dark:border-gray-700" style={{ height: 480 }}>
-            <iframe
-              src={offer.pdfUrl}
-              className="w-full h-full"
-              title="Offer letter PDF"
-            />
+          <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50" style={{ height: 480 }}>
+            <iframe src={offer.pdfUrl} className="w-full h-full" title="Offer letter PDF" />
+          </div>
+        ) : offer.templateContent ? (
+          <div className="border border-gray-200 rounded-xl p-5 bg-gray-50 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
+            {offer.templateContent}
           </div>
         ) : (
-          <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-10 text-center dark:bg-gray-800 dark:border-gray-700">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
-                </svg>
-              </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Your offer letter is ready. Click <strong>Review & Sign</strong> to proceed.
-            </p>
+          <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-8 text-center">
+            <p className="text-sm text-gray-400">Your offer letter is attached. Click <strong>Review &amp; Sign</strong> to proceed.</p>
           </div>
         )}
 
         <div className="flex gap-3">
-          <button
-            onClick={() => handleSubmit('reject')}
-            disabled={submitting}
-            className="flex-1 py-3 rounded-xl text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50"
-          >
+          <button onClick={() => handleSubmit('reject')} disabled={submitting}
+            className="flex-1 py-3 rounded-xl text-sm font-semibold border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50">
             Decline offer
           </button>
-          <button
-            onClick={() => setStep('sign')}
+          <button onClick={() => setStep('sign')}
             className="flex-1 py-3 rounded-xl text-sm font-semibold text-white transition hover:opacity-90"
-            style={{ background: color }}
-          >
+            style={{ background: color }}>
             Review &amp; Sign →
           </button>
         </div>
@@ -344,16 +388,18 @@ export default function OfferPage({ params }: { params: Promise<{ token: string 
 
 // ── Shared shell ───────────────────────────────────────────────────────────
 
-function PageShell({ offer, color, children }: { offer: OfferData; color: string; children: React.ReactNode }) {
+function PageShell({ offer, color, children }: {
+  offer: Pick<OfferData, 'candidateName' | 'orgName' | 'logoUrl' | 'position'>
+  color: string
+  children: React.ReactNode
+}) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4 dark:bg-gray-800">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
       <div className="w-full max-w-2xl space-y-6">
 
-        {/* Header card */}
-        <div
-          className="rounded-2xl p-6 text-white flex items-center gap-4"
-          style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
-        >
+        {/* Header */}
+        <div className="rounded-2xl p-6 text-white flex items-center gap-4"
+          style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
           {offer.logoUrl ? (
             <img src={offer.logoUrl} alt={offer.orgName ?? ''} className="h-12 max-w-[120px] object-contain bg-white/20 rounded-lg p-1" />
           ) : (
@@ -363,20 +409,18 @@ function PageShell({ offer, color, children }: { offer: OfferData; color: string
           )}
           <div>
             <p className="text-sm font-medium opacity-80">{offer.orgName ?? 'Organisation'}</p>
-            <h1 className="text-xl font-bold leading-tight">
-              Offer letter for {offer.candidateName || 'you'}
-            </h1>
-            <p className="text-xs opacity-70 mt-0.5 capitalize">{offer.type.replace(/_/g, ' ')} position</p>
+            <h1 className="text-xl font-bold leading-tight">Offer letter for {offer.candidateName}</h1>
+            <p className="text-xs opacity-70 mt-0.5">{offer.position}</p>
           </div>
         </div>
 
         {/* Content card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 dark:bg-gray-900 dark:border-gray-800">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           {children}
         </div>
 
         <p className="text-center text-xs text-gray-300">
-          Powered by HRMS · This is a secure, private link for {offer.candidateName || 'the recipient'} only.
+          Powered by HRMS · This is a secure, private link for {offer.candidateName} only.
         </p>
       </div>
     </div>
