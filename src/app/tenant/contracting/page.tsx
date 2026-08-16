@@ -1,11 +1,12 @@
 'use client'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 type Contract = {
   id:string; employeeId:string; type:string; status:string
-  sentAt:string|null; signedAt:string|null; tfnProvided:boolean; superFund:string|null; createdAt:string
+  sentAt:string|null; signedAt:string|null; tfnProvided:boolean; superFund:string|null
+  pdfUrl:string|null; createdAt:string
   firstName:string|null; lastName:string|null; email:string|null; employmentType:string|null
 }
 type Stats = { total:number; draft:number; sent:number; signed:number; expired:number }
@@ -47,8 +48,9 @@ export default function ContractingPage() {
 
   async function create() {
     setSaving(true)
-    await fetchWithAuth('/api/tenant/contracting', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
-    setShowCreate(false); setSaving(false); load()
+    const res = await fetchWithAuth('/api/tenant/contracting', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
+    if (res.ok) { const d = await res.json(); setShowCreate(false); await load(); setSelected(d.contract ?? null) }
+    setSaving(false)
   }
 
   async function patch(id:string, updates:Record<string,unknown>) {
@@ -84,7 +86,7 @@ export default function ContractingPage() {
           <div className="flex-1 overflow-y-auto">
             {loading ? <p className="p-4 text-sm text-gray-600 dark:text-gray-400">Loading…</p> : contracts.length===0 ? <p className="p-6 text-sm text-gray-600 dark:text-gray-400 text-center">No contracts</p> : contracts.map(c=>(
               <button key={c.id} onClick={()=>setSelected(c)}
-                className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition  dark:border-gray-800${selected?.id===c.id?'bg-brand-50 border-l-2 border-l-brand-500':''}`}>
+                className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition dark:border-gray-800 ${selected?.id===c.id?'bg-brand-50 border-l-2 border-l-brand-500':''}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate dark:text-white">{c.firstName} {c.lastName}</p>
@@ -103,7 +105,7 @@ export default function ContractingPage() {
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{selected.firstName} {selected.lastName}</h2>
-                <p className="text-sm text-gray-500 capitalize dark:text-gray-400">{selected.type.replace(/_/g,' ')} contract</p>
+                <p className="text-sm text-gray-500 capitalize dark:text-gray-400">{selected.type.replace(/_/g,' ')} contract · {selected.email}</p>
               </div>
               <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[selected.status]??''}`}>{selected.status}</span>
             </div>
@@ -130,11 +132,28 @@ export default function ContractingPage() {
             </div>
 
             {selected.sentAt && <p className="text-xs text-gray-600 dark:text-gray-400">Sent: {new Date(selected.sentAt).toLocaleString()}</p>}
-            {selected.signedAt && <p className="text-xs text-green-600 font-medium">Signed: {new Date(selected.signedAt).toLocaleString()}</p>}
+            {selected.signedAt && <p className="text-xs text-green-600 font-medium">✅ Signed: {new Date(selected.signedAt).toLocaleString()}</p>}
 
-            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">PDF upload and e-signature is available — contact support to enable DocuSign / Adobe Sign integration.</p>
-            </div>
+            {/* E-signature section */}
+            <SendForSignaturePanel
+              contract={selected}
+              onSent={(updates) => {
+                setSelected(s => s ? { ...s, ...updates } : s)
+                load()
+              }}
+            />
+
+            {/* PDF viewer */}
+            {selected.pdfUrl && (
+              <div className="pt-2">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Contract Document</p>
+                  <a href={selected.pdfUrl} target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-brand-600 hover:underline">Open in new tab ↗</a>
+                </div>
+                <iframe src={selected.pdfUrl} className="w-full h-96 border border-gray-200 rounded-lg dark:border-gray-700" title="Contract PDF"/>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">Select a contract to view details</div>
@@ -160,6 +179,190 @@ export default function ContractingPage() {
             </div>
           </div>
         </div>
+      )}
+    </div>
+  )
+}
+
+// ── Send for Signature Panel ─────────────────────────────────────────────────
+
+function SendForSignaturePanel({
+  contract,
+  onSent,
+}: {
+  contract: Contract
+  onSent: (updates: Partial<Contract>) => void
+}) {
+  const [file, setFile]       = useState<File | null>(null)
+  const [sending, setSending] = useState(false)
+  const [sent, setSent]       = useState(false)
+  const [error, setError]     = useState('')
+  const [copyDone, setCopyDone] = useState(false)
+  const fileRef               = useRef<HTMLInputElement>(null)
+
+  const signingUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/offer/${contract.id}`
+    : `/offer/${contract.id}`
+
+  async function sendForSignature() {
+    setSending(true); setError('')
+    try {
+      const fd = new FormData()
+      if (file) fd.append('file', file)
+      fd.append('baseUrl', window.location.origin)
+
+      const res = await fetchWithAuth(`/api/tenant/contracting/${contract.id}/send`, {
+        method: 'POST',
+        body:   fd,
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Failed to send'); setSending(false); return }
+
+      onSent({ status: 'sent', sentAt: new Date().toISOString(), pdfUrl: data.pdfUrl ?? contract.pdfUrl })
+      setSent(true)
+    } catch (e: any) {
+      setError(e.message ?? 'Failed to send')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(signingUrl)
+    setCopyDone(true)
+    setTimeout(() => setCopyDone(false), 2000)
+  }
+
+  // If already signed — show read-only confirmation
+  if (contract.status === 'signed') {
+    return (
+      <div className="border border-green-200 bg-green-50 rounded-xl p-4 dark:bg-green-950/30 dark:border-green-800">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-green-600 text-lg">✅</span>
+          <p className="text-sm font-semibold text-green-800 dark:text-green-300">Contract signed electronically</p>
+        </div>
+        {contract.pdfUrl && (
+          <a href={contract.pdfUrl} target="_blank" rel="noopener noreferrer"
+            className="text-xs text-green-700 hover:underline dark:text-green-400">View contract document ↗</a>
+        )}
+      </div>
+    )
+  }
+
+  // If sent but not signed — show status + copy link
+  if (contract.status === 'sent' && !sent) {
+    return (
+      <div className="border border-blue-200 bg-blue-50 rounded-xl p-4 space-y-3 dark:bg-blue-950/30 dark:border-blue-800">
+        <div className="flex items-center gap-2">
+          <span className="text-blue-600 text-lg">📧</span>
+          <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">Awaiting employee signature</p>
+        </div>
+        <p className="text-xs text-blue-700 dark:text-blue-400">
+          The signing link has been emailed to <strong>{contract.email}</strong>.
+          You can also share the link directly:
+        </p>
+        <div className="flex gap-2">
+          <input readOnly value={signingUrl}
+            className="flex-1 border border-blue-200 rounded-lg px-3 py-1.5 text-xs bg-white dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-200 truncate"/>
+          <button onClick={copyLink}
+            className="px-3 py-1.5 border border-blue-300 rounded-lg text-xs font-medium text-blue-700 hover:bg-blue-100 dark:text-blue-300 dark:border-blue-600 dark:hover:bg-blue-800 shrink-0">
+            {copyDone ? '✓ Copied' : 'Copy'}
+          </button>
+        </div>
+        <button onClick={sendForSignature} disabled={sending}
+          className="text-xs text-blue-600 hover:underline dark:text-blue-400 disabled:opacity-50">
+          {sending ? 'Resending…' : 'Resend email'}
+        </button>
+      </div>
+    )
+  }
+
+  // Draft (or just-sent) — show upload + send form
+  return (
+    <div className="border border-gray-200 rounded-xl p-4 space-y-3 dark:border-gray-700">
+      <div className="flex items-center gap-2">
+        <span className="text-gray-500 text-lg">📄</span>
+        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Send for e-signature</p>
+      </div>
+
+      {sent ? (
+        <div className="space-y-3">
+          <div className="flex items-start gap-2 bg-green-50 border border-green-200 rounded-lg p-3 dark:bg-green-950/30 dark:border-green-800">
+            <span className="text-green-600 mt-0.5">✓</span>
+            <div>
+              <p className="text-sm font-medium text-green-800 dark:text-green-300">Sent successfully!</p>
+              <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
+                Signing link emailed to <strong>{contract.email}</strong>
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <input readOnly value={signingUrl}
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-xs dark:border-gray-700 dark:bg-gray-800 truncate"/>
+            <button onClick={copyLink}
+              className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-800 shrink-0">
+              {copyDone ? '✓ Copied' : 'Copy link'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* PDF upload */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1.5 dark:text-gray-400">
+              Contract PDF <span className="font-normal text-gray-400">(optional — attach to send with the signing email)</span>
+            </label>
+            {contract.pdfUrl && !file ? (
+              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mb-2">
+                <span>📎</span>
+                <a href={contract.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline">
+                  Existing PDF ↗
+                </a>
+                <span className="text-gray-400">— upload a new file to replace it</span>
+              </div>
+            ) : null}
+            <div
+              onClick={() => fileRef.current?.click()}
+              className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-brand-400 hover:bg-brand-50 transition dark:border-gray-700 dark:hover:border-brand-600 dark:hover:bg-brand-950/20"
+            >
+              {file ? (
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-brand-600">📎</span>
+                  <span className="text-sm font-medium text-brand-700 dark:text-brand-400">{file.name}</span>
+                  <button
+                    onClick={e => { e.stopPropagation(); setFile(null) }}
+                    className="text-gray-400 hover:text-red-500 ml-1 text-xs"
+                  >✕</button>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Click to upload PDF <span className="text-gray-400">(max 10 MB)</span>
+                </p>
+              )}
+            </div>
+            <input
+              ref={fileRef} type="file" accept="application/pdf"
+              className="hidden"
+              onChange={e => setFile(e.target.files?.[0] ?? null)}
+            />
+          </div>
+
+          {error && <p className="text-xs text-red-600">{error}</p>}
+
+          <div className="flex gap-2">
+            <button onClick={sendForSignature} disabled={sending}
+              className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50">
+              {sending ? 'Sending…' : '📧 Send for Signature'}
+            </button>
+            <button onClick={copyLink} title="Copy signing link"
+              className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800">
+              {copyDone ? '✓' : '🔗'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            The employee will receive an email with a secure link to review and sign the contract electronically.
+          </p>
+        </>
       )}
     </div>
   )
