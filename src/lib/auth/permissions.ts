@@ -101,6 +101,13 @@ export type Permission =
   | 'leave:read'
   | 'leave:write'
   | 'leave:approve'
+  // CRM
+  | 'crm:read'
+  | 'crm:write'
+  // Expenses
+  | 'expenses:read'
+  | 'expenses:write'
+  | 'expenses:approve'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -136,6 +143,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'recognition:read', 'recognition:write',
     'referrals:read', 'referrals:write',
     'leave:read', 'leave:write', 'leave:approve',
+    'crm:read', 'crm:write',
+    'expenses:read', 'expenses:write', 'expenses:approve',
     'settings:read', 'settings:write',
   ],
 
@@ -165,6 +174,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'recognition:read', 'recognition:write',
     'referrals:read',
     'leave:read', 'leave:write', 'leave:approve',
+    'crm:read', 'crm:write',
+    'expenses:read', 'expenses:write', 'expenses:approve',
     'settings:read',
   ],
 
@@ -193,6 +204,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'whs:read',
     'documents:read',
     'leave:read', 'leave:approve',
+    'crm:read',
+    'expenses:read', 'expenses:approve',
   ],
 
   team_leader: [
@@ -207,6 +220,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'recognition:read', 'recognition:write',
     'engagement:read',
     'leave:read', 'leave:approve',
+    'expenses:read', 'expenses:approve',
   ],
 
   payroll_officer: [
@@ -251,6 +265,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'leave:read', 'leave:write',
     'rostering:read',   // view own schedule
     'timesheets:read', 'timesheets:write',  // clock in/out, view own
+    'expenses:read', 'expenses:write',      // submit and view own claims
   ],
 
   contractor: [

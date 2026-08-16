@@ -68,6 +68,8 @@ const NAV_ICONS: Record<string, IconName> = {
   'leave':              'calendar',
   'public-holidays':    'calendar',
   'reports':            'bar-chart',
+  'crm':                'search',
+  'expenses':           'currency',
   'screening':          'screening',
   'my-profile':         'user-circle',
   'my-payslips':        'payslip',

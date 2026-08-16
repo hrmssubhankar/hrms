@@ -1019,3 +1019,164 @@ export const offerLetterTemplates = pgTable('offer_letter_templates', {
 }, (t) => ({
   tenantIdx: index('offer_tmpl_tenant_idx').on(t.tenantId),
 }))
+
+// ──────────────────────────────────────────────
+// CRM — Core (Leads, Contacts, Accounts, Deals)
+// ──────────────────────────────────────────────
+
+export const crmLeads = pgTable('crm_leads', {
+  id:            uuid('id').primaryKey().defaultRandom(),
+  tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  firstName:     varchar('first_name', { length: 255 }).notNull(),
+  lastName:      varchar('last_name', { length: 255 }),
+  email:         varchar('email', { length: 255 }),
+  phone:         varchar('phone', { length: 50 }),
+  company:       varchar('company', { length: 255 }),
+  jobTitle:      varchar('job_title', { length: 255 }),
+  source:        varchar('source', { length: 100 }),       // website, referral, linkedin, cold_call, etc.
+  status:        varchar('status', { length: 50 }).notNull().default('new'),  // new, contacted, qualified, converted, lost
+  stage:         varchar('stage', { length: 50 }).notNull().default('new'),   // Kanban column
+  score:         integer('score').default(0),
+  assignedTo:    varchar('assigned_to', { length: 255 }),  // user email
+  notes:         text('notes'),
+  tags:          jsonb('tags').$type<string[]>().default([]),
+  customFields:  jsonb('custom_fields').$type<Record<string, unknown>>().default({}),
+  convertedAt:   timestamp('converted_at'),
+  convertedToId: uuid('converted_to_id'),                 // contact id after conversion
+  createdBy:     varchar('created_by', { length: 255 }),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+  updatedAt:     timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:  index('crm_leads_tenant_idx').on(t.tenantId),
+  statusIdx:  index('crm_leads_status_idx').on(t.status),
+  assignedIdx: index('crm_leads_assigned_idx').on(t.assignedTo),
+}))
+
+export const crmContacts = pgTable('crm_contacts', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  accountId:    uuid('account_id'),
+  firstName:    varchar('first_name', { length: 255 }).notNull(),
+  lastName:     varchar('last_name', { length: 255 }),
+  email:        varchar('email', { length: 255 }),
+  phone:        varchar('phone', { length: 50 }),
+  mobile:       varchar('mobile', { length: 50 }),
+  jobTitle:     varchar('job_title', { length: 255 }),
+  department:   varchar('department', { length: 255 }),
+  isPrimary:    boolean('is_primary').default(false),
+  assignedTo:   varchar('assigned_to', { length: 255 }),
+  notes:        text('notes'),
+  tags:         jsonb('tags').$type<string[]>().default([]),
+  customFields: jsonb('custom_fields').$type<Record<string, unknown>>().default({}),
+  createdBy:    varchar('created_by', { length: 255 }),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:  index('crm_contacts_tenant_idx').on(t.tenantId),
+  accountIdx: index('crm_contacts_account_idx').on(t.accountId),
+}))
+
+export const crmAccounts = pgTable('crm_accounts', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  name:         varchar('name', { length: 255 }).notNull(),
+  industry:     varchar('industry', { length: 100 }),
+  website:      varchar('website', { length: 500 }),
+  phone:        varchar('phone', { length: 50 }),
+  email:        varchar('email', { length: 255 }),
+  address:      text('address'),
+  city:         varchar('city', { length: 100 }),
+  state:        varchar('state', { length: 100 }),
+  country:      varchar('country', { length: 100 }),
+  abn:          varchar('abn', { length: 20 }),
+  revenue:      decimal('revenue', { precision: 15, scale: 2 }),
+  employees:    integer('employees'),
+  type:         varchar('type', { length: 50 }).default('prospect'),   // prospect, customer, partner, vendor
+  status:       varchar('status', { length: 50 }).default('active'),
+  assignedTo:   varchar('assigned_to', { length: 255 }),
+  notes:        text('notes'),
+  tags:         jsonb('tags').$type<string[]>().default([]),
+  customFields: jsonb('custom_fields').$type<Record<string, unknown>>().default({}),
+  createdBy:    varchar('created_by', { length: 255 }),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('crm_accounts_tenant_idx').on(t.tenantId),
+  nameIdx:   index('crm_accounts_name_idx').on(t.name),
+}))
+
+export const crmDeals = pgTable('crm_deals', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  accountId:    uuid('account_id'),
+  contactId:    uuid('contact_id'),
+  title:        varchar('title', { length: 255 }).notNull(),
+  value:        decimal('value', { precision: 15, scale: 2 }),
+  currency:     varchar('currency', { length: 10 }).default('AUD'),
+  stage:        varchar('stage', { length: 50 }).notNull().default('prospecting'),
+  // prospecting, qualification, proposal, negotiation, closed_won, closed_lost
+  probability:  integer('probability').default(0),
+  closeDate:    date('close_date'),
+  source:       varchar('source', { length: 100 }),
+  assignedTo:   varchar('assigned_to', { length: 255 }),
+  notes:        text('notes'),
+  lostReason:   text('lost_reason'),
+  tags:         jsonb('tags').$type<string[]>().default([]),
+  customFields: jsonb('custom_fields').$type<Record<string, unknown>>().default({}),
+  createdBy:    varchar('created_by', { length: 255 }),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:  index('crm_deals_tenant_idx').on(t.tenantId),
+  stageIdx:   index('crm_deals_stage_idx').on(t.stage),
+  accountIdx: index('crm_deals_account_idx').on(t.accountId),
+}))
+
+export const crmActivities = pgTable('crm_activities', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  type:        varchar('type', { length: 50 }).notNull(), // call, email, meeting, note, task
+  subject:     varchar('subject', { length: 255 }).notNull(),
+  notes:       text('notes'),
+  dueDate:     timestamp('due_date'),
+  completedAt: timestamp('completed_at'),
+  isDone:      boolean('is_done').default(false),
+  // Polymorphic association
+  relatedType: varchar('related_type', { length: 50 }),   // lead, contact, account, deal
+  relatedId:   uuid('related_id'),
+  assignedTo:  varchar('assigned_to', { length: 255 }),
+  createdBy:   varchar('created_by', { length: 255 }),
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+  updatedAt:   timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('crm_activities_tenant_idx').on(t.tenantId),
+  relatedIdx:  index('crm_activities_related_idx').on(t.relatedType, t.relatedId),
+  assignedIdx: index('crm_activities_assigned_idx').on(t.assignedTo),
+}))
+
+// ─── Expense Management ──────────────────────────────────────────────────────
+
+export const expenseClaims = pgTable('expense_claims', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  employeeId:   uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  title:        varchar('title', { length: 255 }).notNull(),
+  category:     varchar('category', { length: 100 }).notNull(), // travel, meals, accommodation, equipment, training, other
+  amount:       decimal('amount', { precision: 15, scale: 2 }).notNull(),
+  currency:     varchar('currency', { length: 10 }).default('AUD'),
+  expenseDate:  date('expense_date').notNull(),
+  description:  text('description'),
+  receiptUrl:   varchar('receipt_url', { length: 1000 }),
+  status:       varchar('status', { length: 50 }).notNull().default('pending'), // pending, approved, rejected, paid
+  submittedAt:  timestamp('submitted_at').defaultNow(),
+  reviewedBy:   varchar('reviewed_by', { length: 255 }),
+  reviewedAt:   timestamp('reviewed_at'),
+  reviewNotes:  text('review_notes'),
+  paidAt:       timestamp('paid_at'),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('expense_claims_tenant_idx').on(t.tenantId),
+  employeeIdx: index('expense_claims_employee_idx').on(t.employeeId),
+  statusIdx:   index('expense_claims_status_idx').on(t.status),
+}))
