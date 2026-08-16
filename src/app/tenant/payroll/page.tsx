@@ -697,14 +697,26 @@ export default function PayrollPage() {
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">Payslip</h2>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                {(selected.payslipData as any)?.payslipUrl ? (
+                  <a
+                    href={(selected.payslipData as any).payslipUrl}
+                    target="_blank" rel="noreferrer"
+                    className="text-xs px-3 py-1.5 rounded-lg border border-green-700 text-green-400 hover:bg-green-900/30 transition">
+                    📄 View Payslip
+                  </a>
+                ) : null}
+                <GeneratePdfButton recordId={selected.id} onGenerated={(url) => {
+                  setSelected(s => s ? { ...s, payslipData: { ...(s.payslipData ?? {}), payslipUrl: url } } : s)
+                  load()
+                }} />
                 <a
                   href={`/tenant/payroll/${selected.id}/payslip`}
                   target="_blank" rel="noreferrer"
                   className="text-xs px-3 py-1.5 rounded-lg border border-purple-700 text-purple-300 hover:bg-purple-900/30 transition">
-                  🖨 Print / PDF
+                  🖨 Print
                 </a>
-                <button onClick={() => setSelected(null)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl"></button>
+                <button onClick={() => setSelected(null)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl ml-1">×</button>
               </div>
             </div>
             <div className="px-6 py-5 space-y-3 text-sm">
@@ -737,6 +749,56 @@ export default function PayrollPage() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// ── Generate PDF Button ─────────────────────────────────────────────────────
+
+function GeneratePdfButton({ recordId, onGenerated }: {
+  recordId: string
+  onGenerated: (url: string) => void
+}) {
+  const [loading,  setLoading]  = useState(false)
+  const [emailing, setEmailing] = useState(false)
+
+  async function generate(emailEmployee: boolean) {
+    if (emailEmployee) setEmailing(true); else setLoading(true)
+    try {
+      const res  = await fetchWithAuth(`/api/tenant/payroll/${recordId}/pdf`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ emailEmployee }),
+      })
+      const data = await res.json()
+      if (res.ok && data.payslipUrl) {
+        onGenerated(data.payslipUrl)
+        if (!emailEmployee) window.open(data.payslipUrl, '_blank')
+      } else {
+        alert(data.error ?? 'Failed to generate payslip')
+      }
+    } catch {
+      alert('Network error')
+    } finally {
+      setLoading(false); setEmailing(false)
+    }
+  }
+
+  return (
+    <div className="flex gap-1">
+      <button
+        onClick={() => generate(false)}
+        disabled={loading || emailing}
+        className="text-xs px-3 py-1.5 rounded-lg border border-blue-700 text-blue-400 hover:bg-blue-900/30 transition disabled:opacity-50">
+        {loading ? '⏳' : '⚡'} Generate
+      </button>
+      <button
+        onClick={() => generate(true)}
+        disabled={loading || emailing}
+        title="Generate and email to employee"
+        className="text-xs px-3 py-1.5 rounded-lg border border-blue-700 text-blue-400 hover:bg-blue-900/30 transition disabled:opacity-50">
+        {emailing ? '⏳' : '📧'}
+      </button>
     </div>
   )
 }
