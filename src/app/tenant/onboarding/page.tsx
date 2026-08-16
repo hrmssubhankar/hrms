@@ -74,7 +74,7 @@ export default function OnboardingPage() {
     if (s)  p.set('search', s)
     if (fs) p.set('status', fs)
     if (fg) p.set('stage',  fg)
-    const res  = await fetch(`/api/tenant/onboarding?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/onboarding?${p}`)
     const data = await res.json()
     setRecords(data.records ?? [])
     setStats(data.stats ?? { total: 0, pending: 0, in_progress: 0, completed: 0 })

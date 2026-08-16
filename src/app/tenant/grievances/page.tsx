@@ -76,7 +76,7 @@ export default function GrievancesPage() {
     const p = new URLSearchParams()
     if (st) p.set('status', st)
     if (t)  p.set('type', t)
-    const res  = await fetch(`/api/tenant/grievances?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/grievances?${p}`)
     const data = await res.json()
     setRecords(data.records ?? [])
     setStats(data.stats ?? { total:0,new:0,active:0,closed:0,critical:0,high:0 })

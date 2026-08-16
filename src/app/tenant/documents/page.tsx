@@ -140,7 +140,7 @@ export default function DocumentsPage() {
     const p = new URLSearchParams()
     if (cat) p.set('category', cat)
     if (st)  p.set('status', st)
-    const data = await fetch(`/api/tenant/documents?${p}`).then(r => r.json())
+    const data = await fetchWithAuth(`/api/tenant/documents?${p}`).then(r => r.json())
     setDocs(data.documents ?? [])
     setStats(data.stats ?? { total:0, active:0, expired:0, expiringSoon:0, pendingReview:0 })
     setLoading(false)
@@ -186,7 +186,7 @@ export default function DocumentsPage() {
   async function deleteDoc(id: string, title: string) {
     if (!confirm(`Permanently delete "${title}"? This cannot be undone.`)) return
     setDeleting(id)
-    await fetch(`/api/tenant/documents?id=${id}`, { method: 'DELETE' })
+    await fetchWithAuth(`/api/tenant/documents?id=${id}`, { method: 'DELETE' })
     setDeleting(null)
     load()
   }

@@ -588,7 +588,7 @@ export default function RosteringPage() {
     setLoading(true)
     try {
       const [sd, ed, pd, avd] = await Promise.all([
-        fetch(`/api/tenant/roster/shifts?weekStart=${isoDate(weekStart)}`).then(r => r.json()),
+        fetchWithAuth(`/api/tenant/roster/shifts?weekStart=${isoDate(weekStart)}`).then(r => r.json()),
         fetchWithAuth('/api/tenant/employees?limit=200&status=active').then(r => r.json()),
         fetchWithAuth('/api/tenant/participants').then(r => r.json()),
         fetchWithAuth('/api/tenant/roster/availability').then(r => r.json()),
@@ -616,7 +616,7 @@ export default function RosteringPage() {
     try {
       const drafts = shifts.filter(s => s.status === 'draft')
       await Promise.all(drafts.map(s =>
-        fetch(`/api/tenant/roster/shifts/${s.id}`, {
+        fetchWithAuth(`/api/tenant/roster/shifts/${s.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ publish: true }),
@@ -657,7 +657,7 @@ export default function RosteringPage() {
       clientSite: data.clientSite || null, notes: data.notes || null,
     }
     if (data.id) {
-      await fetch(`/api/tenant/roster/shifts/${data.id}`, {
+      await fetchWithAuth(`/api/tenant/roster/shifts/${data.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       })
     } else {
@@ -671,7 +671,7 @@ export default function RosteringPage() {
 
   async function handleDelete() {
     if (!modal?.data.id) return
-    await fetch(`/api/tenant/roster/shifts/${modal.data.id}`, { method: 'DELETE' })
+    await fetchWithAuth(`/api/tenant/roster/shifts/${modal.data.id}`, { method: 'DELETE' })
     setModal(null)
     await fetchData()
   }
@@ -708,7 +708,7 @@ export default function RosteringPage() {
   }
 
   async function deleteAvailability(id: string) {
-    await fetch(`/api/tenant/roster/availability?id=${id}`, { method: 'DELETE' })
+    await fetchWithAuth(`/api/tenant/roster/availability?id=${id}`, { method: 'DELETE' })
     await fetchData()
   }
 

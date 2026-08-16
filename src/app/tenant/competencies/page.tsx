@@ -41,7 +41,7 @@ export default function CompetencyPage() {
     setLoading(true)
     const p = new URLSearchParams({ assessments: '1' })
     if (filterEmp) p.set('employeeId', filterEmp)
-    const res  = await fetch(`/api/tenant/competencies?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/competencies?${p}`)
     const data = await res.json()
     setCompetencies(data.competencies ?? [])
     setAssessments(data.assessments  ?? [])

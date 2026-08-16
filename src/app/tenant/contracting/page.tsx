@@ -35,7 +35,7 @@ export default function ContractingPage() {
     const p = new URLSearchParams()
     if (statusFilter) p.set('status', statusFilter)
     if (search)       p.set('search', search)
-    const res = await fetch(`/api/tenant/contracting?${p}`)
+    const res = await fetchWithAuth(`/api/tenant/contracting?${p}`)
     if (res.ok) { const d = await res.json(); setContracts(d.contracts ?? []); setStats(d.stats ?? {}) }
     setLoading(false)
   }, [statusFilter, search])

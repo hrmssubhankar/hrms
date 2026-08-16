@@ -60,7 +60,7 @@ export default function WhsPage() {
     if (s)  p.set('search', s)
     if (st) p.set('status', st)
     if (sv) p.set('severity', sv)
-    const res  = await fetch(`/api/tenant/whs?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/whs?${p}`)
     const data = await res.json()
     setIncidents(data.records ?? [])
     setStats(data.stats ?? { total:0,open:0,investigating:0,closed:0,critical:0,high:0 })

@@ -212,7 +212,7 @@ export default function EmployeeManagementPage() {
       if (status)          params.set('status', status)
       if (empType)         params.set('type', empType)
       params.set('limit', '50')
-      const res  = await fetch(`/api/tenant/employees?${params}`)
+      const res  = await fetchWithAuth(`/api/tenant/employees?${params}`)
       if (res.status === 403) { setDenied(true); setLoading(false); return }
       const data = await res.json()
       setEmployees(data.employees ?? [])

@@ -63,7 +63,7 @@ export default function PromotionsPage() {
     setLoading(true)
     const params = new URLSearchParams()
     if (statusFilter) params.set('status', statusFilter)
-    const res  = await fetch(`/api/tenant/promotions?${params}`)
+    const res  = await fetchWithAuth(`/api/tenant/promotions?${params}`)
     const data = await res.json()
     setPromotions(data.promotions ?? [])
     setStats(data.stats ?? { total:0,pending:0,under_review:0,approved:0,rejected:0,implemented:0 })
@@ -77,7 +77,7 @@ export default function PromotionsPage() {
 
   async function selectPromotion(p: Promotion) {
     setSelected(p); setReviewNote('')
-    const res  = await fetch(`/api/tenant/promotions/${p.id}`)
+    const res  = await fetchWithAuth(`/api/tenant/promotions/${p.id}`)
     const data = await res.json()
     setSelected(data.promotion)
     setEvents(data.events ?? [])
@@ -99,7 +99,7 @@ export default function PromotionsPage() {
 
   async function action(status: string, notes?: string) {
     if (!selected) return
-    const res = await fetch(`/api/tenant/promotions/${selected.id}`, {
+    const res = await fetchWithAuth(`/api/tenant/promotions/${selected.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, reviewNotes: notes }),
     })
@@ -109,7 +109,7 @@ export default function PromotionsPage() {
   async function addNote() {
     if (!selected || !inlineNote.trim()) return
     setAddingNote(true)
-    await fetch(`/api/tenant/promotions/${selected.id}`, {
+    await fetchWithAuth(`/api/tenant/promotions/${selected.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reviewNotes: inlineNote.trim() }),
     })

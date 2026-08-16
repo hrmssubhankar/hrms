@@ -43,7 +43,7 @@ export default function PayslipPrintPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/tenant/payroll/${id}`).then(r => r.json()),
+      fetchWithAuth(`/api/tenant/payroll/${id}`).then(r => r.json()),
       fetchWithAuth('/api/tenant/config').then(r => r.json()).catch(() => ({})),
     ]).then(([pd, td]) => {
       if (pd.error) { setError(pd.error); return }

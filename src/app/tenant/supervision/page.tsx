@@ -45,7 +45,7 @@ export default function SupervisionPage() {
     const p = new URLSearchParams()
     if (st) p.set('status', st)
     if (t)  p.set('type', t)
-    const res  = await fetch(`/api/tenant/supervision?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/supervision?${p}`)
     const data = await res.json()
     setRecords(data.records ?? [])
     setStats(data.stats ?? { total:0, scheduled:0, completed:0, overdue:0 })

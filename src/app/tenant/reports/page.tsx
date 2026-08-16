@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useCallback } from 'react'
 
@@ -321,7 +322,7 @@ export default function ReportsPage() {
     const p = new URLSearchParams({ report: selected })
     if (dateFrom) p.set('from', dateFrom)
     if (dateTo)   p.set('to',   dateTo)
-    const res = await fetch(`/api/tenant/reports?${p}`)
+    const res = await fetchWithAuth(`/api/tenant/reports?${p}`)
     if (res.ok) {
       const d = await res.json()
       setData(d.data ?? [])

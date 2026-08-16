@@ -82,13 +82,13 @@ export default function OnboardingDetailPage() {
   const [taskSaving,    setTaskSaving]    = useState(false)
 
   useEffect(() => {
-    fetch(`/api/tenant/onboarding/${id}`)
+    fetchWithAuth(`/api/tenant/onboarding/${id}`)
       .then(r => r.json())
       .then(d => {
         const record = d.record ?? null
         setRec(record)
         if (record?.buddyId) {
-          fetch(`/api/tenant/employees?limit=200`)
+          fetchWithAuth(`/api/tenant/employees?limit=200`)
             .then(r => r.json())
             .then(ed => {
               const buddy = (ed.employees ?? []).find((e: Employee) => e.id === record.buddyId)
@@ -103,7 +103,7 @@ export default function OnboardingDetailPage() {
     if (!rec) return
     setNotesSaving(true)
     try {
-      const res  = await fetch(`/api/tenant/onboarding/${id}`, {
+      const res  = await fetchWithAuth(`/api/tenant/onboarding/${id}`, {
         method:  'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ notes: notesDraft }),
@@ -123,7 +123,7 @@ export default function OnboardingDetailPage() {
     if (!rec) return
     setBuddySaving(true)
     try {
-      const res  = await fetch(`/api/tenant/onboarding/${id}`, {
+      const res  = await fetchWithAuth(`/api/tenant/onboarding/${id}`, {
         method:  'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ buddyId: buddyDraft || null }),
@@ -152,7 +152,7 @@ export default function OnboardingDetailPage() {
     }
     const updated = [...rec.checklist, newItem]
     try {
-      const res  = await fetch(`/api/tenant/onboarding/${id}`, {
+      const res  = await fetchWithAuth(`/api/tenant/onboarding/${id}`, {
         method:  'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ checklist: updated }),
@@ -179,7 +179,7 @@ export default function OnboardingDetailPage() {
 
     setSaving(true)
     try {
-      const res  = await fetch(`/api/tenant/onboarding/${id}`, {
+      const res  = await fetchWithAuth(`/api/tenant/onboarding/${id}`, {
         method:  'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ checklist: updated }),
@@ -204,7 +204,7 @@ export default function OnboardingDetailPage() {
     if (!next) return
     setSaving(true)
     try {
-      const res  = await fetch(`/api/tenant/onboarding/${id}`, {
+      const res  = await fetchWithAuth(`/api/tenant/onboarding/${id}`, {
         method:  'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ stage: next }),

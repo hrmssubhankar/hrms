@@ -121,7 +121,7 @@ export default function MyLeavePage() {
 
   const loadBalances = useCallback(async () => {
     setLoadingBal(true)
-    const res  = await fetch(`/api/tenant/leave/balances?year=${new Date().getFullYear()}`)
+    const res  = await fetchWithAuth(`/api/tenant/leave/balances?year=${new Date().getFullYear()}`)
     const data = await res.json()
     setBalances(data.balances ?? [])
     setLoadingBal(false)
@@ -136,7 +136,7 @@ export default function MyLeavePage() {
         setLeaveTypes(types)
         if (types.length > 0) setForm(f => ({ ...f, leaveType: types[0].key }))
       })
-    fetch(`/api/tenant/public-holidays?year=${new Date().getFullYear()}`)
+    fetchWithAuth(`/api/tenant/public-holidays?year=${new Date().getFullYear()}`)
       .then(r => r.json()).then(d => setHolidays(d.holidays ?? []))
   }, [])
 

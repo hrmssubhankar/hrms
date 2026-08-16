@@ -47,7 +47,7 @@ export default function ScreeningPage() {
     if (statusFilter) p.set('status', statusFilter)
     if (typeFilter)   p.set('checkType', typeFilter)
     if (search)       p.set('search', search)
-    const res = await fetch(`/api/tenant/screening?${p}`)
+    const res = await fetchWithAuth(`/api/tenant/screening?${p}`)
     if (res.ok) { const d = await res.json(); setRecords(d.records ?? []); setStats(d.stats ?? {}) }
     setLoading(false)
   }, [statusFilter, typeFilter, search])

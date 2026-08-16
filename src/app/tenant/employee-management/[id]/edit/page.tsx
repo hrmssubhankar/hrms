@@ -67,7 +67,7 @@ export default function EditEmployeePage() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/tenant/employees/${id}`).then(r => r.json()),
+      fetchWithAuth(`/api/tenant/employees/${id}`).then(r => r.json()),
       fetchWithAuth('/api/tenant/departments').then(r => r.json()),
       fetchWithAuth('/api/tenant/positions').then(r => r.json()),
       fetchWithAuth('/api/tenant/config').then(r => r.json()),
@@ -133,7 +133,7 @@ export default function EditEmployeePage() {
         annualSalary:        form.annualSalary        || null,
         ordinaryHoursPerWeek: form.ordinaryHoursPerWeek || null,
       }
-      const res  = await fetch(`/api/tenant/employees/${id}`, {
+      const res  = await fetchWithAuth(`/api/tenant/employees/${id}`, {
         method:  'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),

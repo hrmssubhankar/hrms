@@ -81,7 +81,7 @@ export default function NotificationsPage() {
   }
 
   async function dismiss(id: string) {
-    await fetch(`/api/tenant/notifications?id=${id}`, { method: 'DELETE' })
+    await fetchWithAuth(`/api/tenant/notifications?id=${id}`, { method: 'DELETE' })
     setNotifications(n => n.filter(x => x.id !== id))
   }
 

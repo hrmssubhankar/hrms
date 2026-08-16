@@ -37,7 +37,7 @@ export default function EngagementPage() {
   }
 
   const loadResponses = async (surveyId: string) => {
-    const data = await fetch(`/api/tenant/engagement?surveyId=${surveyId}`).then(r => r.json())
+    const data = await fetchWithAuth(`/api/tenant/engagement?surveyId=${surveyId}`).then(r => r.json())
     setResponses(data.responses ?? [])
   }
 

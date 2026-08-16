@@ -179,7 +179,7 @@ export default function LeavePage() {
     const p = new URLSearchParams()
     if (st) p.set('status', st)
     if (t)  p.set('leaveType', t)
-    const res  = await fetch(`/api/tenant/leave?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/leave?${p}`)
     const data = await res.json()
     setRequests(data.requests ?? [])
     setStats(data.stats ?? { total:0, pending:0, approved:0, rejected:0, cancelled:0, totalDaysApproved:0 })
@@ -193,7 +193,7 @@ export default function LeavePage() {
     setLoadingBal(true)
     const p = new URLSearchParams({ year: String(year) })
     if (empId) p.set('employeeId', empId)
-    const res  = await fetch(`/api/tenant/leave/balances?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/leave/balances?${p}`)
     const data = await res.json()
     setBalLinked(data.employeeLinked !== false)
     setBalances(data.balances ?? [])
@@ -207,7 +207,7 @@ export default function LeavePage() {
   // ── Load calendar ──
   const loadCalendar = useCallback(async (year = calYear, month = calMonth) => {
     setLoadingCal(true)
-    const res  = await fetch(`/api/tenant/leave/calendar?year=${year}&month=${month}`)
+    const res  = await fetchWithAuth(`/api/tenant/leave/calendar?year=${year}&month=${month}`)
     const data = await res.json()
     setCalEvents(data.events ?? [])
     setLoadingCal(false)
@@ -327,7 +327,7 @@ export default function LeavePage() {
             onClick={() => {
               setShowForm(true); setFormError(null)
               if (holidays.length === 0) {
-                fetch(`/api/tenant/public-holidays?year=${new Date().getFullYear()}`)
+                fetchWithAuth(`/api/tenant/public-holidays?year=${new Date().getFullYear()}`)
                   .then(r => r.json()).then(d => setHolidays(d.holidays ?? []))
               }
             }}

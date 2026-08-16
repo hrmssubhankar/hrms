@@ -352,7 +352,7 @@ export default function TimesheetsPage() {
       const params = new URLSearchParams()
       if (statusFilter) params.set('status', statusFilter)
       params.set('weekStart', isoDate(weekStart))
-      const r = await fetch(`/api/tenant/timesheets?${params}`)
+      const r = await fetchWithAuth(`/api/tenant/timesheets?${params}`)
       const d = await r.json()
       setTimesheets(d.timesheets ?? [])
     } finally { setLoading(false) }
@@ -361,7 +361,7 @@ export default function TimesheetsPage() {
   useEffect(() => { fetchTimesheets() }, [fetchTimesheets])
 
   async function approve(id: string) {
-    await fetch(`/api/tenant/timesheets/${id}`, {
+    await fetchWithAuth(`/api/tenant/timesheets/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'approve' }),
@@ -370,7 +370,7 @@ export default function TimesheetsPage() {
   }
 
   async function reject(id: string, reason: string) {
-    await fetch(`/api/tenant/timesheets/${id}`, {
+    await fetchWithAuth(`/api/tenant/timesheets/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'reject', reason }),

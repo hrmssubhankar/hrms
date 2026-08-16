@@ -115,7 +115,7 @@ export default function MySchedulePage() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/tenant/roster/shifts?weekStart=${isoDate(ws)}`)
+      const res = await fetchWithAuth(`/api/tenant/roster/shifts?weekStart=${isoDate(ws)}`)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to load shifts')
       // API auto-scopes to the logged-in employee's own shifts for non-managers

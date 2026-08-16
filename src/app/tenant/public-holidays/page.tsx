@@ -102,7 +102,7 @@ export default function PublicHolidaysPage() {
 
   const load = useCallback(async (y: number) => {
     setLoading(true)
-    const res  = await fetch(`/api/tenant/public-holidays?year=${y}`)
+    const res  = await fetchWithAuth(`/api/tenant/public-holidays?year=${y}`)
     const data = await res.json()
     setHolidays(data.holidays ?? [])
     setLoading(false)

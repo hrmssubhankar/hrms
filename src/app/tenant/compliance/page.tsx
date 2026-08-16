@@ -108,7 +108,7 @@ function ScreeningTab() {
     const p = new URLSearchParams()
     if (s) p.set('search', s)
     if (f) p.set('status', f)
-    const res  = await fetch(`/api/tenant/compliance/screening?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/compliance/screening?${p}`)
     const data = await res.json()
     setRecords(data.records ?? [])
     setStats(data.stats ?? { total:0,green:0,amber:0,red:0,pending:0,expiring:0,expired:0 })

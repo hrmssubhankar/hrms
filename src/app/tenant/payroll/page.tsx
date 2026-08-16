@@ -121,7 +121,7 @@ export default function PayrollPage() {
     setLoading(true)
     const params = new URLSearchParams()
     if (statusFilter) params.set('status', statusFilter)
-    const res = await fetch(`/api/tenant/payroll?${params}`)
+    const res = await fetchWithAuth(`/api/tenant/payroll?${params}`)
     if (res.ok) {
       const d = await res.json()
       setRecords(d.records ?? [])

@@ -75,7 +75,7 @@ export default function BenefitsPage() {
   const load = useCallback(async (empId = filterEmp) => {
     setLoading(true)
     const p = empId ? `?employeeId=${empId}` : ''
-    const data = await fetch(`/api/tenant/benefits${p}`).then(r => r.json())
+    const data = await fetchWithAuth(`/api/tenant/benefits${p}`).then(r => r.json())
     setBenefits(data.benefits ?? [])
     setLoading(false)
   }, [filterEmp])

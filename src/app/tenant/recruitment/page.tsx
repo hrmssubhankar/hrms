@@ -106,7 +106,7 @@ export default function RecruitmentPage() {
   }, [])
 
   const loadApps = useCallback(async (reqId: string) => {
-    const data = await fetch(`/api/tenant/recruitment?view=applications&requisitionId=${reqId}`).then(r => r.json())
+    const data = await fetchWithAuth(`/api/tenant/recruitment?view=applications&requisitionId=${reqId}`).then(r => r.json())
     setApplications(data.applications ?? [])
   }, [])
 

@@ -47,7 +47,7 @@ export default function ContractsPage() {
     setLoading(true)
     const p = new URLSearchParams()
     if (st) p.set('status', st)
-    const res  = await fetch(`/api/tenant/contracts?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/contracts?${p}`)
     const data = await res.json()
     setContracts(data.contracts ?? [])
     setStats(data.stats ?? { total:0, draft:0, sent:0, signed:0 })

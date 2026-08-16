@@ -317,7 +317,7 @@ export default function MyProfilePage() {
 
   async function deleteContact(id: string) {
     if (!confirm('Remove this emergency contact?')) return
-    await fetch(`/api/tenant/my-profile/emergency-contacts?id=${id}`, { method: 'DELETE' })
+    await fetchWithAuth(`/api/tenant/my-profile/emergency-contacts?id=${id}`, { method: 'DELETE' })
     setContacts(c => c.filter(x => x.id !== id))
     if (editingContact === id) setEditingContact(null)
   }

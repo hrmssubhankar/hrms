@@ -1,4 +1,5 @@
 'use client'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 
@@ -38,7 +39,7 @@ export default function AuditLogsPage() {
     if (res)   params.set('resource', res)
     if (act)   params.set('action', act)
     if (since) params.set('since', since)
-    const data = await fetch(`/api/tenant/audit-logs?${params}`).then(r => r.json())
+    const data = await fetchWithAuth(`/api/tenant/audit-logs?${params}`).then(r => r.json())
     setLogs(data.logs ?? [])
     setResources(data.resources ?? [])
     setLoading(false)

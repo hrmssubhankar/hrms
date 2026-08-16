@@ -189,7 +189,7 @@ export default function EmployeeProfilePage() {
         reader.onerror = rej
         reader.readAsDataURL(file)
       })
-      const res = await fetch(`/api/tenant/employees/${id}`, {
+      const res = await fetchWithAuth(`/api/tenant/employees/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photoUrl: dataUrl }),
@@ -210,7 +210,7 @@ export default function EmployeeProfilePage() {
   }
 
   useEffect(() => {
-    fetch(`/api/tenant/employees/${id}`)
+    fetchWithAuth(`/api/tenant/employees/${id}`)
       .then(r => r.json())
       .then(d => { setEmp(d.employee ?? null); setLoading(false) })
       .catch(() => setLoading(false))
@@ -219,7 +219,7 @@ export default function EmployeeProfilePage() {
   // Load emergency contacts when that tab is first opened
   useEffect(() => {
     if (tab === 'Emergency Contacts' && !contactsLoaded) {
-      fetch(`/api/tenant/employees/${id}/emergency-contacts`)
+      fetchWithAuth(`/api/tenant/employees/${id}/emergency-contacts`)
         .then(r => r.json())
         .then(d => { setContacts(d.contacts ?? []); setContactsLoaded(true) })
         .catch(() => setContactsLoaded(true))
@@ -229,7 +229,7 @@ export default function EmployeeProfilePage() {
   // Load screening records when Compliance tab is first opened
   useEffect(() => {
     if (tab === 'Compliance' && !screeningLoaded) {
-      fetch(`/api/tenant/compliance/screening?employeeId=${id}`)
+      fetchWithAuth(`/api/tenant/compliance/screening?employeeId=${id}`)
         .then(r => r.json())
         .then(d => { setScreening(d.records ?? []); setScreeningLoaded(true) })
         .catch(() => setScreeningLoaded(true))
@@ -239,7 +239,7 @@ export default function EmployeeProfilePage() {
   // Load documents when Documents tab is first opened
   useEffect(() => {
     if (tab === 'Documents' && !docsLoaded) {
-      fetch(`/api/tenant/documents?employeeId=${id}`)
+      fetchWithAuth(`/api/tenant/documents?employeeId=${id}`)
         .then(r => r.json())
         .then(d => { setDocs(d.documents ?? []); setDocsLoaded(true) })
         .catch(() => setDocsLoaded(true))
@@ -249,7 +249,7 @@ export default function EmployeeProfilePage() {
   // Load promotions when Promotions tab is first opened
   useEffect(() => {
     if (tab === 'Promotions' && !promotionsLoaded) {
-      fetch(`/api/tenant/promotions?employeeId=${id}`)
+      fetchWithAuth(`/api/tenant/promotions?employeeId=${id}`)
         .then(r => r.json())
         .then(d => { setPromotions(d.promotions ?? []); setPromotionsLoaded(true) })
         .catch(() => setPromotionsLoaded(true))
@@ -260,7 +260,7 @@ export default function EmployeeProfilePage() {
   useEffect(() => {
     if (tab === 'Training' && !trainingLoaded) {
       Promise.all([
-        fetch(`/api/tenant/training/records?employeeId=${id}`).then(r => r.json()),
+        fetchWithAuth(`/api/tenant/training/records?employeeId=${id}`).then(r => r.json()),
         fetchWithAuth('/api/tenant/training/courses').then(r => r.json()),
       ]).then(([recs, crss]) => {
         setTraining(recs.records ?? [])
@@ -277,7 +277,7 @@ export default function EmployeeProfilePage() {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ employeeId: id, courseId: enrolCourseId }),
     })
-    const res = await fetch(`/api/tenant/training/records?employeeId=${id}`)
+    const res = await fetchWithAuth(`/api/tenant/training/records?employeeId=${id}`)
     const d   = await res.json()
     setTraining(d.records ?? [])
     setEnrolCourseId(''); setShowEnrolModal(false); setEnrolSaving(false)
@@ -289,7 +289,7 @@ export default function EmployeeProfilePage() {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: recordId, status: 'completed' }),
     })
-    const res = await fetch(`/api/tenant/training/records?employeeId=${id}`)
+    const res = await fetchWithAuth(`/api/tenant/training/records?employeeId=${id}`)
     const d   = await res.json()
     setTraining(d.records ?? [])
     setTrainingUpdating(null)
@@ -324,7 +324,7 @@ export default function EmployeeProfilePage() {
 
   async function updatePromoStatus(promoId: string, status: string, notes?: string) {
     setPromoUpdating(promoId)
-    await fetch(`/api/tenant/promotions/${promoId}`, {
+    await fetchWithAuth(`/api/tenant/promotions/${promoId}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, reviewNotes: notes }),
     })
@@ -501,11 +501,11 @@ export default function EmployeeProfilePage() {
     try {
       const payload = { ...contactForm, relationship: contactForm.relationship || null, phone: contactForm.phone || null, email: contactForm.email || null }
       const res = editingContact
-        ? await fetch(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contactId: editingContact.id, ...payload }) })
-        : await fetch(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'POST',  headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        ? await fetchWithAuth(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contactId: editingContact.id, ...payload }) })
+        : await fetchWithAuth(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'POST',  headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       if (!res.ok) { const d = await res.json(); setContactError(d.error ?? 'Failed to save'); return }
       // Refresh list
-      const refreshed = await fetch(`/api/tenant/employees/${id}/emergency-contacts`).then(r => r.json())
+      const refreshed = await fetchWithAuth(`/api/tenant/employees/${id}/emergency-contacts`).then(r => r.json())
       setContacts(refreshed.contacts ?? [])
       setShowContactForm(false)
     } catch {
@@ -518,7 +518,7 @@ export default function EmployeeProfilePage() {
   async function deleteContact(contactId: string) {
     setDeletingContact(contactId)
     try {
-      await fetch(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contactId }) })
+      await fetchWithAuth(`/api/tenant/employees/${id}/emergency-contacts`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contactId }) })
       setContacts(prev => prev.filter(c => c.id !== contactId))
     } finally {
       setDeletingContact(null)
@@ -528,7 +528,7 @@ export default function EmployeeProfilePage() {
   async function toggleActive() {
     if (!emp) return
     setSaving(true)
-    const res  = await fetch(`/api/tenant/employees/${id}`, {
+    const res  = await fetchWithAuth(`/api/tenant/employees/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isActive: !emp.isActive }),
@@ -542,7 +542,7 @@ export default function EmployeeProfilePage() {
   async function setCompliance(status: string) {
     if (!emp) return
     setSaving(true)
-    const res  = await fetch(`/api/tenant/employees/${id}`, {
+    const res  = await fetchWithAuth(`/api/tenant/employees/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ complianceStatus: status }),

@@ -87,7 +87,7 @@ export default function SeparationPage() {
     if (st) p.set('status', st)
     if (t)  p.set('type', t)
     if (s)  p.set('search', s)
-    const res  = await fetch(`/api/tenant/separation?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/separation?${p}`)
     const data = await res.json()
     setRecords(data.records ?? [])
     setStats(data.stats ?? { total:0, pending:0, active:0, completed:0, resignation:0, termination:0 })
@@ -113,7 +113,7 @@ export default function SeparationPage() {
   }
 
   async function patch(id: string, updates: Record<string, unknown>) {
-    await fetch(`/api/tenant/separation/${id}`, {
+    await fetchWithAuth(`/api/tenant/separation/${id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     })
@@ -141,7 +141,7 @@ export default function SeparationPage() {
   }
 
   async function loadEvents(id: string) {
-    const res  = await fetch(`/api/tenant/separation/${id}`)
+    const res  = await fetchWithAuth(`/api/tenant/separation/${id}`)
     const data = await res.json()
     setSepEvents(prev => ({ ...prev, [id]: data.events ?? [] }))
   }
@@ -150,7 +150,7 @@ export default function SeparationPage() {
     const note = noteFields[id]?.trim()
     if (!note) return
     setSavingNote(id)
-    await fetch(`/api/tenant/separation/${id}`, {
+    await fetchWithAuth(`/api/tenant/separation/${id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ _note: note }),
     })

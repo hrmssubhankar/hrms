@@ -38,7 +38,7 @@ export default function CompetencyPage() {
   const loadAssessments = useCallback(async (empId: string) => {
     if (!empId) return
     setLoading(true)
-    const res = await fetch(`/api/tenant/competency?employeeId=${empId}`)
+    const res = await fetchWithAuth(`/api/tenant/competency?employeeId=${empId}`)
     if (res.ok) { const d = await res.json(); setAssessments(d.assessments ?? []) }
     setLoading(false)
   }, [])

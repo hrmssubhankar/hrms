@@ -122,7 +122,7 @@ export default function PerformancePage() {
     if (s)  p.set('search', s)
     if (st) p.set('status', st)
     if (t)  p.set('type', t)
-    const res  = await fetch(`/api/tenant/performance?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/performance?${p}`)
     const data = await res.json()
     setReviews(data.records ?? [])
     setStats(data.stats ?? { total:0,scheduled:0,completed:0,overdue:0,probation:0 })
@@ -133,7 +133,7 @@ export default function PerformancePage() {
     setGoalsLoading(true)
     const p = new URLSearchParams()
     if (empId) p.set('employeeId', empId)
-    const res  = await fetch(`/api/tenant/performance-goals?${p}`)
+    const res  = await fetchWithAuth(`/api/tenant/performance-goals?${p}`)
     const data = await res.json()
     let g: Goal[] = data.goals ?? []
     if (st) g = g.filter(x => x.status === st)
@@ -249,7 +249,7 @@ export default function PerformancePage() {
 
   async function deleteGoal(id: string) {
     if (!confirm('Delete this goal?')) return
-    await fetch(`/api/tenant/performance-goals?id=${id}`, { method: 'DELETE' })
+    await fetchWithAuth(`/api/tenant/performance-goals?id=${id}`, { method: 'DELETE' })
     loadGoals()
   }
 

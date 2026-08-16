@@ -304,7 +304,7 @@ export default function OfferLettersPage() {
     const params = new URLSearchParams()
     if (statusFilter) params.set('status', statusFilter)
     if (search)       params.set('search', search)
-    const res  = await fetch(`/api/tenant/offer-letters?${params}`)
+    const res  = await fetchWithAuth(`/api/tenant/offer-letters?${params}`)
     const data = await res.json()
     setOffers(data.offers ?? [])
     setStats(data.stats ?? { total:0,draft:0,sent:0,accepted:0,rejected:0,expired:0 })
@@ -385,7 +385,7 @@ export default function OfferLettersPage() {
 
   async function selectOffer(offer: Offer) {
     setSelected(offer)
-    const res  = await fetch(`/api/tenant/offer-letters/${offer.id}`)
+    const res  = await fetchWithAuth(`/api/tenant/offer-letters/${offer.id}`)
     const data = await res.json()
     setSelected(data.offer)
     setEvents(data.events ?? [])
@@ -393,7 +393,7 @@ export default function OfferLettersPage() {
 
   async function updateStatus(status: string) {
     if (!selected) return
-    const res = await fetch(`/api/tenant/offer-letters/${selected.id}`, {
+    const res = await fetchWithAuth(`/api/tenant/offer-letters/${selected.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     })
@@ -403,7 +403,7 @@ export default function OfferLettersPage() {
   async function addNote() {
     if (!selected || !noteText.trim()) return
     setAddingNote(true)
-    await fetch(`/api/tenant/offer-letters/${selected.id}`, {
+    await fetchWithAuth(`/api/tenant/offer-letters/${selected.id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ _note: noteText.trim() }),
     })
@@ -413,7 +413,7 @@ export default function OfferLettersPage() {
 
   async function deleteOffer(id: string) {
     if (!confirm('Delete this draft offer letter?')) return
-    await fetch(`/api/tenant/offer-letters/${id}`, { method: 'DELETE' })
+    await fetchWithAuth(`/api/tenant/offer-letters/${id}`, { method: 'DELETE' })
     setSelected(null); load()
   }
 

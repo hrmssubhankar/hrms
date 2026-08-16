@@ -143,7 +143,7 @@ export default function MyDocumentsPage() {
     if (!confirm('Withdraw this document? It will be permanently deleted.')) return
     setWithdrawing(id)
     try {
-      const res = await fetch(`/api/tenant/my-documents?id=${id}`, { method: 'DELETE' })
+      const res = await fetchWithAuth(`/api/tenant/my-documents?id=${id}`, { method: 'DELETE' })
       if (res.ok) {
         setDocs(d => d.filter(x => x.id !== id))
       } else {
