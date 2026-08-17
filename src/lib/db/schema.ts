@@ -613,6 +613,87 @@ export const participants = pgTable('participants', {
   tenantIdx: index('participants_tenant_idx').on(t.tenantId),
 }))
 
+// ─── Participant Management CRM (Module 39) ──────────────────────────────────
+
+export const participantGoals = pgTable('participant_goals', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  goalCategory:   varchar('goal_category', { length: 100 }).notNull().default('daily_living'), // daily_living, social_community, employment, health_wellbeing, learning, home_living
+  title:          varchar('title', { length: 255 }).notNull(),
+  description:    text('description'),
+  status:         varchar('status', { length: 50 }).notNull().default('not_started'), // not_started, in_progress, achieved, on_hold, discontinued
+  targetDate:     date('target_date'),
+  achievedDate:   date('achieved_date'),
+  progressNotes:  text('progress_notes'),
+  createdBy:      varchar('created_by', { length: 255 }),
+  createdAt:      timestamp('created_at').notNull().defaultNow(),
+  updatedAt:      timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('participant_goals_tenant_idx').on(t.tenantId),
+  participantIdx: index('participant_goals_participant_idx').on(t.participantId),
+}))
+
+export const participantSupportPlans = pgTable('participant_support_plans', {
+  id:                uuid('id').primaryKey().defaultRandom(),
+  tenantId:          uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:     uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  planType:          varchar('plan_type', { length: 50 }).notNull().default('initial'),   // initial, review, transition
+  title:             varchar('title', { length: 255 }).notNull(),
+  status:            varchar('status', { length: 50 }).notNull().default('draft'),        // draft, active, expired, archived
+  planStartDate:     date('plan_start_date'),
+  planEndDate:       date('plan_end_date'),
+  reviewDate:        date('review_date'),
+  totalBudget:       decimal('total_budget', { precision: 12, scale: 2 }),
+  fundedSupports:    text('funded_supports'),
+  coordinatorName:   varchar('coordinator_name', { length: 255 }),
+  coordinatorOrg:    varchar('coordinator_org', { length: 255 }),
+  coordinatorEmail:  varchar('coordinator_email', { length: 255 }),
+  notes:             text('notes'),
+  createdBy:         varchar('created_by', { length: 255 }),
+  createdAt:         timestamp('created_at').notNull().defaultNow(),
+  updatedAt:         timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('participant_support_plans_tenant_idx').on(t.tenantId),
+  participantIdx: index('participant_support_plans_participant_idx').on(t.participantId),
+}))
+
+export const participantNotes = pgTable('participant_notes', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  noteType:       varchar('note_type', { length: 50 }).notNull().default('case_note'), // case_note, progress_note, incident_note, general
+  title:          varchar('title', { length: 255 }),
+  content:        text('content').notNull(),
+  visibility:     varchar('visibility', { length: 50 }).notNull().default('internal'), // internal, shared, participant
+  createdBy:      varchar('created_by', { length: 255 }),
+  createdAt:      timestamp('created_at').notNull().defaultNow(),
+  updatedAt:      timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('participant_notes_tenant_idx').on(t.tenantId),
+  participantIdx: index('participant_notes_participant_idx').on(t.participantId),
+}))
+
+export const participantContacts = pgTable('participant_contacts', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  contactType:    varchar('contact_type', { length: 50 }).notNull().default('emergency'), // emergency, guardian, support_coordinator, family, other
+  firstName:      varchar('first_name', { length: 100 }).notNull(),
+  lastName:       varchar('last_name', { length: 100 }),
+  relationship:   varchar('relationship', { length: 100 }),
+  phone:          varchar('phone', { length: 20 }),
+  email:          varchar('email', { length: 255 }),
+  address:        text('address'),
+  isPrimary:      boolean('is_primary').notNull().default(false),
+  notes:          text('notes'),
+  createdAt:      timestamp('created_at').notNull().defaultNow(),
+  updatedAt:      timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('participant_contacts_tenant_idx').on(t.tenantId),
+  participantIdx: index('participant_contacts_participant_idx').on(t.participantId),
+}))
+
 export const shifts = pgTable('shifts', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id),

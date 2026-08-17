@@ -114,6 +114,9 @@ export type Permission =
   // NDIS Incidents
   | 'ndis_incidents:read'
   | 'ndis_incidents:write'
+  // Participant Management CRM
+  | 'participant_mgmt:read'
+  | 'participant_mgmt:write'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -153,6 +156,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'expenses:read', 'expenses:write', 'expenses:approve',
     'ndis_audits:read', 'ndis_audits:write',
     'ndis_incidents:read', 'ndis_incidents:write',
+    'participant_mgmt:read', 'participant_mgmt:write',
     'settings:read', 'settings:write',
   ],
 
@@ -186,6 +190,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'expenses:read', 'expenses:write', 'expenses:approve',
     'ndis_audits:read', 'ndis_audits:write',
     'ndis_incidents:read', 'ndis_incidents:write',
+    'participant_mgmt:read', 'participant_mgmt:write',
     'settings:read',
   ],
 
@@ -200,6 +205,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'analytics:read',
     'ndis_audits:read', 'ndis_audits:write',
     'ndis_incidents:read', 'ndis_incidents:write',
+    'participant_mgmt:read', 'participant_mgmt:write',
     'settings:read',
   ],
 
@@ -218,6 +224,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'leave:read', 'leave:approve',
     'crm:read',
     'expenses:read', 'expenses:approve',
+    'participant_mgmt:read', 'participant_mgmt:write',
   ],
 
   team_leader: [
@@ -256,6 +263,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'performance:read',
     'ndis_audits:read',
     'ndis_incidents:read',
+    'participant_mgmt:read',
   ],
 
   it_admin: [

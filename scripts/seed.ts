@@ -91,6 +91,7 @@ const MODULES = [
   { id: 36, name: 'CRM' },
   { id: 37, name: 'NDIS Practice Standards Audit' },
   { id: 38, name: 'NDIS Reportable Incidents' },
+  { id: 39, name: 'Participant Management' },
 ]
 
 const SUPER_ADMIN = {
