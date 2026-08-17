@@ -1,12 +1,14 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- COMBINED PENDING MIGRATIONS — paste the entire file into Supabase SQL Editor
 -- ═══════════════════════════════════════════════════════════════════════════
+-- Note: tenant_id and participant_id use plain UUID (no FK) to match
+-- the existing Supabase table structure (hrms_ prefix on core tables).
 
 -- ─── Migration 0037: NDIS Practice Standards Audit ───────────────────────────
 
 CREATE TABLE IF NOT EXISTS ndis_audits (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id           UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id           UUID NOT NULL,
   title               VARCHAR(255) NOT NULL,
   audit_type          VARCHAR(100) NOT NULL,
   standard            VARCHAR(255) NOT NULL,
@@ -35,7 +37,7 @@ CREATE INDEX IF NOT EXISTS ndis_audits_date_idx   ON ndis_audits (scheduled_date
 
 CREATE TABLE IF NOT EXISTS ndis_audit_actions (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id    UUID NOT NULL,
   audit_id     UUID NOT NULL REFERENCES ndis_audits(id) ON DELETE CASCADE,
   description  TEXT NOT NULL,
   priority     VARCHAR(50) NOT NULL DEFAULT 'medium',
@@ -52,24 +54,18 @@ CREATE TABLE IF NOT EXISTS ndis_audit_actions (
 CREATE INDEX IF NOT EXISTS ndis_audit_actions_tenant_idx ON ndis_audit_actions (tenant_id);
 CREATE INDEX IF NOT EXISTS ndis_audit_actions_audit_idx  ON ndis_audit_actions (audit_id);
 
-INSERT INTO tenant_modules (tenant_id, module_id, module_name, is_enabled, created_at, updated_at)
-SELECT t.id, 37, 'NDIS Practice Standards Audit', true, NOW(), NOW()
-FROM tenants t WHERE t.is_active = true
-ON CONFLICT (tenant_id, module_id) DO UPDATE
-  SET is_enabled = true, module_name = 'NDIS Practice Standards Audit', updated_at = NOW();
-
 
 -- ─── Migration 0038: NDIS Reportable Incidents ───────────────────────────────
 
 CREATE TABLE IF NOT EXISTS ndis_incidents (
   id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id               UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id               UUID NOT NULL,
   incident_type           VARCHAR(100) NOT NULL,
   incident_category       VARCHAR(100),
   is_reportable           BOOLEAN NOT NULL DEFAULT true,
   status                  VARCHAR(50) NOT NULL DEFAULT 'open',
   severity                VARCHAR(50) NOT NULL DEFAULT 'medium',
-  participant_id          UUID REFERENCES participants(id) ON DELETE SET NULL,
+  participant_id          UUID,
   participant_name        VARCHAR(255),
   worker_name             VARCHAR(255),
   worker_role             VARCHAR(100),
@@ -104,7 +100,7 @@ CREATE INDEX IF NOT EXISTS ndis_incidents_participant_idx ON ndis_incidents (par
 
 CREATE TABLE IF NOT EXISTS ndis_incident_actions (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id    UUID NOT NULL,
   incident_id  UUID NOT NULL REFERENCES ndis_incidents(id) ON DELETE CASCADE,
   description  TEXT NOT NULL,
   action_type  VARCHAR(100) DEFAULT 'corrective',
@@ -121,9 +117,3 @@ CREATE TABLE IF NOT EXISTS ndis_incident_actions (
 
 CREATE INDEX IF NOT EXISTS ndis_incident_actions_tenant_idx   ON ndis_incident_actions (tenant_id);
 CREATE INDEX IF NOT EXISTS ndis_incident_actions_incident_idx ON ndis_incident_actions (incident_id);
-
-INSERT INTO tenant_modules (tenant_id, module_id, module_name, is_enabled, created_at, updated_at)
-SELECT t.id, 38, 'NDIS Reportable Incidents', true, NOW(), NOW()
-FROM tenants t WHERE t.is_active = true
-ON CONFLICT (tenant_id, module_id) DO UPDATE
-  SET is_enabled = true, module_name = 'NDIS Reportable Incidents', updated_at = NOW();

@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS ndis_audits (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id           UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id           UUID NOT NULL,
   title               VARCHAR(255) NOT NULL,
   audit_type          VARCHAR(100) NOT NULL,          -- internal, external, certification, surveillance
   standard            VARCHAR(255) NOT NULL,           -- NDIS Practice Standard reference
@@ -32,7 +32,7 @@ CREATE INDEX IF NOT EXISTS ndis_audits_date_idx   ON ndis_audits (scheduled_date
 
 CREATE TABLE IF NOT EXISTS ndis_audit_actions (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id    UUID NOT NULL,
   audit_id     UUID NOT NULL REFERENCES ndis_audits(id) ON DELETE CASCADE,
   description  TEXT NOT NULL,
   priority     VARCHAR(50) NOT NULL DEFAULT 'medium',  -- low, medium, high, critical

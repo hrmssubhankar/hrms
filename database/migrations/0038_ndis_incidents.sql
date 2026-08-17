@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS ndis_incidents (
   id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id               UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id               UUID NOT NULL,
   -- Classification
   incident_type           VARCHAR(100) NOT NULL,   -- death, serious_injury, abuse, neglect, unlawful_sexual, unauthorised_restrictive_practice, missing_participant, medication_error, physical_assault, self_harm, property_damage, other
   incident_category       VARCHAR(100),
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS ndis_incidents (
   status                  VARCHAR(50) NOT NULL DEFAULT 'open',   -- open, under_review, reported_to_commission, closed
   severity                VARCHAR(50) NOT NULL DEFAULT 'medium', -- low, medium, high, critical
   -- People
-  participant_id          UUID REFERENCES participants(id) ON DELETE SET NULL,
+  participant_id          UUID,
   participant_name        VARCHAR(255),
   worker_name             VARCHAR(255),
   worker_role             VARCHAR(100),
@@ -52,7 +52,7 @@ CREATE INDEX IF NOT EXISTS ndis_incidents_participant_idx ON ndis_incidents (par
 
 CREATE TABLE IF NOT EXISTS ndis_incident_actions (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id    UUID NOT NULL,
   incident_id  UUID NOT NULL REFERENCES ndis_incidents(id) ON DELETE CASCADE,
   description  TEXT NOT NULL,
   action_type  VARCHAR(100) DEFAULT 'corrective',  -- corrective, preventive, notification, investigation
