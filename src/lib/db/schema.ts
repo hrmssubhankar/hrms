@@ -694,6 +694,99 @@ export const participantContacts = pgTable('participant_contacts', {
   participantIdx: index('participant_contacts_participant_idx').on(t.participantId),
 }))
 
+// ─── Module 40: Medication & Health Support ───────────────────────────────────
+
+export const participantMedications = pgTable('participant_medications', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  medicationName: varchar('medication_name', { length: 255 }).notNull(),
+  genericName:    varchar('generic_name', { length: 255 }),
+  dosage:         varchar('dosage', { length: 100 }),
+  form:           varchar('form', { length: 50 }).notNull().default('tablet'),  // tablet, capsule, liquid, injection, patch, inhaler, cream, drops, other
+  route:          varchar('route', { length: 50 }).notNull().default('oral'),   // oral, topical, inhaled, injection, sublingual, other
+  frequency:      varchar('frequency', { length: 100 }),
+  prescribedBy:   varchar('prescribed_by', { length: 255 }),
+  indication:     text('indication'),
+  instructions:   text('instructions'),
+  startDate:      date('start_date'),
+  endDate:        date('end_date'),
+  status:         varchar('status', { length: 50 }).notNull().default('active'), // active, paused, discontinued, completed
+  requiresAssist: boolean('requires_assist').notNull().default(true),
+  refrigerated:   boolean('refrigerated').notNull().default(false),
+  notes:          text('notes'),
+  createdBy:      varchar('created_by', { length: 255 }),
+  createdAt:      timestamp('created_at').notNull().defaultNow(),
+  updatedAt:      timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('participant_medications_tenant_idx').on(t.tenantId),
+  participantIdx: index('participant_medications_participant_idx').on(t.participantId),
+}))
+
+export const participantMedicationLogs = pgTable('participant_medication_logs', {
+  id:            uuid('id').primaryKey().defaultRandom(),
+  tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  medicationId:  uuid('medication_id').notNull().references(() => participantMedications.id, { onDelete: 'cascade' }),
+  participantId: uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  scheduledTime: timestamp('scheduled_time').notNull(),
+  administeredAt: timestamp('administered_at'),
+  outcome:       varchar('outcome', { length: 50 }).notNull().default('given'), // given, missed, refused, held, partial
+  administeredBy: varchar('administered_by', { length: 255 }),
+  notes:         text('notes'),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('medication_logs_tenant_idx').on(t.tenantId),
+  medicationIdx:  index('medication_logs_medication_idx').on(t.medicationId),
+  participantIdx: index('medication_logs_participant_idx').on(t.participantId),
+}))
+
+export const participantHealthConditions = pgTable('participant_health_conditions', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  conditionName:  varchar('condition_name', { length: 255 }).notNull(),
+  conditionType:  varchar('condition_type', { length: 100 }).notNull().default('chronic'), // chronic, acute, allergy, mental_health, disability, other
+  icdCode:        varchar('icd_code', { length: 20 }),
+  severity:       varchar('severity', { length: 50 }).notNull().default('moderate'), // mild, moderate, severe, critical
+  diagnosedDate:  date('diagnosed_date'),
+  diagnosedBy:    varchar('diagnosed_by', { length: 255 }),
+  status:         varchar('status', { length: 50 }).notNull().default('active'), // active, resolved, managed, monitoring
+  description:    text('description'),
+  managementPlan: text('management_plan'),
+  alerts:         text('alerts'),
+  createdBy:      varchar('created_by', { length: 255 }),
+  createdAt:      timestamp('created_at').notNull().defaultNow(),
+  updatedAt:      timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('health_conditions_tenant_idx').on(t.tenantId),
+  participantIdx: index('health_conditions_participant_idx').on(t.participantId),
+}))
+
+export const participantHealthAppointments = pgTable('participant_health_appointments', {
+  id:              uuid('id').primaryKey().defaultRandom(),
+  tenantId:        uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:   uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  appointmentType: varchar('appointment_type', { length: 100 }).notNull().default('gp'), // gp, specialist, allied_health, dental, mental_health, other
+  providerName:    varchar('provider_name', { length: 255 }),
+  providerOrg:     varchar('provider_org', { length: 255 }),
+  appointmentDate: date('appointment_date').notNull(),
+  appointmentTime: varchar('appointment_time', { length: 10 }),
+  location:        varchar('location', { length: 255 }),
+  purpose:         text('purpose'),
+  outcome:         text('outcome'),
+  followUpDate:    date('follow_up_date'),
+  followUpNotes:   text('follow_up_notes'),
+  status:          varchar('status', { length: 50 }).notNull().default('scheduled'), // scheduled, completed, cancelled, missed
+  requiresTransport: boolean('requires_transport').notNull().default(false),
+  supportWorkerNeeded: boolean('support_worker_needed').notNull().default(false),
+  createdBy:       varchar('created_by', { length: 255 }),
+  createdAt:       timestamp('created_at').notNull().defaultNow(),
+  updatedAt:       timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('health_appointments_tenant_idx').on(t.tenantId),
+  participantIdx: index('health_appointments_participant_idx').on(t.participantId),
+}))
+
 export const shifts = pgTable('shifts', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id),

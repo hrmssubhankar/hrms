@@ -117,6 +117,9 @@ export type Permission =
   // Participant Management CRM
   | 'participant_mgmt:read'
   | 'participant_mgmt:write'
+  // Medication & Health Support
+  | 'medication_health:read'
+  | 'medication_health:write'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -157,6 +160,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'ndis_audits:read', 'ndis_audits:write',
     'ndis_incidents:read', 'ndis_incidents:write',
     'participant_mgmt:read', 'participant_mgmt:write',
+    'medication_health:read', 'medication_health:write',
     'settings:read', 'settings:write',
   ],
 
@@ -191,6 +195,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'ndis_audits:read', 'ndis_audits:write',
     'ndis_incidents:read', 'ndis_incidents:write',
     'participant_mgmt:read', 'participant_mgmt:write',
+    'medication_health:read', 'medication_health:write',
     'settings:read',
   ],
 
@@ -206,6 +211,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'ndis_audits:read', 'ndis_audits:write',
     'ndis_incidents:read', 'ndis_incidents:write',
     'participant_mgmt:read', 'participant_mgmt:write',
+    'medication_health:read', 'medication_health:write',
     'settings:read',
   ],
 
@@ -225,6 +231,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'crm:read',
     'expenses:read', 'expenses:approve',
     'participant_mgmt:read', 'participant_mgmt:write',
+    'medication_health:read', 'medication_health:write',
   ],
 
   team_leader: [
@@ -264,6 +271,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'ndis_audits:read',
     'ndis_incidents:read',
     'participant_mgmt:read',
+    'medication_health:read',
   ],
 
   it_admin: [
