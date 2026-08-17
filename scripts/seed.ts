@@ -93,6 +93,7 @@ const MODULES = [
   { id: 38, name: 'NDIS Reportable Incidents' },
   { id: 39, name: 'Participant Management' },
   { id: 40, name: 'Medication & Health Support' },
+  { id: 41, name: 'Incident & Behaviour Support' },
 ]
 
 const SUPER_ADMIN = {

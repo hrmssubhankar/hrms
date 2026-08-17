@@ -51,6 +51,7 @@ const NAV_PERMISSION: Record<string, Permission | null> = {
   'ndis-incidents':     'ndis_incidents:read',
   'participants':       'participant_mgmt:read',
   'medication-health':  'medication_health:read',
+  'incident-behaviour': 'incident_behaviour:read',
   // Built-in routes (IDs 31+) — not controlled by tenant module toggles
   'timesheets':         'timesheets:read',
   'screening':          'compliance:read',
@@ -101,6 +102,7 @@ const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
   38: { key: 'ndis-incidents',        label: 'Reportable Incidents' },
   39: { key: 'participants',          label: 'Participants' },
   40: { key: 'medication-health',     label: 'Medication & Health' },
+  41: { key: 'incident-behaviour',    label: 'Incidents & Behaviour' },
 }
 
 async function getTenantConfig(slug: string) {

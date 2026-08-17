@@ -120,6 +120,9 @@ export type Permission =
   // Medication & Health Support
   | 'medication_health:read'
   | 'medication_health:write'
+  // Incident & Behaviour Support
+  | 'incident_behaviour:read'
+  | 'incident_behaviour:write'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -161,6 +164,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'ndis_incidents:read', 'ndis_incidents:write',
     'participant_mgmt:read', 'participant_mgmt:write',
     'medication_health:read', 'medication_health:write',
+    'incident_behaviour:read', 'incident_behaviour:write',
     'settings:read', 'settings:write',
   ],
 
@@ -196,6 +200,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'ndis_incidents:read', 'ndis_incidents:write',
     'participant_mgmt:read', 'participant_mgmt:write',
     'medication_health:read', 'medication_health:write',
+    'incident_behaviour:read', 'incident_behaviour:write',
     'settings:read',
   ],
 
@@ -212,6 +217,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'ndis_incidents:read', 'ndis_incidents:write',
     'participant_mgmt:read', 'participant_mgmt:write',
     'medication_health:read', 'medication_health:write',
+    'incident_behaviour:read', 'incident_behaviour:write',
     'settings:read',
   ],
 
@@ -232,6 +238,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'expenses:read', 'expenses:approve',
     'participant_mgmt:read', 'participant_mgmt:write',
     'medication_health:read', 'medication_health:write',
+    'incident_behaviour:read', 'incident_behaviour:write',
   ],
 
   team_leader: [
@@ -272,6 +279,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'ndis_incidents:read',
     'participant_mgmt:read',
     'medication_health:read',
+    'incident_behaviour:read',
   ],
 
   it_admin: [

@@ -787,6 +787,86 @@ export const participantHealthAppointments = pgTable('participant_health_appoint
   participantIdx: index('health_appointments_participant_idx').on(t.participantId),
 }))
 
+// ─── Module 41: Incident & Behaviour Support ──────────────────────────────────
+
+export const participantIncidents = pgTable('participant_incidents', {
+  id:                uuid('id').primaryKey().defaultRandom(),
+  tenantId:          uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:     uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  incidentDate:      date('incident_date').notNull(),
+  incidentTime:      varchar('incident_time', { length: 10 }),
+  location:          varchar('location', { length: 255 }),
+  incidentType:      varchar('incident_type', { length: 100 }).notNull().default('general'),
+  severity:          varchar('severity', { length: 50 }).notNull().default('minor'),
+  description:       text('description').notNull(),
+  immediateAction:   text('immediate_action'),
+  witnesses:         text('witnesses'),
+  reportedBy:        varchar('reported_by', { length: 255 }),
+  reportedTo:        varchar('reported_to', { length: 255 }),
+  ndisReportable:    boolean('ndis_reportable').notNull().default(false),
+  policeReport:      boolean('police_report').notNull().default(false),
+  policeReportNumber:varchar('police_report_number', { length: 100 }),
+  status:            varchar('status', { length: 50 }).notNull().default('open'),
+  outcome:           text('outcome'),
+  followUpRequired:  boolean('follow_up_required').notNull().default(false),
+  followUpDate:      date('follow_up_date'),
+  followUpNotes:     text('follow_up_notes'),
+  createdBy:         varchar('created_by', { length: 255 }),
+  createdAt:         timestamp('created_at').notNull().defaultNow(),
+  updatedAt:         timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('participant_incidents_tenant_idx').on(t.tenantId),
+  participantIdx: index('participant_incidents_participant_idx').on(t.participantId),
+}))
+
+export const participantBehaviourPlans = pgTable('participant_behaviour_plans', {
+  id:                uuid('id').primaryKey().defaultRandom(),
+  tenantId:          uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:     uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  planName:          varchar('plan_name', { length: 255 }).notNull(),
+  behaviourType:     varchar('behaviour_type', { length: 100 }),
+  triggers:          text('triggers'),
+  earlyWarnings:     text('early_warnings'),
+  preventionStrategies: text('prevention_strategies'),
+  deEscalationStrategies: text('de_escalation_strategies'),
+  responseStrategies: text('response_strategies'),
+  postIncidentSupport: text('post_incident_support'),
+  authorisedBy:      varchar('authorised_by', { length: 255 }),
+  reviewDate:        date('review_date'),
+  status:            varchar('status', { length: 50 }).notNull().default('active'),
+  notes:             text('notes'),
+  createdBy:         varchar('created_by', { length: 255 }),
+  createdAt:         timestamp('created_at').notNull().defaultNow(),
+  updatedAt:         timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('behaviour_plans_tenant_idx').on(t.tenantId),
+  participantIdx: index('behaviour_plans_participant_idx').on(t.participantId),
+}))
+
+export const participantRestrictivePractices = pgTable('participant_restrictive_practices', {
+  id:                uuid('id').primaryKey().defaultRandom(),
+  tenantId:          uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  participantId:     uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
+  practiceType:      varchar('practice_type', { length: 100 }).notNull(),
+  description:       text('description').notNull(),
+  authorisedBy:      varchar('authorised_by', { length: 255 }),
+  authorisedDate:    date('authorised_date'),
+  expiryDate:        date('expiry_date'),
+  regulatoryApproval:boolean('regulatory_approval').notNull().default(false),
+  approvalReference: varchar('approval_reference', { length: 255 }),
+  monitoringFrequency: varchar('monitoring_frequency', { length: 100 }),
+  lastReviewDate:    date('last_review_date'),
+  nextReviewDate:    date('next_review_date'),
+  status:            varchar('status', { length: 50 }).notNull().default('active'),
+  notes:             text('notes'),
+  createdBy:         varchar('created_by', { length: 255 }),
+  createdAt:         timestamp('created_at').notNull().defaultNow(),
+  updatedAt:         timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:      index('restrictive_practices_tenant_idx').on(t.tenantId),
+  participantIdx: index('restrictive_practices_participant_idx').on(t.participantId),
+}))
+
 export const shifts = pgTable('shifts', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id),
