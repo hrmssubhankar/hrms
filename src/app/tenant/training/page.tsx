@@ -38,7 +38,7 @@ function daysUntil(d: string | null) {
 
 // ── Page ───────────────────────────────────────────────────────────────────
 export default function TrainingPage() {
-  const [tab, setTab] = useState<'library' | 'records'>('library')
+  const [tab, setTab] = useState<'library' | 'records' | 'gap'>('library')
 
   return (
     <div className="space-y-6">
@@ -51,6 +51,7 @@ export default function TrainingPage() {
         {([
           { key: 'library', label: 'Course Library' },
           { key: 'records', label: 'Training Records' },
+          { key: 'gap',     label: '⚠️ Gap Report' },
         ] as const).map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
@@ -63,6 +64,7 @@ export default function TrainingPage() {
 
       {tab === 'library' && <LibraryTab />}
       {tab === 'records' && <RecordsTab />}
+      {tab === 'gap'     && <GapTab />}
     </div>
   )
 }
@@ -421,6 +423,131 @@ function RecordsTab() {
                   </tr>
                 )
               })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Training Gap Report ────────────────────────────────────────────────────
+type GapRow = {
+  employeeId: string; firstName: string; lastName: string; employmentType: string; email: string
+  missingCourses: { id: string; title: string; category: string | null }[]
+  expiredCourses:  { id: string; title: string; category: string | null; expiredOn: string }[]
+}
+
+function GapTab() {
+  const [gaps, setGaps] = useState<GapRow[]>([])
+  const [mandatory, setMandatory] = useState<{ id: string; title: string }[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchWithAuth('/api/tenant/training/gap')
+      .then(r => r.json())
+      .then(d => { setGaps(d.gaps ?? []); setMandatory(d.mandatoryCourses ?? []) })
+      .finally(() => setLoading(false))
+  }, [])
+
+  function exportCSV() {
+    const rows = gaps.flatMap(g => {
+      const lines: string[] = []
+      g.missingCourses.forEach(c => lines.push(`${g.firstName} ${g.lastName},${g.email},${g.employmentType},${c.title},Missing,`))
+      g.expiredCourses.forEach(c => lines.push(`${g.firstName} ${g.lastName},${g.email},${g.employmentType},${c.title},Expired,${c.expiredOn}`))
+      return lines
+    })
+    const csv = 'Name,Email,Employment Type,Course,Issue,Expired On\n' + rows.join('\n')
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+    const a = document.createElement('a'); a.href = url; a.download = 'training_gap_report.csv'; a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  if (loading) return <div className="text-center py-16 text-gray-400">Loading gap report…</div>
+
+  if (mandatory.length === 0) return (
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center text-gray-400">
+      <p className="text-2xl mb-2">📋</p>
+      <p className="font-medium">No mandatory courses configured</p>
+      <p className="text-sm mt-1">Mark courses as mandatory in the Course Library to generate a gap report.</p>
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {gaps.length === 0
+              ? '✅ All employees are compliant with mandatory training'
+              : `${gaps.length} employee${gaps.length !== 1 ? 's' : ''} have training gaps across ${mandatory.length} mandatory course${mandatory.length !== 1 ? 's' : ''}`}
+          </p>
+        </div>
+        {gaps.length > 0 && (
+          <button onClick={exportCSV}
+            className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+            ⬇ Export CSV
+          </button>
+        )}
+      </div>
+
+      {gaps.length === 0 ? (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-8 text-center">
+          <p className="text-3xl mb-2">✅</p>
+          <p className="font-medium text-green-700 dark:text-green-400">All employees compliant</p>
+          <p className="text-sm text-green-600 dark:text-green-500 mt-1">Everyone has completed all {mandatory.length} mandatory course{mandatory.length !== 1 ? 's' : ''}</p>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Employee</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Missing</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Expired</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Gaps</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {gaps.map(g => (
+                <tr key={g.employeeId} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <td className="px-5 py-3.5">
+                    <p className="font-medium text-gray-900 dark:text-white">{g.firstName} {g.lastName}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{g.email} · {g.employmentType?.replace(/_/g,' ')}</p>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    {g.missingCourses.length === 0 ? (
+                      <span className="text-gray-400">—</span>
+                    ) : (
+                      <div className="space-y-1">
+                        {g.missingCourses.map(c => (
+                          <span key={c.id} className="inline-block text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-0.5 rounded mr-1">
+                            {c.title}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    {g.expiredCourses.length === 0 ? (
+                      <span className="text-gray-400">—</span>
+                    ) : (
+                      <div className="space-y-1">
+                        {g.expiredCourses.map(c => (
+                          <span key={c.id} className="inline-block text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded mr-1">
+                            {c.title} (expired {new Date(c.expiredOn).toLocaleDateString('en-AU')})
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-bold">
+                      {g.missingCourses.length + g.expiredCourses.length}
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

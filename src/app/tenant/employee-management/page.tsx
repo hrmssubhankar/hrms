@@ -170,6 +170,7 @@ type Employee = {
   isActive: boolean
   complianceStatus: 'green' | 'amber' | 'red' | 'pending'
   ndisWorker: boolean
+  photoUrl: string | null
 }
 
 const COMPLIANCE_BADGE: Record<string, { label: string; cls: string }> = {
@@ -381,12 +382,17 @@ export default function EmployeeManagementPage() {
                       <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{emp.employeeNumber}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                            style={{ background: 'var(--primary)' }}
-                          >
-                            {emp.firstName[0]}{emp.lastName[0]}
-                          </div>
+                          {emp.photoUrl ? (
+                            <img src={emp.photoUrl} alt={fullName}
+                              className="w-8 h-8 rounded-full object-cover shrink-0 border border-gray-200 dark:border-gray-700" />
+                          ) : (
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                              style={{ background: 'var(--primary)' }}
+                            >
+                              {emp.firstName[0]}{emp.lastName[0]}
+                            </div>
+                          )}
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
                               {fullName}

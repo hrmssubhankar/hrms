@@ -408,6 +408,8 @@ export const contracts = pgTable('contracts', {
   superFund:      varchar('super_fund', { length: 200 }),
   bankBsb:        varchar('bank_bsb', { length: 10 }),
   bankAccount:    varchar('bank_account', { length: 20 }),
+  endDate:        date('end_date'), // for fixed-term contracts
+  notes:          text('notes'),
   createdAt:      timestamp('created_at').notNull().defaultNow(),
 })
 
