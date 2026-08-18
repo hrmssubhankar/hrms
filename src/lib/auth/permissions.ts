@@ -126,6 +126,14 @@ export type Permission =
   // Roster & Shift Management
   | 'roster_shifts:read'
   | 'roster_shifts:write'
+  // Payroll & Finance (enhanced)
+  | 'payroll_finance:read'
+  | 'payroll_finance:write'
+  // Employee Self-Service
+  | 'self_service:read'
+  | 'self_service:write'
+  // Reports & Analytics (enhanced)
+  | 'reports_analytics:read'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -169,6 +177,9 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'medication_health:read', 'medication_health:write',
     'incident_behaviour:read', 'incident_behaviour:write',
     'roster_shifts:read', 'roster_shifts:write',
+    'payroll_finance:read', 'payroll_finance:write',
+    'self_service:read', 'self_service:write',
+    'reports_analytics:read',
     'settings:read', 'settings:write',
   ],
 
@@ -206,6 +217,9 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'medication_health:read', 'medication_health:write',
     'incident_behaviour:read', 'incident_behaviour:write',
     'roster_shifts:read', 'roster_shifts:write',
+    'payroll_finance:read', 'payroll_finance:write',
+    'self_service:read', 'self_service:write',
+    'reports_analytics:read',
     'settings:read',
   ],
 
@@ -224,6 +238,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'medication_health:read', 'medication_health:write',
     'incident_behaviour:read', 'incident_behaviour:write',
     'roster_shifts:read',
+    'payroll_finance:read',
+    'reports_analytics:read',
     'settings:read',
   ],
 
@@ -246,6 +262,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'medication_health:read', 'medication_health:write',
     'incident_behaviour:read', 'incident_behaviour:write',
     'roster_shifts:read', 'roster_shifts:write',
+    'payroll_finance:read', 'payroll_finance:write',
+    'reports_analytics:read',
   ],
 
   team_leader: [
@@ -262,6 +280,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'engagement:read',
     'leave:read', 'leave:approve',
     'expenses:read', 'expenses:approve',
+    'self_service:read',
+    'reports_analytics:read',
   ],
 
   payroll_officer: [
@@ -272,6 +292,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'documents:read',
     'analytics:read',
     'leave:read',
+    'payroll_finance:read', 'payroll_finance:write',
+    'reports_analytics:read',
   ],
 
   auditor: [
@@ -289,6 +311,8 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'medication_health:read',
     'incident_behaviour:read',
     'roster_shifts:read',
+    'payroll_finance:read',
+    'reports_analytics:read',
   ],
 
   it_admin: [
@@ -313,6 +337,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'rostering:read',   // view own schedule
     'timesheets:read', 'timesheets:write',  // clock in/out, view own
     'expenses:read', 'expenses:write',      // submit and view own claims
+    'self_service:read', 'self_service:write',
   ],
 
   contractor: [

@@ -53,6 +53,9 @@ const NAV_PERMISSION: Record<string, Permission | null> = {
   'medication-health':  'medication_health:read',
   'incident-behaviour': 'incident_behaviour:read',
   'roster-shifts':      'roster_shifts:read',
+  'payroll-finance':    'payroll_finance:read',
+  'self-service':       'self_service:read',
+  'reports-analytics':  'reports_analytics:read',
   // Built-in routes (IDs 31+) — not controlled by tenant module toggles
   'timesheets':         'timesheets:read',
   'screening':          'compliance:read',
@@ -105,6 +108,9 @@ const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
   40: { key: 'medication-health',     label: 'Medication & Health' },
   41: { key: 'incident-behaviour',    label: 'Incidents & Behaviour' },
   42: { key: 'roster-shifts',         label: 'Roster & Shifts' },
+  43: { key: 'payroll-finance',       label: 'Payroll & Finance' },
+  44: { key: 'self-service',          label: 'Employee Self-Service' },
+  45: { key: 'reports-analytics',     label: 'Reports & Analytics' },
 }
 
 async function getTenantConfig(slug: string) {

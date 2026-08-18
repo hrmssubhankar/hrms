@@ -95,6 +95,9 @@ const MODULES = [
   { id: 40, name: 'Medication & Health Support' },
   { id: 41, name: 'Incident & Behaviour Support' },
   { id: 42, name: 'Roster & Shift Management' },
+  { id: 43, name: 'Payroll & Finance' },
+  { id: 44, name: 'Employee Self-Service' },
+  { id: 45, name: 'Reports & Analytics' },
 ]
 
 const SUPER_ADMIN = {

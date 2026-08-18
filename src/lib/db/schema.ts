@@ -1605,3 +1605,107 @@ export const expenseClaims = pgTable('expense_claims', {
   employeeIdx: index('expense_claims_employee_idx').on(t.employeeId),
   statusIdx:   index('expense_claims_status_idx').on(t.status),
 }))
+
+// ─── Module 43: Payroll & Finance ────────────────────────────────────────────
+
+export const payrollRuns = pgTable('payroll_runs', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull(),
+  name:         varchar('name', { length: 255 }).notNull(),
+  periodStart:  date('period_start').notNull(),
+  periodEnd:    date('period_end').notNull(),
+  payDate:      date('pay_date'),
+  frequency:    varchar('frequency', { length: 50 }).notNull().default('fortnightly'), // weekly, fortnightly, monthly
+  status:       varchar('status', { length: 50 }).notNull().default('draft'), // draft, processing, finalised, paid
+  totalGross:   decimal('total_gross', { precision: 12, scale: 2 }).default('0'),
+  totalNet:     decimal('total_net', { precision: 12, scale: 2 }).default('0'),
+  totalTax:     decimal('total_tax', { precision: 12, scale: 2 }).default('0'),
+  totalSuper:   decimal('total_super', { precision: 12, scale: 2 }).default('0'),
+  employeeCount:integer('employee_count').default(0),
+  notes:        text('notes'),
+  createdBy:    varchar('created_by', { length: 255 }),
+  finalisedBy:  varchar('finalised_by', { length: 255 }),
+  finalisedAt:  timestamp('finalised_at'),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('payroll_runs_tenant_idx').on(t.tenantId),
+  statusIdx: index('payroll_runs_status_idx').on(t.status),
+}))
+
+export const payrollRunEntries = pgTable('payroll_run_entries', {
+  id:              uuid('id').primaryKey().defaultRandom(),
+  tenantId:        uuid('tenant_id').notNull(),
+  runId:           uuid('run_id').notNull().references(() => payrollRuns.id, { onDelete: 'cascade' }),
+  employeeId:      uuid('employee_id').notNull(),
+  employeeNumber:  varchar('employee_number', { length: 50 }),
+  firstName:       varchar('first_name', { length: 100 }),
+  lastName:        varchar('last_name', { length: 100 }),
+  employmentType:  varchar('employment_type', { length: 50 }),
+  hoursWorked:     decimal('hours_worked', { precision: 8, scale: 2 }).default('0'),
+  hourlyRate:      decimal('hourly_rate', { precision: 10, scale: 4 }).default('0'),
+  ordinaryPay:     decimal('ordinary_pay', { precision: 10, scale: 2 }).default('0'),
+  overtimePay:     decimal('overtime_pay', { precision: 10, scale: 2 }).default('0'),
+  allowances:      decimal('allowances', { precision: 10, scale: 2 }).default('0'),
+  grossPay:        decimal('gross_pay', { precision: 10, scale: 2 }).default('0'),
+  paygWithholding: decimal('payg_withholding', { precision: 10, scale: 2 }).default('0'),
+  medicareLevy:    decimal('medicare_levy', { precision: 10, scale: 2 }).default('0'),
+  otherDeductions: decimal('other_deductions', { precision: 10, scale: 2 }).default('0'),
+  superContribution:decimal('super_contribution', { precision: 10, scale: 2 }).default('0'),
+  netPay:          decimal('net_pay', { precision: 10, scale: 2 }).default('0'),
+  leaveAccrued:    decimal('leave_accrued', { precision: 8, scale: 4 }).default('0'),
+  notes:           text('notes'),
+  createdAt:       timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('payroll_run_entries_tenant_idx').on(t.tenantId),
+  runIdx:    index('payroll_run_entries_run_idx').on(t.runId),
+}))
+
+// ─── Module 44: Employee Self-Service ────────────────────────────────────────
+
+export const essAnnouncements = pgTable('ess_announcements', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  tenantId:   uuid('tenant_id').notNull(),
+  title:      varchar('title', { length: 255 }).notNull(),
+  body:       text('body').notNull(),
+  priority:   varchar('priority', { length: 50 }).notNull().default('info'), // info, warning, critical
+  targetRole: varchar('target_role', { length: 100 }), // null = all roles
+  publishedAt:timestamp('published_at'),
+  expiresAt:  timestamp('expires_at'),
+  createdBy:  varchar('created_by', { length: 255 }),
+  createdAt:  timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('ess_announcements_tenant_idx').on(t.tenantId),
+}))
+
+export const essQuickLinks = pgTable('ess_quick_links', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  tenantId:   uuid('tenant_id').notNull(),
+  label:      varchar('label', { length: 255 }).notNull(),
+  url:        varchar('url', { length: 1000 }).notNull(),
+  icon:       varchar('icon', { length: 50 }),
+  sortOrder:  integer('sort_order').default(0),
+  createdAt:  timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('ess_quick_links_tenant_idx').on(t.tenantId),
+}))
+
+// ─── Module 45: Reports & Analytics ──────────────────────────────────────────
+
+export const savedReports = pgTable('saved_reports', {
+  id:           uuid('id').primaryKey().defaultRandom(),
+  tenantId:     uuid('tenant_id').notNull(),
+  name:         varchar('name', { length: 255 }).notNull(),
+  reportType:   varchar('report_type', { length: 100 }).notNull(), // headcount, payroll, leave, compliance, incidents
+  filters:      jsonb('filters').default({}),
+  columns:      jsonb('columns').default([]),
+  sortBy:       varchar('sort_by', { length: 100 }),
+  sortDir:      varchar('sort_dir', { length: 10 }).default('asc'),
+  isShared:     boolean('is_shared').notNull().default(false),
+  createdBy:    varchar('created_by', { length: 255 }),
+  lastRunAt:    timestamp('last_run_at'),
+  createdAt:    timestamp('created_at').notNull().defaultNow(),
+  updatedAt:    timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('saved_reports_tenant_idx').on(t.tenantId),
+}))
