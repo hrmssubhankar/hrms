@@ -867,6 +867,55 @@ export const participantRestrictivePractices = pgTable('participant_restrictive_
   participantIdx: index('restrictive_practices_participant_idx').on(t.participantId),
 }))
 
+// ─── Module 42: Roster & Shift Management ────────────────────────────────────
+
+export const rosterTemplates = pgTable('roster_templates', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  name:        varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  status:      varchar('status', { length: 50 }).notNull().default('active'),
+  createdBy:   varchar('created_by', { length: 255 }),
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+  updatedAt:   timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('roster_templates_tenant_idx').on(t.tenantId),
+}))
+
+export const rosterTemplateSlots = pgTable('roster_template_slots', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  templateId:     uuid('template_id').notNull().references(() => rosterTemplates.id, { onDelete: 'cascade' }),
+  dayOfWeek:      integer('day_of_week').notNull(), // 0=Mon, 6=Sun
+  startTime:      varchar('start_time', { length: 5 }).notNull(), // HH:MM
+  endTime:        varchar('end_time', { length: 5 }).notNull(),
+  shiftType:      varchar('shift_type', { length: 100 }).notNull().default('standard'),
+  location:       varchar('location', { length: 255 }),
+  participantId:  uuid('participant_id'),
+  requiredStaff:  integer('required_staff').notNull().default(1),
+  notes:          text('notes'),
+}, (t) => ({
+  templateIdx: index('roster_template_slots_template_idx').on(t.templateId),
+}))
+
+export const shiftSwapRequests = pgTable('shift_swap_requests', {
+  id:              uuid('id').primaryKey().defaultRandom(),
+  tenantId:        uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  shiftId:         uuid('shift_id').notNull().references(() => shifts.id, { onDelete: 'cascade' }),
+  requestedById:   uuid('requested_by_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  swapWithId:      uuid('swap_with_id').references(() => employees.id),
+  reason:          text('reason'),
+  status:          varchar('status', { length: 50 }).notNull().default('pending'),
+  reviewedBy:      varchar('reviewed_by', { length: 255 }),
+  reviewedAt:      timestamp('reviewed_at'),
+  reviewNotes:     text('review_notes'),
+  createdAt:       timestamp('created_at').notNull().defaultNow(),
+  updatedAt:       timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx: index('shift_swap_requests_tenant_idx').on(t.tenantId),
+  shiftIdx:  index('shift_swap_requests_shift_idx').on(t.shiftId),
+}))
+
 export const shifts = pgTable('shifts', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id),

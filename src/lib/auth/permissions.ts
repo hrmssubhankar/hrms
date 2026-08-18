@@ -123,6 +123,9 @@ export type Permission =
   // Incident & Behaviour Support
   | 'incident_behaviour:read'
   | 'incident_behaviour:write'
+  // Roster & Shift Management
+  | 'roster_shifts:read'
+  | 'roster_shifts:write'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -165,6 +168,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'participant_mgmt:read', 'participant_mgmt:write',
     'medication_health:read', 'medication_health:write',
     'incident_behaviour:read', 'incident_behaviour:write',
+    'roster_shifts:read', 'roster_shifts:write',
     'settings:read', 'settings:write',
   ],
 
@@ -201,6 +205,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'participant_mgmt:read', 'participant_mgmt:write',
     'medication_health:read', 'medication_health:write',
     'incident_behaviour:read', 'incident_behaviour:write',
+    'roster_shifts:read', 'roster_shifts:write',
     'settings:read',
   ],
 
@@ -218,6 +223,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'participant_mgmt:read', 'participant_mgmt:write',
     'medication_health:read', 'medication_health:write',
     'incident_behaviour:read', 'incident_behaviour:write',
+    'roster_shifts:read',
     'settings:read',
   ],
 
@@ -239,6 +245,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'participant_mgmt:read', 'participant_mgmt:write',
     'medication_health:read', 'medication_health:write',
     'incident_behaviour:read', 'incident_behaviour:write',
+    'roster_shifts:read', 'roster_shifts:write',
   ],
 
   team_leader: [
@@ -246,6 +253,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'supervision:read', 'supervision:write',
     'performance:read', 'performance:write',
     'rostering:read', 'rostering:write',
+    'roster_shifts:read', 'roster_shifts:write',
     'timesheets:read', 'timesheets:write', 'timesheets:approve',
     'training:read',
     'documents:read',
@@ -280,6 +288,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'participant_mgmt:read',
     'medication_health:read',
     'incident_behaviour:read',
+    'roster_shifts:read',
   ],
 
   it_admin: [
