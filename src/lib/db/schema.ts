@@ -27,7 +27,7 @@ export const documentStatusEnum   = pgEnum('document_status', ['active', 'expire
 // Module 01 — Tenants (Multi-Tenant Core)
 // ──────────────────────────────────────────────
 
-export const tenants = pgTable('tenants', {
+export const tenants = pgTable('hrms_tenants', {
   id:          uuid('id').primaryKey().defaultRandom(),
   name:        varchar('name', { length: 255 }).notNull(),
   slug:        varchar('slug', { length: 100 }).notNull().unique(),
@@ -40,7 +40,7 @@ export const tenants = pgTable('tenants', {
   updatedAt:   timestamp('updated_at').notNull().defaultNow(),
 })
 
-export const tenantModules = pgTable('tenant_modules', {
+export const tenantModules = pgTable('hrms_tenant_modules', {
   id:        uuid('id').primaryKey().defaultRandom(),
   tenantId:  uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   moduleId:  integer('module_id').notNull(),
@@ -56,7 +56,7 @@ export const tenantModules = pgTable('tenant_modules', {
 // Module 03 — Users & RBAC
 // ──────────────────────────────────────────────
 
-export const users = pgTable('users', {
+export const users = pgTable('hrms_users', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   email:          varchar('email', { length: 255 }).notNull(),
@@ -79,7 +79,7 @@ export const users = pgTable('users', {
 // Module 02 — Employee Master Profiles
 // ──────────────────────────────────────────────
 
-export const employees = pgTable('employees', {
+export const employees = pgTable('hrms_employees', {
   id:               uuid('id').primaryKey().defaultRandom(),
   tenantId:         uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   userId:           uuid('user_id').references(() => users.id),
@@ -118,7 +118,7 @@ export const employees = pgTable('employees', {
   empNumberIdx:  uniqueIndex('employees_number_tenant').on(t.tenantId, t.employeeNumber),
 }))
 
-export const emergencyContacts = pgTable('emergency_contacts', {
+export const emergencyContacts = pgTable('hrms_emergency_contacts', {
   id:           uuid('id').primaryKey().defaultRandom(),
   employeeId:   uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
   name:         varchar('name', { length: 200 }).notNull(),
@@ -128,7 +128,7 @@ export const emergencyContacts = pgTable('emergency_contacts', {
   isPrimary:    boolean('is_primary').notNull().default(false),
 })
 
-export const departments = pgTable('departments', {
+export const departments = pgTable('hrms_departments', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name:        varchar('name', { length: 200 }).notNull(),
@@ -137,7 +137,7 @@ export const departments = pgTable('departments', {
   isActive:    boolean('is_active').notNull().default(true),
 })
 
-export const positions = pgTable('positions', {
+export const positions = pgTable('hrms_positions', {
   id:                  uuid('id').primaryKey().defaultRandom(),
   tenantId:            uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   departmentId:        uuid('department_id').references(() => departments.id),
@@ -154,7 +154,7 @@ export const positions = pgTable('positions', {
 // Module 04 — Audit Logging
 // ──────────────────────────────────────────────
 
-export const auditLogs = pgTable('audit_logs', {
+export const auditLogs = pgTable('hrms_audit_logs', {
   id:         uuid('id').primaryKey().defaultRandom(),
   tenantId:   uuid('tenant_id').notNull().references(() => tenants.id),
   userId:     uuid('user_id'),
@@ -175,7 +175,7 @@ export const auditLogs = pgTable('audit_logs', {
 // Module 05 — Document Management
 // ──────────────────────────────────────────────
 
-export const documents = pgTable('documents', {
+export const documents = pgTable('hrms_documents', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   employeeId:   uuid('employee_id').references(() => employees.id),
@@ -201,7 +201,7 @@ export const documents = pgTable('documents', {
 // Module 06 — Pre-Employment Screening
 // ──────────────────────────────────────────────
 
-export const screeningRecords = pgTable('screening_records', {
+export const screeningRecords = pgTable('hrms_screening_records', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   employeeId:    uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
@@ -222,7 +222,7 @@ export const screeningRecords = pgTable('screening_records', {
 // Module 07 — Compliance Lock
 // ──────────────────────────────────────────────
 
-export const complianceLockExceptions = pgTable('compliance_lock_exceptions', {
+export const complianceLockExceptions = pgTable('hrms_compliance_lock_exceptions', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:     uuid('employee_id').notNull().references(() => employees.id),
@@ -237,7 +237,7 @@ export const complianceLockExceptions = pgTable('compliance_lock_exceptions', {
 // Module 08 — Ongoing Compliance Tracking
 // ──────────────────────────────────────────────
 
-export const complianceTracking = pgTable('compliance_tracking', {
+export const complianceTracking = pgTable('hrms_compliance_tracking', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:      uuid('employee_id').notNull().references(() => employees.id),
@@ -255,7 +255,7 @@ export const complianceTracking = pgTable('compliance_tracking', {
 // Module 09 — Onboarding & Induction
 // ──────────────────────────────────────────────
 
-export const onboardingRecords = pgTable('onboarding_records', {
+export const onboardingRecords = pgTable('hrms_onboarding_records', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:   uuid('employee_id').notNull().references(() => employees.id),
@@ -273,7 +273,7 @@ export const onboardingRecords = pgTable('onboarding_records', {
 // Module 10 — Training Management & LMS
 // ──────────────────────────────────────────────
 
-export const courses = pgTable('courses', {
+export const courses = pgTable('hrms_courses', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id),
   title:        varchar('title', { length: 300 }).notNull(),
@@ -286,7 +286,7 @@ export const courses = pgTable('courses', {
   createdAt:    timestamp('created_at').notNull().defaultNow(),
 })
 
-export const trainingRecords = pgTable('training_records', {
+export const trainingRecords = pgTable('hrms_training_records', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:     uuid('employee_id').notNull().references(() => employees.id),
@@ -304,7 +304,7 @@ export const trainingRecords = pgTable('training_records', {
 // Module 11 — Competency Management
 // ──────────────────────────────────────────────
 
-export const competencies = pgTable('competencies', {
+export const competencies = pgTable('hrms_competencies', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id),
   name:        varchar('name', { length: 200 }).notNull(),
@@ -313,7 +313,7 @@ export const competencies = pgTable('competencies', {
   isActive:    boolean('is_active').notNull().default(true),
 })
 
-export const competencyAssessments = pgTable('competency_assessments', {
+export const competencyAssessments = pgTable('hrms_competency_assessments', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:      uuid('employee_id').notNull().references(() => employees.id),
@@ -331,7 +331,7 @@ export const competencyAssessments = pgTable('competency_assessments', {
 // Module 12 — Supervision Management
 // ──────────────────────────────────────────────
 
-export const supervisionRecords = pgTable('supervision_records', {
+export const supervisionRecords = pgTable('hrms_supervision_records', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:   uuid('employee_id').notNull().references(() => employees.id),
@@ -349,7 +349,7 @@ export const supervisionRecords = pgTable('supervision_records', {
 // Module 14 — Recruitment & ATS
 // ──────────────────────────────────────────────
 
-export const jobRequisitions = pgTable('job_requisitions', {
+export const jobRequisitions = pgTable('hrms_job_requisitions', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id),
   positionId:     uuid('position_id').references(() => positions.id),
@@ -363,7 +363,7 @@ export const jobRequisitions = pgTable('job_requisitions', {
   createdAt:      timestamp('created_at').notNull().defaultNow(),
 })
 
-export const candidates = pgTable('candidates', {
+export const candidates = pgTable('hrms_candidates', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id),
   firstName:    varchar('first_name', { length: 100 }).notNull(),
@@ -375,7 +375,7 @@ export const candidates = pgTable('candidates', {
   createdAt:    timestamp('created_at').notNull().defaultNow(),
 })
 
-export const applications = pgTable('applications', {
+export const applications = pgTable('hrms_applications', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull().references(() => tenants.id),
   requisitionId:   uuid('requisition_id').notNull().references(() => jobRequisitions.id),
@@ -392,7 +392,7 @@ export const applications = pgTable('applications', {
 // Module 15 — Contracting & E-Sign
 // ──────────────────────────────────────────────
 
-export const contracts = pgTable('contracts', {
+export const contracts = pgTable('hrms_contracts', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:     uuid('employee_id').notNull().references(() => employees.id),
@@ -417,7 +417,7 @@ export const contracts = pgTable('contracts', {
 // Module 16 — Probation & Performance
 // ──────────────────────────────────────────────
 
-export const performanceReviews = pgTable('performance_reviews', {
+export const performanceReviews = pgTable('hrms_performance_reviews', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:      uuid('employee_id').notNull().references(() => employees.id),
@@ -440,7 +440,7 @@ export const performanceReviews = pgTable('performance_reviews', {
 // Module 17 — WHS & Injury Management
 // ──────────────────────────────────────────────
 
-export const whsIncidents = pgTable('whs_incidents', {
+export const whsIncidents = pgTable('hrms_whs_incidents', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull().references(() => tenants.id),
   reportedBy:      uuid('reported_by').notNull().references(() => employees.id),
@@ -460,7 +460,7 @@ export const whsIncidents = pgTable('whs_incidents', {
 // Module 18 — Grievance & Investigation
 // ──────────────────────────────────────────────
 
-export const grievances = pgTable('grievances', {
+export const grievances = pgTable('hrms_grievances', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id),
   lodgedBy:       uuid('lodged_by').references(() => employees.id), // null = anonymous
@@ -482,7 +482,7 @@ export const grievances = pgTable('grievances', {
 // Module 19 — Separation & Exit Management
 // ──────────────────────────────────────────────
 
-export const separationRecords = pgTable('separation_records', {
+export const separationRecords = pgTable('hrms_separation_records', {
   id:               uuid('id').primaryKey().defaultRandom(),
   tenantId:         uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:       uuid('employee_id').notNull().references(() => employees.id),
@@ -503,7 +503,7 @@ export const separationRecords = pgTable('separation_records', {
 // Module 26 — Assets & Equipment
 // ──────────────────────────────────────────────
 
-export const assets = pgTable('assets', {
+export const assets = pgTable('hrms_assets', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id),
   name:         varchar('name', { length: 200 }).notNull(),
@@ -514,7 +514,7 @@ export const assets = pgTable('assets', {
   createdAt:    timestamp('created_at').notNull().defaultNow(),
 })
 
-export const assetAssignments = pgTable('asset_assignments', {
+export const assetAssignments = pgTable('hrms_asset_assignments', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id),
   assetId:      uuid('asset_id').notNull().references(() => assets.id),
@@ -531,7 +531,7 @@ export const assetAssignments = pgTable('asset_assignments', {
 // Module 25 — Employee Voice / Surveys
 // ──────────────────────────────────────────────
 
-export const surveys = pgTable('surveys', {
+export const surveys = pgTable('hrms_surveys', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id),
   title:       varchar('title', { length: 300 }).notNull(),
@@ -542,7 +542,7 @@ export const surveys = pgTable('surveys', {
   createdAt:   timestamp('created_at').notNull().defaultNow(),
 })
 
-export const surveyResponses = pgTable('survey_responses', {
+export const surveyResponses = pgTable('hrms_survey_responses', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id),
   surveyId:    uuid('survey_id').notNull().references(() => surveys.id),
@@ -555,7 +555,7 @@ export const surveyResponses = pgTable('survey_responses', {
 // Module 22 — Recognition & Rewards
 // ──────────────────────────────────────────────
 
-export const recognitions = pgTable('recognitions', {
+export const recognitions = pgTable('hrms_recognitions', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id),
   recipientId:    uuid('recipient_id').notNull().references(() => employees.id),
@@ -572,7 +572,7 @@ export const recognitions = pgTable('recognitions', {
 // Module 23 — Referral Program
 // ──────────────────────────────────────────────
 
-export const referrals = pgTable('referrals', {
+export const referrals = pgTable('hrms_referrals', {
   id:               uuid('id').primaryKey().defaultRandom(),
   tenantId:         uuid('tenant_id').notNull().references(() => tenants.id),
   referrerId:       uuid('referrer_id').notNull().references(() => employees.id),
@@ -591,7 +591,7 @@ export const referrals = pgTable('referrals', {
 // ──────────────────────────────────────────────
 
 /** NDIS participants / service recipients linked to shifts */
-export const participants = pgTable('participants', {
+export const participants = pgTable('hrms_participants', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   firstName:    varchar('first_name', { length: 100 }).notNull(),
@@ -617,7 +617,7 @@ export const participants = pgTable('participants', {
 
 // ─── Participant Management CRM (Module 39) ──────────────────────────────────
 
-export const participantGoals = pgTable('participant_goals', {
+export const participantGoals = pgTable('hrms_participant_goals', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -636,7 +636,7 @@ export const participantGoals = pgTable('participant_goals', {
   participantIdx: index('participant_goals_participant_idx').on(t.participantId),
 }))
 
-export const participantSupportPlans = pgTable('participant_support_plans', {
+export const participantSupportPlans = pgTable('hrms_participant_support_plans', {
   id:                uuid('id').primaryKey().defaultRandom(),
   tenantId:          uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:     uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -660,7 +660,7 @@ export const participantSupportPlans = pgTable('participant_support_plans', {
   participantIdx: index('participant_support_plans_participant_idx').on(t.participantId),
 }))
 
-export const participantNotes = pgTable('participant_notes', {
+export const participantNotes = pgTable('hrms_participant_notes', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -676,7 +676,7 @@ export const participantNotes = pgTable('participant_notes', {
   participantIdx: index('participant_notes_participant_idx').on(t.participantId),
 }))
 
-export const participantContacts = pgTable('participant_contacts', {
+export const participantContacts = pgTable('hrms_participant_contacts', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -698,7 +698,7 @@ export const participantContacts = pgTable('participant_contacts', {
 
 // ─── Module 40: Medication & Health Support ───────────────────────────────────
 
-export const participantMedications = pgTable('participant_medications', {
+export const participantMedications = pgTable('hrms_participant_medications', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -725,7 +725,7 @@ export const participantMedications = pgTable('participant_medications', {
   participantIdx: index('participant_medications_participant_idx').on(t.participantId),
 }))
 
-export const participantMedicationLogs = pgTable('participant_medication_logs', {
+export const participantMedicationLogs = pgTable('hrms_participant_medication_logs', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   medicationId:  uuid('medication_id').notNull().references(() => participantMedications.id, { onDelete: 'cascade' }),
@@ -742,7 +742,7 @@ export const participantMedicationLogs = pgTable('participant_medication_logs', 
   participantIdx: index('medication_logs_participant_idx').on(t.participantId),
 }))
 
-export const participantHealthConditions = pgTable('participant_health_conditions', {
+export const participantHealthConditions = pgTable('hrms_participant_health_conditions', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:  uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -764,7 +764,7 @@ export const participantHealthConditions = pgTable('participant_health_condition
   participantIdx: index('health_conditions_participant_idx').on(t.participantId),
 }))
 
-export const participantHealthAppointments = pgTable('participant_health_appointments', {
+export const participantHealthAppointments = pgTable('hrms_participant_health_appointments', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:   uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -791,7 +791,7 @@ export const participantHealthAppointments = pgTable('participant_health_appoint
 
 // ─── Module 41: Incident & Behaviour Support ──────────────────────────────────
 
-export const participantIncidents = pgTable('participant_incidents', {
+export const participantIncidents = pgTable('hrms_participant_incidents', {
   id:                uuid('id').primaryKey().defaultRandom(),
   tenantId:          uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:     uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -821,7 +821,7 @@ export const participantIncidents = pgTable('participant_incidents', {
   participantIdx: index('participant_incidents_participant_idx').on(t.participantId),
 }))
 
-export const participantBehaviourPlans = pgTable('participant_behaviour_plans', {
+export const participantBehaviourPlans = pgTable('hrms_participant_behaviour_plans', {
   id:                uuid('id').primaryKey().defaultRandom(),
   tenantId:          uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:     uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -845,7 +845,7 @@ export const participantBehaviourPlans = pgTable('participant_behaviour_plans', 
   participantIdx: index('behaviour_plans_participant_idx').on(t.participantId),
 }))
 
-export const participantRestrictivePractices = pgTable('participant_restrictive_practices', {
+export const participantRestrictivePractices = pgTable('hrms_participant_restrictive_practices', {
   id:                uuid('id').primaryKey().defaultRandom(),
   tenantId:          uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   participantId:     uuid('participant_id').notNull().references(() => participants.id, { onDelete: 'cascade' }),
@@ -871,7 +871,7 @@ export const participantRestrictivePractices = pgTable('participant_restrictive_
 
 // ─── Module 42: Roster & Shift Management ────────────────────────────────────
 
-export const rosterTemplates = pgTable('roster_templates', {
+export const rosterTemplates = pgTable('hrms_roster_templates', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name:        varchar('name', { length: 255 }).notNull(),
@@ -884,7 +884,7 @@ export const rosterTemplates = pgTable('roster_templates', {
   tenantIdx: index('roster_templates_tenant_idx').on(t.tenantId),
 }))
 
-export const rosterTemplateSlots = pgTable('roster_template_slots', {
+export const rosterTemplateSlots = pgTable('hrms_roster_template_slots', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   templateId:     uuid('template_id').notNull().references(() => rosterTemplates.id, { onDelete: 'cascade' }),
@@ -900,7 +900,7 @@ export const rosterTemplateSlots = pgTable('roster_template_slots', {
   templateIdx: index('roster_template_slots_template_idx').on(t.templateId),
 }))
 
-export const shiftSwapRequests = pgTable('shift_swap_requests', {
+export const shiftSwapRequests = pgTable('hrms_shift_swap_requests', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   shiftId:         uuid('shift_id').notNull().references(() => shifts.id, { onDelete: 'cascade' }),
@@ -918,7 +918,7 @@ export const shiftSwapRequests = pgTable('shift_swap_requests', {
   shiftIdx:  index('shift_swap_requests_shift_idx').on(t.shiftId),
 }))
 
-export const shifts = pgTable('shifts', {
+export const shifts = pgTable('hrms_shifts', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:    uuid('employee_id').notNull().references(() => employees.id),
@@ -940,7 +940,7 @@ export const shifts = pgTable('shifts', {
   timeIdx:    index('shifts_time_idx').on(t.startTime, t.endTime),
 }))
 
-export const timesheets = pgTable('timesheets', {
+export const timesheets = pgTable('hrms_timesheets', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:    uuid('employee_id').notNull().references(() => employees.id),
@@ -966,7 +966,7 @@ export const timesheets = pgTable('timesheets', {
 // ──────────────────────────────────────────────
 
 /** Weekly recurring availability slots per employee */
-export const employeeAvailability = pgTable('employee_availability', {
+export const employeeAvailability = pgTable('hrms_employee_availability', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:  uuid('employee_id').notNull().references(() => employees.id),
@@ -986,7 +986,7 @@ export const employeeAvailability = pgTable('employee_availability', {
 // Module 28 — Payroll
 // ──────────────────────────────────────────────
 
-export const payrollRecords = pgTable('payroll_records', {
+export const payrollRecords = pgTable('hrms_payroll_records', {
   id:               uuid('id').primaryKey().defaultRandom(),
   tenantId:         uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:       uuid('employee_id').notNull().references(() => employees.id),
@@ -1013,7 +1013,7 @@ export const payrollRecords = pgTable('payroll_records', {
 // Module 13 — Workforce Planning
 // ──────────────────────────────────────────────
 
-export const headcountPlan = pgTable('headcount_plan', {
+export const headcountPlan = pgTable('hrms_headcount_plan', {
   id:             uuid('id').primaryKey().defaultRandom(),
   tenantId:       uuid('tenant_id').notNull().references(() => tenants.id),
   departmentId:   uuid('department_id').references(() => departments.id),
@@ -1031,7 +1031,7 @@ export const headcountPlan = pgTable('headcount_plan', {
 // Module 24 — DEI
 // ──────────────────────────────────────────────
 
-export const diversityData = pgTable('diversity_data', {
+export const diversityData = pgTable('hrms_diversity_data', {
   id:                   uuid('id').primaryKey().defaultRandom(),
   tenantId:             uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:           uuid('employee_id').notNull().references(() => employees.id),
@@ -1050,7 +1050,7 @@ export const diversityData = pgTable('diversity_data', {
 // Module 21 — Employee Experience & Benefits
 // ──────────────────────────────────────────────
 
-export const employeeBenefits = pgTable('employee_benefits', {
+export const employeeBenefits = pgTable('hrms_employee_benefits', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id),
   employeeId:   uuid('employee_id').notNull().references(() => employees.id),
@@ -1066,7 +1066,7 @@ export const employeeBenefits = pgTable('employee_benefits', {
 // Notifications (cross-module)
 // ──────────────────────────────────────────────
 
-export const notifications = pgTable('notifications', {
+export const notifications = pgTable('hrms_notifications', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id),
   userId:      uuid('user_id').notNull().references(() => users.id),
@@ -1084,7 +1084,7 @@ export const notifications = pgTable('notifications', {
 // Platform — Super Admins (no tenant FK)
 // ──────────────────────────────────────────────
 
-export const superAdmins = pgTable('super_admins', {
+export const superAdmins = pgTable('hrms_super_admins', {
   id:           uuid('id').primaryKey().defaultRandom(),
   email:        varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
@@ -1104,7 +1104,7 @@ export const superAdmins = pgTable('super_admins', {
 export const leaveTypeEnum   = pgEnum('leave_type',   ['annual', 'sick', 'personal', 'unpaid', 'long_service', 'carer', 'compassionate'])
 export const leaveStatusEnum = pgEnum('leave_status', ['pending', 'approved', 'rejected', 'cancelled'])
 
-export const leaveRequests = pgTable('leave_requests', {
+export const leaveRequests = pgTable('hrms_leave_requests', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   employeeId:   uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
@@ -1127,7 +1127,7 @@ export const leaveRequests = pgTable('leave_requests', {
 }))
 
 // ── Public Holidays ───────────────────────────────────────────────────────────
-export const publicHolidays = pgTable('public_holidays', {
+export const publicHolidays = pgTable('hrms_public_holidays', {
   id:         uuid('id').primaryKey().defaultRandom(),
   tenantId:   uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name:       varchar('name', { length: 200 }).notNull(),
@@ -1146,7 +1146,7 @@ export const publicHolidays = pgTable('public_holidays', {
 // Module 15 — Offer Letters & Acceptance Tracking
 // ──────────────────────────────────────────────
 
-export const offerLetters = pgTable('offer_letters', {
+export const offerLetters = pgTable('hrms_offer_letters', {
   id:               uuid('id').primaryKey().defaultRandom(),
   tenantId:         uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   // Candidate (pre-hire — may not have an employee record yet)
@@ -1183,7 +1183,7 @@ export const offerLetters = pgTable('offer_letters', {
   emailIdx:   index('offer_letters_email_idx').on(t.candidateEmail),
 }))
 
-export const offerLetterEvents = pgTable('offer_letter_events', {
+export const offerLetterEvents = pgTable('hrms_offer_letter_events', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   offerId:     uuid('offer_id').notNull().references(() => offerLetters.id, { onDelete: 'cascade' }),
@@ -1200,7 +1200,7 @@ export const offerLetterEvents = pgTable('offer_letter_events', {
 // Module 16 — Promotion Cases
 // ──────────────────────────────────────────────
 
-export const promotionRequests = pgTable('promotion_requests', {
+export const promotionRequests = pgTable('hrms_promotion_requests', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   employeeId:      uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
@@ -1230,7 +1230,7 @@ export const promotionRequests = pgTable('promotion_requests', {
   statusIdx:    index('promotions_status_idx').on(t.status),
 }))
 
-export const promotionEvents = pgTable('promotion_events', {
+export const promotionEvents = pgTable('hrms_promotion_events', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   promotionId:  uuid('promotion_id').notNull().references(() => promotionRequests.id, { onDelete: 'cascade' }),
@@ -1248,7 +1248,7 @@ export const promotionEvents = pgTable('promotion_events', {
 // (extends existing separationRecords)
 // ──────────────────────────────────────────────
 
-export const separationEvents = pgTable('separation_events', {
+export const separationEvents = pgTable('hrms_separation_events', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   separationId:  uuid('separation_id').notNull().references(() => separationRecords.id, { onDelete: 'cascade' }),
@@ -1267,7 +1267,7 @@ export const separationEvents = pgTable('separation_events', {
 // (linked to performanceReviews above)
 // ──────────────────────────────────────────────
 
-export const performanceGoals = pgTable('performance_goals', {
+export const performanceGoals = pgTable('hrms_performance_goals', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   employeeId:    uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
@@ -1291,7 +1291,7 @@ export const performanceGoals = pgTable('performance_goals', {
 
 export const announcementPriorityEnum = pgEnum('announcement_priority', ['info', 'warning', 'critical'])
 
-export const platformAnnouncements = pgTable('platform_announcements', {
+export const platformAnnouncements = pgTable('hrms_platform_announcements', {
   id:             uuid('id').primaryKey().defaultRandom(),
   title:          varchar('title', { length: 300 }).notNull(),
   body:           text('body').notNull(),
@@ -1311,7 +1311,7 @@ export const platformAnnouncements = pgTable('platform_announcements', {
 // ──────────────────────────────────────────────
 // Offer Letter — Custom Templates (per tenant)
 // ──────────────────────────────────────────────
-export const offerLetterTemplates = pgTable('offer_letter_templates', {
+export const offerLetterTemplates = pgTable('hrms_offer_letter_templates', {
   id:        uuid('id').primaryKey().defaultRandom(),
   tenantId:  uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name:      varchar('name', { length: 255 }).notNull(),
@@ -1329,7 +1329,7 @@ export const offerLetterTemplates = pgTable('offer_letter_templates', {
 // CRM — Core (Leads, Contacts, Accounts, Deals)
 // ──────────────────────────────────────────────
 
-export const crmLeads = pgTable('crm_leads', {
+export const crmLeads = pgTable('hrms_crm_leads', {
   id:            uuid('id').primaryKey().defaultRandom(),
   tenantId:      uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   firstName:     varchar('first_name', { length: 255 }).notNull(),
@@ -1357,7 +1357,7 @@ export const crmLeads = pgTable('crm_leads', {
   assignedIdx: index('crm_leads_assigned_idx').on(t.assignedTo),
 }))
 
-export const crmContacts = pgTable('crm_contacts', {
+export const crmContacts = pgTable('hrms_crm_contacts', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   accountId:    uuid('account_id'),
@@ -1381,7 +1381,7 @@ export const crmContacts = pgTable('crm_contacts', {
   accountIdx: index('crm_contacts_account_idx').on(t.accountId),
 }))
 
-export const crmAccounts = pgTable('crm_accounts', {
+export const crmAccounts = pgTable('hrms_crm_accounts', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   name:         varchar('name', { length: 255 }).notNull(),
@@ -1410,7 +1410,7 @@ export const crmAccounts = pgTable('crm_accounts', {
   nameIdx:   index('crm_accounts_name_idx').on(t.name),
 }))
 
-export const crmDeals = pgTable('crm_deals', {
+export const crmDeals = pgTable('hrms_crm_deals', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   accountId:    uuid('account_id'),
@@ -1437,7 +1437,7 @@ export const crmDeals = pgTable('crm_deals', {
   accountIdx: index('crm_deals_account_idx').on(t.accountId),
 }))
 
-export const crmActivities = pgTable('crm_activities', {
+export const crmActivities = pgTable('hrms_crm_activities', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   type:        varchar('type', { length: 50 }).notNull(), // call, email, meeting, note, task
@@ -1461,7 +1461,7 @@ export const crmActivities = pgTable('crm_activities', {
 
 // ─── NDIS Practice Standards Audit ──────────────────────────────────────────
 
-export const ndisAudits = pgTable('ndis_audits', {
+export const ndisAudits = pgTable('hrms_ndis_audits', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   title:        varchar('title', { length: 255 }).notNull(),
@@ -1490,7 +1490,7 @@ export const ndisAudits = pgTable('ndis_audits', {
   dateIdx:    index('ndis_audits_date_idx').on(t.scheduledDate),
 }))
 
-export const ndisAuditActions = pgTable('ndis_audit_actions', {
+export const ndisAuditActions = pgTable('hrms_ndis_audit_actions', {
   id:          uuid('id').primaryKey().defaultRandom(),
   tenantId:    uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   auditId:     uuid('audit_id').notNull().references(() => ndisAudits.id, { onDelete: 'cascade' }),
@@ -1511,7 +1511,7 @@ export const ndisAuditActions = pgTable('ndis_audit_actions', {
 
 // ─── NDIS Reportable Incidents ───────────────────────────────────────────────
 
-export const ndisIncidents = pgTable('ndis_incidents', {
+export const ndisIncidents = pgTable('hrms_ndis_incidents', {
   id:               uuid('id').primaryKey().defaultRandom(),
   tenantId:         uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   // Classification
@@ -1561,7 +1561,7 @@ export const ndisIncidents = pgTable('ndis_incidents', {
   participantIdx: index('ndis_incidents_participant_idx').on(t.participantId),
 }))
 
-export const ndisIncidentActions = pgTable('ndis_incident_actions', {
+export const ndisIncidentActions = pgTable('hrms_ndis_incident_actions', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   incidentId:   uuid('incident_id').notNull().references(() => ndisIncidents.id, { onDelete: 'cascade' }),
@@ -1583,7 +1583,7 @@ export const ndisIncidentActions = pgTable('ndis_incident_actions', {
 
 // ─── Expense Management ──────────────────────────────────────────────────────
 
-export const expenseClaims = pgTable('expense_claims', {
+export const expenseClaims = pgTable('hrms_expense_claims', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
   employeeId:   uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
@@ -1610,7 +1610,7 @@ export const expenseClaims = pgTable('expense_claims', {
 
 // ─── Module 43: Payroll & Finance ────────────────────────────────────────────
 
-export const payrollRuns = pgTable('payroll_runs', {
+export const payrollRuns = pgTable('hrms_payroll_runs', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull(),
   name:         varchar('name', { length: 255 }).notNull(),
@@ -1635,7 +1635,7 @@ export const payrollRuns = pgTable('payroll_runs', {
   statusIdx: index('payroll_runs_status_idx').on(t.status),
 }))
 
-export const payrollRunEntries = pgTable('payroll_run_entries', {
+export const payrollRunEntries = pgTable('hrms_payroll_run_entries', {
   id:              uuid('id').primaryKey().defaultRandom(),
   tenantId:        uuid('tenant_id').notNull(),
   runId:           uuid('run_id').notNull().references(() => payrollRuns.id, { onDelete: 'cascade' }),
@@ -1665,7 +1665,7 @@ export const payrollRunEntries = pgTable('payroll_run_entries', {
 
 // ─── Module 44: Employee Self-Service ────────────────────────────────────────
 
-export const essAnnouncements = pgTable('ess_announcements', {
+export const essAnnouncements = pgTable('hrms_ess_announcements', {
   id:         uuid('id').primaryKey().defaultRandom(),
   tenantId:   uuid('tenant_id').notNull(),
   title:      varchar('title', { length: 255 }).notNull(),
@@ -1680,7 +1680,7 @@ export const essAnnouncements = pgTable('ess_announcements', {
   tenantIdx: index('ess_announcements_tenant_idx').on(t.tenantId),
 }))
 
-export const essQuickLinks = pgTable('ess_quick_links', {
+export const essQuickLinks = pgTable('hrms_ess_quick_links', {
   id:         uuid('id').primaryKey().defaultRandom(),
   tenantId:   uuid('tenant_id').notNull(),
   label:      varchar('label', { length: 255 }).notNull(),
@@ -1694,7 +1694,7 @@ export const essQuickLinks = pgTable('ess_quick_links', {
 
 // ─── Module 45: Reports & Analytics ──────────────────────────────────────────
 
-export const savedReports = pgTable('saved_reports', {
+export const savedReports = pgTable('hrms_saved_reports', {
   id:           uuid('id').primaryKey().defaultRandom(),
   tenantId:     uuid('tenant_id').notNull(),
   name:         varchar('name', { length: 255 }).notNull(),
