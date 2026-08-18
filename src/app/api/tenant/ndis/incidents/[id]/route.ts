@@ -12,7 +12,7 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const guard = await apiGuard('ndis:read')
+  const guard = await apiGuard('ndis_incidents:read')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
 
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const guard = await apiGuard('ndis:write')
+  const guard = await apiGuard('ndis_incidents:write')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
 
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const guard = await apiGuard('ndis:write')
+  const guard = await apiGuard('ndis_incidents:write')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
 

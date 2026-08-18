@@ -11,7 +11,7 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  const guard = await apiGuard('ndis:read')
+  const guard = await apiGuard('ndis_incidents:read')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
 
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const guard = await apiGuard('ndis:write')
+  const guard = await apiGuard('ndis_incidents:write')
   if (guard.error) return guard.error
   const { tenantId, email } = guard.session
 
