@@ -72,6 +72,7 @@ const NAV_ICONS: Record<string, IconName> = {
   'ndis-audits':        'clipboard-list',
   'ndis-incidents':     'shield',
   'participants':       'users',
+  'schads':             'currency',
   'crm':                'search',
   'expenses':           'currency',
   'screening':          'screening',
