@@ -188,6 +188,8 @@ const EMP_TYPE_LABEL: Record<string, string> = {
   volunteer:  'Volunteer',
 }
 
+type ScreeningExpiry = Record<string, { expiryDate: string; daysUntil: number }>
+
 export default function EmployeeManagementPage() {
   const router = useRouter()
   const [employees, setEmployees]   = useState<Employee[]>([])
@@ -198,6 +200,15 @@ export default function EmployeeManagementPage() {
   const [empType,   setEmpType]     = useState('')
   const [showImport, setShowImport] = useState(false)
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [screeningExpiry, setScreeningExpiry] = useState<ScreeningExpiry>({})
+
+  // Fetch screening expiry data
+  useEffect(() => {
+    fetchWithAuth('/api/tenant/employees/screening-expiry')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.screeningExpiry) setScreeningExpiry(d.screeningExpiry) })
+      .catch(() => {})
+  }, [])
 
   // Debounce search
   useEffect(() => {
@@ -373,6 +384,14 @@ export default function EmployeeManagementPage() {
                 {employees.map(emp => {
                   const badge = COMPLIANCE_BADGE[emp.complianceStatus] ?? COMPLIANCE_BADGE.pending
                   const fullName = [emp.firstName, emp.lastName].join(' ')
+                  const scrExp = screeningExpiry[emp.id]
+                  const scrBadge = scrExp
+                    ? scrExp.daysUntil <= 14
+                      ? { label: `🛡 Expires in ${scrExp.daysUntil}d`, cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' }
+                      : scrExp.daysUntil <= 30
+                        ? { label: `🛡 Expires in ${scrExp.daysUntil}d`, cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' }
+                        : null
+                    : null
                   return (
                     <tr
                       key={emp.id}
@@ -417,6 +436,11 @@ export default function EmployeeManagementPage() {
                         <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${badge.cls}`}>
                           {badge.label}
                         </span>
+                        {scrBadge && (
+                          <span className={`mt-1 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${scrBadge.cls}`}>
+                            {scrBadge.label}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex w-2 h-2 rounded-full ${emp.isActive ? 'bg-green-500' : 'bg-gray-300'}`} />

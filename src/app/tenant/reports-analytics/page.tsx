@@ -208,6 +208,32 @@ function exportCSV(columns: string[], rows: ReportRow[], filename: string) {
   URL.revokeObjectURL(url)
 }
 
+function exportPDF(label: string, columns: string[], rows: ReportRow[], activeFilters: Record<string, string>) {
+  const filterStr = Object.entries(activeFilters)
+    .filter(([, v]) => v)
+    .map(([k, v]) => `${prettyKey(k)}: ${v}`)
+    .join('  |  ')
+  const tableRows = rows.map(row =>
+    `<tr>${columns.map(col => `<td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${String(row[col] ?? '—')}</td>`).join('')}</tr>`
+  ).join('')
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${label}</title>
+  <style>body{font-family:Arial,sans-serif;padding:24px;color:#111}
+  h1{font-size:18px;margin:0 0 4px}p{font-size:12px;color:#555;margin:0 0 16px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{background:#f3f4f6;text-align:left;padding:7px 10px;border-bottom:2px solid #d1d5db;font-weight:600}
+  tr:nth-child(even){background:#f9fafb}
+  @media print{body{padding:0}}</style></head>
+  <body><h1>${label}</h1><p>${filterStr || 'No filters applied'} — Generated ${new Date().toLocaleString('en-AU')}</p>
+  <table><thead><tr>${columns.map(c => `<th>${prettyKey(c)}</th>`).join('')}</tr></thead>
+  <tbody>${tableRows}</tbody></table></body></html>`
+  const win = window.open('', '_blank')
+  if (!win) return
+  win.document.write(html)
+  win.document.close()
+  win.focus()
+  setTimeout(() => { win.print(); win.close() }, 500)
+}
+
 export default function ReportsAnalyticsPage() {
   const [activeTab, setActiveTab] = useState<'run' | 'saved'>('run')
   const [selected, setSelected] = useState<ReportConfig | null>(null)
@@ -432,6 +458,11 @@ export default function ReportsAnalyticsPage() {
                         onClick={() => exportCSV(columns, results, `${selected.type}_${new Date().toISOString().split('T')[0]}.csv`)}
                         className="px-3 py-2 border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                         ⬇ CSV
+                      </button>
+                      <button
+                        onClick={() => exportPDF(selected.label, columns, results, filters)}
+                        className="px-3 py-2 border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                        🖨 PDF
                       </button>
                       <button onClick={() => setSaveModal(true)}
                         className="px-3 py-2 border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
