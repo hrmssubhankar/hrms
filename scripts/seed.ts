@@ -16,7 +16,7 @@
 
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })  // Next.js uses .env.local
-import { drizzle } from 'drizzle-orm/neon-http'
+import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { eq, and } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'

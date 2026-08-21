@@ -9,7 +9,7 @@ dotenv.config({ path: '.env.local' })
 
 async function main() {
   const postgres = (await import('postgres')).default
-  const sql = neon(process.env.DATABASE_URL!)
+  const sql = postgres(process.env.DATABASE_URL!, { prepare: false })
 
   const statements = [
     // ── participants table ────────────────────────────────────────────────────
