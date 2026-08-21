@@ -17,7 +17,7 @@
 import dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })  // Next.js uses .env.local
 import { drizzle } from 'drizzle-orm/neon-http'
-import { neon } from '@neondatabase/serverless'
+import postgres from 'postgres'
 import { eq, and } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
@@ -112,7 +112,7 @@ async function main() {
   const url = process.env.DATABASE_URL
   if (!url) throw new Error('DATABASE_URL not set — check .env.local')
 
-  const sql = neon(url)
+  const sql = postgres(url, { prepare: false })
   const db  = drizzle(sql)
 
   console.log('\n🌱 Starting HRMS seed...\n')

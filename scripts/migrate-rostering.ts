@@ -8,7 +8,7 @@ import * as dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 
 async function main() {
-  const { neon } = await import('@neondatabase/serverless')
+  const postgres = (await import('postgres')).default
   const sql = neon(process.env.DATABASE_URL!)
 
   const statements = [
@@ -66,7 +66,7 @@ async function main() {
   let ok = 0
   for (const stmt of statements) {
     try {
-      await sql(stmt)
+      await sql.unsafe(stmt)
       console.log(`  ✓ ${stmt.slice(0, 70).replace(/\s+/g, ' ')}…`)
       ok++
     } catch (err: any) {

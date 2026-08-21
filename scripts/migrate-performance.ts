@@ -66,20 +66,20 @@ const statements = [
 ]
 
 async function migrate() {
-  const { neon } = await import('@neondatabase/serverless')
+  const postgres = (await import('postgres')).default
   const url = process.env.DATABASE_URL
   if (!url || url.includes('placeholder')) {
     console.error('ERROR: DATABASE_URL not set. Check .env.local exists.')
     process.exit(1)
   }
 
-  const sql = neon(url)
+  const sql = postgres(url, { prepare: false })
   console.log('Running migration: performance_reviews, performance_goals…\n')
 
   for (const stmt of statements) {
     const label = stmt.trim().split('\n')[0].slice(0, 60)
     process.stdout.write(`  ${label}… `)
-    await sql(stmt)
+    await sql.unsafe(stmt)
     console.log('OK')
   }
 
