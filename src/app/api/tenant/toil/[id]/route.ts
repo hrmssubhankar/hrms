@@ -3,7 +3,7 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 import { db } from '@/lib/db'
 import { toilEntries } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { upsertBalance } from '../route'
+import { upsertBalance } from '../_helpers'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { apiGuard } from '@/lib/auth/apiGuard'
 import { db } from '@/lib/db'
-import { toilEntries, toilBalances, employees } from '@/lib/db/schema'
+import { toilEntries, employees } from '@/lib/db/schema'
 import { eq, and, desc, sql } from 'drizzle-orm'
+import { upsertBalance } from './_helpers'
 
 export const dynamic = 'force-dynamic'
 
@@ -73,35 +74,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ entry }, { status: 201 })
-}
-
-export async function upsertBalance(tenantId: string, employeeId: string, hours: number, entryType: string) {
-  // Check if balance row exists
-  const existing = await db
-    .select()
-    .from(toilBalances)
-    .where(and(eq(toilBalances.tenantId, tenantId), eq(toilBalances.employeeId, employeeId)))
-    .limit(1)
-
-  if (existing.length === 0) {
-    await db.insert(toilBalances).values({
-      tenantId,
-      employeeId,
-      balanceHours: String(entryType === 'accrual' ? hours : -Math.abs(hours)),
-      totalAccrued: String(entryType === 'accrual' ? hours : 0),
-      totalTaken: String(entryType === 'accrual' ? 0 : Math.abs(hours)),
-      updatedAt: new Date(),
-    })
-  } else {
-    const bal = existing[0]
-    const newBalance = parseFloat(bal.balanceHours) + (entryType === 'accrual' ? hours : -Math.abs(hours))
-    const newAccrued = parseFloat(bal.totalAccrued) + (entryType === 'accrual' ? hours : 0)
-    const newTaken = parseFloat(bal.totalTaken) + (entryType === 'accrual' ? 0 : Math.abs(hours))
-    await db.update(toilBalances).set({
-      balanceHours: String(newBalance),
-      totalAccrued: String(newAccrued),
-      totalTaken: String(newTaken),
-      updatedAt: new Date(),
-    }).where(and(eq(toilBalances.tenantId, tenantId), eq(toilBalances.employeeId, employeeId)))
-  }
 }

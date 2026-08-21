@@ -11,43 +11,46 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const guard = await apiGuard('ndis_incidents:read')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
+  const { id } = await params
 
   const [incident] = await db.select().from(ndisIncidents)
-    .where(and(eq(ndisIncidents.id, params.id), eq(ndisIncidents.tenantId, tenantId)))
+    .where(and(eq(ndisIncidents.id, id), eq(ndisIncidents.tenantId, tenantId)))
   if (!incident) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const actions = await db.select().from(ndisIncidentActions)
-    .where(and(eq(ndisIncidentActions.incidentId, params.id), eq(ndisIncidentActions.tenantId, tenantId)))
+    .where(and(eq(ndisIncidentActions.incidentId, id), eq(ndisIncidentActions.tenantId, tenantId)))
 
   return NextResponse.json({ incident, actions })
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const guard = await apiGuard('ndis_incidents:write')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
+  const { id } = await params
 
   const body = await req.json()
   const [incident] = await db.update(ndisIncidents)
     .set({ ...body, updatedAt: new Date() })
-    .where(and(eq(ndisIncidents.id, params.id), eq(ndisIncidents.tenantId, tenantId)))
+    .where(and(eq(ndisIncidents.id, id), eq(ndisIncidents.tenantId, tenantId)))
     .returning()
 
   if (!incident) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json({ incident })
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const guard = await apiGuard('ndis_incidents:write')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
+  const { id } = await params
 
   await db.delete(ndisIncidents)
-    .where(and(eq(ndisIncidents.id, params.id), eq(ndisIncidents.tenantId, tenantId)))
+    .where(and(eq(ndisIncidents.id, id), eq(ndisIncidents.tenantId, tenantId)))
 
   return NextResponse.json({ success: true })
 }

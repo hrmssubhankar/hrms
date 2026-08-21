@@ -10,22 +10,24 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const guard = await apiGuard('employees:read')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
+  const { id } = await params
 
   const [submission] = await db.select().from(essOnboarding)
-    .where(and(eq(essOnboarding.id, params.id), eq(essOnboarding.tenantId, tenantId)))
+    .where(and(eq(essOnboarding.id, id), eq(essOnboarding.tenantId, tenantId)))
   if (!submission) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   return NextResponse.json({ submission })
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const guard = await apiGuard('employees:write')
   if (guard.error) return guard.error
   const { tenantId, email } = guard.session
+  const { id } = await params
 
   const body = await req.json()
   // HR can set status (hr_reviewed, completed), hrNotes, reviewedBy
@@ -41,7 +43,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const [submission] = await db.update(essOnboarding)
     .set(updatePayload)
-    .where(and(eq(essOnboarding.id, params.id), eq(essOnboarding.tenantId, tenantId)))
+    .where(and(eq(essOnboarding.id, id), eq(essOnboarding.tenantId, tenantId)))
     .returning()
 
   if (!submission) return NextResponse.json({ error: 'Not found' }, { status: 404 })
