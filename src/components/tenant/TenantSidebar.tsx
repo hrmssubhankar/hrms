@@ -76,6 +76,8 @@ const NAV_ICONS: Record<string, IconName> = {
   'crm':                'search',
   'expenses':           'currency',
   'screening':          'screening',
+  'ess-onboarding':         'onboarding',
+  'ess-onboarding-review':  'clipboard-list',
   'my-profile':         'user-circle',
   'my-payslips':        'payslip',
   'my-documents':       'folder',

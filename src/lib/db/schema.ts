@@ -1711,3 +1711,51 @@ export const savedReports = pgTable('hrms_saved_reports', {
 }, (t) => ({
   tenantIdx: index('saved_reports_tenant_idx').on(t.tenantId),
 }))
+
+// ─── Module 9: ESS Onboarding Portal ─────────────────────────────────────────
+
+export const essOnboarding = pgTable('hrms_ess_onboarding', {
+  id:                 uuid('id').primaryKey().defaultRandom(),
+  tenantId:           uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  employeeId:         uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  // Step 1 — Personal
+  preferredName:      varchar('preferred_name', { length: 100 }),
+  dateOfBirth:        date('date_of_birth'),
+  gender:             varchar('gender', { length: 50 }),
+  phone:              varchar('phone', { length: 20 }),
+  address:            text('address'),
+  // Step 2 — Tax
+  tfnDeclared:        boolean('tfn_declared').notNull().default(false),
+  taxResidency:       varchar('tax_residency', { length: 50 }),
+  taxFreeThreshold:   boolean('tax_free_threshold').notNull().default(false),
+  hasHelpDebt:        boolean('has_help_debt').notNull().default(false),
+  taxFileNumber:      varchar('tax_file_number', { length: 9 }),
+  // Step 3 — Super
+  superFundName:      varchar('super_fund_name', { length: 255 }),
+  superFundAbn:       varchar('super_fund_abn', { length: 20 }),
+  superUsi:           varchar('super_usi', { length: 50 }),
+  superMemberNumber:  varchar('super_member_number', { length: 100 }),
+  isSmsf:             boolean('is_smsf').notNull().default(false),
+  // Step 4 — Bank
+  bankName:           varchar('bank_name', { length: 100 }),
+  bankBsb:            varchar('bank_bsb', { length: 7 }),
+  bankAccountNumber:  varchar('bank_account_number', { length: 20 }),
+  bankAccountName:    varchar('bank_account_name', { length: 100 }),
+  // Step 5 — Emergency contact
+  emergencyName:      varchar('emergency_name', { length: 200 }),
+  emergencyRelation:  varchar('emergency_relation', { length: 100 }),
+  emergencyPhone:     varchar('emergency_phone', { length: 20 }),
+  emergencyPhone2:    varchar('emergency_phone2', { length: 20 }),
+  // Workflow
+  status:             varchar('status', { length: 50 }).notNull().default('draft'),
+  submittedAt:        timestamp('submitted_at'),
+  reviewedBy:         varchar('reviewed_by', { length: 255 }),
+  reviewedAt:         timestamp('reviewed_at'),
+  hrNotes:            text('hr_notes'),
+  createdAt:          timestamp('created_at').notNull().defaultNow(),
+  updatedAt:          timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('ess_onboarding_tenant_idx').on(t.tenantId),
+  employeeIdx: index('ess_onboarding_employee_idx').on(t.employeeId),
+  uniqueIdx:   uniqueIndex('hrms_ess_onboarding_unique').on(t.tenantId, t.employeeId),
+}))
