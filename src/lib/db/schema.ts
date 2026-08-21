@@ -1759,3 +1759,132 @@ export const essOnboarding = pgTable('hrms_ess_onboarding', {
   employeeIdx: index('ess_onboarding_employee_idx').on(t.employeeId),
   uniqueIdx:   uniqueIndex('hrms_ess_onboarding_unique').on(t.tenantId, t.employeeId),
 }))
+
+// ─── Module 39: Superannuation Tracker ───────────────────────────────────────
+
+export const superFunds = pgTable('hrms_super_funds', {
+  id:               uuid('id').primaryKey().defaultRandom(),
+  tenantId:         uuid('tenant_id').notNull(),
+  employeeId:       uuid('employee_id').notNull(),
+  fundName:         varchar('fund_name', { length: 255 }).notNull(),
+  fundAbn:          varchar('fund_abn', { length: 20 }),
+  usi:              varchar('usi', { length: 50 }),
+  memberNumber:     varchar('member_number', { length: 100 }),
+  isSmsf:           boolean('is_smsf').notNull().default(false),
+  smsfBankBsb:      varchar('smsf_bank_bsb', { length: 7 }),
+  smsfBankAccount:  varchar('smsf_bank_account', { length: 20 }),
+  smsfEsa:          varchar('smsf_esa', { length: 255 }),
+  status:           varchar('status', { length: 50 }).notNull().default('active'),
+  isPrimary:        boolean('is_primary').notNull().default(true),
+  effectiveFrom:    date('effective_from'),
+  effectiveTo:      date('effective_to'),
+  source:           varchar('source', { length: 50 }).notNull().default('employee'),
+  verifiedAt:       timestamp('verified_at'),
+  verifiedBy:       varchar('verified_by', { length: 255 }),
+  notes:            text('notes'),
+  createdAt:        timestamp('created_at').notNull().defaultNow(),
+  updatedAt:        timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('super_funds_tenant_idx').on(t.tenantId),
+  employeeIdx: index('super_funds_employee_idx').on(t.employeeId),
+}))
+
+export const superContributions = pgTable('hrms_super_contributions', {
+  id:                  uuid('id').primaryKey().defaultRandom(),
+  tenantId:            uuid('tenant_id').notNull(),
+  employeeId:          uuid('employee_id').notNull(),
+  superFundId:         uuid('super_fund_id').notNull(),
+  periodStart:         date('period_start').notNull(),
+  periodEnd:           date('period_end').notNull(),
+  dueDate:             date('due_date').notNull(),
+  paidDate:            date('paid_date'),
+  grossEarnings:       decimal('gross_earnings', { precision: 12, scale: 2 }).notNull().default('0'),
+  sgRate:              decimal('sg_rate', { precision: 5, scale: 4 }).notNull().default('0.115'),
+  sgAmount:            decimal('sg_amount', { precision: 12, scale: 2 }).notNull().default('0'),
+  voluntaryAmount:     decimal('voluntary_amount', { precision: 12, scale: 2 }).notNull().default('0'),
+  totalContribution:   decimal('total_contribution', { precision: 12, scale: 2 }).notNull().default('0'),
+  status:              varchar('status', { length: 50 }).notNull().default('pending'),
+  paymentReference:    varchar('payment_reference', { length: 255 }),
+  notes:               text('notes'),
+  createdAt:           timestamp('created_at').notNull().defaultNow(),
+  updatedAt:           timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('super_contributions_tenant_idx').on(t.tenantId),
+  employeeIdx: index('super_contributions_employee_idx').on(t.employeeId),
+}))
+
+// ─── Module 40: Salary Review & Increment Workflow ───────────────────────────
+
+export const salaryReviews = pgTable('hrms_salary_reviews', {
+  id:                uuid('id').primaryKey().defaultRandom(),
+  tenantId:          uuid('tenant_id').notNull(),
+  employeeId:        uuid('employee_id').notNull(),
+  reviewType:        varchar('review_type', { length: 50 }).notNull().default('annual'),
+  reviewDate:        date('review_date').notNull(),
+  effectiveDate:     date('effective_date'),
+  currentSalary:     decimal('current_salary', { precision: 12, scale: 2 }).notNull().default('0'),
+  currentBasis:      varchar('current_basis', { length: 20 }).notNull().default('annual'),
+  proposedSalary:    decimal('proposed_salary', { precision: 12, scale: 2 }),
+  proposedBasis:     varchar('proposed_basis', { length: 20 }),
+  incrementAmount:   decimal('increment_amount', { precision: 12, scale: 2 }),
+  incrementPercent:  decimal('increment_percent', { precision: 5, scale: 2 }),
+  justification:     text('justification'),
+  performanceRating: varchar('performance_rating', { length: 50 }),
+  marketData:        text('market_data'),
+  status:            varchar('status', { length: 50 }).notNull().default('draft'),
+  submittedBy:       varchar('submitted_by', { length: 255 }),
+  submittedAt:       timestamp('submitted_at'),
+  reviewedBy:        varchar('reviewed_by', { length: 255 }),
+  reviewedAt:        timestamp('reviewed_at'),
+  approvedBy:        varchar('approved_by', { length: 255 }),
+  approvedAt:        timestamp('approved_at'),
+  rejectionReason:   text('rejection_reason'),
+  hrNotes:           text('hr_notes'),
+  createdAt:         timestamp('created_at').notNull().defaultNow(),
+  updatedAt:         timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('salary_reviews_tenant_idx').on(t.tenantId),
+  employeeIdx: index('salary_reviews_employee_idx').on(t.employeeId),
+  statusIdx:   index('salary_reviews_status_idx').on(t.status),
+}))
+
+// ─── Module 42: TOIL Tracking ─────────────────────────────────────────────────
+
+export const toilBalances = pgTable('hrms_toil_balances', {
+  id:            uuid('id').primaryKey().defaultRandom(),
+  tenantId:      uuid('tenant_id').notNull(),
+  employeeId:    uuid('employee_id').notNull(),
+  balanceHours:  decimal('balance_hours', { precision: 8, scale: 2 }).notNull().default('0'),
+  totalAccrued:  decimal('total_accrued', { precision: 8, scale: 2 }).notNull().default('0'),
+  totalTaken:    decimal('total_taken', { precision: 8, scale: 2 }).notNull().default('0'),
+  expiryDate:    date('expiry_date'),
+  updatedAt:     timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  uniqueIdx:  uniqueIndex('toil_balances_unique').on(t.tenantId, t.employeeId),
+  tenantIdx:  index('toil_balances_tenant_idx').on(t.tenantId),
+}))
+
+export const toilEntries = pgTable('hrms_toil_entries', {
+  id:            uuid('id').primaryKey().defaultRandom(),
+  tenantId:      uuid('tenant_id').notNull(),
+  employeeId:    uuid('employee_id').notNull(),
+  entryType:     varchar('entry_type', { length: 20 }).notNull().default('accrual'),
+  workDate:      date('work_date').notNull(),
+  hours:         decimal('hours', { precision: 6, scale: 2 }).notNull(),
+  multiplier:    decimal('multiplier', { precision: 4, scale: 2 }).notNull().default('1.0'),
+  shiftId:       uuid('shift_id'),
+  timesheetId:   uuid('timesheet_id'),
+  description:   text('description'),
+  status:        varchar('status', { length: 50 }).notNull().default('approved'),
+  requestedAt:   timestamp('requested_at'),
+  approvedBy:    varchar('approved_by', { length: 255 }),
+  approvedAt:    timestamp('approved_at'),
+  rejectedReason: text('rejected_reason'),
+  createdBy:     varchar('created_by', { length: 255 }),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
+  updatedAt:     timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('toil_entries_tenant_idx').on(t.tenantId),
+  employeeIdx: index('toil_entries_employee_idx').on(t.employeeId),
+  dateIdx:     index('toil_entries_date_idx').on(t.workDate),
+}))

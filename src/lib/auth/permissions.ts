@@ -137,6 +137,15 @@ export type Permission =
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
+  // Superannuation Tracker
+  | 'superannuation:read'
+  | 'superannuation:write'
+  // Salary Review & Increment Workflow
+  | 'salary_review:read'
+  | 'salary_review:write'
+  // TOIL (Time Off In Lieu) Tracking
+  | 'toil:read'
+  | 'toil:write'
 
 /** Permission matrix — every role mapped to its allowed permissions */
 const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
@@ -181,6 +190,9 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'self_service:read', 'self_service:write',
     'reports_analytics:read',
     'settings:read', 'settings:write',
+    'superannuation:read', 'superannuation:write',
+    'salary_review:read', 'salary_review:write',
+    'toil:read', 'toil:write',
   ],
 
   hr_officer: [
@@ -221,6 +233,9 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'self_service:read', 'self_service:write',
     'reports_analytics:read',
     'settings:read',
+    'superannuation:read', 'superannuation:write',
+    'salary_review:read', 'salary_review:write',
+    'toil:read', 'toil:write',
   ],
 
   compliance_manager: [
@@ -241,6 +256,9 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'payroll_finance:read',
     'reports_analytics:read',
     'settings:read',
+    'superannuation:read',
+    'salary_review:read',
+    'toil:read',
   ],
 
   operations_manager: [
@@ -264,6 +282,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'roster_shifts:read', 'roster_shifts:write',
     'payroll_finance:read', 'payroll_finance:write',
     'reports_analytics:read',
+    'toil:read', 'toil:write',
   ],
 
   team_leader: [
@@ -282,6 +301,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'expenses:read', 'expenses:approve',
     'self_service:read',
     'reports_analytics:read',
+    'toil:read', 'toil:write',
   ],
 
   payroll_officer: [
@@ -294,6 +314,9 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'leave:read',
     'payroll_finance:read', 'payroll_finance:write',
     'reports_analytics:read',
+    'superannuation:read', 'superannuation:write',
+    'salary_review:read', 'salary_review:write',
+    'toil:read', 'toil:write',
   ],
 
   auditor: [
@@ -313,6 +336,9 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'roster_shifts:read',
     'payroll_finance:read',
     'reports_analytics:read',
+    'superannuation:read',
+    'salary_review:read',
+    'toil:read',
   ],
 
   it_admin: [
@@ -338,6 +364,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'timesheets:read', 'timesheets:write',  // clock in/out, view own
     'expenses:read', 'expenses:write',      // submit and view own claims
     'self_service:read', 'self_service:write',
+    'toil:read', 'toil:write',             // view own TOIL balance / request
   ],
 
   contractor: [
