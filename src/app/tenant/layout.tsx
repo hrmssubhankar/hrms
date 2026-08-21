@@ -61,6 +61,15 @@ const NAV_PERMISSION: Record<string, Permission | null> = {
   'screening':          'compliance:read',
   'reports':            'analytics:read',
   'offer-letters':      'contracts:read',
+  // New modules (46–52)
+  'superannuation':     'superannuation:read',
+  'salary-reviews':     'salary_review:read',
+  'toil':               'toil:read',
+  'schads':             'payroll:read',
+  'promotions':         'employees:read',
+  'ess-onboarding':     'self_service:read',
+  'ess-onboarding-review': 'onboarding:read',
+  'experience':         'employees:read',
 }
 
 // Maps SOW module ID → { route slug, sidebar label }
@@ -108,9 +117,17 @@ const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
   40: { key: 'medication-health',     label: 'Medication & Health' },
   41: { key: 'incident-behaviour',    label: 'Incidents & Behaviour' },
   42: { key: 'roster-shifts',         label: 'Roster & Shifts' },
-  43: { key: 'payroll-finance',       label: 'Payroll & Finance' },
-  44: { key: 'self-service',          label: 'Employee Self-Service' },
-  45: { key: 'reports-analytics',     label: 'Reports & Analytics' },
+  43: { key: 'payroll-finance',        label: 'Payroll & Finance' },
+  44: { key: 'self-service',           label: 'Employee Self-Service' },
+  45: { key: 'reports-analytics',      label: 'Reports & Analytics' },
+  46: { key: 'superannuation',         label: 'Superannuation' },
+  47: { key: 'salary-reviews',         label: 'Salary Reviews' },
+  48: { key: 'toil',                   label: 'TOIL' },
+  49: { key: 'schads',                 label: 'SCHADS Award' },
+  50: { key: 'promotions',             label: 'Promotions' },
+  51: { key: 'ess-onboarding',         label: 'ESS Onboarding' },
+  52: { key: 'ess-onboarding-review',  label: 'Onboarding Review' },
+  53: { key: 'experience',             label: 'Experience' },
 }
 
 async function getTenantConfig(slug: string) {

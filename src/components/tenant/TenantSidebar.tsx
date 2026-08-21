@@ -82,6 +82,8 @@ const NAV_ICONS: Record<string, IconName> = {
   'superannuation':         'currency',
   'salary-reviews':         'chart-line',
   'toil':                   'calendar',
+  'promotions':             'chart-line',
+  'experience':             'trophy',
   'my-profile':         'user-circle',
   'my-payslips':        'payslip',
   'my-documents':       'folder',
