@@ -69,9 +69,20 @@ const stageColor = (s: string) => {
   return map[s] ?? '#6b7280'
 }
 
-function Badge({ label, color }: { label: string; color: string }) {
+// Dynamic-color badge — keeps inline styles intentionally (hex alpha blending)
+function ColorBadge({ label, color }: { label: string; color: string }) {
   return (
-    <span style={{ background: color + '18', color, border: `1px solid ${color}44`, borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 600, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+    <span style={{
+      background: color + '22',
+      color,
+      border: `1px solid ${color}55`,
+      borderRadius: 6,
+      padding: '2px 8px',
+      fontSize: 11,
+      fontWeight: 600,
+      textTransform: 'capitalize',
+      whiteSpace: 'nowrap',
+    }}>
       {label.replace(/_/g,' ')}
     </span>
   )
@@ -99,14 +110,14 @@ function fmt(v: string | null | undefined) {
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.4)', padding:16 }}
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4"
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background:'#fff', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'90vh', overflow:'auto', boxShadow:'0 20px 60px rgba(0,0,0,0.25)' }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px 24px 16px', borderBottom:'1px solid #f3f4f6' }}>
-          <h2 style={{ margin:0, fontSize:17, fontWeight:700 }}>{title}</h2>
-          <button onClick={onClose} style={{ background:'none', border:'none', fontSize:20, cursor:'pointer', color:'#9ca3af' }}>✕</button>
+      <div className="card-premium w-full max-w-lg max-h-[90vh] overflow-auto shadow-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="m-0 text-base font-bold text-gray-900 dark:text-white">{title}</h2>
+          <button onClick={onClose} className="bg-transparent border-none text-xl cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 leading-none">✕</button>
         </div>
-        <div style={{ padding:24 }}>{children}</div>
+        <div className="p-6">{children}</div>
       </div>
     </div>
   )
@@ -114,15 +125,12 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom:14 }}>
-      <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#6b7280', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.05em' }}>{label}</label>
+    <div className="mb-3.5">
+      <label className="section-label">{label}</label>
       {children}
     </div>
   )
 }
-
-const inp: React.CSSProperties = { width:'100%', border:'1px solid #e5e7eb', borderRadius:8, padding:'8px 12px', fontSize:14, outline:'none', boxSizing:'border-box' }
-const sel: React.CSSProperties = { ...inp, background:'#fff' }
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
@@ -174,51 +182,51 @@ function LeadsTab() {
 
   return (
     <div>
-      <div style={{ display:'flex', gap:12, marginBottom:20, flexWrap:'wrap' }}>
+      <div className="flex gap-3 mb-5 flex-wrap">
         <input placeholder="Search leads…" value={search} onChange={e => setSearch(e.target.value)}
-          style={{ ...inp, maxWidth:280 }} />
-        <button onClick={() => setModal(true)} style={{ marginLeft:'auto', background:'#6366f1', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontWeight:600, cursor:'pointer', fontSize:14 }}>
+          className="input-premium max-w-[280px]" />
+        <button onClick={() => setModal(true)}
+          className="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + New Lead
         </button>
       </div>
 
-      {loading ? <div style={{ textAlign:'center', padding:40, color:'#9ca3af' }}>Loading…</div> : (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(5, 1fr)', gap:12, overflowX:'auto', minWidth:900 }}>
+      {loading ? (
+        <div className="text-center py-10 text-gray-400 dark:text-gray-500">Loading…</div>
+      ) : (
+        <div className="grid gap-3 overflow-x-auto pb-2" style={{ gridTemplateColumns: 'repeat(5, minmax(200px, 1fr))' }}>
           {LEAD_STAGES.map(stage => (
             <div key={stage.key}
               onDragOver={e => e.preventDefault()}
               onDrop={() => { if (dragging) { moveStage(dragging, stage.key); setDragging(null) } }}
-              style={{ background:'#f9fafb', borderRadius:12, padding:12, minHeight:200 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
-                <div style={{ width:10, height:10, borderRadius:'50%', background:stage.color }} />
-                <span style={{ fontWeight:600, fontSize:13, color:'#374151' }}>{stage.label}</span>
-                <span style={{ marginLeft:'auto', background:'#e5e7eb', borderRadius:99, padding:'1px 8px', fontSize:11, color:'#6b7280' }}>{stageLeads(stage.key).length}</span>
+              className="bg-gray-50 dark:bg-gray-800/60 rounded-xl p-3 min-h-[200px]">
+              <div className="flex items-center gap-2 mb-2.5">
+                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: stage.color }} />
+                <span className="font-semibold text-[13px] text-gray-700 dark:text-gray-300">{stage.label}</span>
+                <span className="ml-auto bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full px-2 py-0.5 text-[11px]">
+                  {stageLeads(stage.key).length}
+                </span>
               </div>
-              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+              <div className="flex flex-col gap-2">
                 {stageLeads(stage.key).map(lead => (
                   <div key={lead.id} draggable
                     onDragStart={() => setDragging(lead.id)}
                     onDragEnd={() => setDragging(null)}
-                    style={{ background:'#fff', borderRadius:10, padding:12, boxShadow:'0 1px 4px rgba(0,0,0,0.08)', cursor:'grab', border:`2px solid ${dragging===lead.id ? stage.color : 'transparent'}` }}>
-                    <div style={{ fontWeight:600, fontSize:13, color:'#111827', marginBottom:2 }}>
+                    className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm cursor-grab select-none border-2 transition-colors"
+                    style={{ borderColor: dragging === lead.id ? stage.color : 'transparent' }}>
+                    <div className="font-semibold text-[13px] text-gray-900 dark:text-white mb-0.5">
                       {lead.firstName} {lead.lastName}
                     </div>
-                    {lead.company && <div style={{ fontSize:11, color:'#6b7280' }}>{lead.company}</div>}
-                    {lead.email && <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>{lead.email}</div>}
-                    {lead.source && (
-                      <div style={{ marginTop:6 }}>
-                        <Badge label={lead.source} color="#6b7280" />
-                      </div>
-                    )}
+                    {lead.company && <div className="text-[11px] text-gray-500 dark:text-gray-400">{lead.company}</div>}
+                    {lead.email   && <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{lead.email}</div>}
+                    {lead.source  && <div className="mt-1.5"><ColorBadge label={lead.source} color="#6b7280" /></div>}
                     {(lead.score ?? 0) > 0 && (
-                      <div style={{ marginTop:6, fontSize:11, color:'#f59e0b', fontWeight:600 }}>
-                        ⭐ Score: {lead.score}
-                      </div>
+                      <div className="mt-1.5 text-[11px] text-amber-500 font-semibold">⭐ Score: {lead.score}</div>
                     )}
                   </div>
                 ))}
                 {stageLeads(stage.key).length === 0 && (
-                  <div style={{ textAlign:'center', color:'#d1d5db', fontSize:12, padding:'12px 0' }}>Drop here</div>
+                  <div className="text-center text-gray-300 dark:text-gray-600 text-xs py-3">Drop here</div>
                 )}
               </div>
             </div>
@@ -228,27 +236,27 @@ function LeadsTab() {
 
       {modal && (
         <Modal title="New Lead" onClose={() => setModal(false)}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div className="grid grid-cols-2 gap-3">
             <Field label="First Name *">
-              <input style={inp} value={form.firstName} onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))} placeholder="Jane" />
+              <input className="input-premium" value={form.firstName} onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))} placeholder="Jane" />
             </Field>
             <Field label="Last Name">
-              <input style={inp} value={form.lastName} onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))} placeholder="Smith" />
+              <input className="input-premium" value={form.lastName} onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))} placeholder="Smith" />
             </Field>
             <Field label="Email">
-              <input style={inp} type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="jane@company.com" />
+              <input className="input-premium" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="jane@company.com" />
             </Field>
             <Field label="Phone">
-              <input style={inp} value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+61 400 000 000" />
+              <input className="input-premium" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+61 400 000 000" />
             </Field>
             <Field label="Company">
-              <input style={inp} value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} placeholder="Acme Corp" />
+              <input className="input-premium" value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} placeholder="Acme Corp" />
             </Field>
             <Field label="Job Title">
-              <input style={inp} value={form.jobTitle} onChange={e => setForm(p => ({ ...p, jobTitle: e.target.value }))} placeholder="HR Manager" />
+              <input className="input-premium" value={form.jobTitle} onChange={e => setForm(p => ({ ...p, jobTitle: e.target.value }))} placeholder="HR Manager" />
             </Field>
             <Field label="Source">
-              <select style={sel} value={form.source} onChange={e => setForm(p => ({ ...p, source: e.target.value }))}>
+              <select className="input-premium" value={form.source} onChange={e => setForm(p => ({ ...p, source: e.target.value }))}>
                 <option value="">— Select —</option>
                 {['website','referral','linkedin','cold_call','email_campaign','event','other'].map(s => (
                   <option key={s} value={s}>{s.replace(/_/g,' ')}</option>
@@ -256,17 +264,18 @@ function LeadsTab() {
               </select>
             </Field>
             <Field label="Stage">
-              <select style={sel} value={form.stage} onChange={e => setForm(p => ({ ...p, stage: e.target.value }))}>
+              <select className="input-premium" value={form.stage} onChange={e => setForm(p => ({ ...p, stage: e.target.value }))}>
                 {LEAD_STAGES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
               </select>
             </Field>
           </div>
           <Field label="Notes">
-            <textarea style={{ ...inp, minHeight:80, resize:'vertical' }} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="Add any notes…" />
+            <textarea className="input-premium min-h-[80px] resize-y" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="Add any notes…" />
           </Field>
-          <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:8 }}>
-            <button onClick={() => setModal(false)} style={{ padding:'8px 16px', borderRadius:8, border:'1px solid #e5e7eb', background:'#fff', cursor:'pointer' }}>Cancel</button>
-            <button onClick={create} disabled={saving || !form.firstName.trim()} style={{ padding:'8px 18px', borderRadius:8, background:'#6366f1', color:'#fff', border:'none', cursor:'pointer', fontWeight:600, opacity: saving || !form.firstName.trim() ? 0.5 : 1 }}>
+          <div className="flex gap-2.5 justify-end mt-2">
+            <button onClick={() => setModal(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button onClick={create} disabled={saving || !form.firstName.trim()}
+              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white border-none cursor-pointer font-semibold text-sm transition-colors disabled:opacity-50">
               {saving ? 'Creating…' : 'Create Lead'}
             </button>
           </div>
@@ -308,43 +317,46 @@ function ContactsTab() {
 
   return (
     <div>
-      <div style={{ display:'flex', gap:12, marginBottom:20, flexWrap:'wrap' }}>
-        <input placeholder="Search contacts…" value={search} onChange={e => setSearch(e.target.value)} style={{ ...inp, maxWidth:280 }} />
-        <button onClick={() => setModal(true)} style={{ marginLeft:'auto', background:'#10b981', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontWeight:600, cursor:'pointer', fontSize:14 }}>
+      <div className="flex gap-3 mb-5 flex-wrap">
+        <input placeholder="Search contacts…" value={search} onChange={e => setSearch(e.target.value)} className="input-premium max-w-[280px]" />
+        <button onClick={() => setModal(true)}
+          className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + New Contact
         </button>
       </div>
 
-      {loading ? <div style={{ textAlign:'center', padding:40, color:'#9ca3af' }}>Loading…</div> : (
-        <div style={{ background:'#fff', borderRadius:12, border:'1px solid #f3f4f6', overflow:'hidden' }}>
-          <table style={{ width:'100%', borderCollapse:'collapse' }}>
+      {loading ? (
+        <div className="text-center py-10 text-gray-400 dark:text-gray-500">Loading…</div>
+      ) : (
+        <div className="table-responsive">
+          <table className="table-premium">
             <thead>
-              <tr style={{ background:'#f9fafb' }}>
+              <tr>
                 {['Name','Email','Phone','Job Title','Created'].map(h => (
-                  <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontSize:11, fontWeight:600, color:'#6b7280', textTransform:'uppercase', letterSpacing:'0.05em', whiteSpace:'nowrap' }}>{h}</th>
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {contacts.map((c, i) => (
-                <tr key={c.id} style={{ borderTop: i > 0 ? '1px solid #f3f4f6' : undefined }}>
-                  <td style={{ padding:'12px 14px' }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              {contacts.map(c => (
+                <tr key={c.id}>
+                  <td>
+                    <div className="flex items-center gap-2.5">
                       <Avatar name={`${c.firstName} ${c.lastName ?? ''}`} size={32} />
                       <div>
-                        <div style={{ fontWeight:600, fontSize:14 }}>{c.firstName} {c.lastName}</div>
-                        {c.accountId && <div style={{ fontSize:11, color:'#9ca3af' }}>Has account</div>}
+                        <div className="font-semibold text-sm text-gray-900 dark:text-white">{c.firstName} {c.lastName}</div>
+                        {c.accountId && <div className="text-[11px] text-gray-400">Has account</div>}
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding:'12px 14px', fontSize:13, color:'#374151' }}>{c.email ?? '—'}</td>
-                  <td style={{ padding:'12px 14px', fontSize:13, color:'#374151' }}>{c.phone ?? '—'}</td>
-                  <td style={{ padding:'12px 14px', fontSize:13, color:'#374151' }}>{c.jobTitle ?? '—'}</td>
-                  <td style={{ padding:'12px 14px', fontSize:12, color:'#9ca3af' }}>{new Date(c.createdAt).toLocaleDateString('en-AU')}</td>
+                  <td>{c.email ?? '—'}</td>
+                  <td>{c.phone ?? '—'}</td>
+                  <td>{c.jobTitle ?? '—'}</td>
+                  <td className="text-xs text-gray-400">{new Date(c.createdAt).toLocaleDateString('en-AU')}</td>
                 </tr>
               ))}
               {contacts.length === 0 && (
-                <tr><td colSpan={5} style={{ textAlign:'center', padding:40, color:'#9ca3af' }}>No contacts yet. Create your first contact.</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-gray-400">No contacts yet. Create your first contact.</td></tr>
               )}
             </tbody>
           </table>
@@ -353,32 +365,33 @@ function ContactsTab() {
 
       {modal && (
         <Modal title="New Contact" onClose={() => setModal(false)}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div className="grid grid-cols-2 gap-3">
             <Field label="First Name *">
-              <input style={inp} value={form.firstName} onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))} />
+              <input className="input-premium" value={form.firstName} onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))} />
             </Field>
             <Field label="Last Name">
-              <input style={inp} value={form.lastName} onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))} />
+              <input className="input-premium" value={form.lastName} onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))} />
             </Field>
             <Field label="Email">
-              <input style={inp} type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+              <input className="input-premium" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
             </Field>
             <Field label="Phone">
-              <input style={inp} value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+              <input className="input-premium" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
             </Field>
             <Field label="Job Title">
-              <input style={inp} value={form.jobTitle} onChange={e => setForm(p => ({ ...p, jobTitle: e.target.value }))} />
+              <input className="input-premium" value={form.jobTitle} onChange={e => setForm(p => ({ ...p, jobTitle: e.target.value }))} />
             </Field>
             <Field label="Department">
-              <input style={inp} value={form.department} onChange={e => setForm(p => ({ ...p, department: e.target.value }))} />
+              <input className="input-premium" value={form.department} onChange={e => setForm(p => ({ ...p, department: e.target.value }))} />
             </Field>
           </div>
           <Field label="Notes">
-            <textarea style={{ ...inp, minHeight:80, resize:'vertical' }} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
+            <textarea className="input-premium min-h-[80px] resize-y" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
           </Field>
-          <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:8 }}>
-            <button onClick={() => setModal(false)} style={{ padding:'8px 16px', borderRadius:8, border:'1px solid #e5e7eb', background:'#fff', cursor:'pointer' }}>Cancel</button>
-            <button onClick={create} disabled={saving || !form.firstName.trim()} style={{ padding:'8px 18px', borderRadius:8, background:'#10b981', color:'#fff', border:'none', cursor:'pointer', fontWeight:600, opacity: saving ? 0.5 : 1 }}>
+          <div className="flex gap-2.5 justify-end mt-2">
+            <button onClick={() => setModal(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button onClick={create} disabled={saving || !form.firstName.trim()}
+              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white border-none cursor-pointer font-semibold text-sm transition-colors disabled:opacity-50">
               {saving ? 'Creating…' : 'Create Contact'}
             </button>
           </div>
@@ -423,34 +436,37 @@ function AccountsTab() {
 
   return (
     <div>
-      <div style={{ display:'flex', gap:12, marginBottom:20, flexWrap:'wrap' }}>
-        <input placeholder="Search accounts…" value={search} onChange={e => setSearch(e.target.value)} style={{ ...inp, maxWidth:280 }} />
-        <button onClick={() => setModal(true)} style={{ marginLeft:'auto', background:'#3b82f6', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontWeight:600, cursor:'pointer', fontSize:14 }}>
+      <div className="flex gap-3 mb-5 flex-wrap">
+        <input placeholder="Search accounts…" value={search} onChange={e => setSearch(e.target.value)} className="input-premium max-w-[280px]" />
+        <button onClick={() => setModal(true)}
+          className="ml-auto bg-blue-600 hover:bg-blue-700 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + New Account
         </button>
       </div>
 
-      {loading ? <div style={{ textAlign:'center', padding:40, color:'#9ca3af' }}>Loading…</div> : (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:14 }}>
+      {loading ? (
+        <div className="text-center py-10 text-gray-400 dark:text-gray-500">Loading…</div>
+      ) : (
+        <div className="grid gap-3.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {accounts.map(a => (
-            <div key={a.id} style={{ background:'#fff', borderRadius:12, padding:16, border:'1px solid #f3f4f6', boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
-              <div style={{ display:'flex', alignItems:'flex-start', gap:12, marginBottom:10 }}>
-                <div style={{ width:42, height:42, borderRadius:10, background:'#eff6ff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>🏢</div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontWeight:700, fontSize:15, color:'#111827', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{a.name}</div>
-                  {a.industry && <div style={{ fontSize:12, color:'#6b7280', marginTop:1 }}>{a.industry}</div>}
+            <div key={a.id} className="card-premium p-4">
+              <div className="flex items-start gap-3 mb-2.5">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-lg flex-shrink-0">🏢</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[15px] text-gray-900 dark:text-white truncate">{a.name}</div>
+                  {a.industry && <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{a.industry}</div>}
                 </div>
               </div>
-              <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
-                {a.type && <Badge label={a.type} color={TYPE_COLORS[a.type] ?? '#6b7280'} />}
+              <div className="flex gap-1.5 flex-wrap mb-2.5">
+                {a.type && <ColorBadge label={a.type} color={TYPE_COLORS[a.type] ?? '#6b7280'} />}
               </div>
-              {a.email && <div style={{ fontSize:12, color:'#6b7280', marginBottom:2 }}>📧 {a.email}</div>}
-              {a.phone && <div style={{ fontSize:12, color:'#6b7280', marginBottom:2 }}>📞 {a.phone}</div>}
-              {a.city  && <div style={{ fontSize:12, color:'#9ca3af' }}>📍 {a.city}{a.country ? `, ${a.country}` : ''}</div>}
+              {a.email && <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">📧 {a.email}</div>}
+              {a.phone && <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">📞 {a.phone}</div>}
+              {a.city  && <div className="text-xs text-gray-400 dark:text-gray-500">📍 {a.city}{a.country ? `, ${a.country}` : ''}</div>}
             </div>
           ))}
           {accounts.length === 0 && (
-            <div style={{ gridColumn:'1/-1', textAlign:'center', padding:40, color:'#9ca3af' }}>No accounts yet.</div>
+            <div className="col-span-full text-center py-10 text-gray-400">No accounts yet.</div>
           )}
         </div>
       )}
@@ -458,42 +474,43 @@ function AccountsTab() {
       {modal && (
         <Modal title="New Account" onClose={() => setModal(false)}>
           <Field label="Account Name *">
-            <input style={inp} value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Acme Corp" />
+            <input className="input-premium" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Acme Corp" />
           </Field>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div className="grid grid-cols-2 gap-3">
             <Field label="Industry">
-              <input style={inp} value={form.industry} onChange={e => setForm(p => ({ ...p, industry: e.target.value }))} placeholder="Healthcare" />
+              <input className="input-premium" value={form.industry} onChange={e => setForm(p => ({ ...p, industry: e.target.value }))} placeholder="Healthcare" />
             </Field>
             <Field label="Type">
-              <select style={sel} value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))}>
+              <select className="input-premium" value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))}>
                 {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </Field>
             <Field label="Email">
-              <input style={inp} type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
+              <input className="input-premium" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} />
             </Field>
             <Field label="Phone">
-              <input style={inp} value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+              <input className="input-premium" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
             </Field>
             <Field label="Website">
-              <input style={inp} value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))} placeholder="https://…" />
+              <input className="input-premium" value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))} placeholder="https://…" />
             </Field>
             <Field label="ABN">
-              <input style={inp} value={form.abn} onChange={e => setForm(p => ({ ...p, abn: e.target.value }))} placeholder="00 000 000 000" />
+              <input className="input-premium" value={form.abn} onChange={e => setForm(p => ({ ...p, abn: e.target.value }))} placeholder="00 000 000 000" />
             </Field>
             <Field label="City">
-              <input style={inp} value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} />
+              <input className="input-premium" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} />
             </Field>
             <Field label="State">
-              <input style={inp} value={form.state} onChange={e => setForm(p => ({ ...p, state: e.target.value }))} />
+              <input className="input-premium" value={form.state} onChange={e => setForm(p => ({ ...p, state: e.target.value }))} />
             </Field>
           </div>
           <Field label="Notes">
-            <textarea style={{ ...inp, minHeight:80, resize:'vertical' }} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
+            <textarea className="input-premium min-h-[80px] resize-y" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
           </Field>
-          <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:8 }}>
-            <button onClick={() => setModal(false)} style={{ padding:'8px 16px', borderRadius:8, border:'1px solid #e5e7eb', background:'#fff', cursor:'pointer' }}>Cancel</button>
-            <button onClick={create} disabled={saving || !form.name.trim()} style={{ padding:'8px 18px', borderRadius:8, background:'#3b82f6', color:'#fff', border:'none', cursor:'pointer', fontWeight:600, opacity: saving ? 0.5 : 1 }}>
+          <div className="flex gap-2.5 justify-end mt-2">
+            <button onClick={() => setModal(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button onClick={create} disabled={saving || !form.name.trim()}
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white border-none cursor-pointer font-semibold text-sm transition-colors disabled:opacity-50">
               {saving ? 'Creating…' : 'Create Account'}
             </button>
           </div>
@@ -506,12 +523,12 @@ function AccountsTab() {
 // ─── Deals Tab ────────────────────────────────────────────────────────────────
 
 function DealsTab() {
-  const [deals, setDeals]     = useState<Deal[]>([])
-  const [loading, setLoading] = useState(true)
-  const [modal, setModal]     = useState(false)
+  const [deals, setDeals]       = useState<Deal[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [modal, setModal]       = useState(false)
   const [dragging, setDragging] = useState<string | null>(null)
-  const [form, setForm]       = useState({ title:'', value:'', stage:'prospecting', probability:10, closeDate:'', notes:'' })
-  const [saving, setSaving]   = useState(false)
+  const [form, setForm]         = useState({ title:'', value:'', stage:'prospecting', probability:10, closeDate:'', notes:'' })
+  const [saving, setSaving]     = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -544,53 +561,57 @@ function DealsTab() {
 
   return (
     <div>
-      <div style={{ display:'flex', gap:12, marginBottom:20 }}>
-        <div style={{ display:'flex', gap:10 }}>
+      <div className="flex gap-3 mb-5 flex-wrap items-center">
+        <div className="flex gap-2.5 flex-wrap">
           {['closed_won','prospecting','proposal'].map(s => {
             const total = deals.filter(d => d.stage === s).reduce((sum, d) => sum + Number(d.value ?? 0), 0)
             const label = s === 'closed_won' ? '✅ Won' : s === 'prospecting' ? '🔍 Pipeline' : '📄 In Proposal'
             return total > 0 ? (
-              <div key={s} style={{ background:'#f9fafb', borderRadius:10, padding:'8px 14px', fontSize:13 }}>
-                <span style={{ color:'#6b7280' }}>{label}: </span>
-                <span style={{ fontWeight:700, color: s==='closed_won' ? '#10b981' : '#111827' }}>{fmt(String(total))}</span>
+              <div key={s} className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 text-sm">
+                <span className="text-gray-500 dark:text-gray-400">{label}: </span>
+                <span className={`font-bold ${s === 'closed_won' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>{fmt(String(total))}</span>
               </div>
             ) : null
           })}
         </div>
-        <button onClick={() => setModal(true)} style={{ marginLeft:'auto', background:'#10b981', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontWeight:600, cursor:'pointer', fontSize:14 }}>
+        <button onClick={() => setModal(true)}
+          className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + New Deal
         </button>
       </div>
 
-      {loading ? <div style={{ textAlign:'center', padding:40, color:'#9ca3af' }}>Loading…</div> : (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(6, 1fr)', gap:10, overflowX:'auto', minWidth:1000 }}>
+      {loading ? (
+        <div className="text-center py-10 text-gray-400 dark:text-gray-500">Loading…</div>
+      ) : (
+        <div className="grid gap-2.5 overflow-x-auto pb-2" style={{ gridTemplateColumns: 'repeat(6, minmax(170px, 1fr))' }}>
           {DEAL_STAGES.map(stage => (
             <div key={stage.key}
               onDragOver={e => e.preventDefault()}
               onDrop={() => { if (dragging) { moveStage(dragging, stage.key); setDragging(null) } }}
-              style={{ background:'#f9fafb', borderRadius:12, padding:10, minHeight:200 }}>
-              <div style={{ marginBottom:8 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
-                  <div style={{ width:8, height:8, borderRadius:'50%', background:stageColor(stage.key) }} />
-                  <span style={{ fontWeight:600, fontSize:12, color:'#374151' }}>{stage.label}</span>
-                  <span style={{ marginLeft:'auto', background:'#e5e7eb', borderRadius:99, padding:'0px 6px', fontSize:10, color:'#6b7280' }}>{stageDeals(stage.key).length}</span>
+              className="bg-gray-50 dark:bg-gray-800/60 rounded-xl p-2.5 min-h-[200px]">
+              <div className="mb-2">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: stageColor(stage.key) }} />
+                  <span className="font-semibold text-[12px] text-gray-700 dark:text-gray-300">{stage.label}</span>
+                  <span className="ml-auto bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full px-1.5 text-[10px]">{stageDeals(stage.key).length}</span>
                 </div>
                 {stageValue(stage.key) > 0 && (
-                  <div style={{ fontSize:11, color:'#6b7280', paddingLeft:14, fontWeight:600 }}>{fmt(String(stageValue(stage.key)))}</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 pl-3.5 font-semibold">{fmt(String(stageValue(stage.key)))}</div>
                 )}
               </div>
-              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              <div className="flex flex-col gap-1.5">
                 {stageDeals(stage.key).map(deal => (
                   <div key={deal.id} draggable
                     onDragStart={() => setDragging(deal.id)}
                     onDragEnd={() => setDragging(null)}
-                    style={{ background:'#fff', borderRadius:8, padding:10, boxShadow:'0 1px 3px rgba(0,0,0,0.07)', cursor:'grab', border:`2px solid ${dragging===deal.id ? stageColor(stage.key) : 'transparent'}` }}>
-                    <div style={{ fontWeight:600, fontSize:12, color:'#111827', marginBottom:2 }}>{deal.title}</div>
-                    {deal.accountName && <div style={{ fontSize:11, color:'#6b7280' }}>{deal.accountName}</div>}
-                    {deal.value && <div style={{ fontSize:12, color:'#10b981', fontWeight:700, marginTop:4 }}>{fmt(deal.value)}</div>}
-                    {deal.closeDate && <div style={{ fontSize:10, color:'#9ca3af', marginTop:2 }}>Close: {deal.closeDate}</div>}
-                    <div style={{ marginTop:4, height:3, background:'#f3f4f6', borderRadius:99 }}>
-                      <div style={{ height:'100%', width: `${deal.probability ?? 0}%`, background: stageColor(stage.key), borderRadius:99 }} />
+                    className="bg-white dark:bg-gray-800 rounded-lg p-2.5 shadow-sm cursor-grab select-none border-2 transition-colors"
+                    style={{ borderColor: dragging === deal.id ? stageColor(stage.key) : 'transparent' }}>
+                    <div className="font-semibold text-[12px] text-gray-900 dark:text-white mb-0.5">{deal.title}</div>
+                    {deal.accountName && <div className="text-[11px] text-gray-500 dark:text-gray-400">{deal.accountName}</div>}
+                    {deal.value      && <div className="text-[12px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">{fmt(deal.value)}</div>}
+                    {deal.closeDate  && <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Close: {deal.closeDate}</div>}
+                    <div className="mt-1 h-[3px] bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${deal.probability ?? 0}%`, background: stageColor(stage.key) }} />
                     </div>
                   </div>
                 ))}
@@ -603,14 +624,14 @@ function DealsTab() {
       {modal && (
         <Modal title="New Deal" onClose={() => setModal(false)}>
           <Field label="Deal Title *">
-            <input style={inp} value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Enterprise HRMS — Acme Corp" />
+            <input className="input-premium" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="Enterprise HRMS — Acme Corp" />
           </Field>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div className="grid grid-cols-2 gap-3">
             <Field label="Value (AUD)">
-              <input style={inp} type="number" value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))} placeholder="50000" />
+              <input className="input-premium" type="number" value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))} placeholder="50000" />
             </Field>
             <Field label="Stage">
-              <select style={sel} value={form.stage} onChange={e => {
+              <select className="input-premium" value={form.stage} onChange={e => {
                 const ds = DEAL_STAGES.find(s => s.key === e.target.value)
                 setForm(p => ({ ...p, stage: e.target.value, probability: ds?.prob ?? p.probability }))
               }}>
@@ -618,18 +639,19 @@ function DealsTab() {
               </select>
             </Field>
             <Field label="Probability (%)">
-              <input style={inp} type="number" min={0} max={100} value={form.probability} onChange={e => setForm(p => ({ ...p, probability: Number(e.target.value) }))} />
+              <input className="input-premium" type="number" min={0} max={100} value={form.probability} onChange={e => setForm(p => ({ ...p, probability: Number(e.target.value) }))} />
             </Field>
             <Field label="Close Date">
-              <input style={inp} type="date" value={form.closeDate} onChange={e => setForm(p => ({ ...p, closeDate: e.target.value }))} />
+              <input className="input-premium" type="date" value={form.closeDate} onChange={e => setForm(p => ({ ...p, closeDate: e.target.value }))} />
             </Field>
           </div>
           <Field label="Notes">
-            <textarea style={{ ...inp, minHeight:80, resize:'vertical' }} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
+            <textarea className="input-premium min-h-[80px] resize-y" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
           </Field>
-          <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:8 }}>
-            <button onClick={() => setModal(false)} style={{ padding:'8px 16px', borderRadius:8, border:'1px solid #e5e7eb', background:'#fff', cursor:'pointer' }}>Cancel</button>
-            <button onClick={create} disabled={saving || !form.title.trim()} style={{ padding:'8px 18px', borderRadius:8, background:'#10b981', color:'#fff', border:'none', cursor:'pointer', fontWeight:600, opacity: saving ? 0.5 : 1 }}>
+          <div className="flex gap-2.5 justify-end mt-2">
+            <button onClick={() => setModal(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button onClick={create} disabled={saving || !form.title.trim()}
+              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white border-none cursor-pointer font-semibold text-sm transition-colors disabled:opacity-50">
               {saving ? 'Creating…' : 'Create Deal'}
             </button>
           </div>
@@ -677,66 +699,78 @@ function ActivitiesTab() {
 
   return (
     <div>
-      <div style={{ display:'flex', gap:12, marginBottom:20, flexWrap:'wrap', alignItems:'center' }}>
-        <div style={{ display:'flex', gap:0, background:'#f3f4f6', borderRadius:8, padding:3 }}>
+      <div className="flex gap-3 mb-5 flex-wrap items-center">
+        <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-0">
           {(['all','pending','done'] as const).map(f => (
-            <button key={f} onClick={() => setFilter(f)} style={{ padding:'5px 14px', borderRadius:6, border:'none', cursor:'pointer', fontWeight:600, fontSize:13, background: filter===f ? '#fff' : 'transparent', color: filter===f ? '#111827' : '#6b7280', boxShadow: filter===f ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}>
+            <button key={f} onClick={() => setFilter(f)}
+              className={`px-3.5 py-1.5 rounded-md border-none cursor-pointer font-semibold text-sm transition-all ${
+                filter === f
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                  : 'bg-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}>
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
           ))}
         </div>
-        <button onClick={() => setModal(true)} style={{ marginLeft:'auto', background:'#f59e0b', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontWeight:600, cursor:'pointer', fontSize:14 }}>
+        <button onClick={() => setModal(true)}
+          className="ml-auto bg-amber-500 hover:bg-amber-600 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + Log Activity
         </button>
       </div>
 
-      {loading ? <div style={{ textAlign:'center', padding:40, color:'#9ca3af' }}>Loading…</div> : (
-        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+      {loading ? (
+        <div className="text-center py-10 text-gray-400 dark:text-gray-500">Loading…</div>
+      ) : (
+        <div className="flex flex-col gap-2">
           {activities.map(a => (
-            <div key={a.id} style={{ background:'#fff', borderRadius:10, padding:'12px 16px', border:'1px solid #f3f4f6', display:'flex', alignItems:'center', gap:14, opacity: a.isDone ? 0.6 : 1 }}>
-              <div style={{ fontSize:20 }}>{ACTIVITY_ICONS[a.type] ?? '📋'}</div>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ fontWeight:600, fontSize:14, color: a.isDone ? '#9ca3af' : '#111827', textDecoration: a.isDone ? 'line-through' : 'none' }}>{a.subject}</div>
-                <div style={{ fontSize:12, color:'#9ca3af', marginTop:1 }}>
-                  {a.type} {a.dueDate ? `· Due: ${new Date(a.dueDate).toLocaleDateString('en-AU')}` : ''} {a.assignedTo ? `· ${a.assignedTo}` : ''}
+            <div key={a.id} className={`card-premium p-3 px-4 flex items-center gap-3.5 transition-opacity ${a.isDone ? 'opacity-60' : ''}`}>
+              <div className="text-xl">{ACTIVITY_ICONS[a.type] ?? '📋'}</div>
+              <div className="flex-1 min-w-0">
+                <div className={`font-semibold text-sm ${a.isDone ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                  {a.subject}
                 </div>
-                {a.notes && <div style={{ fontSize:12, color:'#6b7280', marginTop:2 }}>{a.notes}</div>}
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                  {a.type}{a.dueDate ? ` · Due: ${new Date(a.dueDate).toLocaleDateString('en-AU')}` : ''}{a.assignedTo ? ` · ${a.assignedTo}` : ''}
+                </div>
+                {a.notes && <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{a.notes}</div>}
               </div>
               {!a.isDone && (
-                <button onClick={() => markDone(a.id)} style={{ background:'#ecfdf5', color:'#10b981', border:'1px solid #a7f3d0', borderRadius:8, padding:'4px 10px', fontSize:12, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap' }}>
+                <button onClick={() => markDone(a.id)}
+                  className="badge badge-green text-xs px-2.5 py-1 cursor-pointer border-none whitespace-nowrap">
                   ✓ Done
                 </button>
               )}
-              {a.isDone && <Badge label="Done" color="#10b981" />}
+              {a.isDone && <span className="badge badge-green">Done</span>}
             </div>
           ))}
           {activities.length === 0 && (
-            <div style={{ textAlign:'center', padding:40, color:'#9ca3af' }}>No activities yet.</div>
+            <div className="text-center py-10 text-gray-400">No activities yet.</div>
           )}
         </div>
       )}
 
       {modal && (
         <Modal title="Log Activity" onClose={() => setModal(false)}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div className="grid grid-cols-2 gap-3">
             <Field label="Type">
-              <select style={sel} value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))}>
+              <select className="input-premium" value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))}>
                 {ACTIVITY_TYPES.map(t => <option key={t} value={t}>{ACTIVITY_ICONS[t]} {t}</option>)}
               </select>
             </Field>
             <Field label="Due Date">
-              <input style={inp} type="datetime-local" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} />
+              <input className="input-premium" type="datetime-local" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} />
             </Field>
           </div>
           <Field label="Subject *">
-            <input style={inp} value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} placeholder="Follow-up call with Jane Smith" />
+            <input className="input-premium" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} placeholder="Follow-up call with Jane Smith" />
           </Field>
           <Field label="Notes">
-            <textarea style={{ ...inp, minHeight:80, resize:'vertical' }} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
+            <textarea className="input-premium min-h-[80px] resize-y" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
           </Field>
-          <div style={{ display:'flex', gap:10, justifyContent:'flex-end', marginTop:8 }}>
-            <button onClick={() => setModal(false)} style={{ padding:'8px 16px', borderRadius:8, border:'1px solid #e5e7eb', background:'#fff', cursor:'pointer' }}>Cancel</button>
-            <button onClick={create} disabled={saving || !form.subject.trim()} style={{ padding:'8px 18px', borderRadius:8, background:'#f59e0b', color:'#fff', border:'none', cursor:'pointer', fontWeight:600, opacity: saving ? 0.5 : 1 }}>
+          <div className="flex gap-2.5 justify-end mt-2">
+            <button onClick={() => setModal(false)} className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button onClick={create} disabled={saving || !form.subject.trim()}
+              className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white border-none cursor-pointer font-semibold text-sm transition-colors disabled:opacity-50">
               {saving ? 'Saving…' : 'Log Activity'}
             </button>
           </div>
@@ -752,18 +786,22 @@ export default function CRMPage() {
   const [tab, setTab] = useState<'leads'|'contacts'|'accounts'|'deals'|'activities'>('leads')
 
   return (
-    <div style={{ padding:24, maxWidth:1400, margin:'0 auto' }}>
+    <div className="p-6 max-w-[1400px] mx-auto">
       {/* Header */}
-      <div style={{ marginBottom:24 }}>
-        <h1 style={{ margin:0, fontSize:26, fontWeight:800, color:'#111827' }}>CRM</h1>
-        <p style={{ margin:'4px 0 0', color:'#6b7280', fontSize:14 }}>Leads · Contacts · Accounts · Deals · Activities</p>
+      <div className="mb-6">
+        <h1 className="page-premium-title">CRM</h1>
+        <p className="page-premium-subtitle">Leads · Contacts · Accounts · Deals · Activities</p>
       </div>
 
       {/* Tabs */}
-      <div style={{ display:'flex', gap:2, marginBottom:24, borderBottom:'2px solid #f3f4f6', overflowX:'auto' }}>
+      <div className="flex gap-0 mb-6 border-b-2 border-gray-100 dark:border-gray-800 overflow-x-auto">
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
-            style={{ padding:'10px 18px', border:'none', background:'none', cursor:'pointer', fontSize:14, fontWeight:600, color: tab===t.key ? '#6366f1' : '#6b7280', borderBottom: tab===t.key ? '2px solid #6366f1' : '2px solid transparent', marginBottom:-2, whiteSpace:'nowrap' }}>
+            className={`px-4 py-2.5 border-none bg-transparent cursor-pointer text-sm font-semibold whitespace-nowrap transition-colors -mb-0.5 border-b-2 ${
+              tab === t.key
+                ? 'text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400'
+                : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'
+            }`}>
             {t.label}
           </button>
         ))}
