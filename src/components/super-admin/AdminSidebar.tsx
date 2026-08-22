@@ -22,7 +22,12 @@ const NAV: NavItem[] = [
 
 const ACCENT = '#7c3aed'
 
-export default function AdminSidebar() {
+type Props = {
+  mobileOpen?:    boolean
+  onMobileClose?: () => void
+}
+
+export default function AdminSidebar({ mobileOpen, onMobileClose }: Props) {
   const pathname = usePathname()
 
   function isActive(href: string, exact?: boolean) {
@@ -30,13 +35,18 @@ export default function AdminSidebar() {
     return pathname === href || pathname.startsWith(href + '/')
   }
 
-  return (
-    <aside className="w-60 flex flex-col h-full shrink-0 select-none bg-[#070c1a] dark:bg-[#070c1a] border-r border-white/[0.055]">
+  const sidebarContent = (
+    <aside className="w-60 flex flex-col h-full shrink-0 select-none bg-[#070c1a] border-r border-white/[0.055]">
       {/* Brand */}
       <div className="px-4 py-4 border-b border-white/[0.055]">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
-            style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`, boxShadow: `0 0 12px ${ACCENT}50` }}>
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
+            style={{
+              background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT}bb)`,
+              boxShadow: `0 0 12px ${ACCENT}50`,
+            }}
+          >
             ⚡
           </div>
           <div>
@@ -51,7 +61,10 @@ export default function AdminSidebar() {
         {NAV.map(item => {
           const active = isActive(item.href, item.exact)
           return (
-            <Link key={item.href} href={item.href}
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onMobileClose}
               className="flex items-center gap-2.5 py-[7px] pr-3 rounded-lg text-[13px] transition-all duration-150"
               style={active ? {
                 background: `linear-gradient(90deg, ${ACCENT}25, ${ACCENT}10)`,
@@ -67,6 +80,7 @@ export default function AdminSidebar() {
                 if (!active) {
                   const el = e.currentTarget as HTMLElement
                   el.style.background = 'rgba(255,255,255,0.05)'
+                  el.style.opacity = '1'
                   el.style.color = '#e2e8f4'
                 }
               }}
@@ -76,7 +90,8 @@ export default function AdminSidebar() {
                   el.style.background = 'transparent'
                   el.style.color = 'rgba(226,232,244,0.6)'
                 }
-              }}>
+              }}
+            >
               <span style={active ? { color: ACCENT } : {}}>
                 <Icon name={item.icon} className="w-4 h-4 shrink-0" strokeWidth={active ? 2 : 1.6} />
               </span>
@@ -91,5 +106,27 @@ export default function AdminSidebar() {
         <p className="text-[11px] text-slate-600 font-medium">HRMS Platform v1.0</p>
       </div>
     </aside>
+  )
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <div className="hidden md:flex h-full shrink-0">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile overlay drawer */}
+      {mobileOpen && (
+        <>
+          <div
+            className="md:hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
+            onClick={onMobileClose}
+          />
+          <div className="md:hidden fixed inset-y-0 left-0 z-50 flex h-full">
+            {sidebarContent}
+          </div>
+        </>
+      )}
+    </>
   )
 }

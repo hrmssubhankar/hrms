@@ -8,15 +8,17 @@ import Icon, { type IconName } from '@/components/ui/Icon'
 type NavItem = { key: string; label: string }
 
 type Props = {
-  navItems:    NavItem[]
-  sidebarBg:   string
-  primaryColor:string
-  tenantName:  string
-  logoUrl:     string
-  userEmail:   string
-  userInitial: string
-  userRole:    string
-  borderRadius:string
+  navItems:       NavItem[]
+  sidebarBg:      string
+  primaryColor:   string
+  tenantName:     string
+  logoUrl:        string
+  userEmail:      string
+  userInitial:    string
+  userRole:       string
+  borderRadius:   string
+  mobileOpen?:    boolean
+  onMobileClose?: () => void
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -94,6 +96,7 @@ const NAV_ICONS: Record<string, IconName> = {
 export default function TenantSidebar({
   navItems, sidebarBg, primaryColor, tenantName,
   logoUrl, userEmail, userInitial, userRole, borderRadius,
+  mobileOpen, onMobileClose,
 }: Props) {
   const pathname  = usePathname()
   const router    = useRouter()
@@ -119,7 +122,6 @@ export default function TenantSidebar({
     return () => document.removeEventListener('mousedown', handle)
   }, [])
 
-  // Premium dark theme colours
   const isDarkMode = isDark
   const bg         = isDarkMode ? '#070c1a' : '#ffffff'
   const borderClr  = isDarkMode ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.07)'
@@ -166,6 +168,7 @@ export default function TenantSidebar({
     return (
       <Link
         href={`/tenant/${navKey}`}
+        onClick={onMobileClose}
         className="flex items-center gap-2.5 py-[7px] pr-3 rounded-lg text-[13px] transition-all duration-150"
         style={active ? activeStyle : inactiveStyle}
         onMouseEnter={e => {
@@ -195,9 +198,9 @@ export default function TenantSidebar({
     )
   }
 
-  return (
+  const sidebarContent = (
     <aside
-      className="w-60 flex flex-col shrink-0 select-none"
+      className="w-60 flex flex-col shrink-0 select-none h-full"
       style={{
         background: bg,
         borderRight: `1px solid ${borderClr}`,
@@ -339,5 +342,27 @@ export default function TenantSidebar({
         </button>
       </div>
     </aside>
+  )
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <div className="hidden md:flex h-full shrink-0">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile overlay drawer */}
+      {mobileOpen && (
+        <>
+          <div
+            className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            onClick={onMobileClose}
+          />
+          <div className="md:hidden fixed inset-y-0 left-0 z-50 flex h-full">
+            {sidebarContent}
+          </div>
+        </>
+      )}
+    </>
   )
 }
