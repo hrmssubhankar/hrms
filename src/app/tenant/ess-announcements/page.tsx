@@ -61,8 +61,10 @@ export default function EssAnnouncementsPage() {
   const [editing, setEditing]   = useState<Announcement | null>(null)
   const [form, setForm]         = useState({ ...EMPTY_FORM })
   const [saving, setSaving]     = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   const [search, setSearch]     = useState('')
   const [filterPriority, setFilterPriority] = useState('')
 
@@ -104,6 +106,7 @@ export default function EssAnnouncementsPage() {
   async function handleSave() {
     if (!form.title.trim() || !form.body.trim()) return
     setSaving(true)
+    setSaveError('')
     try {
       const payload = {
         ...(editing ? { id: editing.id } : {}),
@@ -123,7 +126,7 @@ export default function EssAnnouncementsPage() {
       setShowModal(false)
       await load()
     } catch {
-      alert('Save failed. Please try again.')
+      setSaveError('Save failed. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -132,13 +135,14 @@ export default function EssAnnouncementsPage() {
   async function handleDelete() {
     if (!deleteId) return
     setDeleting(true)
+    setDeleteError('')
     try {
       const res = await fetchWithAuth(`/api/tenant/self-service/announcements?id=${deleteId}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
       setDeleteId(null)
       await load()
     } catch {
-      alert('Delete failed. Please try again.')
+      setDeleteError('Delete failed. Please try again.')
     } finally {
       setDeleting(false)
     }
@@ -317,9 +321,13 @@ export default function EssAnnouncementsPage() {
                 </div>
               </div>
 
+              {saveError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+              )}
+
               <div className="flex justify-end gap-3 pt-2">
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={() => { setShowModal(false); setSaveError('') }}
                   className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   Cancel
@@ -343,9 +351,12 @@ export default function EssAnnouncementsPage() {
           <div className="card-premium w-full max-w-sm shadow-2xl p-6 space-y-4">
             <h2 className="text-base font-semibold text-gray-900 dark:text-white">Delete announcement?</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">This cannot be undone.</p>
+            {deleteError && (
+              <p className="text-sm text-red-600 dark:text-red-400">{deleteError}</p>
+            )}
             <div className="flex justify-end gap-3">
               <button
-                onClick={() => setDeleteId(null)}
+                onClick={() => { setDeleteId(null); setDeleteError('') }}
                 className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 Cancel

@@ -100,6 +100,7 @@ export default function RecruitmentPage() {
   const [convertForm,       setConvertForm]        = useState({ startDate: '', employmentType: 'full_time', createOnboarding: true })
   const [convertSaving,     setConvertSaving]      = useState(false)
   const [convertResult,     setConvertResult]      = useState<{ employeeId: string; employeeNumber: string } | null>(null)
+  const [convertError,      setConvertError]       = useState('')
 
   // ── Loaders ──────────────────────────────────────────────────────────────────
 
@@ -246,7 +247,7 @@ export default function RecruitmentPage() {
       if (res.status === 409 && data.employeeId) {
         setConvertResult({ employeeId: data.employeeId, employeeNumber: '' })
       } else {
-        alert(data.error ?? 'Failed to convert')
+        setConvertError(data.error ?? 'Failed to convert')
       }
     }
   }
@@ -813,10 +814,14 @@ export default function RecruitmentPage() {
                   </label>
                 </div>
 
+                {convertError && (
+                  <p className="text-sm text-red-600 dark:text-red-400">{convertError}</p>
+                )}
+
                 <div className="flex gap-3 pt-1">
                   <button
                     type="button"
-                    onClick={() => setConvertApp(null)}
+                    onClick={() => { setConvertApp(null); setConvertError('') }}
                     className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                   >Cancel</button>
                   <button

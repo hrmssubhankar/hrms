@@ -92,6 +92,7 @@ export default function MyDocumentsPage() {
   const [saving,     setSaving]     = useState(false)
   const [saveError,  setSaveError]  = useState<string | null>(null)
   const [withdrawing, setWithdrawing] = useState<string | null>(null)
+  const [withdrawError, setWithdrawError] = useState('')
   const [form, setForm] = useState({
     title: '', category: 'Police Check', blobUrl: '',
     fileName: '', fileSizeBytes: 0, mimeType: '',
@@ -148,7 +149,7 @@ export default function MyDocumentsPage() {
         setDocs(d => d.filter(x => x.id !== id))
       } else {
         const data = await res.json().catch(() => ({}))
-        alert(data.error ?? 'Could not withdraw document')
+        setWithdrawError(data.error ?? 'Could not withdraw document')
       }
     } finally { setWithdrawing(null) }
   }
@@ -162,6 +163,13 @@ export default function MyDocumentsPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
+
+      {withdrawError && (
+        <div className="card-premium p-3 border-red-300 dark:border-red-800 flex items-center justify-between gap-3">
+          <p className="text-sm text-red-600 dark:text-red-400">{withdrawError}</p>
+          <button onClick={() => setWithdrawError('')} className="text-red-400 hover:text-red-600 text-lg leading-none">×</button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">

@@ -763,6 +763,7 @@ function GeneratePdfButton({ recordId, onGenerated }: {
 }) {
   const [loading,  setLoading]  = useState(false)
   const [emailing, setEmailing] = useState(false)
+  const [genError, setGenError] = useState('')
 
   async function generate(emailEmployee: boolean) {
     if (emailEmployee) setEmailing(true); else setLoading(true)
@@ -774,20 +775,23 @@ function GeneratePdfButton({ recordId, onGenerated }: {
       })
       const data = await res.json()
       if (res.ok && data.payslipUrl) {
+        setGenError('')
         onGenerated(data.payslipUrl)
         if (!emailEmployee) window.open(data.payslipUrl, '_blank')
       } else {
-        alert(data.error ?? 'Failed to generate payslip')
+        setGenError(data.error ?? 'Failed to generate payslip')
       }
     } catch {
-      alert('Network error')
+      setGenError('Network error — please try again')
     } finally {
       setLoading(false); setEmailing(false)
     }
   }
 
   return (
-    <div className="flex gap-1">
+    <div className="space-y-1">
+      {genError && <p className="text-xs text-red-500 dark:text-red-400">{genError}</p>}
+      <div className="flex gap-1">
       <button
         onClick={() => generate(false)}
         disabled={loading || emailing}
@@ -801,6 +805,7 @@ function GeneratePdfButton({ recordId, onGenerated }: {
         className="text-xs px-3 py-1.5 rounded-lg border border-blue-700 text-blue-400 hover:bg-blue-900/30 transition disabled:opacity-50">
         {emailing ? '⏳' : '📧'}
       </button>
+      </div>
     </div>
   )
 }

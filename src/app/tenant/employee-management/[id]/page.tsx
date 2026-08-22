@@ -174,11 +174,13 @@ export default function EmployeeProfilePage() {
     const file = e.target.files?.[0]
     if (!file || !emp) return
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
-      alert('Please select a JPG, PNG, WebP or GIF image.')
+      setMsg('Please select a JPG, PNG, WebP or GIF image.')
+      setTimeout(() => setMsg(''), 4000)
       return
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert('Image must be smaller than 2 MB.')
+      setMsg('Image must be smaller than 2 MB.')
+      setTimeout(() => setMsg(''), 4000)
       return
     }
     setPhotoUploading(true)
@@ -200,10 +202,12 @@ export default function EmployeeProfilePage() {
         setMsg('Photo updated')
         setTimeout(() => setMsg(''), 3000)
       } else {
-        alert('Failed to save photo. Please try again.')
+        setMsg('Failed to save photo. Please try again.')
+        setTimeout(() => setMsg(''), 4000)
       }
     } catch {
-      alert('Upload failed. Please try again.')
+      setMsg('Upload failed. Please try again.')
+      setTimeout(() => setMsg(''), 4000)
     } finally {
       setPhotoUploading(false)
     }
