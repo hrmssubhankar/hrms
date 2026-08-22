@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+type ComplianceScore = { counts: { green: number; amber: number; red: number; pending: number }; total: number; score: number }
+
+type HeadcountTrend = { label: string; count: number }
+
 type DashboardData = {
   headcount: {
     total: number
@@ -116,6 +120,51 @@ function MiniBar({ items }: { items: { label: string; value: number; color: stri
           <span className="text-xs font-semibold text-gray-900 dark:text-white w-8 text-right">{item.value}</span>
         </div>
       ))}
+    </div>
+  )
+}
+
+// ── Headcount trend sparkline ─────────────────────────────────────────────────
+function TrendSparkline({ data }: { data: { label: string; count: number }[] }) {
+  if (data.length < 2) return null
+  const max = Math.max(...data.map(d => d.count), 1)
+  const W = 200, H = 48, pad = 4
+  const pts = data.map((d, i) => ({
+    x: pad + (i / (data.length - 1)) * (W - pad * 2),
+    y: H - pad - ((d.count / max) * (H - pad * 2)),
+    ...d,
+  }))
+  const polyline = pts.map(p => `${p.x},${p.y}`).join(' ')
+  const area = `M${pts[0].x},${H} ` + pts.map(p => `L${p.x},${p.y}`).join(' ') + ` L${pts[pts.length-1].x},${H} Z`
+  const last = pts[pts.length - 1]
+  const prev = pts[pts.length - 2]
+  const trendDir = last.count >= prev.count ? '↑' : '↓'
+  const trendColor = last.count >= prev.count ? 'text-green-500' : 'text-red-400'
+
+  return (
+    <div className="flex items-end gap-4">
+      <div className="flex-1">
+        <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
+          <defs>
+            <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={area} fill="url(#sparkGrad)" />
+          <polyline points={polyline} fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <circle cx={last.x} cy={last.y} r="3" fill="#8b5cf6" />
+        </svg>
+        <div className="flex justify-between mt-1">
+          {pts.map(p => (
+            <span key={p.label} className="text-[9px] text-gray-400">{p.label}</span>
+          ))}
+        </div>
+      </div>
+      <div className="text-right shrink-0">
+        <p className="text-2xl font-bold text-gray-900 dark:text-white">{last.count}</p>
+        <p className={`text-xs font-semibold ${trendColor}`}>{trendDir} {Math.abs(last.count - prev.count)}</p>
+      </div>
     </div>
   )
 }
@@ -387,6 +436,8 @@ type TrainingOverdue = {
   expiryDate: string
 }
 
+type ReviewDue = { id: string; employeeId: string; type: string; scheduledDate: string | null; firstName: string | null; lastName: string | null }
+
 type ProbationAlert = {
   id: string
   firstName: string
@@ -419,6 +470,9 @@ export default function DashboardPage() {
   const [activity,      setActivity]      = useState<ActivityItem[]>([])
   const [probation,     setProbation]     = useState<ProbationAlert[]>([])
   const [overdueTraining, setOverdueTraining] = useState<TrainingOverdue[]>([])
+  const [reviewsDue,      setReviewsDue]      = useState<ReviewDue[]>([])
+  const [trend,         setTrend]         = useState<HeadcountTrend[]>([])
+  const [compliance,    setCompliance]    = useState<ComplianceScore | null>(null)
 
   useEffect(() => {
     // Greeting is computed client-side only to avoid SSR/CSR hydration mismatch
@@ -461,6 +515,12 @@ export default function DashboardPage() {
       .catch(() => {})
     // Overdue mandatory training (fire-and-forget; failure is silent)
     fetchWithAuth('/api/tenant/training/overdue').then(r => r.json()).then(d => setOverdueTraining(d.overdue ?? [])).catch(() => {})
+    // Performance reviews due in 14 days (fire-and-forget; failure is silent)
+    fetchWithAuth('/api/tenant/performance/due').then(r => r.json()).then(d => setReviewsDue(d.due ?? [])).catch(() => {})
+    // Compliance health score (fire-and-forget; failure is silent)
+    fetchWithAuth('/api/tenant/employees/compliance-score').then(r => r.json()).then(d => setCompliance(d)).catch(() => {})
+    // Headcount trend sparkline (fire-and-forget; failure is silent)
+    fetchWithAuth('/api/tenant/employees/headcount-trend').then(r => r.json()).then(d => setTrend(d.months ?? [])).catch(() => {})
   }, [])
 
   function loadDashboard() {
@@ -598,6 +658,14 @@ export default function DashboardPage() {
               ))}
             </div>
           </section>
+
+          {/* ── Headcount trend sparkline ── */}
+          {trend.length >= 2 && (
+            <div className="card-premium p-6 space-y-3">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Active Headcount — Last 6 Months</h3>
+              <TrendSparkline data={trend} />
+            </div>
+          )}
 
           {/* ── Workforce breakdown ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -866,6 +934,79 @@ export default function DashboardPage() {
             )}
           </div>
           <a href="/tenant/training" className="block mt-3 text-xs text-indigo-500 hover:underline">View training →</a>
+        </div>
+      )}
+
+      {/* ── Compliance Health Score widget ── */}
+      {compliance && compliance.total > 0 && (
+        <div className="card-premium p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">🛡️ Compliance Health</h3>
+            <span className={`text-lg font-bold ${compliance.score >= 80 ? 'text-green-500' : compliance.score >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+              {compliance.score}%
+            </span>
+          </div>
+          {/* Progress bar */}
+          <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-3">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${compliance.score}%`,
+                background: compliance.score >= 80 ? '#22c55e' : compliance.score >= 60 ? '#f59e0b' : '#ef4444'
+              }}
+            />
+          </div>
+          <div className="grid grid-cols-4 gap-1 text-center">
+            {[
+              { label: 'Green',   value: compliance.counts.green,   color: 'text-green-500' },
+              { label: 'Amber',   value: compliance.counts.amber,   color: 'text-amber-500' },
+              { label: 'Red',     value: compliance.counts.red,     color: 'text-red-500' },
+              { label: 'Pending', value: compliance.counts.pending, color: 'text-gray-400' },
+            ].map(({ label, value, color }) => (
+              <div key={label}>
+                <p className={`text-sm font-bold ${color}`}>{value}</p>
+                <p className="text-[10px] text-gray-400">{label}</p>
+              </div>
+            ))}
+          </div>
+          <a href="/tenant/compliance" className="block mt-3 text-xs text-indigo-500 hover:underline">View compliance →</a>
+        </div>
+      )}
+
+      {/* ── Performance Reviews Due widget ── */}
+      {reviewsDue.length > 0 && (
+        <div className="card-premium p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">📋 Reviews Due</h3>
+            <span className="badge badge-amber">{reviewsDue.length}</span>
+          </div>
+          <div className="space-y-2">
+            {reviewsDue.slice(0, 5).map(r => {
+              const daysLeft = r.scheduledDate
+                ? Math.round((new Date(r.scheduledDate + 'T00:00:00').getTime() - Date.now()) / 86400000)
+                : null
+              const overdue = daysLeft !== null && daysLeft < 0
+              return (
+                <div key={r.id} className="flex items-center justify-between text-xs">
+                  <span className="text-gray-700 dark:text-gray-300 truncate max-w-[140px]">
+                    {r.firstName} {r.lastName}
+                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    <span className="text-gray-400 truncate max-w-[80px] capitalize">{r.type.replace(/_/g, ' ')}</span>
+                    {daysLeft !== null && (
+                      <span className={`font-medium ${overdue ? 'text-red-400' : 'text-amber-500'}`}>
+                        {overdue ? `${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? 'Today' : `in ${daysLeft}d`}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+            {reviewsDue.length > 5 && (
+              <p className="text-xs text-gray-400 text-right">+{reviewsDue.length - 5} more</p>
+            )}
+          </div>
+          <a href="/tenant/performance" className="block mt-3 text-xs text-indigo-500 hover:underline">View performance →</a>
         </div>
       )}
 

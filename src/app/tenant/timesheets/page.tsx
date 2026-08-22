@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useState, useEffect, useCallback } from 'react'
 import PermissionGate from '@/components/auth/PermissionGate'
 import { usePermissions } from '@/hooks/usePermissions'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import { ExportButton } from '@/components/ui/ExportButton'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -411,6 +413,22 @@ export default function TimesheetsPage() {
     })
   }
 
+  function exportTimesheets() {
+    exportCsv<Timesheet & Record<string, unknown>>({
+      filename: 'timesheets.csv',
+      columns: [
+        { header: 'Employee',        key: 'empFirst',        format: (_, row) => `${row.empFirst ?? ''} ${row.empLast ?? ''}`.trim() },
+        { header: 'Clock In',        key: 'clockIn',         format: v => fmtCsvDate(v) },
+        { header: 'Clock Out',       key: 'clockOut',        format: v => fmtCsvDate(v) },
+        { header: 'Hours Worked',    key: 'hoursWorked' },
+        { header: 'Status',          key: 'status' },
+        { header: 'Approved At',     key: 'approvedAt',      format: v => fmtCsvDate(v) },
+        { header: 'Rejected Reason', key: 'rejectedReason' },
+      ],
+      rows: timesheets as (Timesheet & Record<string, unknown>)[],
+    })
+  }
+
   // Summary stats
   const totalHours   = timesheets.reduce((s, t) => s + parseFloat(t.hoursWorked ?? '0'), 0)
   const pendingCount = timesheets.filter(t => t.status === 'submitted').length
@@ -464,6 +482,7 @@ export default function TimesheetsPage() {
               {bulkApproving ? 'Approving…' : `✓ Approve ${selected.size} selected`}
             </button>
           )}
+          <ExportButton onClick={exportTimesheets} disabled={timesheets.length === 0} />
         </div>
       </div>
 

@@ -256,11 +256,15 @@ export default function PayrollPage() {
 
   function handleExport() {
     exportCsv({
-      filename: 'payroll',
+      filename: 'payroll-summary.csv',
       columns: [
         { header: 'Employee',         key: 'employee' },
+        { header: 'Email',            key: 'email' },
+        { header: 'Entity',           key: 'entity' },
         { header: 'Period Start',     key: 'periodStart',      format: fmtCsvDate },
         { header: 'Period End',       key: 'periodEnd',        format: fmtCsvDate },
+        { header: 'Hours',            key: 'hoursWorked' },
+        { header: 'Hourly Rate',      key: 'hourlyRate' },
         { header: 'Gross Pay',        key: 'grossPay' },
         { header: 'PAYG Withholding', key: 'paygWithholding' },
         { header: 'Medicare Levy',    key: 'medicareLevy' },
@@ -269,15 +273,19 @@ export default function PayrollPage() {
         { header: 'Status',           key: 'status' },
       ],
       rows: records.map(r => ({
-        employee:        `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim(),
-        periodStart:     r.periodStart,
-        periodEnd:       r.periodEnd,
-        grossPay:        r.grossPay ?? '',
-        paygWithholding: r.paygWithholding ?? '',
-        medicareLevy:    r.medicareLevy ?? '',
+        employee:          `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim(),
+        email:             r.employeeEmail ?? '',
+        entity:            '',
+        periodStart:       r.periodStart,
+        periodEnd:         r.periodEnd,
+        hoursWorked:       r.hoursWorked ?? '',
+        hourlyRate:        r.hourlyRate ?? '',
+        grossPay:          r.grossPay ?? '',
+        paygWithholding:   r.paygWithholding ?? '',
+        medicareLevy:      r.medicareLevy ?? '',
         superContribution: r.superContribution ?? '',
-        netPay:          r.netPay ?? '',
-        status:          r.status,
+        netPay:            r.netPay ?? '',
+        status:            r.status,
       })),
     })
   }
