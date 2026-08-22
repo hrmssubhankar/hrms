@@ -67,6 +67,7 @@ const NAV_PERMISSION: Record<string, Permission | null> = {
   'ess-onboarding':     'self_service:read',
   'ess-onboarding-review': 'onboarding:read',
   'experience':         'employees:read',
+  'ess-announcements':  'self_service:write',
 }
 
 // Maps SOW module ID → { route slug, sidebar label }
@@ -129,6 +130,7 @@ const MODULE_ROUTES: Record<number, { key: string; label: string }> = {
   55: { key: 'workforce',              label: 'Workforce Summary' },
   56: { key: 'referral',               label: 'Referrals (ESS)' },
   57: { key: 'competency',             label: 'Competency Assessments' },
+  58: { key: 'ess-announcements',      label: 'Announcements' },
 }
 
 async function getTenantConfig(slug: string) {
