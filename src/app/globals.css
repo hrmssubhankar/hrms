@@ -38,36 +38,36 @@
   }
 
   .dark {
-    /* ── Dark mode ──────────────────────────────────────────── */
-    --background:            222.2 84% 4.9%;
-    --foreground:            210 40% 98%;
-    --card:                  220 13% 9%;
-    --card-foreground:       210 40% 98%;
-    --popover:               220 13% 9%;
-    --popover-foreground:    210 40% 98%;
-    --primary:               217.2 91.2% 59.8%;
-    --primary-foreground:    222.2 47.4% 11.2%;
-    --secondary:             217.2 32.6% 17.5%;
-    --secondary-foreground:  210 40% 98%;
-    --muted:                 217.2 32.6% 17.5%;
-    --muted-foreground:      215 20.2% 65.1%;
-    --accent:                217.2 32.6% 17.5%;
-    --accent-foreground:     210 40% 98%;
-    --destructive:           0 62.8% 30.6%;
-    --destructive-foreground:210 40% 98%;
-    --border:                217.2 25% 18%;
-    --input:                 217.2 25% 18%;
-    --ring:                  224.3 76.3% 48%;
-    --chart-1: 220 70% 50%;
+    /* ── Dark mode — Deep Blue-Black Premium ──────────────────── */
+    --background:            228 71% 3.5%;   /* #060918 — near-black with blue tint */
+    --foreground:            214 32% 96%;    /* near-white */
+    --card:                  227 43% 6%;     /* #0a0f1e — card surfaces */
+    --card-foreground:       214 32% 96%;
+    --popover:               227 43% 6%;
+    --popover-foreground:    214 32% 96%;
+    --primary:               217.2 91.2% 62%;
+    --primary-foreground:    228 71% 3.5%;
+    --secondary:             228 35% 10%;
+    --secondary-foreground:  214 32% 96%;
+    --muted:                 228 35% 10%;
+    --muted-foreground:      218 18% 52%;    /* mid-tone for labels */
+    --accent:                228 35% 10%;
+    --accent-foreground:     214 32% 96%;
+    --destructive:           0 55% 35%;
+    --destructive-foreground:214 32% 96%;
+    --border:                228 40% 10%;    /* #0e1628 — very subtle borders */
+    --input:                 228 40% 9%;
+    --ring:                  217.2 91.2% 62%;
+    --chart-1: 220 70% 55%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    /* Surface scale */
-    --surface-page:          222 14% 5%;   /* darkest — page bg */
-    --surface-card:          220 13% 9%;   /* dark cards */
-    --surface-input:         220 12% 13%;  /* input backgrounds */
-    --surface-subtle:        220 12% 16%;  /* subtle highlights */
+    /* Surface scale — deep blue-black */
+    --surface-page:          228 71% 3%;    /* #050817 — deepest page bg */
+    --surface-card:          227 43% 6%;    /* #0a0f1e — card surfaces */
+    --surface-input:         228 40% 8%;    /* #0c1122 — input backgrounds */
+    --surface-subtle:        228 35% 11%;   /* #101828 — subtle highlights */
   }
 }
 

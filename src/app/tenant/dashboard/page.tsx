@@ -191,20 +191,27 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8">
       {/* Welcome banner */}
-      <div className="rounded-2xl p-6 text-white relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}aa)` }}>
+      <div
+        className="rounded-2xl p-6 text-white relative overflow-hidden"
+        style={{
+          background: `linear-gradient(135deg, ${primaryColor}f0, ${primaryColor}90)`,
+          boxShadow: `0 8px 32px ${primaryColor}30`,
+        }}
+      >
+        <div className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
         <div className="relative z-10">
-          <p className="text-sm font-medium opacity-80">{greetingText || 'Welcome'},</p>
-          <h1 className="text-2xl font-bold mt-0.5">{userName || '…'} </h1>
-          <p className="text-sm opacity-70 mt-1">{tenantName || 'HRMS'} · Employee Portal</p>
+          <p className="text-[13px] font-medium opacity-75">{greetingText || 'Welcome'},</p>
+          <h1 className="text-[22px] font-bold mt-0.5 tracking-tight">{userName || '…'}</h1>
+          <p className="text-[13px] opacity-60 mt-0.5">{tenantName || 'HRMS'} · Employee Portal</p>
         </div>
-        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-white" />
-        <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full opacity-10 bg-white" />
+        <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-white opacity-[0.07] pointer-events-none" />
+        <div className="absolute -right-4 -bottom-12 w-60 h-60 rounded-full bg-white opacity-[0.05] pointer-events-none" />
       </div>
 
       {/* Leave balance summary */}
       {employeeLinked && leaveBalances.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
+        <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Leave Balances — {new Date().getFullYear()}</h3>
             <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">Full details →</Link>
@@ -215,7 +222,7 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
               const pct   = cap > 0 ? Math.min(100, Math.round((b.taken / cap) * 100)) : 0
               const isLow = b.remaining != null && cap > 0 && b.remaining <= cap * 0.2
               return (
-                <div key={b.key} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 flex flex-col gap-2">
+                <div key={b.key} className="bg-black/[0.02] dark:bg-white/[0.04] rounded-xl border border-black/[0.04] dark:border-white/[0.04] p-3 flex flex-col gap-2">
                   <div className="flex items-center gap-1.5">
                     <span className="text-base">{b.emoji}</span>
                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{b.label}</span>
@@ -255,7 +262,7 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
       {/* Leave requests + upcoming holidays */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* My Leave */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+        <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white"> My Leave</h3>
             <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
@@ -296,7 +303,7 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
         </div>
 
         {/* Upcoming public holidays */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+        <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white"> Upcoming Holidays</h3>
             <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
@@ -323,13 +330,13 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
 
       {/* Personal module shortcuts */}
       <section>
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">My Modules</h2>
+        <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">My Modules</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {PERSONAL_SHORTCUTS.map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-purple-400 dark:hover:border-purple-700/50 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition group">
-              <span className="text-2xl">{m.icon}</span>
-              <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white font-medium transition">{m.label}</span>
+              className="group bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] hover:border-black/10 dark:hover:border-white/10 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition-all hover:shadow-sm dark:hover:shadow-none hover:-translate-y-px">
+              <span className="text-2xl leading-none">{m.icon}</span>
+              <span className="text-[12px] text-gray-500 dark:text-slate-400 group-hover:text-gray-800 dark:group-hover:text-white font-medium transition-colors">{m.label}</span>
             </Link>
           ))}
         </div>
@@ -420,26 +427,33 @@ export default function DashboardPage() {
       {/* Welcome banner */}
       <div
         className="rounded-2xl p-6 text-white relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}aa)` }}
+        style={{
+          background: `linear-gradient(135deg, ${primaryColor}f0, ${primaryColor}90)`,
+          boxShadow: `0 8px 32px ${primaryColor}30`,
+        }}
       >
-        <div className="relative z-10">
-          <p className="text-sm font-medium opacity-80">{greetingText || 'Welcome'},</p>
-          <h1 className="text-2xl font-bold mt-0.5">{userName || '…'} </h1>
-          <p className="text-sm opacity-70 mt-1">{tenantName || 'HRMS'} · HR Portal</p>
-        </div>
-        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-10 bg-white dark:bg-gray-900" />
-        <div className="absolute -right-4 -bottom-10 w-56 h-56 rounded-full opacity-10 bg-white dark:bg-gray-900" />
-        <div className="absolute top-4 right-4 z-10 flex gap-2">
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+        <div className="relative z-10 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[13px] font-medium opacity-75">{greetingText || 'Welcome'},</p>
+            <h1 className="text-[22px] font-bold mt-0.5 tracking-tight">{userName || '…'}</h1>
+            <p className="text-[13px] opacity-60 mt-0.5">{tenantName || 'HRMS'} · HR Portal</p>
+          </div>
           <button onClick={loadDashboard}
-            className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white/80 transition">
+            className="shrink-0 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white/80 transition backdrop-blur-sm border border-white/10">
             ↻ Refresh
           </button>
         </div>
+        {/* Decorative orbs */}
+        <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-white opacity-[0.07] pointer-events-none" />
+        <div className="absolute -right-4 -bottom-12 w-60 h-60 rounded-full bg-white opacity-[0.05] pointer-events-none" />
       </div>
 
       {/* Alert banner */}
       {hasAlerts && (
-        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-700/60 rounded-2xl px-5 py-4 flex flex-wrap gap-4 items-center">
+        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 rounded-xl px-5 py-3.5 flex flex-wrap gap-4 items-center">
           <p className="text-sm font-semibold text-red-700 dark:text-red-300 shrink-0">Attention required</p>
           {data!.compliance.redCount > 0 && (
             <Link href="/tenant/employee-management" className="text-sm text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-200 underline underline-offset-2">
@@ -462,13 +476,13 @@ export default function DashboardPage() {
       {loading && !data && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array(8).fill(0).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 h-28 animate-pulse" />
+            <div key={i} className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-5 h-28 animate-pulse" />
           ))}
         </div>
       )}
 
       {error && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-8 text-center">
+        <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-8 text-center">
           <p className="text-gray-500 text-sm dark:text-gray-400">
             Could not load live stats ({error}). You may not have manager-level access.
           </p>
@@ -479,26 +493,35 @@ export default function DashboardPage() {
         <>
           {/* ── Headcount stats ── */}
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Workforce</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">Workforce</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {[
-                { label: 'Total', value: data.headcount.total, color: 'text-gray-900 dark:text-white', href: '/tenant/employee-management' },
-                { label: 'Active', value: data.headcount.active, color: 'text-green-600 dark:text-green-400', href: '/tenant/employee-management' },
-                { label: 'New This Month', value: data.headcount.newThisMonth, color: 'text-purple-600 dark:text-purple-400' },
-                { label: 'Leaving This Month', value: data.headcount.leavingThisMonth, color: data.headcount.leavingThisMonth > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400' },
-                { label: 'Amber Compliance', value: data.compliance.amberCount, color: data.compliance.amberCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400', href: '/tenant/employee-management' },
-                { label: 'Red Compliance', value: data.compliance.redCount, color: data.compliance.redCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400', href: '/tenant/employee-management' },
+                { label: 'Total', value: data.headcount.total, accent: null, href: '/tenant/employee-management' },
+                { label: 'Active', value: data.headcount.active, accent: '#10b981', href: '/tenant/employee-management' },
+                { label: 'New This Month', value: data.headcount.newThisMonth, accent: '#8b5cf6' },
+                { label: 'Leaving', value: data.headcount.leavingThisMonth, accent: data.headcount.leavingThisMonth > 0 ? '#f59e0b' : null },
+                { label: 'Amber Compliance', value: data.compliance.amberCount, accent: data.compliance.amberCount > 0 ? '#f59e0b' : null, href: '/tenant/employee-management' },
+                { label: 'Red Compliance', value: data.compliance.redCount, accent: data.compliance.redCount > 0 ? '#ef4444' : null, href: '/tenant/employee-management' },
               ].map(s => (
-                <div key={s.label} className={`bg-white dark:bg-gray-900 border rounded-2xl p-5 ${data.compliance.redCount > 0 && s.label === 'Red Compliance' ? 'border-red-300 dark:border-red-800/50' : 'border-gray-200 dark:border-gray-800'}`}>
+                <div
+                  key={s.label}
+                  className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-4 hover:border-black/10 dark:hover:border-white/10 transition-colors"
+                  style={s.accent && s.label === 'Red Compliance' ? { borderColor: 'rgba(239,68,68,0.25)' } : {}}
+                >
                   {s.href ? (
                     <Link href={s.href} className="block">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
-                      <p className={`text-3xl font-bold mt-1.5 ${s.color}`}>{s.value}</p>
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500 font-medium">{s.label}</p>
+                      <p
+                        className={`text-2xl font-bold mt-1.5 tabular-nums ${!s.accent ? 'text-gray-900 dark:text-white' : ''}`}
+                        style={s.accent ? { color: s.accent } : undefined}
+                      >
+                        {s.value}
+                      </p>
                     </Link>
                   ) : (
                     <>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
-                      <p className={`text-3xl font-bold mt-1.5 ${s.color}`}>{s.value}</p>
+                      <p className="text-[11px] text-gray-400 dark:text-slate-500 font-medium">{s.label}</p>
+                      <p className="text-2xl font-bold mt-1.5 tabular-nums" style={{ color: s.accent ?? undefined }}>{s.value}</p>
                     </>
                   )}
                 </div>
@@ -508,7 +531,7 @@ export default function DashboardPage() {
 
           {/* ── Workforce breakdown ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">By Employment Type</h3>
               {data.headcount.byEmploymentType.length === 0
                 ? <p className="text-sm text-gray-600 dark:text-gray-400">No data yet</p>
@@ -519,7 +542,7 @@ export default function DashboardPage() {
                   }))} />
               }
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">By Entity</h3>
               {data.headcount.byEntity.length === 0
                 ? <p className="text-sm text-gray-600 dark:text-gray-400">No entity data yet — set entity on employee profiles</p>
@@ -542,9 +565,9 @@ export default function DashboardPage() {
 
           {/* ── Payroll ── */}
           <section>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Payroll</h2>
+            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">Payroll</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+              <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Last Pay Run</h3>
                   <Link href="/tenant/payroll" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
@@ -561,7 +584,7 @@ export default function DashboardPage() {
                         { label: 'Net',   value: data.payroll.lastRunNet,   color: 'text-green-700 dark:text-green-400' },
                         { label: 'Super', value: data.payroll.lastRunSuper, color: 'text-purple-700 dark:text-purple-400' },
                       ].map(s => (
-                        <div key={s.label} className="bg-gray-100 dark:bg-gray-800/60 rounded-xl px-3 py-3">
+                        <div key={s.label} className="bg-black/[0.03] dark:bg-white/[0.04] rounded-lg px-3 py-3">
                           <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                           <p className={`text-sm font-bold mt-0.5 ${s.color}`}>{fmt(s.value)}</p>
                         </div>
@@ -573,7 +596,7 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+              <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Year to Date — {new Date().getFullYear()}</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[
@@ -581,7 +604,7 @@ export default function DashboardPage() {
                     { label: 'Net',   value: data.payroll.ytdNet,   color: 'text-green-700 dark:text-green-400' },
                     { label: 'Super', value: data.payroll.ytdSuper, color: 'text-purple-700 dark:text-purple-400' },
                   ].map(s => (
-                    <div key={s.label} className="bg-gray-100 dark:bg-gray-800/60 rounded-xl px-3 py-3">
+                    <div key={s.label} className="bg-black/[0.03] dark:bg-white/[0.04] rounded-lg px-3 py-3">
                       <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                       <p className={`text-sm font-bold mt-0.5 ${s.color}`}>{fmt(s.value)}</p>
                     </div>
@@ -595,7 +618,7 @@ export default function DashboardPage() {
           {/* ── Leave / Holidays / Documents / WHS ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Leave</h3>
                 <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
@@ -620,7 +643,7 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Holidays</h3>
                 <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
@@ -687,7 +710,7 @@ export default function DashboardPage() {
       {/* ── Celebrations widget ── */}
       {celebrations.length > 0 && (
         <section>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Upcoming Celebrations</h2>
+          <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">Upcoming Celebrations</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {celebrations.map(c => (
               <div key={`${c.id}-${c.type}`}
@@ -715,15 +738,15 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ── Module shortcuts ── (always shown) */}
+      {/* ── Module shortcuts ── */}
       <section>
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4 dark:text-gray-400">Modules</h2>
+        <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">Modules</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {MODULE_SHORTCUTS.map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-purple-400 dark:hover:border-purple-700/50 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition group">
-              <span className="text-2xl">{m.icon}</span>
-              <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white font-medium transition">{m.label}</span>
+              className="group bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] hover:border-black/10 dark:hover:border-white/10 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition-all hover:shadow-sm dark:hover:shadow-none hover:-translate-y-px">
+              <span className="text-2xl leading-none">{m.icon}</span>
+              <span className="text-[12px] text-gray-500 dark:text-slate-400 group-hover:text-gray-800 dark:group-hover:text-white font-medium transition-colors">{m.label}</span>
             </Link>
           ))}
         </div>

@@ -31,12 +31,10 @@ const ROLE_LABELS: Record<string, string> = {
   it_admin:           'IT Admin',
 }
 
-/** Strip any leading emoji + whitespace from label strings coming from layout */
 function cleanLabel(label: string): string {
   return label.replace(/^[\p{Emoji}\s]+/u, '').trim()
 }
 
-/** Map nav key → icon name */
 const NAV_ICONS: Record<string, IconName> = {
   'dashboard':          'dashboard',
   'employee-management':'users',
@@ -103,7 +101,6 @@ export default function TenantSidebar({
   const [isDark, setIsDark] = useState(false)
   const dropdownRef         = useRef<HTMLDivElement>(null)
 
-  // Detect dark mode and react to changes
   useEffect(() => {
     const check = () => setIsDark(document.documentElement.classList.contains('dark'))
     check()
@@ -122,12 +119,14 @@ export default function TenantSidebar({
     return () => document.removeEventListener('mousedown', handle)
   }, [])
 
-  // Theme-aware sidebar colours
-  const bg          = isDark ? sidebarBg : '#ffffff'
-  const textColor   = isDark ? '#ffffff' : '#111827'
-  const dividerClr  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
-  const hoverBg     = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.05)'
-  const mutedText   = isDark ? 'rgba(255,255,255,0.40)' : 'rgba(0,0,0,0.40)'
+  // Premium dark theme colours
+  const isDarkMode = isDark
+  const bg         = isDarkMode ? '#070c1a' : '#ffffff'
+  const borderClr  = isDarkMode ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.07)'
+  const textColor  = isDarkMode ? '#e2e8f4' : '#0f172a'
+  const mutedText  = isDarkMode ? 'rgba(148,163,184,0.7)' : 'rgba(71,85,105,0.8)'
+  const hoverBg    = isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'
+  const labelColor = isDarkMode ? 'rgba(100,116,139,0.8)' : 'rgba(100,116,139,0.9)'
 
   async function handleSignOut() {
     await fetch('/api/auth/logout', { method: 'POST' })
@@ -143,56 +142,115 @@ export default function TenantSidebar({
   function NavLink({ navKey, label }: { navKey: string; label: string }) {
     const active = navKey === 'dashboard' ? isDashboard : isActive(navKey)
     const icon   = NAV_ICONS[navKey] ?? 'document'
+
+    const activeStyle = isDarkMode ? {
+      background: `linear-gradient(90deg, ${primaryColor}25, ${primaryColor}10)`,
+      borderLeft: `2px solid ${primaryColor}`,
+      color: '#ffffff',
+      fontWeight: 600,
+      paddingLeft: '10px',
+    } : {
+      background: `${primaryColor}15`,
+      borderLeft: `2px solid ${primaryColor}`,
+      color: primaryColor,
+      fontWeight: 600,
+      paddingLeft: '10px',
+    }
+
+    const inactiveStyle = {
+      color: textColor,
+      opacity: isDarkMode ? 0.6 : 0.7,
+      paddingLeft: '12px',
+    }
+
     return (
       <Link
         href={`/tenant/${navKey}`}
-        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition"
-        style={active
-          ? { background: primaryColor, color: '#ffffff', fontWeight: 500 }
-          : { color: textColor, opacity: isDark ? 0.65 : 0.75 }
-        }
-        onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = hoverBg; (e.currentTarget as HTMLElement).style.opacity = '1' } }}
-        onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.opacity = isDark ? '0.65' : '0.75' } }}
+        className="flex items-center gap-2.5 py-[7px] pr-3 rounded-lg text-[13px] transition-all duration-150"
+        style={active ? activeStyle : inactiveStyle}
+        onMouseEnter={e => {
+          if (!active) {
+            const el = e.currentTarget as HTMLElement
+            el.style.background = hoverBg
+            el.style.opacity = '1'
+          }
+        }}
+        onMouseLeave={e => {
+          if (!active) {
+            const el = e.currentTarget as HTMLElement
+            el.style.background = 'transparent'
+            el.style.opacity = isDarkMode ? '0.6' : '0.7'
+          }
+        }}
       >
-        <Icon name={icon} className="w-4 h-4 shrink-0" strokeWidth={active ? 2 : 1.75} />
-        <span className="truncate">{cleanLabel(label)}</span>
+        <span style={active ? { color: primaryColor } : {}}>
+          <Icon
+            name={icon}
+            className="w-4 h-4 shrink-0"
+            strokeWidth={active ? 2 : 1.6}
+          />
+        </span>
+        <span className="truncate leading-none">{cleanLabel(label)}</span>
       </Link>
     )
   }
 
   return (
-    <aside className="w-64 flex flex-col shrink-0 select-none transition-colors" style={{ background: bg, color: textColor }}>
+    <aside
+      className="w-60 flex flex-col shrink-0 select-none"
+      style={{
+        background: bg,
+        borderRight: `1px solid ${borderClr}`,
+        color: textColor,
+      }}
+    >
       {/* Brand */}
-      <div className="px-5 py-4" style={{ borderBottom: `1px solid ${dividerClr}` }}>
+      <div
+        className="px-4 py-4 flex items-center gap-3"
+        style={{ borderBottom: `1px solid ${borderClr}` }}
+      >
         {logoUrl ? (
-          <img src={logoUrl} alt={tenantName} className="h-8 object-contain" />
+          <img src={logoUrl} alt={tenantName} className="h-7 max-w-[140px] object-contain" />
         ) : (
-          <div className="flex items-center gap-2.5">
+          <>
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm shrink-0"
-              style={{ background: primaryColor }}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}bb)`,
+                boxShadow: isDarkMode ? `0 0 12px ${primaryColor}40` : 'none',
+              }}
             >
               {tenantName[0]}
             </div>
-            <div>
-              <p className="text-sm font-bold leading-tight tracking-tight">{tenantName}</p>
-              <p className="text-[11px] font-medium uppercase tracking-widest" style={{ color: mutedText }}>HRMS</p>
+            <div className="min-w-0">
+              <p
+                className="text-[13px] font-semibold leading-tight truncate"
+                style={{ color: textColor }}
+              >
+                {tenantName}
+              </p>
+              <p className="text-[10px] font-medium tracking-widest uppercase" style={{ color: labelColor }}>
+                HRMS
+              </p>
             </div>
-          </div>
+          </>
         )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-3 overflow-y-auto space-y-0.5">
+      <nav className="flex-1 px-2.5 py-3 overflow-y-auto space-y-0.5">
         <NavLink navKey="dashboard" label="Dashboard" />
 
         {navItems.map(({ key, label }) => (
           <NavLink key={key} navKey={key} label={label} />
         ))}
 
-        {/* Self-Service */}
-        <div className="pt-3 mt-1" style={{ borderTop: `1px solid ${dividerClr}` }}>
-          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: mutedText }}>
+        {/* My Portal */}
+        <div className="pt-4 mt-1" style={{ borderTop: `1px solid ${borderClr}` }}>
+          <p
+            className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em]"
+            style={{ color: labelColor }}
+          >
             My Portal
           </p>
           {[
@@ -212,29 +270,38 @@ export default function TenantSidebar({
       {/* User section */}
       <div
         ref={dropdownRef}
-        className="relative px-3 pb-4 pt-3"
-        style={{ borderTop: `1px solid ${dividerClr}` }}
+        className="relative px-2.5 pb-3 pt-2"
+        style={{ borderTop: `1px solid ${borderClr}` }}
       >
         {open && (
           <div
-            className="absolute bottom-full left-3 right-3 mb-2 rounded-xl overflow-hidden shadow-2xl"
-            style={{ background: bg, border: `1px solid ${dividerClr}` }}
+            className="absolute bottom-full left-2 right-2 mb-2 rounded-xl overflow-hidden"
+            style={{
+              background: isDarkMode ? '#0d1427' : '#ffffff',
+              border: `1px solid ${borderClr}`,
+              boxShadow: isDarkMode
+                ? '0 -8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)'
+                : '0 -4px 24px rgba(0,0,0,0.12)',
+            }}
           >
             <Link
               href="/tenant/settings"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-3 text-sm transition"
+              className="flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] transition-colors"
               style={{ color: textColor }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = hoverBg }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             >
-              <Icon name="gear" className="w-4 h-4 shrink-0" />
+              <span style={{ color: mutedText }}><Icon name="gear" className="w-4 h-4 shrink-0" /></span>
               Settings
             </Link>
-            <div style={{ borderTop: `1px solid ${dividerClr}` }} />
+            <div style={{ height: '1px', background: borderClr }} />
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition text-left"
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] text-left transition-colors"
+              style={{ color: '#f87171' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             >
               <Icon name="logout" className="w-4 h-4 shrink-0" />
               Sign out
@@ -244,25 +311,28 @@ export default function TenantSidebar({
 
         <button
           onClick={() => setOpen(v => !v)}
-          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition text-left"
-          style={{ background: open ? hoverBg : `${hoverBg.replace('0.05', '0.03').replace('0.10', '0.07')}` }}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-colors text-left"
+          style={{ background: open ? hoverBg : 'transparent' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = hoverBg }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = open ? hoverBg : 'transparent' }}
         >
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
-            style={{ background: primaryColor }}
+            className="w-7 h-7 rounded-full flex items-center justify-center text-white font-semibold text-xs shrink-0"
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}bb)`,
+              boxShadow: isDarkMode ? `0 0 8px ${primaryColor}50` : 'none',
+            }}
           >
             {userInitial}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium truncate" style={{ color: textColor }}>{userEmail}</p>
+            <p className="text-[12px] font-medium truncate" style={{ color: textColor }}>{userEmail}</p>
             <p className="text-[11px]" style={{ color: mutedText }}>{ROLE_LABELS[userRole] ?? userRole}</p>
           </div>
           <svg
-            className="w-3.5 h-3.5 shrink-0 transition-transform"
+            className="w-3 h-3 shrink-0 transition-transform duration-200"
             style={{ color: mutedText, transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
           </svg>

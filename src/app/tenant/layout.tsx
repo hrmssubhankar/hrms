@@ -222,8 +222,8 @@ export default async function TenantLayout({ children }: { children: React.React
         body { font-family: var(--font); }
       `}</style>
 
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
-        {/* Sidebar — client component with active highlighting */}
+      <div className="flex h-screen bg-[#f3f4f8] dark:bg-[#050817] overflow-hidden">
+        {/* Sidebar */}
         <TenantSidebar
           navItems={navItems}
           sidebarBg={sidebarBg}
@@ -238,17 +238,20 @@ export default async function TenantLayout({ children }: { children: React.React
 
         {/* Main area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top bar */}
-          <header
-            className="h-14 flex items-center justify-between px-6 bg-white dark:bg-gray-900 shadow-sm shrink-0"
-            style={{ borderBottom: `3px solid ${primaryColor}` }}
-          >
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{tenantName}</span>
+          {/* Top bar — clean, borderless, premium */}
+          <header className="h-12 flex items-center justify-between px-5 bg-white/80 dark:bg-[#070c1a]/90 backdrop-blur-md shrink-0 border-b border-black/[0.06] dark:border-white/[0.05]">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-1.5 h-4 rounded-full"
+                style={{ background: `linear-gradient(180deg, ${primaryColor}, ${primaryColor}60)` }}
+              />
+              <span className="text-[13px] font-semibold text-gray-800 dark:text-gray-100 tracking-tight">{tenantName}</span>
+            </div>
 
-            <div className="flex items-center gap-1.5">
-              <ThemeToggle className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition" />
+            <div className="flex items-center gap-1">
+              <ThemeToggle className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-amber-500 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition" />
               <NotificationBell primaryColor={primaryColor} />
-              <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
+              <div className="w-px h-4 bg-gray-200 dark:bg-white/[0.08] mx-1" />
               <TenantUserDropdown
                 email={userEmail}
                 role={userRole}
@@ -260,7 +263,7 @@ export default async function TenantLayout({ children }: { children: React.React
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-950">
+          <main className="flex-1 overflow-y-auto p-5 bg-[#f3f4f8] dark:bg-[#050817]">
             {children}
           </main>
         </div>

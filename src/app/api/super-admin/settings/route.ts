@@ -51,7 +51,7 @@ export async function GET() {
 
   const result = await db.execute(sql`SELECT key, value FROM platform_config`)
   const stored: Record<string, unknown> = {}
-  for (const row of result as unknown as { key: string; value: unknown }[]) {
+  for (const row of (result as unknown as { rows: { key: string; value: unknown }[] }).rows) {
     stored[row.key] = row.value
   }
 
