@@ -120,6 +120,40 @@ function MiniBar({ items }: { items: { label: string; value: number; color: stri
   )
 }
 
+// ── Activity feed types & helpers ─────────────────────────────────────────────
+type ActivityItem = {
+  id: string
+  action: string
+  resource: string
+  resourceId: string | null
+  newValues: Record<string, unknown> | null
+  createdAt: string
+  actorFirst: string | null
+  actorLast: string | null
+}
+
+function describeActivity(item: ActivityItem): { icon: string; text: string } {
+  const actor = item.actorFirst ? `${item.actorFirst} ${item.actorLast}` : 'System'
+  const res = item.resource.replace(/_/g, ' ')
+  switch (item.action) {
+    case 'create': return { icon: '➕', text: `${actor} added a ${res}` }
+    case 'update': return { icon: '✏️', text: `${actor} updated a ${res}` }
+    case 'delete': return { icon: '🗑️', text: `${actor} removed a ${res}` }
+    case 'approve': return { icon: '✅', text: `${actor} approved a ${res}` }
+    case 'reject': return { icon: '❌', text: `${actor} rejected a ${res}` }
+    case 'login': return { icon: '🔑', text: `${actor} logged in` }
+    default: return { icon: '📋', text: `${actor} performed ${item.action} on ${res}` }
+  }
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
+}
+
 // ── Personal dashboard types ───────────────────────────────────────────────────
 type LeaveRequest = { id: string; leaveType: string; startDate: string; endDate: string; totalDays: number; status: string }
 type PublicHoliday = { name: string; date: string; country: string }
@@ -361,6 +395,7 @@ export default function DashboardPage() {
   const [primaryColor,  setPrimaryColor]  = useState('#6d28d9')
   const [greetingText,  setGreetingText]  = useState('')
   const [celebrations,  setCelebrations]  = useState<Celebration[]>([])
+  const [activity,      setActivity]      = useState<ActivityItem[]>([])
 
   useEffect(() => {
     // Greeting is computed client-side only to avoid SSR/CSR hydration mismatch
@@ -386,6 +421,11 @@ export default function DashboardPage() {
     }).catch(() => {})
 
     loadDashboard()
+    // Activity feed (fire-and-forget; failure is silent)
+    fetchWithAuth('/api/tenant/activity')
+      .then(r => r.ok ? r.json() : [])
+      .then(setActivity)
+      .catch(() => {})
     // Celebrations widget (fire-and-forget; failure is silent)
     fetchWithAuth('/api/tenant/dashboard/celebrations')
       .then(r => r.ok ? r.json() : { celebrations: [] })
@@ -706,6 +746,32 @@ export default function DashboardPage() {
           </div>
         </>
       )}
+
+      {/* ── Recent Activity feed ── */}
+      <div className="card-premium p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
+          <Link href="/tenant/audit-logs" className="text-xs text-indigo-500 hover:text-indigo-700">View all →</Link>
+        </div>
+        {activity.length === 0 ? (
+          <p className="text-sm text-gray-400 py-4 text-center">No recent activity</p>
+        ) : (
+          <div className="space-y-3">
+            {activity.slice(0, 8).map(item => {
+              const { icon, text } = describeActivity(item)
+              return (
+                <div key={item.id} className="flex items-start gap-3">
+                  <span className="text-base flex-shrink-0 mt-0.5">{icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 truncate">{text}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{timeAgo(item.createdAt)}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
 
       {/* ── Celebrations widget ── */}
       {celebrations.length > 0 && (

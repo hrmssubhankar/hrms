@@ -127,8 +127,9 @@ export default function DocumentsPage() {
   const [loading,    setLoading]    = useState(true)
   const [showForm,   setShowForm]   = useState(false)
   const [saving,     setSaving]     = useState(false)
-  const [filterCat,  setFilterCat]  = useState('')
-  const [filterStat, setFilterStat] = useState('')
+  const [filterCat,    setFilterCat]    = useState('')
+  const [filterStat,   setFilterStat]   = useState('')
+  const [expiryFilter, setExpiryFilter] = useState(false)
   const [search,     setSearch]     = useState('')
   const [deleting,   setDeleting]   = useState<string | null>(null)
   const [confirmState, setConfirmState] = useState<ConfirmState>(null)
@@ -140,21 +141,22 @@ export default function DocumentsPage() {
     fileName: '', fileSizeBytes: 0, mimeType: '', expiryDate: '', notes: '',
   })
 
-  const load = useCallback(async (cat = filterCat, st = filterStat) => {
+  const load = useCallback(async (cat = filterCat, st = filterStat, expiring = expiryFilter) => {
     setLoading(true)
     const p = new URLSearchParams()
-    if (cat) p.set('category', cat)
-    if (st)  p.set('status', st)
+    if (cat)     p.set('category', cat)
+    if (st)      p.set('status', st)
+    if (expiring) p.set('expiring', '1')
     const data = await fetchWithAuth(`/api/tenant/documents?${p}`).then(r => r.json())
     setDocs(data.documents ?? [])
     setStats(data.stats ?? { total:0, active:0, expired:0, expiringSoon:0, pendingReview:0 })
     setLoading(false)
-  }, [filterCat, filterStat])
+  }, [filterCat, filterStat, expiryFilter])
 
   useEffect(() => {
     load()
     fetchWithAuth('/api/tenant/employees?status=active&limit=500').then(r => r.json()).then(d => setEmployees(d.employees ?? []))
-  }, [])
+  }, [load])
 
   async function create(e: React.FormEvent) {
     e.preventDefault()
@@ -414,8 +416,18 @@ export default function DocumentsPage() {
           <option value="expired">Expired</option>
           <option value="archived">Archived</option>
         </select>
-        {(filterCat || filterStat || search) && (
-          <button onClick={() => { setFilterCat(''); setFilterStat(''); setSearch(''); load('', '') }}
+        <button
+          onClick={() => { const next = !expiryFilter; setExpiryFilter(next); load(filterCat, filterStat, next) }}
+          className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors whitespace-nowrap ${
+            expiryFilter
+              ? 'bg-amber-500 text-white border-amber-500'
+              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-amber-400 hover:text-amber-600'
+          }`}
+        >
+          ⚠️ Expiring soon
+        </button>
+        {(filterCat || filterStat || search || expiryFilter) && (
+          <button onClick={() => { setFilterCat(''); setFilterStat(''); setSearch(''); setExpiryFilter(false); load('', '', false) }}
             className="text-xs text-gray-600 dark:text-gray-400 hover:text-white px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg">
             Clear
           </button>

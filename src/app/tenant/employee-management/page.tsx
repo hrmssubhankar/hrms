@@ -207,6 +207,9 @@ export default function EmployeeManagementPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const PAGE_SIZE = 50
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkLoading, setBulkLoading] = useState(false)
 
   // Fetch screening expiry data
   useEffect(() => {
@@ -237,6 +240,7 @@ export default function EmployeeManagementPage() {
       const res  = await fetchWithAuth(`/api/tenant/employees?${params}`)
       if (res.status === 403) { setDenied(true); setLoading(false); return }
       const data = await res.json()
+      setSelected(new Set())
       setEmployees(data.employees ?? [])
       setTotalPages(data.pages ?? 1)
       setTotalCount(data.total ?? 0)
@@ -248,6 +252,48 @@ export default function EmployeeManagementPage() {
   }, [debouncedSearch, status, empType, page])
 
   useEffect(() => { fetchEmployees() }, [fetchEmployees])
+
+  async function toggleStatus(id: string, currentIsActive: boolean) {
+    setTogglingId(id)
+    try {
+      const res = await fetchWithAuth(`/api/tenant/employees/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !currentIsActive }),
+      })
+      if (res.ok) {
+        setEmployees(prev => prev.map(e => e.id === id ? { ...e, isActive: !e.isActive } : e))
+      }
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
+  async function bulkDeactivate() {
+    setBulkLoading(true)
+    try {
+      await Promise.all([...selected].map(id =>
+        fetchWithAuth(`/api/tenant/employees/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isActive: false }),
+        })
+      ))
+      setSelected(new Set())
+      fetchEmployees()
+    } finally { setBulkLoading(false) }
+  }
+
+  function bulkExport() {
+    const rows = employees.filter(e => selected.has(e.id))
+    exportCsv({ filename: 'selected-employees', columns: [
+      { header: 'First Name', key: 'firstName' },
+      { header: 'Last Name',  key: 'lastName' },
+      { header: 'Email',      key: 'email' },
+      { header: 'Number',     key: 'employeeNumber' },
+      { header: 'Status',     key: 'isActive', format: (v: unknown) => v ? 'Active' : 'Inactive' },
+    ], rows })
+  }
 
   function handleExport() {
     exportCsv({
@@ -404,10 +450,31 @@ export default function EmployeeManagementPage() {
             )}
           </div>
         ) : (
+          <>{selected.size > 0 && (
+            <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800 flex items-center gap-3">
+              <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{selected.size} selected</span>
+              <PermissionGate permission="employees:write">
+                <button onClick={bulkDeactivate} disabled={bulkLoading} className="px-3 py-1 text-xs rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 disabled:opacity-50">
+                  {bulkLoading ? 'Working…' : 'Deactivate'}
+                </button>
+              </PermissionGate>
+              <button onClick={bulkExport} className="px-3 py-1 text-xs rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50">
+                Export selected
+              </button>
+              <button onClick={() => setSelected(new Set())} className="ml-auto text-xs text-indigo-500 hover:text-indigo-700">Clear</button>
+            </div>
+          )}
           <div className="table-responsive">
             <table className="table-premium">
               <thead>
                 <tr>
+                  <th className="w-8 px-3">
+                    <input type="checkbox"
+                      checked={employees.length > 0 && selected.size === employees.length}
+                      onChange={e => setSelected(e.target.checked ? new Set(employees.map(e => e.id)) : new Set())}
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                  </th>
                   {['Emp #', 'Name', 'Role / Dept', 'Type', 'Entity', 'Start Date', 'Compliance', 'Status', ''].map(h => (
                     <th key={h} className="whitespace-nowrap">{h}</th>
                   ))}
@@ -431,6 +498,17 @@ export default function EmployeeManagementPage() {
                       onClick={() => router.push(`/tenant/employee-management/${emp.id}`)}
                       className="cursor-pointer"
                     >
+                      <td className="px-3" onClick={e => e.stopPropagation()}>
+                        <input type="checkbox"
+                          checked={selected.has(emp.id)}
+                          onChange={e => setSelected(prev => {
+                            const s = new Set(prev)
+                            e.target.checked ? s.add(emp.id) : s.delete(emp.id)
+                            return s
+                          })}
+                          className="rounded border-gray-300 dark:border-gray-600"
+                        />
+                      </td>
                       <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{emp.employeeNumber}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -475,9 +553,26 @@ export default function EmployeeManagementPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex w-2 h-2 rounded-full ${emp.isActive ? 'bg-green-500' : 'bg-gray-300'}`} />
-                        <span className="ml-1.5 text-xs text-gray-500 dark:text-gray-400">{emp.isActive ? 'Active' : 'Inactive'}</span>
+                      <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                        <PermissionGate permission="employees:write" fallback={
+                          <span className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                            <span className={`w-1.5 h-1.5 rounded-full ${emp.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                            {emp.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        }>
+                          <button
+                            onClick={() => toggleStatus(emp.id, emp.isActive)}
+                            disabled={togglingId === emp.id}
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium transition-all ${
+                              emp.isActive
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                                : 'bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'
+                            } ${togglingId === emp.id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${emp.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                            {togglingId === emp.id ? '…' : emp.isActive ? 'Active' : 'Inactive'}
+                          </button>
+                        </PermissionGate>
                       </td>
                       <td className="px-4 py-3">
                         <Link
@@ -516,6 +611,7 @@ export default function EmployeeManagementPage() {
               )}
             </div>
           </div>
+          </>
         )}
       </div>
     </div>

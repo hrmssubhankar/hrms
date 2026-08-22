@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 import Icon, { type IconName } from '@/components/ui/Icon'
 
-type NavItem = { key: string; label: string }
+type NavItem = { key: string; label: string; badge?: number }
 
 type Props = {
   navItems:       NavItem[]
@@ -100,9 +100,17 @@ export default function TenantSidebar({
 }: Props) {
   const pathname  = usePathname()
   const router    = useRouter()
-  const [open, setOpen]     = useState(false)
-  const [isDark, setIsDark] = useState(false)
+  const [open, setOpen]         = useState(false)
+  const [isDark, setIsDark]     = useState(false)
+  const [expiryCount, setExpiryCount] = useState(0)
   const dropdownRef         = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch('/api/tenant/documents/expiry-count')
+      .then(r => r.ok ? r.json() : { count: 0 })
+      .then(d => setExpiryCount(d.count ?? 0))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const check = () => setIsDark(document.documentElement.classList.contains('dark'))
@@ -141,7 +149,7 @@ export default function TenantSidebar({
 
   const isDashboard = pathname === '/tenant/dashboard' || pathname === '/tenant'
 
-  function NavLink({ navKey, label }: { navKey: string; label: string }) {
+  function NavLink({ navKey, label, badge }: { navKey: string; label: string; badge?: number }) {
     const active = navKey === 'dashboard' ? isDashboard : isActive(navKey)
     const icon   = NAV_ICONS[navKey] ?? 'document'
 
@@ -194,6 +202,11 @@ export default function TenantSidebar({
           />
         </span>
         <span className="truncate leading-none">{cleanLabel(label)}</span>
+        {badge !== undefined && badge > 0 && (
+          <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full bg-red-500 text-white">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
       </Link>
     )
   }
@@ -244,8 +257,8 @@ export default function TenantSidebar({
       <nav className="flex-1 px-2.5 py-3 overflow-y-auto space-y-0.5">
         <NavLink navKey="dashboard" label="Dashboard" />
 
-        {navItems.map(({ key, label }) => (
-          <NavLink key={key} navKey={key} label={label} />
+        {navItems.map(({ key, label, badge }) => (
+          <NavLink key={key} navKey={key} label={label} badge={key === 'documents' ? (expiryCount || badge) : badge} />
         ))}
 
         {/* My Portal */}
