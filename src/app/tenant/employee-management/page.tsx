@@ -174,10 +174,10 @@ type Employee = {
 }
 
 const COMPLIANCE_BADGE: Record<string, { label: string; cls: string }> = {
-  green:   { label: 'Compliant',    cls: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' },
-  amber:   { label: 'Review',       cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' },
-  red:     { label: 'Non-Compliant',cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
-  pending: { label: 'Pending',      cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  green:   { label: 'Compliant',    cls: 'badge badge-green' },
+  amber:   { label: 'Review',       cls: 'badge badge-amber' },
+  red:     { label: 'Non-Compliant',cls: 'badge badge-red' },
+  pending: { label: 'Pending',      cls: 'badge badge-gray' },
 }
 
 const EMP_TYPE_LABEL: Record<string, string> = {
@@ -247,7 +247,7 @@ export default function EmployeeManagementPage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Employees</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your workforce</p>
       </div>
-      <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl gap-3">
+      <div className="flex flex-col items-center justify-center h-64 card-premium gap-3">
         <span className="text-4xl">👥</span>
         <p className="text-gray-900 dark:text-white font-semibold">Access Restricted</p>
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs">
@@ -269,8 +269,8 @@ export default function EmployeeManagementPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Employees</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="page-premium-title">Employees</h1>
+          <p className="page-premium-subtitle mt-0.5">
             Manage your workforce
           </p>
         </div>
@@ -301,7 +301,7 @@ export default function EmployeeManagementPage() {
           { label: 'Inactive', value: inactiveCount,     icon: '⏸', cls: 'text-gray-500' },
           { label: 'NDIS',     value: ndisCount,         icon: '', cls: 'text-purple-600 dark:text-purple-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.cls}`}>{s.value}</p>
           </div>
@@ -309,7 +309,7 @@ export default function EmployeeManagementPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 flex flex-wrap gap-3">
+      <div className="card-premium p-4 flex flex-wrap gap-3">
         <input
           type="text"
           placeholder="Search name, email, emp #…"
@@ -347,7 +347,7 @@ export default function EmployeeManagementPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+      <div className="card-premium overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
         ) : employees.length === 0 ? (
@@ -369,34 +369,32 @@ export default function EmployeeManagementPage() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+          <div className="table-responsive">
+            <table className="table-premium">
+              <thead>
                 <tr>
                   {['Emp #', 'Name', 'Role / Dept', 'Type', 'Entity', 'Start Date', 'Compliance', 'Status', ''].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                      {h}
-                    </th>
+                    <th key={h} className="whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+              <tbody>
                 {employees.map(emp => {
                   const badge = COMPLIANCE_BADGE[emp.complianceStatus] ?? COMPLIANCE_BADGE.pending
                   const fullName = [emp.firstName, emp.lastName].join(' ')
                   const scrExp = screeningExpiry[emp.id]
                   const scrBadge = scrExp
                     ? scrExp.daysUntil <= 14
-                      ? { label: `🛡 Expires in ${scrExp.daysUntil}d`, cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' }
+                      ? { label: `🛡 Expires in ${scrExp.daysUntil}d`, cls: 'badge badge-red' }
                       : scrExp.daysUntil <= 30
-                        ? { label: `🛡 Expires in ${scrExp.daysUntil}d`, cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' }
+                        ? { label: `🛡 Expires in ${scrExp.daysUntil}d`, cls: 'badge badge-amber' }
                         : null
                     : null
                   return (
                     <tr
                       key={emp.id}
                       onClick={() => router.push(`/tenant/employee-management/${emp.id}`)}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition"
+                      className="cursor-pointer"
                     >
                       <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{emp.employeeNumber}</td>
                       <td className="px-4 py-3">
@@ -460,7 +458,7 @@ export default function EmployeeManagementPage() {
                 })}
               </tbody>
             </table>
-            <div className="px-4 py-3 border-t border-gray-50 dark:border-gray-800 text-xs text-gray-600 dark:text-gray-400">
+            <div className="px-4 py-3 border-t border-black/[0.04] dark:border-white/[0.04] text-xs text-gray-500 dark:text-gray-400">
               {employees.length} employee{employees.length !== 1 ? 's' : ''} shown
             </div>
           </div>

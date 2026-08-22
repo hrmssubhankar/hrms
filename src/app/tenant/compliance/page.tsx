@@ -33,10 +33,10 @@ const CHECK_TYPES = [
 ]
 
 const STATUS_BADGE: Record<string, string> = {
-  green:   'bg-green-900/60 text-green-300 border-green-800',
-  amber:   'bg-amber-900/60 text-amber-300 border-amber-800',
-  red:     'bg-red-900/60 text-red-300 border-red-800',
-  pending: 'bg-gray-800 text-gray-400 border-gray-700',
+  green:   'badge badge-green',
+  amber:   'badge badge-amber',
+  red:     'badge badge-red',
+  pending: 'badge badge-gray',
 }
 const STATUS_DOT: Record<string, string> = {
   green: 'bg-green-400', amber: 'bg-amber-400', red: 'bg-red-400', pending: 'bg-gray-500',
@@ -62,8 +62,8 @@ export default function CompliancePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Compliance Centre</h1>
-        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Pre-employment screening, compliance tracking & lock exceptions</p>
+        <h1 className="page-premium-title">Compliance Centre</h1>
+        <p className="page-premium-subtitle mt-1">Pre-employment screening, compliance tracking & lock exceptions</p>
       </div>
 
       {/* Tab bar */}
@@ -152,7 +152,7 @@ function ScreeningTab() {
           { label: 'Expiring <30d', value: stats.expiring, color: 'text-amber-400' },
           { label: 'Expired/Red',  value: stats.red + stats.expired, color: 'text-red-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -180,7 +180,7 @@ function ScreeningTab() {
 
       {/* Add form */}
       {showForm && (
-        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={submit} className="card-premium border-purple-500/30 p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">New Screening Check</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -224,22 +224,23 @@ function ScreeningTab() {
 
       {/* Table */}
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+        <div className="card-premium overflow-hidden">
           {records.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-3xl mb-2"></p>
               <p className="text-gray-600 dark:text-gray-400 text-sm">No screening records. Add the first check above.</p>
             </div>
           ) : (
-            <table className="w-full text-sm">
+          <div className="table-responsive">
+            <table className="table-premium">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Employee</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Check Type</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Ref No.</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Expiry</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Action</th>
+                <tr>
+                  <th>Employee</th>
+                  <th>Check Type</th>
+                  <th>Status</th>
+                  <th>Ref No.</th>
+                  <th>Expiry</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,7 +249,7 @@ function ScreeningTab() {
                   const expiryWarning = days !== null && days >= 0 && days <= 30
                   const expired       = days !== null && days < 0
                   return (
-                    <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
+                    <tr key={r.id} className="cursor-default">
                       <td className="px-5 py-3.5">
                         <p className="text-white font-medium text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
                         <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
@@ -262,19 +263,18 @@ function ScreeningTab() {
                           <div className="flex gap-1">
                             {(['pending','green','amber','red'] as const).map(s => (
                               <button key={s} onClick={() => updateStatus(r.id, s)}
-                                className={`text-xs px-2 py-1 rounded border ${STATUS_BADGE[s]} hover:opacity-80`}>
+                                className={`${STATUS_BADGE[s]} hover:opacity-80 cursor-pointer`}>
                                 {statusLabel(s)}
                               </button>
                             ))}
                           </div>
                         ) : (
-                          <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_BADGE[r.status] ?? STATUS_BADGE.pending}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[r.status] ?? 'bg-gray-500'}`} />
+                          <span className={`capitalize ${STATUS_BADGE[r.status] ?? STATUS_BADGE.pending}`}>
                             {statusLabel(r.status)}
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-3.5 text-gray-600 dark:text-gray-400 text-xs">{r.referenceNumber ?? '—'}</td>
+                      <td className="text-xs">{r.referenceNumber ?? '—'}</td>
                       <td className="px-5 py-3.5 text-xs">
                         {r.expiryDate ? (
                           <span className={expired ? 'text-red-400 font-medium' : expiryWarning ? 'text-amber-400 font-medium' : 'text-gray-400'}>
@@ -295,6 +295,7 @@ function ScreeningTab() {
                 })}
               </tbody>
             </table>
+          </div>
           )}
         </div>
       )}
@@ -357,7 +358,7 @@ function TrackingTab() {
           { label: 'Amber', value: stats.amber,   color: 'text-amber-400' },
           { label: 'Red',   value: stats.red,     color: 'text-red-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -372,7 +373,7 @@ function TrackingTab() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={submit} className="card-premium border-purple-500/30 p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">New Compliance Item</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -404,35 +405,35 @@ function TrackingTab() {
       )}
 
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+        <div className="card-premium overflow-hidden">
           {records.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-3xl mb-2"></p>
               <p className="text-gray-600 dark:text-gray-400 text-sm">No compliance tracking items yet.</p>
             </div>
           ) : (
-            <table className="w-full text-sm">
+          <div className="table-responsive">
+            <table className="table-premium">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Employee</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Item</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Due Date</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Last Checked</th>
-                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Update</th>
+                <tr>
+                  <th>Employee</th>
+                  <th>Item</th>
+                  <th>Status</th>
+                  <th>Due Date</th>
+                  <th>Last Checked</th>
+                  <th>Update</th>
                 </tr>
               </thead>
               <tbody>
                 {records.map(r => (
-                  <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
+                  <tr key={r.id}>
                     <td className="px-5 py-3.5">
                       <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
                       <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                     </td>
                     <td className="px-5 py-3.5 text-gray-600 dark:text-gray-300">{r.itemType}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_BADGE[r.status] ?? STATUS_BADGE.pending}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[r.status] ?? 'bg-gray-500'}`} />
+                      <span className={`capitalize ${STATUS_BADGE[r.status] ?? STATUS_BADGE.pending}`}>
                         {statusLabel(r.status)}
                       </span>
                     </td>
@@ -446,7 +447,7 @@ function TrackingTab() {
                       <div className="flex gap-1">
                         {(['green','amber','red'] as const).map(s => (
                           <button key={s} onClick={() => updateStatus(r.id, s)}
-                            className={`text-xs px-2 py-1 rounded border transition hover:opacity-80 ${STATUS_BADGE[s]} ${r.status === s ? 'ring-1 ring-white/30' : ''}`}>
+                            className={`${STATUS_BADGE[s]} transition hover:opacity-80 cursor-pointer ${r.status === s ? 'ring-1 ring-white/30' : ''}`}>
                             {s.charAt(0).toUpperCase() + s.slice(1)}
                           </button>
                         ))}
@@ -456,6 +457,7 @@ function TrackingTab() {
                 ))}
               </tbody>
             </table>
+          </div>
           )}
         </div>
       )}
@@ -524,7 +526,7 @@ function LockTab() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-amber-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={submit} className="card-premium border-amber-500/30 p-5 space-y-4">
           <h3 className="text-sm font-semibold text-amber-300">Grant Temporary Exception</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -555,8 +557,8 @@ function LockTab() {
         <div className="space-y-4">
           {active.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Active Exceptions ({active.length})</p>
-              <div className="bg-white dark:bg-gray-900 border border-amber-800/50 rounded-xl overflow-hidden">
+              <p className="section-label mb-2">Active Exceptions ({active.length})</p>
+              <div className="card-premium border-amber-500/30 overflow-hidden">
                 {active.map(r => (
                   <div key={r.id} className="flex items-center gap-4 px-5 py-4 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
                     <div className="flex-1">
@@ -579,8 +581,8 @@ function LockTab() {
 
           {inactive.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-400">Expired / Revoked</p>
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden opacity-60">
+              <p className="section-label mb-2">Expired / Revoked</p>
+              <div className="card-premium overflow-hidden opacity-60">
                 {inactive.slice(0,5).map(r => (
                   <div key={r.id} className="flex items-center gap-4 px-5 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
                     <div className="flex-1">
@@ -595,7 +597,7 @@ function LockTab() {
           )}
 
           {records.length === 0 && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-12 text-center">
+            <div className="card-premium py-12 text-center">
               <p className="text-3xl mb-2"></p>
               <p className="text-gray-600 dark:text-gray-400 text-sm">No lock exceptions on record.</p>
             </div>

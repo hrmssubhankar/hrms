@@ -150,10 +150,10 @@ const LEAVE_TYPE_LABEL: Record<string, string> = {
   long_service: 'Long Service', parental: 'Parental Leave', unpaid: 'Unpaid Leave', other: 'Other',
 }
 const LEAVE_STATUS_COLOR: Record<string, string> = {
-  pending:  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  cancelled:'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  pending:  'badge badge-amber',
+  approved: 'badge badge-green',
+  rejected: 'badge badge-red',
+  cancelled:'badge badge-gray',
 }
 
 function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }: {
@@ -211,7 +211,7 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
 
       {/* Leave balance summary */}
       {employeeLinked && leaveBalances.length > 0 && (
-        <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6">
+        <div className="card-premium p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Leave Balances — {new Date().getFullYear()}</h3>
             <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">Full details →</Link>
@@ -262,7 +262,7 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
       {/* Leave requests + upcoming holidays */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* My Leave */}
-        <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
+        <div className="card-premium p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white"> My Leave</h3>
             <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
@@ -303,7 +303,7 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
         </div>
 
         {/* Upcoming public holidays */}
-        <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
+        <div className="card-premium p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white"> Upcoming Holidays</h3>
             <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
@@ -330,11 +330,11 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
 
       {/* Personal module shortcuts */}
       <section>
-        <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">My Modules</h2>
+        <h2 className="section-label mb-3">My Modules</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {PERSONAL_SHORTCUTS.map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}
-              className="group bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] hover:border-black/10 dark:hover:border-white/10 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition-all hover:shadow-sm dark:hover:shadow-none hover:-translate-y-px">
+              className="group card-premium px-4 py-4 flex flex-col items-center gap-2 text-center transition-all hover:-translate-y-px hover:shadow-sm">
               <span className="text-2xl leading-none">{m.icon}</span>
               <span className="text-[12px] text-gray-500 dark:text-slate-400 group-hover:text-gray-800 dark:group-hover:text-white font-medium transition-colors">{m.label}</span>
             </Link>
@@ -476,13 +476,13 @@ export default function DashboardPage() {
       {loading && !data && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array(8).fill(0).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-5 h-28 animate-pulse" />
+            <div key={i} className="card-premium p-5 h-28 animate-pulse" />
           ))}
         </div>
       )}
 
       {error && (
-        <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-8 text-center">
+        <div className="card-premium p-8 text-center">
           <p className="text-gray-500 text-sm dark:text-gray-400">
             Could not load live stats ({error}). You may not have manager-level access.
           </p>
@@ -493,7 +493,7 @@ export default function DashboardPage() {
         <>
           {/* ── Headcount stats ── */}
           <section>
-            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">Workforce</h2>
+            <h2 className="section-label mb-3">Workforce</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {[
                 { label: 'Total', value: data.headcount.total, accent: null, href: '/tenant/employee-management' },
@@ -505,7 +505,7 @@ export default function DashboardPage() {
               ].map(s => (
                 <div
                   key={s.label}
-                  className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-4 hover:border-black/10 dark:hover:border-white/10 transition-colors"
+                  className="card-premium p-4 hover:border-black/10 dark:hover:border-white/10 transition-colors"
                   style={s.accent && s.label === 'Red Compliance' ? { borderColor: 'rgba(239,68,68,0.25)' } : {}}
                 >
                   {s.href ? (
@@ -531,7 +531,7 @@ export default function DashboardPage() {
 
           {/* ── Workforce breakdown ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
+            <div className="card-premium p-6 space-y-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">By Employment Type</h3>
               {data.headcount.byEmploymentType.length === 0
                 ? <p className="text-sm text-gray-600 dark:text-gray-400">No data yet</p>
@@ -542,7 +542,7 @@ export default function DashboardPage() {
                   }))} />
               }
             </div>
-            <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
+            <div className="card-premium p-6 space-y-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">By Entity</h3>
               {data.headcount.byEntity.length === 0
                 ? <p className="text-sm text-gray-600 dark:text-gray-400">No entity data yet — set entity on employee profiles</p>
@@ -565,9 +565,9 @@ export default function DashboardPage() {
 
           {/* ── Payroll ── */}
           <section>
-            <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">Payroll</h2>
+            <h2 className="section-label mb-3">Payroll</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
+              <div className="card-premium p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Last Pay Run</h3>
                   <Link href="/tenant/payroll" className="text-xs text-purple-400 hover:text-purple-300">View all →</Link>
@@ -596,7 +596,7 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
+              <div className="card-premium p-6 space-y-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Year to Date — {new Date().getFullYear()}</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {[
@@ -618,7 +618,7 @@ export default function DashboardPage() {
           {/* ── Leave / Holidays / Documents / WHS ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
+            <div className="card-premium p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Leave</h3>
                 <Link href="/tenant/leave" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
@@ -643,7 +643,7 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <div className="bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] rounded-xl p-6 space-y-4">
+            <div className="card-premium p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Holidays</h3>
                 <Link href="/tenant/public-holidays" className="text-xs text-purple-400 hover:text-purple-300">All →</Link>
@@ -664,7 +664,7 @@ export default function DashboardPage() {
               }
             </div>
 
-            <div className={`bg-white dark:bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.documents.expiredActive > 0 ? 'border-red-300 dark:border-red-700/40' : 'border-gray-200 dark:border-gray-800'}`}>
+            <div className={`card-premium p-6 space-y-4 ${data.documents.expiredActive > 0 ? 'border-red-300/50 dark:border-red-700/40' : ''}`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Documents</h3>
                 <Link href="/tenant/documents" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
@@ -681,7 +681,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className={`bg-white dark:bg-gray-900 border rounded-2xl p-6 space-y-4 ${data.incidents.openCritical > 0 ? 'border-red-300 dark:border-red-700/40' : 'border-gray-200 dark:border-gray-800'}`}>
+            <div className={`card-premium p-6 space-y-4 ${data.incidents.openCritical > 0 ? 'border-red-300/50 dark:border-red-700/40' : ''}`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">️ WHS</h3>
                 <Link href="/tenant/whs" className="text-xs text-purple-400 hover:text-purple-300">View →</Link>
@@ -710,11 +710,11 @@ export default function DashboardPage() {
       {/* ── Celebrations widget ── */}
       {celebrations.length > 0 && (
         <section>
-          <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">Upcoming Celebrations</h2>
+          <h2 className="section-label mb-3">Upcoming Celebrations</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {celebrations.map(c => (
               <div key={`${c.id}-${c.type}`}
-                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                className="card-premium px-4 py-3 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-xl shrink-0 overflow-hidden">
                   {c.photoUrl
                     ? <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
@@ -740,11 +740,11 @@ export default function DashboardPage() {
 
       {/* ── Module shortcuts ── */}
       <section>
-        <h2 className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.12em] mb-3">Modules</h2>
+        <h2 className="section-label mb-3">Modules</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {MODULE_SHORTCUTS.map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}
-              className="group bg-white dark:bg-[#0a0f1e] border border-black/[0.06] dark:border-white/[0.06] hover:border-black/10 dark:hover:border-white/10 rounded-xl px-4 py-4 flex flex-col items-center gap-2 text-center transition-all hover:shadow-sm dark:hover:shadow-none hover:-translate-y-px">
+              className="group card-premium px-4 py-4 flex flex-col items-center gap-2 text-center transition-all hover:-translate-y-px hover:shadow-sm">
               <span className="text-2xl leading-none">{m.icon}</span>
               <span className="text-[12px] text-gray-500 dark:text-slate-400 group-hover:text-gray-800 dark:group-hover:text-white font-medium transition-colors">{m.label}</span>
             </Link>

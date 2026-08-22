@@ -78,10 +78,10 @@ const MONTHS = ['January','February','March','April','May','June',
 const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
 const STATUS_STYLE: Record<string, string> = {
-  pending:   'bg-yellow-900/50 text-yellow-300 border-yellow-700',
-  approved:  'bg-green-900/50  text-green-300  border-green-700',
-  rejected:  'bg-red-900/50    text-red-300    border-red-700',
-  cancelled: 'bg-gray-800      text-gray-400   border-gray-700',
+  pending:   'badge badge-amber',
+  approved:  'badge badge-green',
+  rejected:  'badge badge-red',
+  cancelled: 'badge badge-gray',
 }
 
 const MANAGER_ROLES = ['director', 'hr_officer', 'operations_manager', 'team_leader', 'compliance_manager']
@@ -311,8 +311,8 @@ export default function LeavePage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Leave Management</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+          <h1 className="page-premium-title">Leave Management</h1>
+          <p className="page-premium-subtitle mt-0.5">
             {canApprove ? 'Review team leave requests, balances and calendar' : 'Submit and track your leave'}
           </p>
         </div>
@@ -372,7 +372,7 @@ export default function LeavePage() {
               { label: 'Cancelled',    value: stats.cancelled,         color: 'text-gray-500' },
               { label: 'Days Approved',value: stats.totalDaysApproved, color: 'text-purple-400' },
             ].map(s => (
-              <div key={s.label} className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl p-4">
+              <div key={s.label} className="card-premium p-4">
                 <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
                 <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
               </div>
@@ -433,7 +433,7 @@ export default function LeavePage() {
           {loadingReqs ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
           ) : requests.length === 0 ? (
-            <div className="text-center py-16 bg-gray-100 dark:bg-gray-800/50 rounded-2xl border border-gray-300 dark:border-gray-700">
+            <div className="text-center py-16 card-premium">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -452,7 +452,7 @@ export default function LeavePage() {
                 const isSelected   = selected.has(r.id)
                 const isPending    = r.status === 'pending'
                 return (
-                  <div key={r.id} className={`bg-gray-100 dark:bg-gray-800/70 border rounded-xl overflow-hidden transition ${isSelected ? 'border-purple-600' : 'border-gray-300 dark:border-gray-700'}`}>
+                  <div key={r.id} className={`card-premium overflow-hidden transition ${isSelected ? 'ring-2 ring-purple-600 border-purple-600' : ''}`}>
                     <div className="flex items-center gap-3 px-4 py-4">
                       {/* Checkbox — only for pending, managers only */}
                       {canApprove && isPending && (
@@ -485,7 +485,7 @@ export default function LeavePage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className={`text-xs px-2.5 py-1 rounded-full border font-medium capitalize ${STATUS_STYLE[r.status] ?? 'text-gray-400'}`}>
+                        <span className={`capitalize ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                           {r.status}
                         </span>
                         <span className="text-gray-600 text-xs dark:text-gray-400">{isExpanded ? '▲' : '▼'}</span>
@@ -589,7 +589,7 @@ export default function LeavePage() {
           </div>
 
           {!balLinked ? (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center">
+            <div className="card-premium p-10 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -613,7 +613,7 @@ export default function LeavePage() {
                   : 'text-green-400'
 
                 return (
-                  <div key={b.key} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-3">
+                  <div key={b.key} className="card-premium p-5 space-y-3">
                     <div className="flex items-center gap-2.5">
                       <span className="text-2xl">{b.emoji}</span>
                       <div>
@@ -712,7 +712,7 @@ export default function LeavePage() {
           {loadingCal ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading calendar…</div>
           ) : (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+            <div className="card-premium overflow-hidden">
               {/* Weekday headers */}
               <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-800">
                 {WEEKDAYS.map(d => (
