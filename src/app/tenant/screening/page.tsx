@@ -77,7 +77,7 @@ export default function ScreeningPage() {
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Screening & Checks</h1>
           <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">Police checks, WWCC, NDIS screening, working rights</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700">+ Add Check</button>
+        <button onClick={() => setShowCreate(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">+ Add Check</button>
       </div>
 
       {/* Stats */}
@@ -121,7 +121,7 @@ export default function ScreeningPage() {
               <p className="p-6 text-sm text-gray-600 dark:text-gray-400 text-center">No records found</p>
             ) : records.map(r => (
               <button key={r.id} onClick={() => setSelected(r)}
-                className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition  dark:border-gray-800${selected?.id === r.id ? 'bg-brand-50 border-l-2 border-l-brand-500' : ''}`}>
+                className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition  dark:border-gray-800${selected?.id === r.id ? 'bg-indigo-50 border-l-2 border-l-indigo-500' : ''}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate dark:text-white">{r.firstName} {r.lastName}</p>
@@ -232,7 +232,7 @@ export default function ScreeningPage() {
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowCreate(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 dark:text-gray-400 dark:border-gray-700">Cancel</button>
-              <button onClick={create} disabled={saving || !form.employeeId} className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">
+              <button onClick={create} disabled={saving || !form.employeeId} className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">
                 {saving ? 'Adding…' : 'Add Record'}
               </button>
             </div>

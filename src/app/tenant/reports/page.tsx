@@ -350,7 +350,7 @@ export default function ReportsPage() {
             <div className="space-y-1">
               {REPORTS.map(r => (
                 <button key={r.id} onClick={() => { setSelected(r.id); setRan(false); setData([]); setSummary({}) }}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition ${selected===r.id ? 'bg-brand-50 text-brand-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
+                  className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition ${selected===r.id ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
                   <span className="mr-2">{r.icon}</span>{r.label}
                 </button>
               ))}
@@ -368,7 +368,7 @@ export default function ReportsPage() {
               <input type="date" className="input-premium" value={dateTo} onChange={e => setDateTo(e.target.value)} />
             </div>
             <button onClick={run} disabled={loading}
-              className="w-full py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50">
+              className="w-full py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
               {loading ? 'Running…' : 'Run Report'}
             </button>
           </div>
@@ -382,7 +382,7 @@ export default function ReportsPage() {
                 <p className="text-5xl mb-4">{report.icon}</p>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{report.label}</h2>
                 <p className="text-sm text-gray-500 mt-1 mb-6 dark:text-gray-400">{report.description}</p>
-                <button onClick={run} className="px-6 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700">Run Report</button>
+                <button onClick={run} className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Run Report</button>
               </div>
             </div>
           ) : loading ? (

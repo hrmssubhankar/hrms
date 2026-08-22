@@ -36,7 +36,7 @@ export default function WorkforcePage() {
         {summary && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label:'Active Employees', value:summary.totalActive, cls:'text-brand-600' },
+              { label:'Active Employees', value:summary.totalActive, cls:'text-indigo-600' },
               { label:'Full-time', value:summary.fullTime, cls:'text-gray-900' },
               { label:'Part-time', value:summary.partTime, cls:'text-gray-900' },
               { label:'Casual', value:summary.casual, cls:'text-gray-900' },
