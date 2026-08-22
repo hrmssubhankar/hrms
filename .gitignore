@@ -61,3 +61,7 @@ drizzle/meta/
 api/**/appsettings.Development.json
 api/**/appsettings.Production.json
 api/**/secrets.json
+FETCH_HEAD
+check-users.ts
+fix-superadmin.ts
+hrms-premium-redesign.patch
