@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 type Review = {
   id: string; employeeId: string; reviewerId: string | null; type: string; status: string
@@ -115,6 +116,7 @@ export default function PerformancePage() {
 
   // ─── Shared ───────────────────────────────────────────────────────────────
   const [employees, setEmployees] = useState<Employee[]>([])
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const load = useCallback(async (s = search, st = filterStatus, t = filterType) => {
     setLoading(true)
@@ -248,9 +250,13 @@ export default function PerformancePage() {
   }
 
   async function deleteGoal(id: string) {
-    if (!confirm('Delete this goal?')) return
-    await fetchWithAuth(`/api/tenant/performance-goals?id=${id}`, { method: 'DELETE' })
-    loadGoals()
+    setConfirmState({
+      message: 'Delete this goal?',
+      onConfirm: async () => {
+        await fetchWithAuth(`/api/tenant/performance-goals?id=${id}`, { method: 'DELETE' })
+        loadGoals()
+      }
+    })
   }
 
   const empName = (id: string) => {
@@ -783,6 +789,7 @@ export default function PerformancePage() {
           )}
         </>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

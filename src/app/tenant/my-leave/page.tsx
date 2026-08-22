@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 type LeaveRequest = {
   id: string
@@ -104,6 +105,7 @@ export default function MyLeavePage() {
   // Cancel
   const [cancelling, setCancelling] = useState<string | null>(null)
   const [expanded,   setExpanded]   = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   // Tab
   const [tab, setTab] = useState<'history' | 'balances'>('history')
@@ -170,15 +172,20 @@ export default function MyLeavePage() {
   }
 
   async function cancelRequest(id: string) {
-    if (!confirm('Cancel this leave request?')) return
-    setCancelling(id)
-    await fetchWithAuth('/api/tenant/leave', {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, action: 'cancel' }),
+    setConfirmState({
+      message: 'Cancel this leave request?',
+      confirmLabel: 'Cancel Request',
+      onConfirm: async () => {
+        setCancelling(id)
+        await fetchWithAuth('/api/tenant/leave', {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, action: 'cancel' }),
+        })
+        setCancelling(null)
+        loadRequests()
+        if (tab === 'balances') loadBalances()
+      }
     })
-    setCancelling(null)
-    loadRequests()
-    if (tab === 'balances') loadBalances()
   }
 
   if (loading) {
@@ -504,6 +511,7 @@ export default function MyLeavePage() {
           </div>
         )
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

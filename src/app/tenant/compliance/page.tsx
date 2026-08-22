@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type ScreeningRecord = {
@@ -473,6 +474,7 @@ function LockTab() {
   const [showForm,  setShowForm]  = useState(false)
   const [saving,    setSaving]    = useState(false)
   const [form, setForm] = useState({ employeeId:'', reason:'', expiresAt:'' })
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -501,12 +503,17 @@ function LockTab() {
   }
 
   async function revoke(id: string) {
-    if (!confirm('Revoke this exception?')) return
-    await fetchWithAuth('/api/tenant/compliance/lock', {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, isActive: false }),
+    setConfirmState({
+      message: 'Revoke this exception?',
+      confirmLabel: 'Revoke',
+      onConfirm: async () => {
+        await fetchWithAuth('/api/tenant/compliance/lock', {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, isActive: false }),
+        })
+        load()
+      }
     })
-    load()
   }
 
   const active   = records.filter(r => r.isActive && new Date(r.expiresAt) > new Date())
@@ -604,6 +611,7 @@ function LockTab() {
           )}
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Link from 'next/link'
 
 type OnboardingRecord = {
@@ -67,6 +68,7 @@ export default function OnboardingPage() {
   const [filterStage,  setFilterStage]  = useState('')
   const [expanded,  setExpanded]  = useState<string | null>(null)
   const [deleting,  setDeleting]  = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const load = useCallback(async (s = search, fs = filterStatus, fg = filterStage) => {
     setLoading(true)
@@ -86,15 +88,19 @@ export default function OnboardingPage() {
   useEffect(() => { load() }, [])
 
   async function deleteRecord(id: string) {
-    if (!confirm('Delete this onboarding record? This cannot be undone.')) return
-    setDeleting(id)
-    await fetchWithAuth('/api/tenant/onboarding', {
-      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
+    setConfirmState({
+      message: 'Delete this onboarding record? This cannot be undone.',
+      onConfirm: async () => {
+        setDeleting(id)
+        await fetchWithAuth('/api/tenant/onboarding', {
+          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        })
+        setDeleting(null)
+        setExpanded(null)
+        load()
+      }
     })
-    setDeleting(null)
-    setExpanded(null)
-    load()
   }
 
   function progress(checklist: OnboardingRecord['checklist']) {
@@ -503,6 +509,7 @@ export default function OnboardingPage() {
           )}
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

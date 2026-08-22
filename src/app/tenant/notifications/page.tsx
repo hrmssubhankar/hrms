@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 type Notification = {
   id: string
@@ -57,6 +58,7 @@ export default function NotificationsPage() {
   const [daysAhead,  setDaysAhead]  = useState(7)
   const [result,     setResult]     = useState<AlertResult | null>(null)
   const [error,      setError]      = useState('')
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   async function load() {
     setLoading(true)
@@ -86,9 +88,13 @@ export default function NotificationsPage() {
   }
 
   async function clearAll() {
-    if (!confirm('Clear all notifications? This cannot be undone.')) return
-    await fetchWithAuth('/api/tenant/notifications', { method: 'DELETE' })
-    setNotifications([])
+    setConfirmState({
+      message: 'Clear all notifications? This cannot be undone.',
+      onConfirm: async () => {
+        await fetchWithAuth('/api/tenant/notifications', { method: 'DELETE' })
+        setNotifications([])
+      }
+    })
   }
 
   async function runExpiryCheck() {
@@ -290,6 +296,7 @@ export default function NotificationsPage() {
           </div>
         )}
       </div>
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

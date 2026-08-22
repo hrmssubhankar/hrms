@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import FileUpload, { type UploadResult } from '@/components/ui/FileUpload'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -93,6 +94,7 @@ export default function MyDocumentsPage() {
   const [saveError,  setSaveError]  = useState<string | null>(null)
   const [withdrawing, setWithdrawing] = useState<string | null>(null)
   const [withdrawError, setWithdrawError] = useState('')
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
   const [form, setForm] = useState({
     title: '', category: 'Police Check', blobUrl: '',
     fileName: '', fileSizeBytes: 0, mimeType: '',
@@ -141,17 +143,21 @@ export default function MyDocumentsPage() {
   }
 
   async function withdraw(id: string) {
-    if (!confirm('Withdraw this document? It will be permanently deleted.')) return
-    setWithdrawing(id)
-    try {
-      const res = await fetchWithAuth(`/api/tenant/my-documents?id=${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        setDocs(d => d.filter(x => x.id !== id))
-      } else {
-        const data = await res.json().catch(() => ({}))
-        setWithdrawError(data.error ?? 'Could not withdraw document')
+    setConfirmState({
+      message: 'Withdraw this document? It will be permanently deleted.',
+      onConfirm: async () => {
+        setWithdrawing(id)
+        try {
+          const res = await fetchWithAuth(`/api/tenant/my-documents?id=${id}`, { method: 'DELETE' })
+          if (res.ok) {
+            setDocs(d => d.filter(x => x.id !== id))
+          } else {
+            const data = await res.json().catch(() => ({}))
+            setWithdrawError(data.error ?? 'Could not withdraw document')
+          }
+        } finally { setWithdrawing(null) }
       }
-    } finally { setWithdrawing(null) }
+    })
   }
 
   // Split docs by urgency
@@ -384,6 +390,7 @@ function DocSection({
           )
         })}
       </div>
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

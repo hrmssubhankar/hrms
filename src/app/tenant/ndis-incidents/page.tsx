@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -303,6 +304,7 @@ export default function NDISIncidentsPage() {
   const [showModal, setShowModal] = useState(false)
   const [editIncident, setEditIncident] = useState<Incident | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const fetchIncidents = useCallback(async () => {
     setLoading(true)
@@ -323,11 +325,15 @@ export default function NDISIncidentsPage() {
   useEffect(() => { fetchIncidents() }, [fetchIncidents])
 
   async function deleteIncident(id: string) {
-    if (!confirm('Delete this incident? This cannot be undone.')) return
-    setDeleting(id)
-    await fetchWithAuth(`/api/tenant/ndis/incidents/${id}`, { method: 'DELETE' })
-    setDeleting(null)
-    fetchIncidents()
+    setConfirmState({
+      message: 'Delete this incident? This cannot be undone.',
+      onConfirm: async () => {
+        setDeleting(id)
+        await fetchWithAuth(`/api/tenant/ndis/incidents/${id}`, { method: 'DELETE' })
+        setDeleting(null)
+        fetchIncidents()
+      }
+    })
   }
 
   // Summary
@@ -492,6 +498,7 @@ export default function NDISIncidentsPage() {
           </div>
         )}
       </div>
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

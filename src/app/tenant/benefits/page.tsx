@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 type Benefit = {
   id: string
@@ -71,6 +72,7 @@ export default function BenefitsPage() {
   const [filterType, setFilterType] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [view,       setView]       = useState<'list' | 'grouped'>('list')
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const load = useCallback(async (empId = filterEmp) => {
     setLoading(true)
@@ -119,12 +121,16 @@ export default function BenefitsPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm('Remove this benefit?')) return
-    await fetchWithAuth('/api/tenant/benefits', {
-      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
+    setConfirmState({
+      message: 'Remove this benefit?',
+      onConfirm: async () => {
+        await fetchWithAuth('/api/tenant/benefits', {
+          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        })
+        load()
+      }
     })
-    load()
   }
 
   // Filter + derived stats
@@ -390,6 +396,8 @@ export default function BenefitsPage() {
           ))}
         </div>
       )}
+
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
 
       {/* Expiry alert banner */}
       {stats.expiring > 0 && (

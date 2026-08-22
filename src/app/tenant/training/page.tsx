@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Course = {
@@ -85,6 +86,7 @@ function LibraryTab() {
   const [form, setForm] = useState({
     title:'', description:'', category:'', isMandatory: false, validityMonths:''
   })
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const load = useCallback(async (s = search, c = filterCat) => {
     setLoading(true)
@@ -129,12 +131,17 @@ function LibraryTab() {
   }
 
   async function archiveCourse(id: string) {
-    if (!confirm('Archive this course?')) return
-    await fetchWithAuth('/api/tenant/training/courses', {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, isActive: false }),
+    setConfirmState({
+      message: 'Archive this course?',
+      confirmLabel: 'Archive',
+      onConfirm: async () => {
+        await fetchWithAuth('/api/tenant/training/courses', {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, isActive: false }),
+        })
+        load()
+      }
     })
-    load()
   }
 
   return (
@@ -278,6 +285,7 @@ function LibraryTab() {
           ))}
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

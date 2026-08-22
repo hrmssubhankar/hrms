@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useRouter } from 'next/navigation'
 
@@ -277,6 +278,7 @@ export default function NDISAuditsPage() {
   const [showModal, setShowModal] = useState(false)
   const [editAudit, setEditAudit] = useState<Audit | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const fetchAudits = useCallback(async () => {
     setLoading(true)
@@ -296,11 +298,15 @@ export default function NDISAuditsPage() {
   useEffect(() => { fetchAudits() }, [fetchAudits])
 
   async function deleteAudit(id: string) {
-    if (!confirm('Delete this audit? This cannot be undone.')) return
-    setDeleting(id)
-    await fetchWithAuth(`/api/tenant/ndis/audits/${id}`, { method: 'DELETE' })
-    setDeleting(null)
-    fetchAudits()
+    setConfirmState({
+      message: 'Delete this audit? This cannot be undone.',
+      onConfirm: async () => {
+        setDeleting(id)
+        await fetchWithAuth(`/api/tenant/ndis/audits/${id}`, { method: 'DELETE' })
+        setDeleting(null)
+        fetchAudits()
+      }
+    })
   }
 
   // Summary counts
@@ -447,6 +453,7 @@ export default function NDISAuditsPage() {
           </div>
         )}
       </div>
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

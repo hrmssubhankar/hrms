@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import PermissionGate from '@/components/auth/PermissionGate'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -369,6 +370,7 @@ function ShiftModal({
   const [repeating, setRepeating] = useState(false)
   const [error,     setError]     = useState('')
   const [repeated,  setRepeated]  = useState(false)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const f = (k: keyof ShiftFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -388,9 +390,14 @@ function ShiftModal({
   }
 
   async function handleDelete() {
-    if (!onDelete || !confirm('Delete this shift?')) return
-    setDeleting(true)
-    try { await onDelete() } finally { setDeleting(false) }
+    if (!onDelete) return
+    setConfirmState({
+      message: 'Delete this shift?',
+      onConfirm: async () => {
+        setDeleting(true)
+        try { await onDelete() } finally { setDeleting(false) }
+      }
+    })
   }
 
   async function handleRepeat() {
@@ -514,6 +521,7 @@ function ShiftModal({
               className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 focus:outline-none resize-none" />
           </div>
 
+          <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
           <div className="flex gap-3 pt-1 flex-wrap">
             {mode === 'edit' && onDelete && (
               <button type="button" onClick={handleDelete} disabled={deleting}
@@ -556,6 +564,8 @@ export default function RosteringPage() {
   const [showAvail,    setShowAvail]    = useState(false) // toggle availability row
   const [showFill,     setShowFill]     = useState(false) // fill timesheets modal
   const [availModal,   setAvailModal]   = useState<{ empId: string; empName: string } | null>(null)
+
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const [modal, setModal] = useState<{
     mode: 'create' | 'edit'
@@ -611,19 +621,25 @@ export default function RosteringPage() {
     sum + (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / 3_600_000, 0)
 
   async function publishAll() {
-    if (!confirm(`Publish ${draftCount} draft shift${draftCount !== 1 ? 's' : ''}? Employees will be notified.`)) return
-    setPublishing(true)
-    try {
-      const drafts = shifts.filter(s => s.status === 'draft')
-      await Promise.all(drafts.map(s =>
-        fetchWithAuth(`/api/tenant/roster/shifts/${s.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ publish: true }),
-        })
-      ))
-      await fetchData()
-    } finally { setPublishing(false) }
+    setConfirmState({
+      message: `Publish ${draftCount} draft shift${draftCount !== 1 ? 's' : ''}? Employees will be notified.`,
+      confirmLabel: 'Publish',
+      danger: false,
+      onConfirm: async () => {
+        setPublishing(true)
+        try {
+          const drafts = shifts.filter(s => s.status === 'draft')
+          await Promise.all(drafts.map(s =>
+            fetchWithAuth(`/api/tenant/roster/shifts/${s.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ publish: true }),
+            })
+          ))
+          await fetchData()
+        } finally { setPublishing(false) }
+      }
+    })
   }
 
   function openCreate(date: Date, employeeId?: string) {
@@ -937,6 +953,8 @@ export default function RosteringPage() {
           </div>
         )}
       </div>
+
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3 text-xs">

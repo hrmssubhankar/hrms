@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Link from 'next/link'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -134,6 +135,7 @@ export default function LeavePage() {
   // ── Bulk actions ──
   const [selected,    setSelected]    = useState<Set<string>>(new Set())
   const [bulkBusy,    setBulkBusy]    = useState(false)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
   const overlappingHolidays = (form.startDate && form.endDate)
     ? holidays.filter(h => h.date >= form.startDate && h.date <= form.endDate)
     : []
@@ -261,17 +263,23 @@ export default function LeavePage() {
   async function bulkReview(action: 'approve' | 'reject') {
     if (selected.size === 0) return
     const label = action === 'approve' ? 'approve' : 'reject'
-    if (!confirm(`${label.charAt(0).toUpperCase() + label.slice(1)} ${selected.size} selected request${selected.size > 1 ? 's' : ''}?`)) return
-    setBulkBusy(true)
-    await Promise.all([...selected].map(id =>
-      fetchWithAuth('/api/tenant/leave', {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action }),
-      })
-    ))
-    setSelected(new Set())
-    setBulkBusy(false)
-    loadRequests()
+    setConfirmState({
+      message: `${label.charAt(0).toUpperCase() + label.slice(1)} ${selected.size} selected request${selected.size > 1 ? 's' : ''}?`,
+      danger: action === 'reject',
+      confirmLabel: label.charAt(0).toUpperCase() + label.slice(1),
+      onConfirm: async () => {
+        setBulkBusy(true)
+        await Promise.all([...selected].map(id =>
+          fetchWithAuth('/api/tenant/leave', {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, action }),
+          })
+        ))
+        setSelected(new Set())
+        setBulkBusy(false)
+        loadRequests()
+      }
+    })
   }
 
   const pendingRequests = requests.filter(r => r.status === 'pending')
@@ -879,6 +887,7 @@ export default function LeavePage() {
           </form>
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

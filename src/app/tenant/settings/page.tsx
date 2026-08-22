@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useRef, useState } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 type Settings = {
   domain?: { customDomain?: string; subdomain?: string; wwwRedirect?: boolean; sslForced?: boolean }
@@ -82,6 +83,7 @@ export default function TenantSettingsPage() {
   const [myobConnecting,  setMyobConnecting]  = useState(false)
   const [myobDisconnecting, setMyobDisconnecting] = useState(false)
   const [myobMsg,         setMyobMsg]         = useState('')
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   useEffect(() => {
     fetchWithAuth('/api/tenant/config').then(r => r.json()).then(d => {
@@ -128,12 +130,17 @@ export default function TenantSettingsPage() {
   }
 
   async function disconnectXero() {
-    if (!confirm('Disconnect Xero? Payroll records already exported will remain exported.')) return
-    setXeroDisconnecting(true); setXeroMsg('')
-    await fetchWithAuth('/api/tenant/xero/status', { method: 'DELETE' })
-    setXeroStatus({ connected: false })
-    setXeroMsg('Xero disconnected.')
-    setXeroDisconnecting(false)
+    setConfirmState({
+      message: 'Disconnect Xero? Payroll records already exported will remain exported.',
+      confirmLabel: 'Disconnect',
+      onConfirm: async () => {
+        setXeroDisconnecting(true); setXeroMsg('')
+        await fetchWithAuth('/api/tenant/xero/status', { method: 'DELETE' })
+        setXeroStatus({ connected: false })
+        setXeroMsg('Xero disconnected.')
+        setXeroDisconnecting(false)
+      }
+    })
   }
 
   async function connectMyob() {
@@ -147,12 +154,17 @@ export default function TenantSettingsPage() {
   }
 
   async function disconnectMyob() {
-    if (!confirm('Disconnect MYOB? Payroll records already exported will remain exported.')) return
-    setMyobDisconnecting(true); setMyobMsg('')
-    await fetchWithAuth('/api/tenant/myob/status', { method: 'DELETE' })
-    setMyobStatus({ connected: false })
-    setMyobMsg('MYOB disconnected.')
-    setMyobDisconnecting(false)
+    setConfirmState({
+      message: 'Disconnect MYOB? Payroll records already exported will remain exported.',
+      confirmLabel: 'Disconnect',
+      onConfirm: async () => {
+        setMyobDisconnecting(true); setMyobMsg('')
+        await fetchWithAuth('/api/tenant/myob/status', { method: 'DELETE' })
+        setMyobStatus({ connected: false })
+        setMyobMsg('MYOB disconnected.')
+        setMyobDisconnecting(false)
+      }
+    })
   }
 
   function flash() { setSaved(true); setTimeout(() => setSaved(false), 3000) }
@@ -921,6 +933,7 @@ export default function TenantSettingsPage() {
           )}
         </>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

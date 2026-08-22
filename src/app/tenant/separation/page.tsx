@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 type SeparationRecord = {
   id: string; employeeId: string; type: string; reason: string | null
@@ -70,6 +71,7 @@ export default function SeparationPage() {
   const [filterStatus, setFilterStatus] = useState('')
   const [filterType,   setFilterType]   = useState('')
   const [deleting,  setDeleting]  = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   const [form, setForm] = useState({
     employeeId: '', type: 'resignation', reason: '', noticeDate: '', lastWorkingDay: '',
@@ -129,15 +131,19 @@ export default function SeparationPage() {
   }
 
   async function deleteRecord(id: string) {
-    if (!confirm('Delete this separation record? This cannot be undone.')) return
-    setDeleting(id)
-    await fetchWithAuth('/api/tenant/separation', {
-      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
+    setConfirmState({
+      message: 'Delete this separation record? This cannot be undone.',
+      onConfirm: async () => {
+        setDeleting(id)
+        await fetchWithAuth('/api/tenant/separation', {
+          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        })
+        setDeleting(null)
+        setExpanded(null)
+        load()
+      }
     })
-    setDeleting(null)
-    setExpanded(null)
-    load()
   }
 
   async function loadEvents(id: string) {
@@ -744,6 +750,7 @@ export default function SeparationPage() {
           )}
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

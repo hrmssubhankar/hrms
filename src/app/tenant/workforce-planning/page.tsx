@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -115,6 +116,7 @@ export default function WorkforcePlanningPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving,    setSaving]    = useState(false)
   const [deleting,  setDeleting]  = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
   const [form, setForm] = useState({
     departmentId: '', positionId: '', plannedCount: 1, currentCount: 0,
     vacancyCount: 0, targetDate: '', notes: '', status: 'open',
@@ -212,14 +214,18 @@ export default function WorkforcePlanningPage() {
   }
 
   async function deletePlan(id: string) {
-    if (!confirm('Delete this headcount plan?')) return
-    setDeleting(id)
-    await fetchWithAuth('/api/tenant/workforce-planning', {
-      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
+    setConfirmState({
+      message: 'Delete this headcount plan?',
+      onConfirm: async () => {
+        setDeleting(id)
+        await fetchWithAuth('/api/tenant/workforce-planning', {
+          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        })
+        setDeleting(null)
+        loadPlans()
+      }
     })
-    setDeleting(null)
-    loadPlans()
   }
 
   // Filtered plans
@@ -686,6 +692,7 @@ export default function WorkforcePlanningPage() {
           )}
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

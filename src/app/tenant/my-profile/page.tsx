@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 type Profile = {
   id:             string
@@ -223,6 +224,7 @@ export default function MyProfilePage() {
   const [editingContact, setEditingContact] = useState<string | null>(null) // id or 'new'
   const [contactSaving,  setContactSaving]  = useState(false)
   const [contactError,   setContactError]   = useState('')
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   useEffect(() => {
     fetchWithAuth('/api/tenant/my-profile')
@@ -316,10 +318,14 @@ export default function MyProfilePage() {
   }
 
   async function deleteContact(id: string) {
-    if (!confirm('Remove this emergency contact?')) return
-    await fetchWithAuth(`/api/tenant/my-profile/emergency-contacts?id=${id}`, { method: 'DELETE' })
-    setContacts(c => c.filter(x => x.id !== id))
-    if (editingContact === id) setEditingContact(null)
+    setConfirmState({
+      message: 'Remove this emergency contact?',
+      onConfirm: async () => {
+        await fetchWithAuth(`/api/tenant/my-profile/emergency-contacts?id=${id}`, { method: 'DELETE' })
+        setContacts(c => c.filter(x => x.id !== id))
+        if (editingContact === id) setEditingContact(null)
+      }
+    })
   }
 
   function openEditContact(c: EmergencyContact) {
@@ -587,6 +593,7 @@ export default function MyProfilePage() {
       {/* Two-Factor Authentication */}
       <TwoFactorSection />
 
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

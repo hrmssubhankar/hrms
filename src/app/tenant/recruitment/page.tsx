@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -91,6 +92,7 @@ export default function RecruitmentPage() {
   const [filterStatus, setFilterStatus] = useState('')
   const [jobSearch,    setJobSearch]    = useState('')
   const [deletingReq,  setDeletingReq]  = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   // Candidate search
   const [candSearch, setCandSearch] = useState('')
@@ -151,15 +153,19 @@ export default function RecruitmentPage() {
   }
 
   async function deleteReq(id: string) {
-    if (!confirm('Delete this requisition and all its applications?')) return
-    setDeletingReq(id)
-    await fetchWithAuth('/api/tenant/recruitment', {
-      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
+    setConfirmState({
+      message: 'Delete this requisition and all its applications?',
+      onConfirm: async () => {
+        setDeletingReq(id)
+        await fetchWithAuth('/api/tenant/recruitment', {
+          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        })
+        setDeletingReq(null)
+        if (selectedReq?.id === id) { setSelectedReq(null); setTab('jobs') }
+        loadReqs()
+      }
     })
-    setDeletingReq(null)
-    if (selectedReq?.id === id) { setSelectedReq(null); setTab('jobs') }
-    loadReqs()
   }
 
   async function updateReqStatus(id: string, status: string) {
@@ -211,14 +217,18 @@ export default function RecruitmentPage() {
   }
 
   async function deleteApp(appId: string) {
-    if (!confirm('Remove this candidate from the pipeline?')) return
-    setDeletingApp(appId)
-    await fetchWithAuth('/api/tenant/recruitment', {
-      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: appId, _type: 'application' }),
+    setConfirmState({
+      message: 'Remove this candidate from the pipeline?',
+      onConfirm: async () => {
+        setDeletingApp(appId)
+        await fetchWithAuth('/api/tenant/recruitment', {
+          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: appId, _type: 'application' }),
+        })
+        setDeletingApp(null)
+        if (selectedReq) loadApps(selectedReq.id)
+      }
     })
-    setDeletingApp(null)
-    if (selectedReq) loadApps(selectedReq.id)
   }
 
   function openOfferLetter(app: Application) {
@@ -835,6 +845,7 @@ export default function RecruitmentPage() {
           </div>
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

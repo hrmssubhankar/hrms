@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -171,6 +172,7 @@ export default function ParticipantsPage() {
   const [showContact, setShowContact]   = useState(false)
   const [saving, setSaving]             = useState(false)
   const [error, setError]               = useState('')
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
 
   // Forms
   const blankParticipant = {
@@ -293,10 +295,16 @@ export default function ParticipantsPage() {
   }
 
   const softDelete = async () => {
-    if (!selected || !confirm(`Deactivate ${displayName(selected)}?`)) return
-    await fetchWithAuth(`/api/tenant/participants/${selected.id}`, { method: 'DELETE' })
-    await fetchParticipants()
-    setSelected(null)
+    if (!selected) return
+    setConfirmState({
+      message: `Deactivate ${displayName(selected)}?`,
+      confirmLabel: 'Deactivate',
+      onConfirm: async () => {
+        await fetchWithAuth(`/api/tenant/participants/${selected.id}`, { method: 'DELETE' })
+        await fetchParticipants()
+        setSelected(null)
+      }
+    })
   }
 
   // ── Create sub-resources ───────────────────────────────────────────────────
@@ -998,6 +1006,7 @@ function Modal({ title, onClose, onSave, saving, error, children, wide }: {
           </button>
         </div>
       </div>
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

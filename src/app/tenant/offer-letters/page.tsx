@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { useSearchParams } from 'next/navigation'
 
 type Offer = {
@@ -290,6 +291,7 @@ export default function OfferLettersPage() {
   const [uploadExtracted, setUploadExtracted]   = useState('')
   const [extracting,      setExtracting]        = useState(false)
   const [uploading,       setUploading]         = useState(false)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
   const [uploadError,     setUploadError]       = useState('')
   const printRef = useRef<HTMLDivElement>(null)
 
@@ -412,9 +414,13 @@ export default function OfferLettersPage() {
   }
 
   async function deleteOffer(id: string) {
-    if (!confirm('Delete this draft offer letter?')) return
-    await fetchWithAuth(`/api/tenant/offer-letters/${id}`, { method: 'DELETE' })
-    setSelected(null); load()
+    setConfirmState({
+      message: 'Delete this draft offer letter?',
+      onConfirm: async () => {
+        await fetchWithAuth(`/api/tenant/offer-letters/${id}`, { method: 'DELETE' })
+        setSelected(null); load()
+      }
+    })
   }
 
   function candidateUrl(token: string | null) {
@@ -969,6 +975,7 @@ export default function OfferLettersPage() {
 
       {/* Hidden printable div */}
       <div ref={printRef} className="hidden" />
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

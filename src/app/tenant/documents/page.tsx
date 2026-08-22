@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import FileUpload, { type UploadResult } from '@/components/ui/FileUpload'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -127,6 +128,7 @@ export default function DocumentsPage() {
   const [filterStat, setFilterStat] = useState('')
   const [search,     setSearch]     = useState('')
   const [deleting,   setDeleting]   = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
   const [editing,    setEditing]    = useState<string | null>(null)
   const [editForm,   setEditForm]   = useState({ title: '', expiryDate: '', notes: '' })
   const [editSaving, setEditSaving] = useState(false)
@@ -184,11 +186,15 @@ export default function DocumentsPage() {
   }
 
   async function deleteDoc(id: string, title: string) {
-    if (!confirm(`Permanently delete "${title}"? This cannot be undone.`)) return
-    setDeleting(id)
-    await fetchWithAuth(`/api/tenant/documents?id=${id}`, { method: 'DELETE' })
-    setDeleting(null)
-    load()
+    setConfirmState({
+      message: `Permanently delete "${title}"? This cannot be undone.`,
+      onConfirm: async () => {
+        setDeleting(id)
+        await fetchWithAuth(`/api/tenant/documents?id=${id}`, { method: 'DELETE' })
+        setDeleting(null)
+        load()
+      }
+    })
   }
 
   function startEdit(d: Doc) {
@@ -560,6 +566,7 @@ export default function DocumentsPage() {
           </div>
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }
