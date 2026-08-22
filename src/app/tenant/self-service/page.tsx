@@ -167,7 +167,7 @@ export default function SelfServicePage() {
             </div>
           )}
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h1 className="page-premium-title">
               {profile ? `${profile.preferredName || profile.firstName} ${profile.lastName}` : 'Employee Self-Service'}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -270,7 +270,7 @@ export default function SelfServicePage() {
                         <p className="font-medium text-gray-900 dark:text-white">
                           {LEAVE_TYPE_LABELS[lr.leaveType] || lr.leaveType}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p className="page-premium-subtitle mt-0.5">
                           {fmtDate(lr.startDate)} – {fmtDate(lr.endDate)} · {lr.totalDays} day{lr.totalDays !== 1 ? 's' : ''}
                         </p>
                         {lr.reason && <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{lr.reason}</p>}
@@ -296,7 +296,8 @@ export default function SelfServicePage() {
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <table className="w-full text-sm">
+                <div className="table-responsive">
+            <table className="table-premium">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
                       {['Pay Run', 'Period', 'Pay Date', 'Hours', 'Gross', 'Tax', 'Super', 'Net Pay'].map(h => (
@@ -321,6 +322,7 @@ export default function SelfServicePage() {
                     ))}
                   </tbody>
                 </table>
+          </div>
               </div>
             )}
           </div>

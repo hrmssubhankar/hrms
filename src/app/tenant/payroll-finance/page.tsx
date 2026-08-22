@@ -206,8 +206,8 @@ export default function PayrollFinancePage() {
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">{selected.name}</h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <h1 className="page-premium-title">{selected.name}</h1>
+                  <p className="page-premium-subtitle mt-1">
                     Pay period: {fmtDate(selected.periodStart)} – {fmtDate(selected.periodEnd)}
                     {selected.payDate && <> · Pay date: {fmtDate(selected.payDate)}</>}
                   </p>
@@ -260,7 +260,8 @@ export default function PayrollFinancePage() {
                 </div>
               ) : (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <table className="w-full text-sm">
+                  <div className="table-responsive">
+            <table className="table-premium">
                     <thead className="bg-gray-50 dark:bg-gray-700">
                       <tr>
                         {['Employee', 'Type', 'Hours', 'Gross', 'Tax', 'Super', 'Net'].map(h => (
@@ -285,6 +286,7 @@ export default function PayrollFinancePage() {
                       ))}
                     </tbody>
                   </table>
+          </div>
                 </div>
               )}
             </div>

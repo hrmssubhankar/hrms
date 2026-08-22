@@ -153,7 +153,7 @@ export default function MyPerformancePage() {
           { label: 'Goals Done',    value: completedGoals.length, color: 'text-green-400' },
           { label: 'Avg Progress',  value: `${avgProgress}%`, color: 'text-purple-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -175,7 +175,7 @@ export default function MyPerformancePage() {
       {/* Self-assessment modal */}
       {selfAssessModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-xl space-y-4 my-4">
+          <div className="card-premium p-6 w-full max-w-xl space-y-4 my-4">
             <h3 className="text-lg font-bold text-white">My Self-Assessment</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">Your input will be shared with your reviewer ahead of the performance meeting.</p>
             {[
@@ -208,7 +208,7 @@ export default function MyPerformancePage() {
       {/* Goal progress modal */}
       {updatingGoal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-sm space-y-4">
+          <div className="card-premium p-6 w-full max-w-sm space-y-4">
             <h3 className="text-lg font-bold text-white">Update Progress</h3>
             <div>
               <label className="text-xs text-gray-600 dark:text-gray-400 mb-2 block">Progress: {updatingGoal.progress}%</label>
@@ -246,7 +246,7 @@ export default function MyPerformancePage() {
       {/* ─── MY REVIEWS ──────────────────────────────────────────────────── */}
       {tab === 'reviews' && (
         reviews.length === 0 ? (
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+          <div className="card-premium py-14 text-center">
             <p className="text-gray-600 dark:text-gray-300 font-medium">No reviews yet</p>
             <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Your manager will schedule a review when it's time.</p>
           </div>
@@ -257,7 +257,7 @@ export default function MyPerformancePage() {
               const ei = r.employeeInput
               const hasSelfAssess = ei && (ei.strengths || ei.improvements || ei.goals || ei.comments)
               return (
-                <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+                <div key={r.id} className="card-premium overflow-hidden">
                   {/* Summary row */}
                   <div className="flex items-center justify-between px-5 py-4 gap-3">
                     <div className="flex-1 min-w-0">
@@ -265,7 +265,7 @@ export default function MyPerformancePage() {
                         <p className="text-sm font-semibold text-white">
                           {REVIEW_TYPES.find(t => t.value === r.type)?.label ?? r.type}
                         </p>
-                        <span className={`inline-flex text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                        <span className={`inline-flex text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                           {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                         </span>
                       </div>
@@ -340,7 +340,7 @@ export default function MyPerformancePage() {
       {/* ─── MY GOALS ────────────────────────────────────────────────────── */}
       {tab === 'goals' && (
         goals.length === 0 ? (
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+          <div className="card-premium py-14 text-center">
             <p className="text-gray-600 dark:text-gray-300 font-medium">No goals set yet</p>
             <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Your manager will assign goals or you can request them.</p>
           </div>
@@ -349,7 +349,7 @@ export default function MyPerformancePage() {
             {goals.map(g => {
               const statusStyle = GOAL_STATUSES.find(s => s.value === g.status)?.color ?? 'text-gray-400 border-gray-700'
               return (
-                <div key={g.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 space-y-3">
+                <div key={g.id} className="card-premium p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">

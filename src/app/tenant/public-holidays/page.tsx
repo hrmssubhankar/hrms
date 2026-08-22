@@ -277,7 +277,7 @@ export default function PublicHolidaysPage() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <form
             onSubmit={saveHoliday}
-            className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4"
+            className="card-premium rounded-2xl p-6 w-full max-w-md space-y-4"
           >
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-semibold text-white">

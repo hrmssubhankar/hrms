@@ -61,21 +61,21 @@ export default function DEIPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Records</p>
           <p className="text-2xl font-bold text-white mt-1">{summary.total}</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Indigenous / TSI</p>
           <p className="text-2xl font-bold text-amber-400 mt-1">{summary.indigenous}</p>
           <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{pct(summary.indigenous)} of workforce</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Disability</p>
           <p className="text-2xl font-bold text-blue-400 mt-1">{summary.disability}</p>
           <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{pct(summary.disability)} of workforce</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Need Adjustments</p>
           <p className="text-2xl font-bold text-purple-400 mt-1">{summary.adjustments}</p>
         </div>
@@ -83,7 +83,7 @@ export default function DEIPage() {
 
       {/* Gender breakdown */}
       {Object.keys(summary.byGender).length > 0 && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Gender</p>
           <div className="flex flex-wrap gap-3">
             {Object.entries(summary.byGender).map(([g, n]) => (
@@ -97,7 +97,7 @@ export default function DEIPage() {
       )}
 
       {showForm && (
-        <form onSubmit={save} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={save} className="card-premium border-purple-500/30 p-5 space-y-3">
           <p className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-lg p-3 dark:text-gray-400">
             This information is self-reported and confidential. It is used only for aggregate reporting to support DEI initiatives.
           </p>
@@ -147,7 +147,7 @@ export default function DEIPage() {
       )}
 
       {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : records.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -157,12 +157,13 @@ export default function DEIPage() {
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Encourage employees to self-report to support DEI reporting.</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card-premium overflow-hidden">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+              <tr>
                 {['Employee','Gender','Indigenous','Disability','Adjustments'].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
+                  <th key={h} className="px-4 py-3 section-label">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -178,6 +179,7 @@ export default function DEIPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

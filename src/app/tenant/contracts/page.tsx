@@ -23,7 +23,7 @@ const CONTRACT_TYPES = [
 ]
 
 const STATUS_STYLE: Record<string, string> = {
-  draft:  'bg-gray-800 text-gray-400 border-gray-700',
+  draft:  'badge badge-gray',
   sent:   'bg-blue-900/50 text-blue-300 border-blue-800',
   signed: 'bg-green-900/50 text-green-300 border-green-800',
   void:   'bg-red-900/50 text-red-300 border-red-800',
@@ -101,7 +101,7 @@ export default function ContractsPage() {
           { label: 'Sent',   value: stats.sent,   color: 'text-blue-400' },
           { label: 'Signed', value: stats.signed, color: 'text-green-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -110,7 +110,7 @@ export default function ContractsPage() {
 
       {/* Create form */}
       {showForm && (
-        <form onSubmit={create} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={create} className="card-premium border-purple-500/30 p-5 space-y-3">
           <h3 className="text-sm font-semibold text-purple-300">Create New Contract</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -144,7 +144,7 @@ export default function ContractsPage() {
 
       {/* Filter */}
       <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(e.target.value) }}
-        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+        className="input-premium focus:outline-none focus:border-purple-500">
         <option value="">All statuses</option>
         <option value="draft">Draft</option>
         <option value="sent">Sent</option>
@@ -153,7 +153,7 @@ export default function ContractsPage() {
       </select>
 
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : contracts.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -168,7 +168,7 @@ export default function ContractsPage() {
             const isOpen = expanded === c.id
             const ts = taxSuper[c.id] ?? { tfn: c.tfnProvided, fund: c.superFund ?? '' }
             return (
-              <div key={c.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden ${
+              <div key={c.id} className={`card-premium overflow-hidden ${
                 c.status === 'signed' ? 'border-green-900/50' : 'border-gray-800'
               }`}>
                 <div className="flex items-center gap-4 px-5 py-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : c.id)}>
@@ -178,7 +178,7 @@ export default function ContractsPage() {
                       <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                         {CONTRACT_TYPES.find(t => t.value === c.type)?.label ?? c.type}
                       </span>
-                      <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[c.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                      <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[c.status] ?? 'badge badge-gray'}`}>
                         {c.status.charAt(0).toUpperCase() + c.status.slice(1)}
                       </span>
                     </div>

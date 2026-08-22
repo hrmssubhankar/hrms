@@ -22,7 +22,7 @@ const SUP_TYPES = [
 const STATUS_STYLE: Record<string, string> = {
   scheduled: 'bg-blue-900/50 text-blue-300 border-blue-800',
   completed: 'bg-green-900/50 text-green-300 border-green-800',
-  cancelled: 'bg-gray-800 text-gray-400 border-gray-700',
+  cancelled: 'badge badge-gray',
 }
 
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
@@ -118,7 +118,7 @@ export default function SupervisionPage() {
           { label: 'Completed', value: stats.completed, color: 'text-green-400' },
           { label: 'Overdue',   value: stats.overdue,   color: 'text-red-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -127,7 +127,7 @@ export default function SupervisionPage() {
 
       {/* Schedule form */}
       {showForm && (
-        <form onSubmit={schedule} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={schedule} className="card-premium border-purple-500/30 p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">Schedule Supervision Session</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -170,21 +170,21 @@ export default function SupervisionPage() {
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(e.target.value, filterType) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="scheduled">Scheduled</option>
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
         </select>
         <select value={filterType} onChange={e => { setFilterType(e.target.value); load(filterStatus, e.target.value) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium focus:outline-none focus:border-purple-500">
           <option value="">All types</option>
           {SUP_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
       </div>
 
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -201,7 +201,7 @@ export default function SupervisionPage() {
             const supervisor = employees.find(e => e.id === r.supervisorId)
             const draft = actionDraft[r.id] ?? ''
             return (
-              <div key={r.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden ${
+              <div key={r.id} className={`card-premium overflow-hidden ${
                 overdue ? 'border-red-900/60' : r.status === 'completed' ? 'border-green-900/50' : 'border-gray-800'
               }`}>
                 <div className="flex items-center gap-4 px-5 py-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : r.id)}>
@@ -213,7 +213,7 @@ export default function SupervisionPage() {
                       <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">
                         {SUP_TYPES.find(t => t.value === r.type)?.label ?? r.type ?? 'Regular'}
                       </span>
-                      <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                      <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                         {overdue ? '️ Overdue' : r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                       </span>
                     </div>

@@ -108,7 +108,7 @@ export default function RolesPage() {
         <h1 className="text-2xl font-bold text-white">Roles & Access</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage portal users and their access roles</p>
       </div>
-      <div className="flex flex-col items-center justify-center h-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl gap-3">
+      <div className="flex flex-col items-center justify-center h-64 card-premium gap-3">
         <span className="text-4xl">🔒</span>
         <p className="text-gray-900 dark:text-white font-semibold">Access Restricted</p>
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs">
@@ -135,15 +135,15 @@ export default function RolesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Total Users</p>
           <p className="text-2xl font-bold text-white mt-1">{users.length}</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Active</p>
           <p className="text-2xl font-bold text-green-400 mt-1">{activeCount}</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Suspended</p>
           <p className="text-2xl font-bold text-red-400 mt-1">{inactiveCount}</p>
         </div>
@@ -151,11 +151,11 @@ export default function RolesPage() {
 
       {/* Role breakdown */}
       {Object.keys(roleCounts).length > 0 && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 dark:text-gray-400">Breakdown by Role</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(roleCounts).map(([role, count]) => (
-              <span key={role} className={`text-xs px-3 py-1 rounded-full border ${ROLE_STYLE[role] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+              <span key={role} className={`text-xs px-3 py-1 rounded-full border ${ROLE_STYLE[role] ?? 'badge badge-gray'}`}>
                 {ROLE_LABEL[role] ?? role} · {count}
               </span>
             ))}
@@ -165,7 +165,7 @@ export default function RolesPage() {
 
       {/* Invite form */}
       {showForm && (
-        <form onSubmit={invite} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={invite} className="card-premium border-purple-500/30 p-5 space-y-3">
           <h3 className="text-sm font-semibold text-purple-300">Invite new portal user</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -205,7 +205,7 @@ export default function RolesPage() {
 
       {/* User table */}
       {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : users.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -214,12 +214,13 @@ export default function RolesPage() {
           <p className="text-gray-600 dark:text-gray-300 font-medium">No portal users yet</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card-premium overflow-hidden">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
                 {['Email', 'Role', '2FA', 'Last Login', 'Status', ''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
+                  <th key={h} className="px-4 py-3 text-left section-label">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -230,7 +231,7 @@ export default function RolesPage() {
                   <td className="px-4 py-3">
                     <PermissionGate permission="roles:write"
                       fallback={
-                        <span className={`text-xs px-2 py-0.5 rounded-full border ${ROLE_STYLE[u.role] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full border ${ROLE_STYLE[u.role] ?? 'badge badge-gray'}`}>
                           {ROLE_LABEL[u.role] ?? u.role}
                         </span>
                       }>
@@ -247,7 +248,7 @@ export default function RolesPage() {
                         </div>
                       ) : (
                         <button onClick={() => { setEditId(u.id); setEditRole(u.role) }}
-                          className={`text-xs px-2 py-0.5 rounded-full border cursor-pointer hover:opacity-80 transition ${ROLE_STYLE[u.role] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                          className={`text-xs px-2 py-0.5 rounded-full border cursor-pointer hover:opacity-80 transition ${ROLE_STYLE[u.role] ?? 'badge badge-gray'}`}>
                           {ROLE_LABEL[u.role] ?? u.role}
                         </button>
                       )}
@@ -280,6 +281,7 @@ export default function RolesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

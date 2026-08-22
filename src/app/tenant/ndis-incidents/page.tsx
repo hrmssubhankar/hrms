@@ -349,8 +349,8 @@ export default function NDISIncidentsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">NDIS Reportable Incidents</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage, investigate and report incidents to the NDIS Commission</p>
+          <h1 className="page-premium-title">NDIS Reportable Incidents</h1>
+          <p className="page-premium-subtitle mt-0.5">Manage, investigate and report incidents to the NDIS Commission</p>
         </div>
         <button
           onClick={() => { setEditIncident(null); setShowModal(true) }}
@@ -367,7 +367,7 @@ export default function NDISIncidentsPage() {
           { label: 'Critical Severity',     value: critical,    cls: 'text-red-600 dark:text-red-400' },
           { label: 'Pending NDIS Notify',   value: unnotified,  cls: 'text-orange-600 dark:text-orange-400' },
         ].map(({ label, value, cls }) => (
-          <div key={label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
+          <div key={label} className="card-premium rounded-2xl p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
             <p className={`text-3xl font-bold mt-1 ${cls}`}>{value}</p>
           </div>
@@ -411,7 +411,7 @@ export default function NDISIncidentsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+      <div className="card-premium rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-48 text-gray-400">Loading…</div>
         ) : incidents.length === 0 ? (
@@ -422,7 +422,8 @@ export default function NDISIncidentsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <div className="table-responsive">
+            <table className="table-premium">
               <thead className="bg-gray-50 dark:bg-gray-800/60">
                 <tr>
                   {['Title', 'Type', 'Severity', 'Status', 'Participant', 'Date', 'Commission', ''].map(h => (
@@ -487,6 +488,7 @@ export default function NDISIncidentsPage() {
                 })}
               </tbody>
             </table>
+          </div>
           </div>
         )}
       </div>

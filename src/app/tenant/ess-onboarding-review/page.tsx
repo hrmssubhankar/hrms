@@ -151,8 +151,8 @@ export default function EssOnboardingReviewPage() {
     <div className="p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Onboarding Submissions</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <h1 className="page-premium-title">Onboarding Submissions</h1>
+        <p className="page-premium-subtitle mt-1">
           Review employee self-service onboarding forms submitted for HR processing.
         </p>
       </div>
@@ -206,7 +206,8 @@ export default function EssOnboardingReviewPage() {
             <p className="text-sm mt-1">Try a different filter</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
                 {['Employee', 'Department', 'Status', 'Submitted', 'Reviewed By', ''].map(h => (
@@ -252,6 +253,7 @@ export default function EssOnboardingReviewPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
@@ -271,7 +273,7 @@ export default function EssOnboardingReviewPage() {
                 {/* Drawer header */}
                 <div className="flex items-start justify-between mb-6">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selected.employeeName}</h2>
+                    <h2 className="page-premium-title">{selected.employeeName}</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{selected.employeeEmail}</p>
                     <div className="mt-2"><StatusBadge status={selected.status} /></div>
                   </div>

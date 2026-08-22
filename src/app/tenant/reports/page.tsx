@@ -88,14 +88,14 @@ function DonutChart({ data, size = 140 }: { data: { label: string; value: number
 function HeadcountCharts({ summary }: { summary: Summary }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Active vs Inactive</p>
         <BarChart data={[
           { label: 'Active',   value: summary.active   ?? 0, color: '#10b981' },
           { label: 'Inactive', value: summary.inactive ?? 0, color: '#6b7280' },
         ]} />
       </div>
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Employment Type</p>
         <DonutChart data={[
           { label: 'Full-time',  value: summary.fullTime   ?? 0, color: '#8b5cf6' },
@@ -111,7 +111,7 @@ function HeadcountCharts({ summary }: { summary: Summary }) {
 function LeaveCharts({ summary }: { summary: Summary }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">By Status</p>
         <DonutChart data={[
           { label: 'Approved', value: summary.approved ?? 0, color: '#10b981' },
@@ -119,7 +119,7 @@ function LeaveCharts({ summary }: { summary: Summary }) {
           { label: 'Rejected', value: summary.rejected ?? 0, color: '#ef4444' },
         ].filter(d => d.value > 0)} />
       </div>
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Days Taken</p>
         <BarChart data={[
           { label: 'Approved Days', value: summary.totalDays ?? 0, color: '#10b981' },
@@ -131,7 +131,7 @@ function LeaveCharts({ summary }: { summary: Summary }) {
 
 function ComplianceCharts({ summary }: { summary: Summary }) {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+    <div className="card-premium p-4">
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Status Breakdown</p>
       <div className="flex flex-wrap gap-8 items-start">
         <DonutChart data={[
@@ -154,7 +154,7 @@ function ComplianceCharts({ summary }: { summary: Summary }) {
 
 function TurnoverCharts({ summary }: { summary: Summary }) {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+    <div className="card-premium p-4">
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Separation Type</p>
       <BarChart data={[
         { label: 'Voluntary',   value: summary.voluntary   ?? 0, color: '#f59e0b' },
@@ -168,14 +168,14 @@ function TurnoverCharts({ summary }: { summary: Summary }) {
 function WHSCharts({ summary }: { summary: Summary }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Open vs Closed</p>
         <BarChart data={[
           { label: 'Open',   value: summary.open   ?? 0, color: '#ef4444' },
           { label: 'Closed', value: summary.closed ?? 0, color: '#10b981' },
         ]} />
       </div>
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Severity</p>
         <BarChart data={[
           { label: 'Critical', value: summary.critical ?? 0, color: '#7f1d1d' },
@@ -189,14 +189,14 @@ function WHSCharts({ summary }: { summary: Summary }) {
 function TrainingGapCharts({ summary }: { summary: Summary }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Compliance</p>
         <DonutChart data={[
           { label: 'Compliant',   value: summary.employeesCompliant ?? 0, color: '#10b981' },
           { label: 'Has Gaps',    value: summary.employeesWithGaps  ?? 0, color: '#ef4444' },
         ].filter(d => d.value > 0)} />
       </div>
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Gap Totals</p>
         <BarChart data={[
           { label: 'Mandatory Courses', value: summary.mandatoryCourses  ?? 0, color: '#8b5cf6' },
@@ -212,7 +212,7 @@ function PayrollCharts({ summary }: { summary: Summary }) {
   const fmt = (n: number) => `$${n.toLocaleString('en-AU', { minimumFractionDigits: 0 })}`
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Pay Run Status</p>
         <DonutChart data={[
           { label: 'Pending',  value: summary.pending  ?? 0, color: '#f59e0b' },
@@ -220,7 +220,7 @@ function PayrollCharts({ summary }: { summary: Summary }) {
           { label: 'Paid',     value: summary.paid     ?? 0, color: '#10b981' },
         ].filter(d => d.value > 0)} />
       </div>
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+      <div className="card-premium p-4">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 dark:text-gray-400">Financials</p>
         <div className="space-y-3">
           {[
@@ -302,6 +302,7 @@ function downloadPdf(rows: ReportRow[], reportLabel: string, summary: Summary) {
       <p style="color:#6b7280;margin:0 0 20px;font-size:13px">Generated ${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})}</p>
       ${summaryHtml}
       <table>${thead}${tbody}</table>
+          </div>
       <script>window.onload=()=>window.print()<\/script>
     </body></html>`
   const w = window.open('', '_blank')
@@ -393,7 +394,7 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   {Object.entries(summary).map(([k, v]) => (
                     <div key={k} className="bg-white rounded-xl border border-gray-200 p-4 text-center dark:bg-gray-900 dark:border-gray-700">
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{v}</p>
+                      <p className="page-premium-title">{v}</p>
                       <p className="text-xs text-gray-500 capitalize mt-0.5 dark:text-gray-400">{k.replace(/([A-Z])/g,' $1').toLowerCase()}</p>
                     </div>
                   ))}
@@ -428,7 +429,8 @@ export default function ReportsPage() {
               ) : (
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden dark:bg-gray-900 dark:border-gray-700">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <div className="table-responsive">
+            <table className="table-premium">
                       <thead>
                         <tr className="border-b border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-800">
                           {columns.map(c => (
@@ -440,7 +442,7 @@ export default function ReportsPage() {
                       </thead>
                       <tbody>
                         {data.map((row, i) => (
-                          <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800">
+                          <tr key={i}>
                             {columns.map(c => (
                               <td key={c} className="px-4 py-3 text-gray-700 whitespace-nowrap dark:text-gray-300">
                                 {row[c] instanceof Date
@@ -454,6 +456,7 @@ export default function ReportsPage() {
                         ))}
                       </tbody>
                     </table>
+          </div>
                   </div>
                 </div>
               )}

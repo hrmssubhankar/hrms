@@ -96,7 +96,7 @@ export default function MyBenefitsPage() {
   if (!linked) {
     return (
       <div className="p-6 max-w-2xl mx-auto">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center">
+        <div className="card-premium rounded-2xl p-10 text-center">
           <p className="text-lg font-semibold text-white mb-2">Profile Not Linked</p>
           <p className="text-gray-600 dark:text-gray-400 text-sm">
             Your account is not linked to an employee record. Contact HR to set this up.
@@ -135,7 +135,7 @@ export default function MyBenefitsPage() {
 
       {/* No benefits state */}
       {benefits.length === 0 && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl py-16 text-center">
+        <div className="card-premium rounded-2xl py-16 text-center">
           <div className="text-4xl mb-3">🎁</div>
           <p className="text-gray-600 dark:text-gray-300 font-medium">No benefits assigned yet</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">
@@ -154,7 +154,7 @@ export default function MyBenefitsPage() {
             const daysLeft = b.endDate && status === 'expiring' ? daysUntilExpiry(b.endDate) : null
             return (
               <div key={b.id}
-                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden"
+                className="card-premium overflow-hidden"
                 style={{ borderLeft: `4px solid ${info?.color ?? '#6b7280'}` }}>
                 <button
                   onClick={() => setExpanded(isOpen ? null : b.id)}
@@ -229,7 +229,7 @@ export default function MyBenefitsPage() {
       {expiredBenefits.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Expired Benefits ({expiredBenefits.length})</p>
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden opacity-60">
+          <div className="card-premium overflow-hidden opacity-60">
             {expiredBenefits.map((b, i) => {
               const info = BENEFIT_TYPES.find(t => t.value === b.type)
               return (

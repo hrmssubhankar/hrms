@@ -17,7 +17,7 @@ type OfferEvent = { id: string; event: string; note: string | null; performedBy:
 type Stats = { total: number; draft: number; sent: number; accepted: number; rejected: number; expired: number }
 
 const STATUS_STYLE: Record<string, string> = {
-  draft:     'bg-gray-800 text-gray-400 border-gray-700',
+  draft:     'badge badge-gray',
   sent:      'bg-blue-900/50 text-blue-300 border-blue-800',
   accepted:  'bg-green-900/50 text-green-300 border-green-800',
   rejected:  'bg-red-900/50 text-red-300 border-red-800',
@@ -500,7 +500,7 @@ export default function OfferLettersPage() {
           { label: 'Rejected', value: stats.rejected, col: 'border-red-700' },
           { label: 'Expired',  value: stats.expired,  col: 'border-amber-700' },
         ].map(s => (
-          <div key={s.label} className={`bg-white dark:bg-gray-900 border rounded-xl p-3 text-center ${s.col}`}>
+          <div key={s.label} className={`card-premium p-3 text-center ${s.col}`}>
             <p className="text-xl font-bold text-white">{s.value}</p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{s.label}</p>
           </div>
@@ -538,7 +538,7 @@ export default function OfferLettersPage() {
               className={`p-4 rounded-xl border cursor-pointer transition ${selected?.id === o.id ? 'border-purple-600 bg-purple-900/20' : 'border-gray-800 bg-gray-900 hover:border-gray-600'}`}>
               <div className="flex items-start justify-between gap-2 mb-1">
                 <p className="text-sm font-semibold text-white truncate">{o.candidateName}</p>
-                <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[o.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[o.status] ?? 'badge badge-gray'}`}>
                   {o.status}
                 </span>
               </div>
@@ -552,7 +552,7 @@ export default function OfferLettersPage() {
         {/* Detail panel */}
         <div className="lg:col-span-3">
           {!selected ? (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-10 text-center">
+            <div className="card-premium p-10 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -563,7 +563,7 @@ export default function OfferLettersPage() {
           ) : (
             <div className="space-y-4">
               {/* Offer detail card */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+              <div className="card-premium p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="text-lg font-bold text-white">{selected.candidateName}</h2>
@@ -634,7 +634,7 @@ export default function OfferLettersPage() {
 
               {/* Candidate acceptance link */}
               {selected.acceptanceToken && ['draft','sent'].includes(selected.status) && (
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+                <div className="card-premium p-4">
                   <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">📎 Candidate Acceptance Link</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                     Share this link with the candidate. They can view, sign and accept or decline the offer online — no login required.
@@ -666,7 +666,7 @@ export default function OfferLettersPage() {
               )}
 
               {/* Add note */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+              <div className="card-premium p-4">
                 <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Add Note</p>
                 <div className="flex gap-2">
                   <input value={noteText} onChange={e=>setNoteText(e.target.value)}
@@ -681,7 +681,7 @@ export default function OfferLettersPage() {
 
               {/* Letter preview */}
               {selected.templateContent && (
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+                <div className="card-premium p-5">
                   <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">Letter Preview</p>
                   <pre className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-sans leading-relaxed max-h-64 overflow-y-auto">
                     {selected.templateContent}
@@ -690,7 +690,7 @@ export default function OfferLettersPage() {
               )}
 
               {/* History timeline */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+              <div className="card-premium p-5">
                 <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">History</p>
                 {events.length === 0 ? (
                   <p className="text-gray-600 text-sm text-center py-4 dark:text-gray-400">No events yet</p>
@@ -725,7 +725,7 @@ export default function OfferLettersPage() {
       {/* New Offer Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="card-premium rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
               <h2 className="text-lg font-bold text-white">New Offer Letter</h2>
               <button onClick={()=>setShowForm(false)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl">×</button>
@@ -848,7 +848,7 @@ export default function OfferLettersPage() {
       {/* Upload Template Modal */}
       {showUpload && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+          <div className="card-premium rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-800">
               <h2 className="text-base font-bold text-white">Upload Offer Template</h2>
               <button onClick={() => setShowUpload(false)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl">×</button>

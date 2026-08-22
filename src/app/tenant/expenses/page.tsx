@@ -354,8 +354,8 @@ export default function ExpensesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Expense Claims</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Submit and manage employee expense reimbursements</p>
+          <h1 className="page-premium-title">Expense Claims</h1>
+          <p className="page-premium-subtitle mt-1">Submit and manage employee expense reimbursements</p>
         </div>
         <button onClick={() => setShowSubmit(true)}
           className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
@@ -374,7 +374,7 @@ export default function ExpensesPage() {
           <div key={card.label} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
             <p className="text-xs text-gray-500 dark:text-gray-400">{card.label}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{card.value}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{card.sub}</p>
+            <p className="page-premium-subtitle mt-0.5">{card.sub}</p>
           </div>
         ))}
       </div>
@@ -411,7 +411,8 @@ export default function ExpensesPage() {
             <p className="text-sm mt-1">Submit your first expense claim to get started</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead className="bg-gray-50 dark:bg-gray-700/50 border-b dark:border-gray-700">
               <tr>
                 {['Employee', 'Claim', 'Category', 'Amount', 'Date', 'Status', ''].map(h => (
@@ -461,6 +462,7 @@ export default function ExpensesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

@@ -575,7 +575,7 @@ export default function EmployeeProfilePage() {
       </Link>
 
       {/* Profile header card */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+      <div className="card-premium rounded-2xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
           {/* Avatar / photo upload */}
           <label className="relative group cursor-pointer shrink-0" title="Click to upload photo">
@@ -594,7 +594,7 @@ export default function EmployeeProfilePage() {
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{fullName}</h1>
+              <h1 className="page-premium-title">{fullName}</h1>
               {emp.ndisWorker && (
                 <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
                   NDIS Worker
@@ -673,7 +673,7 @@ export default function EmployeeProfilePage() {
       </div>
 
       {/* Tab content */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+      <div className="card-premium rounded-2xl p-6">
 
         {tab === 'Overview' && (
           <div>
@@ -729,7 +729,7 @@ export default function EmployeeProfilePage() {
               <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
                 <form
                   onSubmit={saveContact}
-                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4"
+                  className="card-premium rounded-2xl p-6 w-full max-w-md space-y-4"
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -1015,7 +1015,7 @@ export default function EmployeeProfilePage() {
             {/* Enrol modal */}
             {showEnrolModal && (
               <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-                <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl w-full max-w-md p-6 space-y-4">
+                <div className="card-premium rounded-2xl w-full max-w-md p-6 space-y-4">
                   <h3 className="text-base font-bold text-white">Enrol in Course</h3>
                   <select
                     value={enrolCourseId}
@@ -1307,7 +1307,7 @@ export default function EmployeeProfilePage() {
         {/* ── Review / Implement modal ──────────────────────────────────────── */}
         {reviewModal && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4">
+            <div className="card-premium rounded-2xl p-6 w-full max-w-md space-y-4">
               <h3 className="text-base font-bold text-white capitalize">
                 {reviewModal.action === 'implemented' ? 'Implement Promotion' : `${reviewModal.action === 'approved' ? 'Approve' : 'Reject'} Nomination`}
               </h3>
@@ -1351,7 +1351,7 @@ export default function EmployeeProfilePage() {
         {/* ── New Promotion Form Modal ──────────────────────────────────────── */}
         {showPromoForm && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="card-premium rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-800">
                 <h2 className="text-base font-bold text-white">Raise Promotion / Salary Request</h2>
                 <button onClick={() => setShowPromoForm(false)} className="text-gray-400 hover:text-white text-xl">×</button>

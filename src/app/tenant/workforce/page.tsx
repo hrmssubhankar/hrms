@@ -44,7 +44,7 @@ export default function WorkforcePage() {
               { label:'Departments', value:summary.departments, cls:'text-gray-900' },
               { label:'Positions', value:summary.positions, cls:'text-gray-900' },
             ].map(s => (
-              <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4 dark:bg-gray-900 dark:border-gray-700">
+              <div key={s.label} className="card-premium p-4">
                 <p className={`text-2xl font-bold ${s.cls}`}>{s.value}</p>
                 <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{s.label}</p>
               </div>
@@ -60,16 +60,17 @@ export default function WorkforcePage() {
           {depts.length === 0 ? (
             <p className="p-6 text-sm text-gray-600 dark:text-gray-400">No departments configured</p>
           ) : (
-            <table className="w-full text-sm">
+            <div className="table-responsive">
+            <table className="table-premium">
               <thead><tr className="border-b border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-800">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Department</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Active Staff</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Positions</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Vacancies</th>
+                <th>Department</th>
+                <th>Active Staff</th>
+                <th>Positions</th>
+                <th>Vacancies</th>
               </tr></thead>
               <tbody>
                 {depts.map(d => (
-                  <tr key={d.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800">
+                  <tr key={d.id}>
                     <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{d.name}</td>
                     <td className="px-5 py-3 text-gray-700 dark:text-gray-300">{d.count}</td>
                     <td className="px-5 py-3 text-gray-700 dark:text-gray-300">{d.positions}</td>
@@ -82,6 +83,7 @@ export default function WorkforcePage() {
                 ))}
               </tbody>
             </table>
+          </div>
           )}
         </div>
 

@@ -195,7 +195,7 @@ export default function MyLeavePage() {
   if (!linked) {
     return (
       <div className="p-6 max-w-2xl mx-auto">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-10 text-center">
+        <div className="card-premium rounded-2xl p-10 text-center">
           <p className="text-lg font-semibold text-white mb-2">Profile Not Linked</p>
           <p className="text-gray-600 dark:text-gray-400 text-sm">
             Your account is not linked to an employee record. Contact HR to set this up.
@@ -234,7 +234,7 @@ export default function MyLeavePage() {
             { label: 'Requests',       value: stats.total,             color: 'text-white' },
             { label: 'Pending Review', value: stats.pending,           color: 'text-amber-400' },
           ].map(s => (
-            <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <div key={s.label} className="card-premium p-4">
               <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
               <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
             </div>
@@ -261,7 +261,7 @@ export default function MyLeavePage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <form onSubmit={submitRequest}
-            className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+            className="card-premium rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">New Leave Request</h2>
               <button type="button" onClick={() => { setShowForm(false); setFormError(null) }}
@@ -340,7 +340,7 @@ export default function MyLeavePage() {
       {/* ─── HISTORY TAB ─────────────────────────────────────────────────── */}
       {tab === 'history' && (
         requests.length === 0 ? (
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl py-16 text-center">
+          <div className="card-premium rounded-2xl py-16 text-center">
             <div className="text-4xl mb-3">🌴</div>
             <p className="text-gray-600 dark:text-gray-300 font-medium">No leave requests yet</p>
             <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Submit your first request using the button above.</p>
@@ -350,7 +350,7 @@ export default function MyLeavePage() {
             {requests.map(r => {
               const isOpen = expanded === r.id
               return (
-                <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+                <div key={r.id} className="card-premium overflow-hidden">
                   {/* Summary row */}
                   <button
                     onClick={() => setExpanded(isOpen ? null : r.id)}
@@ -427,7 +427,7 @@ export default function MyLeavePage() {
         loadingBal ? (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">Calculating balances…</div>
         ) : balances.length === 0 ? (
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-12 text-center">
+          <div className="card-premium py-12 text-center">
             <p className="text-gray-500 dark:text-gray-400">No leave types configured. Contact HR.</p>
           </div>
         ) : (
@@ -442,7 +442,7 @@ export default function MyLeavePage() {
                 : 'text-green-400'
 
               return (
-                <div key={b.key} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-3">
+                <div key={b.key} className="card-premium rounded-2xl p-5 space-y-3">
                   <div className="flex items-center gap-2.5">
                     <span className="text-2xl">{b.emoji}</span>
                     <div>

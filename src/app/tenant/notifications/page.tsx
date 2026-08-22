@@ -114,8 +114,8 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="page-premium-title">Notifications</h1>
+          <p className="page-premium-subtitle mt-0.5">
             {unread > 0 ? `${unread} unread` : 'All caught up'}
           </p>
         </div>
@@ -136,7 +136,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Email Alert Panel */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+      <div className="card-premium rounded-2xl p-5">
         <h2 className="font-semibold text-gray-900 dark:text-white mb-1">Document Expiry Alerts</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Scan for compliance documents expiring soon and email employees + compliance managers.
@@ -208,7 +208,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* In-app Notifications */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+      <div className="card-premium rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between gap-4 flex-wrap">
           <h2 className="font-semibold text-gray-900 dark:text-white">In-app Notifications</h2>
 

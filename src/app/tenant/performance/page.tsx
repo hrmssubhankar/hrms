@@ -290,7 +290,7 @@ export default function PerformancePage() {
           { label: 'Overdue',    value: stats.overdue,   color: 'text-red-400' },
           { label: 'Probation',  value: stats.probation, color: 'text-amber-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -314,7 +314,7 @@ export default function PerformancePage() {
         <>
           {/* Create form */}
           {showForm && (
-            <form onSubmit={createReview} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+            <form onSubmit={createReview} className="card-premium border-purple-500/30 p-5 space-y-4">
               <h3 className="text-sm font-semibold text-purple-300">Schedule Review</h3>
               <div className="grid grid-cols-3 gap-3">
                 <div>
@@ -345,10 +345,10 @@ export default function PerformancePage() {
           {/* Complete review modal */}
           {editing && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-              <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-2xl space-y-5 my-4">
+              <div className="card-premium p-6 w-full max-w-2xl space-y-5 my-4">
                 <h3 className="text-lg font-bold text-white">Complete Review</h3>
                 <div className="space-y-3">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">KPI Ratings (1–5)</p>
+                  <p className="section-label">KPI Ratings (1–5)</p>
                   {editing.kpis.map((kpi, i) => (
                     <div key={kpi.id} className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 space-y-2">
                       <p className="text-sm font-medium text-white">{kpi.area}</p>
@@ -405,7 +405,7 @@ export default function PerformancePage() {
           {/* Self-assessment modal */}
           {selfAssessModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-              <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-xl space-y-4 my-4">
+              <div className="card-premium p-6 w-full max-w-xl space-y-4 my-4">
                 <h3 className="text-lg font-bold text-white">Employee Self-Assessment</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">This input is shared with the reviewer ahead of the performance review.</p>
                 {[
@@ -440,16 +440,16 @@ export default function PerformancePage() {
           <div className="flex gap-3 flex-wrap">
             <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterStatus, filterType) }}
               placeholder="Search employee…"
-              className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+              className="flex-1 min-w-48 input-premium placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
             <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(search, e.target.value, filterType) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              className="input-premium focus:outline-none focus:border-purple-500">
               <option value="">All statuses</option>
               <option value="scheduled">Scheduled</option>
               <option value="completed">Completed</option>
               <option value="overdue">Overdue</option>
             </select>
             <select value={filterType} onChange={e => { setFilterType(e.target.value); load(search, filterStatus, e.target.value) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              className="input-premium focus:outline-none focus:border-purple-500">
               <option value="">All types</option>
               {REVIEW_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
@@ -457,15 +457,16 @@ export default function PerformancePage() {
 
           {/* Table */}
           {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : reviews.length === 0 ? (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+            <div className="card-premium py-14 text-center">
               <p className="text-gray-600 dark:text-gray-300 font-medium">No reviews scheduled</p>
               <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Schedule a review for an employee to get started.</p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="card-premium overflow-hidden">
+              <div className="table-responsive">
+            <table className="table-premium">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+                  <tr>
                     {['Employee','Type','Status','Scheduled','Rating','Outcome','Actions'].map(h => (
                       <th key={h} className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">{h}</th>
                     ))}
@@ -486,7 +487,7 @@ export default function PerformancePage() {
                             {REVIEW_TYPES.find(t => t.value === r.type)?.label ?? r.type}
                           </td>
                           <td className="px-4 py-3.5">
-                            <span className={`inline-flex text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                            <span className={`inline-flex text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                               {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                             </span>
                           </td>
@@ -571,6 +572,7 @@ export default function PerformancePage() {
                   })}
                 </tbody>
               </table>
+          </div>
             </div>
           )}
         </>
@@ -581,7 +583,7 @@ export default function PerformancePage() {
         <>
           {/* Add goal form */}
           {showGoalForm && (
-            <form onSubmit={createGoal} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+            <form onSubmit={createGoal} className="card-premium border-purple-500/30 p-5 space-y-4">
               <h3 className="text-sm font-semibold text-purple-300">New Performance Goal</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -634,7 +636,7 @@ export default function PerformancePage() {
           {/* Edit goal modal */}
           {editingGoal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-              <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-lg space-y-4 my-4">
+              <div className="card-premium p-6 w-full max-w-lg space-y-4 my-4">
                 <h3 className="text-lg font-bold text-white">Edit Goal</h3>
                 <div>
                   <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Title</label>
@@ -707,12 +709,12 @@ export default function PerformancePage() {
           {/* Goals filters */}
           <div className="flex gap-3 flex-wrap">
             <select value={filterGoalEmp} onChange={e => { setFilterGoalEmp(e.target.value); loadGoals(e.target.value, filterGoalStatus) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              className="input-premium focus:outline-none focus:border-purple-500">
               <option value="">All employees</option>
               {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
             </select>
             <select value={filterGoalStatus} onChange={e => { setFilterGoalStatus(e.target.value); loadGoals(filterGoalEmp, e.target.value) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              className="input-premium focus:outline-none focus:border-purple-500">
               <option value="">All statuses</option>
               {GOAL_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
@@ -721,14 +723,14 @@ export default function PerformancePage() {
 
           {/* Goals list */}
           {goalsLoading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : goals.length === 0 ? (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+            <div className="card-premium py-14 text-center">
               <p className="text-gray-600 dark:text-gray-300 font-medium">No goals found</p>
               <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create a goal for an employee to get started.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {goals.map(g => (
-                <div key={g.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 space-y-3">
+                <div key={g.id} className="card-premium p-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">

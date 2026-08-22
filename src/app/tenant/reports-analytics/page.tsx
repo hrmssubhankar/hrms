@@ -225,7 +225,8 @@ function exportPDF(label: string, columns: string[], rows: ReportRow[], activeFi
   @media print{body{padding:0}}</style></head>
   <body><h1>${label}</h1><p>${filterStr || 'No filters applied'} — Generated ${new Date().toLocaleString('en-AU')}</p>
   <table><thead><tr>${columns.map(c => `<th>${prettyKey(c)}</th>`).join('')}</tr></thead>
-  <tbody>${tableRows}</tbody></table></body></html>`
+  <tbody>${tableRows}</tbody></table>
+          </div></body></html>`
   const win = window.open('', '_blank')
   if (!win) return
   win.document.write(html)
@@ -446,10 +447,10 @@ export default function ReportsAnalyticsPage() {
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="page-premium-title">
                     {selected.icon} {selected.label}
                   </h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{selected.description}</p>
+                  <p className="page-premium-subtitle mt-1">{selected.description}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {results && results.length > 0 && (
@@ -551,7 +552,8 @@ export default function ReportsAnalyticsPage() {
                     )}
                   </div>
                   <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <table className="w-full text-sm">
+                    <div className="table-responsive">
+            <table className="table-premium">
                       <thead className="bg-gray-50 dark:bg-gray-700">
                         <tr>
                           {columns.map(col => (
@@ -573,6 +575,7 @@ export default function ReportsAnalyticsPage() {
                         ))}
                       </tbody>
                     </table>
+          </div>
                   </div>
                 </>
               )}

@@ -431,7 +431,7 @@ export default function ParticipantsPage() {
           <div className="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h2 className="page-premium-title">
                   {displayName(selected)}
                   {selected.preferredName && <span className="text-gray-500 dark:text-gray-400 font-normal ml-2">({selected.preferredName})</span>}
                 </h2>

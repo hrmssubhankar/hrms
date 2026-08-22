@@ -264,7 +264,7 @@ export default function OnboardingDetailPage() {
       {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
 
       {/* Progress + stage */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 space-y-4">
+      <div className="card-premium p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Overall Progress</p>
@@ -324,9 +324,9 @@ export default function OnboardingDetailPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
         {/* Buddy */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Onboarding Buddy</p>
+            <p className="section-label">Onboarding Buddy</p>
             <button onClick={() => {
               setBuddyDraft(rec.buddyId ?? '')
               if (allEmployees.length === 0) {
@@ -364,9 +364,9 @@ export default function OnboardingDetailPage() {
         </div>
 
         {/* Notes */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+        <div className="card-premium p-4">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Notes</p>
+            <p className="section-label">Notes</p>
             <button onClick={() => {
               setNotesDraft(rec.notes ?? '')
               setEditingNotes(n => !n)
@@ -395,7 +395,7 @@ export default function OnboardingDetailPage() {
       {/* Checklist by category */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Onboarding Checklist</h2>
+          <h2 className="section-label">Onboarding Checklist</h2>
           <button onClick={() => setAddingTask(t => !t)}
             className="text-xs text-purple-400 hover:text-purple-300 transition flex items-center gap-1">
             {addingTask ? '✕ Cancel' : '+ Add Task'}
@@ -404,7 +404,7 @@ export default function OnboardingDetailPage() {
 
         {/* Add task form */}
         {addingTask && (
-          <div className="bg-white dark:bg-gray-900 border border-purple-700 rounded-xl p-4 space-y-3">
+          <div className="card-premium border-purple-500/30 p-4 space-y-3">
             <p className="text-xs font-semibold text-purple-300">New Checklist Task</p>
             <input value={newTaskText} onChange={e => setNewTaskText(e.target.value)}
               placeholder="Task description…"
@@ -423,7 +423,7 @@ export default function OnboardingDetailPage() {
         )}
 
         {Object.entries(grouped).map(([category, items]) => (
-          <div key={category} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+          <div key={category} className="card-premium overflow-hidden">
             <div className="px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${CATEGORY_COLOR[category] ?? 'bg-gray-700 text-gray-300'}`}>
                 {category.charAt(0).toUpperCase() + category.slice(1)}

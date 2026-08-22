@@ -77,7 +77,8 @@ export default function ReferralPage() {
           </div>
         ) : (
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden dark:bg-gray-900 dark:border-gray-700">
-            <table className="w-full text-sm">
+            <div className="table-responsive">
+            <table className="table-premium">
               <thead><tr className="border-b border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-800">
                 {['Referred By','Candidate','Status','Bonus','Submitted','Actions'].map(h=>(
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">{h}</th>
@@ -85,7 +86,7 @@ export default function ReferralPage() {
               </tr></thead>
               <tbody>
                 {referrals.map(r=>(
-                  <tr key={r.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800">
+                  <tr key={r.id}>
                     <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{r.referrerFirstName} {r.referrerLastName}</td>
                     <td className="px-4 py-3">
                       <p className="text-gray-900 dark:text-white">{r.referredName}</p>
@@ -116,6 +117,7 @@ export default function ReferralPage() {
                 ))}
               </tbody>
             </table>
+          </div>
           </div>
         )}
       </div>

@@ -166,7 +166,7 @@ function AvailabilityModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="card-premium w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Availability</h2>
@@ -282,7 +282,7 @@ function FillTimesheetsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+      <div className="card-premium w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Fill Timesheets</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400">✕</button>
@@ -411,7 +411,7 @@ function ShiftModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="card-premium w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
             {mode === 'create' ? 'Add Shift' : 'Edit Shift'}
@@ -749,13 +749,13 @@ export default function RosteringPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Roster</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="page-premium-title">Roster</h1>
+          <p className="page-premium-subtitle mt-0.5">
             {fmtDate(weekStart)} — {fmtDate(addDays(weekStart, 6))}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+          <div className="flex items-center card-premium overflow-hidden">
             <button onClick={() => setWeekStart(w => addDays(w, -7))}
               className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm dark:text-gray-400">←</button>
             <button onClick={() => setWeekStart(getMondayOf(new Date()))}
@@ -806,7 +806,7 @@ export default function RosteringPage() {
           { label: 'Published',   value: shifts.filter(s => s.status === 'published').length,  color: 'text-green-600 dark:text-green-400' },
           { label: 'Staff',       value: new Set(shifts.map(s => s.employeeId)).size,          color: 'text-gray-700 dark:text-gray-300' },
         ].map(c => (
-          <div key={c.label} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2 flex items-center gap-2">
+          <div key={c.label} className="card-premium px-4 py-2 flex items-center gap-2">
             <span className={`text-lg font-bold ${c.color}`}>{c.value}</span>
             <span className="text-xs text-gray-600 dark:text-gray-400">{c.label}</span>
           </div>
@@ -814,12 +814,12 @@ export default function RosteringPage() {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+      <div className="card-premium overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20 text-gray-600 dark:text-gray-400 text-sm">Loading roster…</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[860px]">
+            <table className="table-premium">
               <thead>
                 <tr>
                   <th className="w-36 px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-800 border-b border-r border-gray-100 dark:border-gray-700">

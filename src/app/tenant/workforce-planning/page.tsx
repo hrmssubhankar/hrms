@@ -89,7 +89,7 @@ function fmt(d: string | null): string {
 
 function StatCard({ label, value, color }: { label: string; value: number | string; color: string }) {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+    <div className="card-premium p-4">
       <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
       <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
     </div>
@@ -297,7 +297,7 @@ export default function WorkforcePlanningPage() {
             </div>
 
             {/* Employment type breakdown */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Employment Type Breakdown</h2>
               <div className="space-y-3">
                 {empTypeRows.map(({ key, count }) => {
@@ -320,13 +320,14 @@ export default function WorkforcePlanningPage() {
 
             {/* Headcount by department */}
             {wf.headcountByDepartment.length > 0 && (
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+              <div className="card-premium overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
                   <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Headcount by Department</h2>
                 </div>
-                <table className="w-full text-sm">
+                <div className="table-responsive">
+            <table className="table-premium">
                   <thead>
-                    <tr className="border-b border-gray-100 dark:border-gray-800 text-left">
+                    <tr>
                       {['Department', 'Employees', 'Positions', 'Fill Rate'].map(h => (
                         <th key={h} className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
                       ))}
@@ -362,6 +363,7 @@ export default function WorkforcePlanningPage() {
                       })}
                   </tbody>
                 </table>
+          </div>
               </div>
             )}
 
@@ -375,7 +377,7 @@ export default function WorkforcePlanningPage() {
                 .slice(0, 5)
               if (recent.length === 0) return null
               return (
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+                <div className="card-premium overflow-hidden">
                   <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
                     <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Recent Hires</h2>
                   </div>
@@ -429,7 +431,7 @@ export default function WorkforcePlanningPage() {
 
           {/* Add / Edit form */}
           {showForm && (
-            <form onSubmit={savePlan} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+            <form onSubmit={savePlan} className="card-premium border-purple-500/30 p-5 space-y-4">
               <h3 className="text-sm font-semibold text-purple-300">
                 {editingId ? 'Edit Headcount Plan' : 'Add Headcount Plan'}
               </h3>
@@ -579,7 +581,7 @@ export default function WorkforcePlanningPage() {
           {plansLoading ? (
             <p className="text-gray-500 dark:text-gray-400 text-sm">Loading…</p>
           ) : visiblePlans.length === 0 ? (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+            <div className="card-premium py-14 text-center">
               <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round"
@@ -596,10 +598,11 @@ export default function WorkforcePlanningPage() {
               )}
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="card-premium overflow-hidden">
+              <div className="table-responsive">
+            <table className="table-premium">
                 <thead>
-                  <tr className="border-b border-gray-100 dark:border-gray-800 text-left">
+                  <tr>
                     {['Role / Department', 'Planned', 'Current', 'Vacancies', 'Fill', 'Target Date', 'Status', ''].map(h => (
                       <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
                     ))}
@@ -644,7 +647,7 @@ export default function WorkforcePlanningPage() {
                           {p.targetDate ? fmt(p.targetDate) : '—'}
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${PLAN_STATUS_STYLE[p.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${PLAN_STATUS_STYLE[p.status] ?? 'badge badge-gray'}`}>
                             {p.status === 'on_hold' ? 'On Hold' : p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                           </span>
                         </td>
@@ -678,6 +681,7 @@ export default function WorkforcePlanningPage() {
                   })}
                 </tbody>
               </table>
+          </div>
             </div>
           )}
         </div>

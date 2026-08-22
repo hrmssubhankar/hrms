@@ -257,8 +257,8 @@ export default function PayrollPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Payroll</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Australian PAYG · Super 11.5% · Medicare 2%</p>
+          <h1 className="page-premium-title">Payroll</h1>
+          <p className="page-premium-subtitle mt-0.5">Australian PAYG · Super 11.5% · Medicare 2%</p>
         </div>
         <div className="flex items-center gap-3">
           {xeroStatus && (
@@ -328,7 +328,7 @@ export default function PayrollPage() {
             { label: 'Total Gross', value: `$${Number(stats.totalGross).toLocaleString('en-AU', { minimumFractionDigits: 2 })}`, color: 'text-gray-900 dark:text-white' },
             { label: 'Total Super', value: `$${Number(stats.totalSuper ?? 0).toLocaleString('en-AU', { minimumFractionDigits: 2 })}`, color: 'text-purple-400' },
           ].map(s => (
-            <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+            <div key={s.label} className="card-premium p-4">
               <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
               <p className={`text-lg font-bold mt-0.5 ${s.color}`}>{s.value}</p>
             </div>
@@ -348,9 +348,10 @@ export default function PayrollPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+      <div className="card-premium rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
                 {['Employee', 'Period', 'Gross', 'PAYG Tax', 'Medicare', 'Super', 'Net Pay', 'Status', ''].map(h => (
@@ -383,7 +384,7 @@ export default function PayrollPage() {
                   <td className="px-4 py-3 text-right font-mono text-purple-400">{fmt(r.superContribution)}</td>
                   <td className="px-4 py-3 text-right font-mono font-semibold text-green-400">{fmt(r.netPay)}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>{r.status}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>{r.status}</span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1.5 justify-end items-center">
@@ -418,13 +419,14 @@ export default function PayrollPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
       {/* New Pay Run Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="card-premium rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">New Pay Run</h2>
               <button onClick={() => { setShowModal(false); setPreview(null) }} className="text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl"></button>
@@ -566,7 +568,7 @@ export default function PayrollPage() {
       {/* Bulk Pay Run Modal */}
       {showBulk && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-lg shadow-2xl">
+          <div className="card-premium rounded-2xl w-full max-w-lg shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <div>
                 <h2 className="font-semibold text-gray-900 dark:text-white">⚡ Bulk Pay Run</h2>
@@ -694,7 +696,7 @@ export default function PayrollPage() {
       {/* Payslip Detail Modal */}
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md shadow-2xl">
+          <div className="card-premium rounded-2xl w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
               <h2 className="font-semibold text-gray-900 dark:text-white">Payslip</h2>
               <div className="flex items-center gap-2">

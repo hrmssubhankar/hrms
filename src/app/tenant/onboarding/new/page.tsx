@@ -67,7 +67,7 @@ export default function NewOnboardingPage() {
 
       {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
+      <form onSubmit={handleSubmit} className="space-y-6 card-premium p-6">
 
         {/* Employee */}
         <div>

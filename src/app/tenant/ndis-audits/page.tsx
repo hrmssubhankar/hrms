@@ -322,8 +322,8 @@ export default function NDISAuditsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">NDIS Practice Standards Audit</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Track audits, findings and corrective actions</p>
+          <h1 className="page-premium-title">NDIS Practice Standards Audit</h1>
+          <p className="page-premium-subtitle mt-0.5">Track audits, findings and corrective actions</p>
         </div>
         <button
           onClick={() => { setEditAudit(null); setShowModal(true) }}
@@ -340,7 +340,7 @@ export default function NDISAuditsPage() {
           { label: 'Overdue',         value: overdue,   cls: 'text-red-600 dark:text-red-400' },
           { label: 'Non-Conformant',  value: nonConf,   cls: 'text-orange-600 dark:text-orange-400' },
         ].map(({ label, value, cls }) => (
-          <div key={label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4">
+          <div key={label} className="card-premium rounded-2xl p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
             <p className={`text-3xl font-bold mt-1 ${cls}`}>{value}</p>
           </div>
@@ -368,7 +368,7 @@ export default function NDISAuditsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+      <div className="card-premium rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-48 text-gray-400">Loading…</div>
         ) : audits.length === 0 ? (
@@ -379,7 +379,8 @@ export default function NDISAuditsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <div className="table-responsive">
+            <table className="table-premium">
               <thead className="bg-gray-50 dark:bg-gray-800/60">
                 <tr>
                   {['Title / Standard', 'Type', 'Status', 'Result', 'Risk', 'Scheduled', 'Next Review', 'Auditor', ''].map(h => (
@@ -442,6 +443,7 @@ export default function NDISAuditsPage() {
                 })}
               </tbody>
             </table>
+          </div>
           </div>
         )}
       </div>

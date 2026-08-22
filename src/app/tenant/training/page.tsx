@@ -26,7 +26,7 @@ const STATUS_STYLE: Record<string, string> = {
   enrolled:  'bg-blue-900/50 text-blue-300 border-blue-800',
   completed: 'bg-green-900/50 text-green-300 border-green-800',
   overdue:   'bg-red-900/50 text-red-300 border-red-800',
-  expired:   'bg-gray-800 text-gray-400 border-gray-700',
+  expired:   'badge badge-gray',
 }
 
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
@@ -47,7 +47,7 @@ export default function TrainingPage() {
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage courses, enrolments and completion records</p>
       </div>
 
-      <div className="flex gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 card-premium p-1 w-fit">
         {([
           { key: 'library', label: 'Course Library' },
           { key: 'records', label: 'Training Records' },
@@ -143,9 +143,9 @@ function LibraryTab() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterCat) }}
           placeholder="Search courses…"
-          className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+          className="flex-1 min-w-48 input-premium placeholder-gray-400 dark:placeholder-gray-500 " />
         <select value={filterCat} onChange={e => { setFilterCat(e.target.value); load(search, e.target.value) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium ">
           <option value="">All categories</option>
           {categories.map(c => <option key={c}>{c}</option>)}
         </select>
@@ -157,7 +157,7 @@ function LibraryTab() {
 
       {/* Create form */}
       {showForm && (
-        <form onSubmit={createCourse} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={createCourse} className="card-premium border-purple-500/30 p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">New Course</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
@@ -199,7 +199,7 @@ function LibraryTab() {
       {/* Enrol modal */}
       {enrollCourse && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 w-full max-w-md space-y-4">
+          <div className="card-premium p-6 w-full max-w-md space-y-4">
             <h3 className="text-lg font-bold text-white">Enrol Employees</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">Course: <span className="text-white font-medium">{enrollCourse.title}</span></p>
             <div className="max-h-60 overflow-y-auto space-y-1 border border-gray-200 dark:border-gray-800 rounded-lg p-2">
@@ -230,7 +230,7 @@ function LibraryTab() {
 
       {/* Course grid */}
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : courseList.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -242,7 +242,7 @@ function LibraryTab() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {courseList.map(c => (
-            <div key={c.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 flex flex-col gap-3 hover:border-gray-300 dark:border-gray-700 transition">
+            <div key={c.id} className="card-premium p-5 flex flex-col gap-3 hover:border-gray-300 dark:border-gray-700 transition">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -327,7 +327,7 @@ function RecordsTab() {
           { label: 'Overdue',    value: stats.overdue,   color: 'text-red-400' },
           { label: 'Expiring',   value: stats.expiring,  color: 'text-amber-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -338,9 +338,9 @@ function RecordsTab() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterStatus) }}
           placeholder="Search employee or course…"
-          className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+          className="flex-1 min-w-48 input-premium placeholder-gray-400 dark:placeholder-gray-500 " />
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(search, e.target.value) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium ">
           <option value="">All statuses</option>
           <option value="enrolled">Enrolled</option>
           <option value="completed">Completed</option>
@@ -350,7 +350,7 @@ function RecordsTab() {
 
       {/* Table */}
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -360,16 +360,17 @@ function RecordsTab() {
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Enrol employees in a course from the Course Library tab.</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card-premium overflow-hidden">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Employee</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Course</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Score</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Expiry</th>
-                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Action</th>
+              <tr>
+                <th>Employee</th>
+                <th>Course</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Expiry</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -378,7 +379,7 @@ function RecordsTab() {
                 const expiryWarn = days !== null && days >= 0 && days <= 30
                 const expired    = days !== null && days < 0
                 return (
-                  <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
+                  <tr key={r.id}>
                     <td className="px-5 py-3.5">
                       <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
                       <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
@@ -391,7 +392,7 @@ function RecordsTab() {
                       </div>
                     </td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                      <span className={`inline-flex text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                         {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                       </span>
                     </td>
@@ -425,6 +426,7 @@ function RecordsTab() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
@@ -466,7 +468,7 @@ function GapTab() {
   if (loading) return <div className="text-center py-16 text-gray-400">Loading gap report…</div>
 
   if (mandatory.length === 0) return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-8 text-center text-gray-400">
+    <div className="card-premium p-8 text-center text-gray-400">
       <p className="text-2xl mb-2">📋</p>
       <p className="font-medium">No mandatory courses configured</p>
       <p className="text-sm mt-1">Mark courses as mandatory in the Course Library to generate a gap report.</p>
@@ -498,14 +500,15 @@ function GapTab() {
           <p className="text-sm text-green-600 dark:text-green-500 mt-1">Everyone has completed all {mandatory.length} mandatory course{mandatory.length !== 1 ? 's' : ''}</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card-premium overflow-hidden">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Employee</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Missing</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Expired</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Total Gaps</th>
+                <th>Employee</th>
+                <th>Missing</th>
+                <th>Expired</th>
+                <th>Total Gaps</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -550,6 +553,7 @@ function GapTab() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

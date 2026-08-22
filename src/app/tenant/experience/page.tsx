@@ -78,19 +78,20 @@ export default function ExperiencePage() {
             <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Tenure Overview</h2>
             <p className="text-xs text-gray-600 dark:text-gray-400">{withTenure.length} active employees</p>
           </div>
-          <table className="w-full text-sm">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead><tr className="border-b border-gray-100 bg-gray-50 dark:bg-gray-800 dark:border-gray-800">
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Employee</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Start Date</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Tenure</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase dark:text-gray-400">Milestone</th>
+              <th>Employee</th>
+              <th>Start Date</th>
+              <th>Tenure</th>
+              <th>Milestone</th>
             </tr></thead>
             <tbody>
               {withTenure.map(e => {
                 const achieved = MILESTONES.filter(m => m <= e.tenureMonths)
                 const lastMilestone = achieved.at(-1)
                 return (
-                  <tr key={e.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800">
+                  <tr key={e.id}>
                     <td className="px-5 py-3 font-medium text-gray-900 dark:text-white">{e.firstName} {e.lastName}</td>
                     <td className="px-5 py-3 text-gray-600 dark:text-gray-400">{new Date(e.startDate).toLocaleDateString()}</td>
                     <td className="px-5 py-3 text-gray-700 font-medium dark:text-gray-300">{tenure(e.startDate)}</td>
@@ -105,6 +106,7 @@ export default function ExperiencePage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>

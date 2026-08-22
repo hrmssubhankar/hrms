@@ -78,7 +78,7 @@ export default function ReferralsPage() {
           { label:'Hired',      value:stats.hired,     color:'text-green-400' },
           { label:'Bonus Paid', value:stats.bonusPaid, color:'text-purple-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -86,7 +86,7 @@ export default function ReferralsPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={submit} className="card-premium border-purple-500/30 p-5 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Referring Employee *</label>
@@ -116,7 +116,7 @@ export default function ReferralsPage() {
       )}
 
       {loading ? <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p> : referrals.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -127,11 +127,11 @@ export default function ReferralsPage() {
       ) : (
         <div className="space-y-2">
           {referrals.map(r => (
-            <div key={r.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
+            <div key={r.id} className="card-premium px-5 py-4 flex items-center gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="text-white font-medium text-sm">{r.referredName}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>{r.status}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>{r.status}</span>
                   {r.bonusPaidAt && <span className="text-xs text-green-400">Bonus paid</span>}
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Referred by {r.referrerFirstName} {r.referrerLastName}

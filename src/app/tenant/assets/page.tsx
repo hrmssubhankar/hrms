@@ -12,7 +12,7 @@ const ASSET_CATEGORIES = ['Laptop','Phone','Uniform','PPE','Keys','Access Card',
 const STATUS_STYLE: Record<string, string> = {
   available: 'bg-green-900/50 text-green-300 border-green-800',
   assigned:  'bg-blue-900/50 text-blue-300 border-blue-800',
-  retired:   'bg-gray-800 text-gray-400 border-gray-700',
+  retired:   'badge badge-gray',
   maintenance:'bg-amber-900/50 text-amber-300 border-amber-800',
 }
 
@@ -91,7 +91,7 @@ export default function AssetsPage() {
           { label:'Assigned',  value:stats.assigned,  color:'text-blue-400' },
           { label:'Retired',   value:stats.retired,   color:'text-gray-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -108,7 +108,7 @@ export default function AssetsPage() {
       </div>
 
       {showAssetForm && tab === 'assets' && (
-        <form onSubmit={createAsset} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-3">
+        <form onSubmit={createAsset} className="card-premium border-purple-500/30 p-5 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Name *</label>
@@ -136,7 +136,7 @@ export default function AssetsPage() {
         <>
           {tab === 'assets' && (
             assets.length === 0 ? (
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+              <div className="card-premium py-14 text-center">
                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -145,12 +145,13 @@ export default function AssetsPage() {
                 <p className="text-gray-600 dark:text-gray-300 font-medium">No assets registered</p>
               </div>
             ) : (
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="card-premium overflow-hidden">
+                <div className="table-responsive">
+            <table className="table-premium">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-800">
                       {['Asset','Category','Serial','Status',''].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">{h}</th>
+                        <th key={h} className="px-4 py-3 text-left section-label">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -161,7 +162,7 @@ export default function AssetsPage() {
                         <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs">{a.category}</td>
                         <td className="px-4 py-3 text-gray-500 text-xs font-mono dark:text-gray-400">{a.serialNumber ?? '—'}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[a.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[a.status] ?? 'badge badge-gray'}`}>
                             {a.status}
                           </span>
                         </td>
@@ -201,6 +202,7 @@ export default function AssetsPage() {
                     ))}
                   </tbody>
                 </table>
+          </div>
               </div>
             )
           )}
@@ -210,7 +212,7 @@ export default function AssetsPage() {
               {assignments.filter(a => !a.returnedAt).map(a => {
                 const asset = assets.find(x => x.id === a.assetId)
                 return (
-                  <div key={a.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-5 py-4 flex items-center gap-4">
+                  <div key={a.id} className="card-premium px-5 py-4 flex items-center gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-white font-medium text-sm">{asset?.name ?? 'Unknown'}</span>
@@ -228,7 +230,7 @@ export default function AssetsPage() {
                 )
               })}
               {assignments.filter(a => !a.returnedAt).length === 0 && (
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-10 text-center">
+                <div className="card-premium py-10 text-center">
                   <p className="text-gray-500 text-sm dark:text-gray-400">No active assignments</p>
                 </div>
               )}

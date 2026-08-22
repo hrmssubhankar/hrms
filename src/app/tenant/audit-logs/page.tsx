@@ -15,12 +15,12 @@ const ACTION_COLOR: Record<string, string> = {
   update: 'bg-blue-900/50 text-blue-300 border-blue-800',
   delete: 'bg-red-900/50 text-red-300 border-red-800',
   login:  'bg-purple-900/50 text-purple-300 border-purple-800',
-  logout: 'bg-gray-800 text-gray-400 border-gray-700',
+  logout: 'badge badge-gray',
   export: 'bg-amber-900/50 text-amber-300 border-amber-800',
 }
 
 const actionColor = (a: string) =>
-  ACTION_COLOR[a.toLowerCase().split('_')[0]] ?? 'bg-gray-800 text-gray-400 border-gray-700'
+  ACTION_COLOR[a.toLowerCase().split('_')[0]] ?? 'badge badge-gray'
 
 export default function AuditLogsPage() {
   const [logs,      setLogs]      = useState<AuditLog[]>([])
@@ -66,7 +66,7 @@ export default function AuditLogsPage() {
         <div>
           <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Resource</label>
           <select value={filterResource} onChange={e => setFilterResource(e.target.value)}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 min-w-32">
+            className="input-premium focus:outline-none focus:border-purple-500 min-w-32">
             <option value="">All</option>
             {resources.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
@@ -74,7 +74,7 @@ export default function AuditLogsPage() {
         <div>
           <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Action</label>
           <select value={filterAction} onChange={e => setFilterAction(e.target.value)}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+            className="input-premium focus:outline-none focus:border-purple-500">
             <option value="">All</option>
             {['create','update','delete','login','logout','export'].map(a => <option key={a} value={a}>{a}</option>)}
           </select>
@@ -82,7 +82,7 @@ export default function AuditLogsPage() {
         <div>
           <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Since</label>
           <input type="date" value={filterSince} onChange={e => setFilterSince(e.target.value)}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500" />
+            className="input-premium focus:outline-none focus:border-purple-500" />
         </div>
         <button onClick={applyFilters}
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-lg transition">
@@ -97,7 +97,7 @@ export default function AuditLogsPage() {
       </div>
 
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : logs.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -108,16 +108,17 @@ export default function AuditLogsPage() {
         </div>
       ) : (
         <>
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="card-premium overflow-hidden">
+            <div className="table-responsive">
+            <table className="table-premium">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Timestamp</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">User</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Action</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Resource</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">IP</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-8 dark:text-gray-400"></th>
+                <tr>
+                  <th className="px-4 py-3 section-label">Timestamp</th>
+                  <th className="px-4 py-3 section-label">User</th>
+                  <th className="px-4 py-3 section-label">Action</th>
+                  <th className="px-4 py-3 section-label">Resource</th>
+                  <th className="px-4 py-3 section-label">IP</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-800/60">
@@ -178,6 +179,7 @@ export default function AuditLogsPage() {
                 })}
               </tbody>
             </table>
+          </div>
           </div>
 
           {/* Pagination */}

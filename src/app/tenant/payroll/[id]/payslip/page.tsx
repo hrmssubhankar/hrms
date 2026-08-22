@@ -133,7 +133,7 @@ export default function PayslipPrintPage() {
         </div>
 
         {/* Earnings */}
-        <table className="w-full text-sm mb-6">
+        <table className="table-premium mb-6">
           <thead>
             <tr className="bg-gray-100">
               <th className="text-left px-3 py-2 text-xs font-semibold text-gray-600 uppercase tracking-wide">Earnings</th>
@@ -169,7 +169,7 @@ export default function PayslipPrintPage() {
         </table>
 
         {/* Deductions */}
-        <table className="w-full text-sm mb-6">
+        <table className="table-premium mb-6">
           <thead>
             <tr className="bg-gray-100">
               <th className="text-left px-3 py-2 text-xs font-semibold text-gray-600 uppercase tracking-wide">Deductions</th>

@@ -187,7 +187,8 @@ export default function ToilPage() {
       {/* Balances tab */}
       {activeTab === 'balances' && (
         <div className="overflow-x-auto flex-1">
-          <table className="w-full text-sm">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead>
               <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 <th className="pb-2 pr-4">Employee</th>
@@ -221,6 +222,7 @@ export default function ToilPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -245,7 +247,8 @@ export default function ToilPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <div className="table-responsive">
+            <table className="table-premium">
                 <thead>
                   <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     <th className="pb-2 pr-4">Date</th>
@@ -284,6 +287,7 @@ export default function ToilPage() {
                   ))}
                 </tbody>
               </table>
+          </div>
             </div>
           )}
         </div>

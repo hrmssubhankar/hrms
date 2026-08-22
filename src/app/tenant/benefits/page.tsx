@@ -174,7 +174,7 @@ export default function BenefitsPage() {
           { label: 'Expiring Soon',  value: stats.expiring, color: 'text-amber-400' },
           { label: 'Expired',        value: stats.expired,  color: 'text-gray-500' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -183,7 +183,7 @@ export default function BenefitsPage() {
 
       {/* Add / Edit form */}
       {showForm && (
-        <form onSubmit={save} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={save} className="card-premium border-purple-500/30 p-5 space-y-4">
           <h3 className="text-sm font-semibold text-purple-300">{editingId ? 'Edit Benefit' : 'Assign Benefit'}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -241,17 +241,17 @@ export default function BenefitsPage() {
       {/* Filters + view toggle */}
       <div className="flex flex-wrap items-center gap-3">
         <select value={filterEmp} onChange={e => { setFilterEmp(e.target.value); load(e.target.value) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium focus:outline-none focus:border-purple-500">
           <option value="">All employees</option>
           {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
         </select>
         <select value={filterType} onChange={e => setFilterType(e.target.value)}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium focus:outline-none focus:border-purple-500">
           <option value="">All types</option>
           {BENEFIT_TYPES.map(t => <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>)}
         </select>
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="active">Active</option>
           <option value="permanent">Ongoing</option>
@@ -280,7 +280,7 @@ export default function BenefitsPage() {
       {loading ? (
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="text-4xl mb-3">🎁</div>
           <p className="text-gray-600 dark:text-gray-300 font-medium">No benefits found</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">
@@ -289,10 +289,11 @@ export default function BenefitsPage() {
         </div>
       ) : view === 'list' ? (
         /* ── LIST VIEW ── */
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="card-premium overflow-hidden">
+          <div className="table-responsive">
+            <table className="table-premium">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800 text-left">
+              <tr>
                 {['Employee', 'Benefit', 'Status', 'Period', 'Description', 'Actions'].map(h => (
                   <th key={h} className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">{h}</th>
                 ))}
@@ -342,12 +343,13 @@ export default function BenefitsPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       ) : (
         /* ── GROUPED VIEW ── */
         <div className="space-y-4">
           {grouped.map(group => (
-            <div key={group.value} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+            <div key={group.value} className="card-premium overflow-hidden">
               <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 dark:border-gray-800"
                 style={{ borderLeft: `4px solid ${group.color}` }}>
                 <span className="text-xl">{group.emoji}</span>

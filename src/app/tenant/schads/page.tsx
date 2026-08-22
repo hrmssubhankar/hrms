@@ -194,8 +194,8 @@ export default function SCHADSCalculatorPage() {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">SCHADS Award Rate Calculator</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        <h1 className="page-premium-title">SCHADS Award Rate Calculator</h1>
+        <p className="page-premium-subtitle mt-0.5">
           Social, Community, Home Care &amp; Disability Services Industry Award 2010 — rates effective 1 July 2024
         </p>
       </div>
@@ -212,7 +212,7 @@ export default function SCHADSCalculatorPage() {
         <div className="lg:col-span-2 space-y-5">
 
           {/* Classification & Employment Type */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-4">
+          <div className="card-premium rounded-2xl p-5 space-y-4">
             <h2 className="font-semibold text-gray-900 dark:text-white">Classification</h2>
 
             <div>
@@ -257,13 +257,13 @@ export default function SCHADSCalculatorPage() {
             <div className="pt-1 border-t border-gray-100 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">Base Rate</span>
-                <span className="text-xl font-bold text-gray-900 dark:text-white">${effectiveBaseRate.toFixed(2)}<span className="text-sm font-normal text-gray-500">/hr</span></span>
+                <span className="page-premium-title">${effectiveBaseRate.toFixed(2)}<span className="text-sm font-normal text-gray-500">/hr</span></span>
               </div>
             </div>
           </div>
 
           {/* Hours by penalty type */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-4">
+          <div className="card-premium rounded-2xl p-5 space-y-4">
             <h2 className="font-semibold text-gray-900 dark:text-white">Hours Worked</h2>
             <div className="space-y-3">
               {PENALTY_TYPES.filter(pt => pt.key !== 'early_late').map(pt => {
@@ -298,7 +298,7 @@ export default function SCHADSCalculatorPage() {
           </div>
 
           {/* Allowances */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-4">
+          <div className="card-premium rounded-2xl p-5 space-y-4">
             <h2 className="font-semibold text-gray-900 dark:text-white">Allowances</h2>
             <div className="space-y-3">
               {ALLOWANCES.filter(a => a.key !== 'sleepover_flat').map(al => {
@@ -334,7 +334,7 @@ export default function SCHADSCalculatorPage() {
 
         {/* Right — Summary */}
         <div className="space-y-5">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 space-y-4 sticky top-6">
+          <div className="card-premium rounded-2xl p-5 space-y-4 sticky top-6">
             <h2 className="font-semibold text-gray-900 dark:text-white">Pay Summary</h2>
 
             {lines.length === 0 ? (
@@ -407,9 +407,9 @@ export default function SCHADSCalculatorPage() {
           </div>
 
           {/* Quick penalty rate table */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
+          <div className="card-premium rounded-2xl p-5">
             <h2 className="font-semibold text-gray-900 dark:text-white mb-3">All Penalty Rates</h2>
-            <table className="w-full text-xs">
+            <table className="table-premium">
               <thead>
                 <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
                   <th className="text-left pb-2">Period</th>

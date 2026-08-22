@@ -120,7 +120,7 @@ export default function LeaveSettingsPage() {
           {types.map(t => (
             <div
               key={t.key}
-              className={`bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden transition ${
+              className={`card-premium overflow-hidden transition ${
                 t._dirty ? 'border-purple-700/60' : t.isActive ? 'border-gray-800' : 'border-gray-800/40 opacity-60'
               }`}
             >

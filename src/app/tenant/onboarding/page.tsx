@@ -143,7 +143,7 @@ export default function OnboardingPage() {
         ].map(s => (
           <button key={s.label}
             onClick={() => { setFilterStatus(s.fs); setTab('Pipeline'); load(search, s.fs, filterStage) }}
-            className={`bg-white dark:bg-gray-900 border rounded-xl p-5 text-left transition hover:border-purple-700 ${
+            className={`card-premium p-5 text-left transition hover:border-purple-700 ${
               filterStatus === s.fs && tab === 'Pipeline' ? 'border-purple-600' : 'border-gray-200 dark:border-gray-800'
             }`}>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{s.label}</p>
@@ -172,17 +172,17 @@ export default function OnboardingPage() {
 
           {/* Metric row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Active Onboardings</p>
               <p className="text-3xl font-bold text-blue-400">{stats.pending + stats.in_progress}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stats.pending} pending · {stats.in_progress} in progress</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Avg. Days to Complete</p>
               <p className="text-3xl font-bold text-purple-400">{avgDays !== null ? avgDays : '—'}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Based on {stats.completed} completed</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Completion Rate</p>
               <p className="text-3xl font-bold text-green-400">
                 {stats.total ? Math.round((stats.completed / stats.total) * 100) : 0}%
@@ -193,7 +193,7 @@ export default function OnboardingPage() {
 
           {/* Stage funnel */}
           {Object.keys(stageBreakdown).length > 0 && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Pipeline by Stage</h3>
               <div className="space-y-3">
                 {STAGES.map(s => {
@@ -245,7 +245,7 @@ export default function OnboardingPage() {
 
           {/* Recent completions */}
           {recentCompletions.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+            <div className="card-premium overflow-hidden">
               <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Recent Completions</h3>
               </div>
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
 
           {/* Empty state */}
           {stats.total === 0 && !loading && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+            <div className="card-premium py-14 text-center">
               <div className="text-4xl mb-3">🚀</div>
               <p className="text-gray-900 dark:text-gray-300 font-medium">No onboarding records yet</p>
               <p className="text-gray-500 text-sm mt-1">Start onboarding a new employee to get going.</p>
@@ -298,11 +298,11 @@ export default function OnboardingPage() {
               value={search}
               onChange={e => { setSearch(e.target.value); load(e.target.value, filterStatus, filterStage) }}
               placeholder="Search by name or email…"
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 w-56"
+              className="input-premium placeholder-gray-400 focus:outline-none focus:border-purple-500 w-56"
             />
             <select value={filterStatus}
               onChange={e => { setFilterStatus(e.target.value); load(search, e.target.value, filterStage) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              className="input-premium focus:outline-none focus:border-purple-500">
               <option value="">All statuses</option>
               <option value="pending">Pending</option>
               <option value="in_progress">In Progress</option>
@@ -310,7 +310,7 @@ export default function OnboardingPage() {
             </select>
             <select value={filterStage}
               onChange={e => { setFilterStage(e.target.value); load(search, filterStatus, e.target.value) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              className="input-premium focus:outline-none focus:border-purple-500">
               <option value="">All stages</option>
               {STAGES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
@@ -326,7 +326,7 @@ export default function OnboardingPage() {
           {loading ? (
             <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
           ) : records.length === 0 ? (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-12 text-center">
+            <div className="card-premium p-12 text-center">
               <div className="text-4xl mb-3">🔍</div>
               <p className="text-gray-600 dark:text-gray-300 font-medium">No records match your filters</p>
               <p className="text-gray-500 text-sm mt-1">Try adjusting the filters or start a new onboarding.</p>
@@ -347,7 +347,7 @@ export default function OnboardingPage() {
                 const stageIdx = STAGE_ORDER.indexOf(r.stage)
 
                 return (
-                  <div key={r.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden transition ${
+                  <div key={r.id} className={`card-premium overflow-hidden transition ${
                     r.status === 'completed' ? 'border-green-900' : 'border-gray-200 dark:border-gray-800'
                   }`}>
                     {/* Card header */}

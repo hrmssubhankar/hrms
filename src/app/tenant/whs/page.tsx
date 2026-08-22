@@ -33,7 +33,7 @@ const SEVERITIES = [
 const STATUS_STYLE: Record<string, string> = {
   open:          'bg-red-900/50 text-red-300 border-red-800',
   investigating: 'bg-amber-900/50 text-amber-300 border-amber-800',
-  closed:        'bg-gray-800 text-gray-400 border-gray-700',
+  closed:        'badge badge-gray',
 }
 
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
@@ -141,7 +141,7 @@ export default function WhsPage() {
           { label: 'Critical',      value: stats.critical,      color: 'text-red-300' },
           { label: 'High',          value: stats.high,          color: 'text-orange-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -150,7 +150,7 @@ export default function WhsPage() {
 
       {/* Report form */}
       {showForm && (
-        <form onSubmit={reportIncident} className="bg-white dark:bg-gray-900 border border-red-800 rounded-xl p-5 space-y-4">
+        <form onSubmit={reportIncident} className="card-premium border-red-500/30 p-5 space-y-4">
           <h3 className="text-sm font-semibold text-red-300">Report New Incident</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -212,16 +212,16 @@ export default function WhsPage() {
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={e => { setSearch(e.target.value); load(e.target.value, filterStatus, filterSeverity) }}
           placeholder="Search employee or description…"
-          className="flex-1 min-w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+          className="flex-1 min-w-48 input-premium placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
         <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(search, e.target.value, filterSeverity) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium focus:outline-none focus:border-purple-500">
           <option value="">All statuses</option>
           <option value="open">Open</option>
           <option value="investigating">Investigating</option>
           <option value="closed">Closed</option>
         </select>
         <select value={filterSeverity} onChange={e => { setFilterSeverity(e.target.value); load(search, filterStatus, e.target.value) }}
-          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+          className="input-premium focus:outline-none focus:border-purple-500">
           <option value="">All severities</option>
           {SEVERITIES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
@@ -229,7 +229,7 @@ export default function WhsPage() {
 
       {/* Incident list */}
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : incidents.length === 0 ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+        <div className="card-premium py-14 text-center">
           <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -244,7 +244,7 @@ export default function WhsPage() {
             const s = sev(inc.severity)
             const isOpen = expanded === inc.id
             return (
-              <div key={inc.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden transition ${
+              <div key={inc.id} className={`card-premium overflow-hidden transition ${
                 inc.severity === 'critical' ? 'border-red-800' : inc.severity === 'high' ? 'border-orange-800/60' : 'border-gray-800'
               }`}>
                 {/* Summary row */}
@@ -260,7 +260,7 @@ export default function WhsPage() {
                         {INCIDENT_TYPES.find(t => t.value === inc.type)?.label ?? inc.type}
                       </span>
                       <span className={`text-xs px-2 py-0.5 rounded-full border ${s.bg} ${s.color}`}>{s.label}</span>
-                      <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[inc.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                      <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[inc.status] ?? 'badge badge-gray'}`}>
                         {inc.status.charAt(0).toUpperCase() + inc.status.slice(1)}
                       </span>
                     </div>

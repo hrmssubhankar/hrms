@@ -83,7 +83,7 @@ function RejectModal({ onConfirm, onClose }: {
   const [reason, setReason] = useState('')
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-sm shadow-2xl">
+      <div className="card-premium w-full max-w-sm shadow-2xl">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
           <h3 className="font-bold text-gray-900 dark:text-white">Reject Timesheet</h3>
         </div>
@@ -184,7 +184,7 @@ function ClockCard({ onAction }: { onAction: () => void }) {
 
   if (status === 'loading') {
     return (
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 text-sm text-gray-600 dark:text-gray-400">
+      <div className="card-premium p-6 text-sm text-gray-600 dark:text-gray-400">
         Loading clock status…
       </div>
     )
@@ -194,7 +194,7 @@ function ClockCard({ onAction }: { onAction: () => void }) {
     <div className={`rounded-2xl border p-6 transition ${
       status === 'clocked_in'
         ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-        : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800'
+        : 'card-premium'
     }`}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -428,14 +428,14 @@ export default function TimesheetsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Timesheets</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <h1 className="page-premium-title">Timesheets</h1>
+          <p className="page-premium-subtitle mt-0.5">
             {weekDayLabels[0]} — {weekDayLabels[6]}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Week nav */}
-          <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+          <div className="flex items-center card-premium overflow-hidden">
             <button onClick={() => setWeekStart(w => addDays(w, -7))}
               className="px-3 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm dark:text-gray-400">←</button>
             <button onClick={() => setWeekStart(getMondayOf(new Date()))}
@@ -447,7 +447,7 @@ export default function TimesheetsPage() {
           </div>
           {/* Status filter */}
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none">
+            className="card-premium px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none">
             <option value="">All statuses</option>
             <option value="pending">Pending (active)</option>
             <option value="submitted">Submitted</option>
@@ -481,7 +481,7 @@ export default function TimesheetsPage() {
           { label: 'Submitted',  value: pendingCount,                                             color: 'text-blue-600 dark:text-blue-400' },
           { label: 'Approved',   value: timesheets.filter(t => t.status === 'approved').length,   color: 'text-green-600 dark:text-green-400' },
         ].map(c => (
-          <div key={c.label} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-2 flex items-center gap-2">
+          <div key={c.label} className="card-premium px-4 py-2 flex items-center gap-2">
             <span className={`text-lg font-bold ${c.color}`}>{c.value}</span>
             <span className="text-xs text-gray-600 dark:text-gray-400">{c.label}</span>
           </div>
@@ -489,7 +489,7 @@ export default function TimesheetsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+      <div className="card-premium overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-gray-600 dark:text-gray-400 text-sm">Loading timesheets…</div>
         ) : timesheets.length === 0 ? (
@@ -499,7 +499,7 @@ export default function TimesheetsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[700px]">
+            <table className="table-premium">
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                   {isManager && (
@@ -546,7 +546,7 @@ export default function TimesheetsPage() {
               {isManager && (
                 <tfoot>
                   <tr className="bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
-                    <td colSpan={5} className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                    <td colSpan={5} className="px-4 py-2 section-label">
                       Total
                     </td>
                     <td className="px-4 py-2 text-sm font-bold text-gray-800 dark:text-gray-200 text-right">

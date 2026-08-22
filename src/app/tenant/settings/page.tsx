@@ -254,7 +254,7 @@ export default function TenantSettingsPage() {
             <div className="space-y-6">
 
               {/* Logo */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-5">
+              <div className="card-premium p-6 space-y-5">
                 <div>
                   <p className="text-sm font-medium text-white mb-1">Organisation Logo</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Shown in the sidebar header. PNG, JPG, SVG or WebP · max 512 KB · Recommended: transparent background, min 200px wide.</p>
@@ -298,7 +298,7 @@ export default function TenantSettingsPage() {
               </div>
 
               {/* Portal name */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
+              <div className="card-premium p-6 space-y-4">
                 <div>
                   <label className={LABEL}>Portal Display Name</label>
                   <input value={portalName}
@@ -353,7 +353,7 @@ export default function TenantSettingsPage() {
 
           {/* ── DOMAIN TAB ── */}
           {tab === 'domain' && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-5">
+            <div className="card-premium p-6 space-y-5">
               <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
                 <strong>DNS Configuration:</strong> Point your custom domain CNAME to{' '}
                 <code className="bg-blue-900/50 px-1 rounded">cname.vercel-dns.com</code>, then enter it below.
@@ -408,7 +408,7 @@ export default function TenantSettingsPage() {
 
           {/* ── EMAIL TAB ── */}
           {tab === 'email' && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-5">
+            <div className="card-premium p-6 space-y-5">
               <div className="bg-amber-900/20 border border-amber-800 rounded-lg p-3 text-xs text-amber-300">
                 Configure your own SMTP server to send system emails (onboarding, compliance alerts, etc.) from your own domain.
                 Leave blank to use the platform default sender.
@@ -480,7 +480,7 @@ export default function TenantSettingsPage() {
 
           {/* ── NOTIFICATIONS TAB ── */}
           {tab === 'notifications' && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-6">
+            <div className="card-premium p-6 space-y-6">
 
               {/* Employee Lifecycle */}
               <div>
@@ -656,7 +656,7 @@ export default function TenantSettingsPage() {
               ) : (
                 <div className="space-y-3">
                   {leaveTypes.map((lt, idx) => (
-                    <div key={lt.key} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 space-y-4">
+                    <div key={lt.key} className="card-premium p-5 space-y-4">
                       {/* Header row */}
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2.5">
@@ -762,7 +762,7 @@ export default function TenantSettingsPage() {
               )}
 
               {/* Xero */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
+              <div className="card-premium p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {/* Xero logo (blue X) */}
@@ -843,7 +843,7 @@ export default function TenantSettingsPage() {
                 </div>
               )}
 
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-4">
+              <div className="card-premium p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {/* MYOB logo (purple M) */}
@@ -914,7 +914,7 @@ export default function TenantSettingsPage() {
               </div>
 
               {/* Future integrations placeholder */}
-              <div className="bg-white dark:bg-gray-900/50 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-6 text-center">
+              <div className="card-premium border-dashed p-6 text-center">
                 <p className="text-gray-500 text-sm dark:text-gray-400">More integrations coming soon — ADP, Workday, myGov</p>
               </div>
             </div>

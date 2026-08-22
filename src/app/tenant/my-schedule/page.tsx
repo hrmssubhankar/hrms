@@ -216,8 +216,8 @@ export default function MySchedulePage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Schedule</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Your rostered shifts for the week</p>
+          <h1 className="page-premium-title">My Schedule</h1>
+          <p className="page-premium-subtitle mt-0.5">Your rostered shifts for the week</p>
         </div>
 
         {/* Week nav */}
@@ -319,7 +319,7 @@ export default function MySchedulePage() {
 
       {/* Schedule */}
       {loading ? (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl py-16 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="card-premium rounded-2xl py-16 text-center text-sm text-gray-500 dark:text-gray-400">
           Loading shifts…
         </div>
       ) : (
@@ -332,7 +332,7 @@ export default function MySchedulePage() {
 
             return (
               <div key={dayStr}
-                className={`bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden transition ${
+                className={`card-premium overflow-hidden transition ${
                   today
                     ? 'border-purple-300 dark:border-purple-700'
                     : 'border-gray-200 dark:border-gray-800'

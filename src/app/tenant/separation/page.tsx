@@ -29,7 +29,7 @@ const TYPE_COLORS: Record<string, string> = {
   resignation:  'bg-blue-900/50 text-blue-300 border-blue-800',
   termination:  'bg-red-900/50 text-red-300 border-red-800',
   redundancy:   'bg-amber-900/50 text-amber-300 border-amber-800',
-  contract_end: 'bg-gray-700 text-gray-300 border-gray-600',
+  contract_end: 'badge badge-gray',
   retirement:   'bg-purple-900/50 text-purple-300 border-purple-800',
   abandonment:  'bg-orange-900/50 text-orange-300 border-orange-800',
 }
@@ -219,7 +219,7 @@ export default function SeparationPage() {
           { label: 'Resignations', value: stats.resignation, color: 'text-purple-400' },
           { label: 'Terminations', value: stats.termination, color: 'text-red-400' },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-600 dark:text-gray-400">{s.label}</p>
             <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
@@ -245,17 +245,17 @@ export default function SeparationPage() {
         <div className="space-y-6">
           {/* Key metrics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Active Offboardings</p>
               <p className="text-3xl font-bold text-amber-400">{stats.active + stats.pending}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{stats.pending} pending · {stats.active} in progress</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Avg. Offboarding Days</p>
               <p className="text-3xl font-bold text-purple-400">{avgDays !== null ? avgDays : '—'}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Based on {stats.completed} completed</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Completion Rate</p>
               <p className="text-3xl font-bold text-green-400">
                 {stats.total ? Math.round((stats.completed / stats.total) * 100) : 0}%
@@ -266,7 +266,7 @@ export default function SeparationPage() {
 
           {/* Type breakdown */}
           {typeBreakdown.length > 0 && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
+            <div className="card-premium p-5">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Separation by Type</h3>
               <div className="space-y-3">
                 {typeBreakdown.map(t => (
@@ -315,18 +315,19 @@ export default function SeparationPage() {
           })()}
 
           {/* Recent separations table */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+          <div className="card-premium overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Recent Separations</h3>
             </div>
             {recent.length === 0 ? (
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">No separation records yet.</p>
             ) : (
-              <table className="w-full text-sm">
+              <div className="table-responsive">
+            <table className="table-premium">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-800">
                     {['Employee', 'Type', 'Status', 'Last Working Day', 'Progress'].map(h => (
-                      <th key={h} className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{h}</th>
+                      <th key={h} className="px-5 py-3 text-left section-label">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -342,12 +343,12 @@ export default function SeparationPage() {
                           {r.employeeEmail && <p className="text-xs text-gray-500 dark:text-gray-400 font-normal">{r.employeeEmail}</p>}
                         </td>
                         <td className="px-5 py-3">
-                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TYPE_COLORS[r.type] ?? 'bg-gray-700 text-gray-300 border-gray-600'}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TYPE_COLORS[r.type] ?? 'badge badge-gray'}`}>
                             {SEP_TYPES.find(t => t.value === r.type)?.label ?? r.type}
                           </span>
                         </td>
                         <td className="px-5 py-3">
-                          <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                          <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                             {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                           </span>
                         </td>
@@ -367,6 +368,7 @@ export default function SeparationPage() {
                   })}
                 </tbody>
               </table>
+          </div>
             )}
           </div>
         </div>
@@ -377,7 +379,7 @@ export default function SeparationPage() {
         <div className="space-y-4">
           {/* Initiate form */}
           {showForm && (
-            <form onSubmit={initiate} className="bg-white dark:bg-gray-900 border border-purple-800 rounded-xl p-5 space-y-4">
+            <form onSubmit={initiate} className="card-premium border-purple-500/30 p-5 space-y-4">
               <h3 className="text-sm font-semibold text-purple-300">Initiate Separation Process</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -432,17 +434,17 @@ export default function SeparationPage() {
               placeholder="Search by name…"
               value={search}
               onChange={e => { setSearch(e.target.value); load(filterStatus, filterType, e.target.value) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 w-52"
+              className="input-premium placeholder-gray-400 focus:outline-none focus:border-purple-500 w-52"
             />
             <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); load(e.target.value, filterType, search) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              className="input-premium focus:outline-none focus:border-purple-500">
               <option value="">All statuses</option>
               <option value="pending">Pending</option>
               <option value="active">Active</option>
               <option value="completed">Completed</option>
             </select>
             <select value={filterType} onChange={e => { setFilterType(e.target.value); load(filterStatus, e.target.value, search) }}
-              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-purple-500">
+              className="input-premium focus:outline-none focus:border-purple-500">
               <option value="">All types</option>
               {SEP_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
@@ -452,7 +454,7 @@ export default function SeparationPage() {
           {loading ? (
             <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
           ) : records.length === 0 ? (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-14 text-center">
+            <div className="card-premium py-14 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
@@ -470,7 +472,7 @@ export default function SeparationPage() {
                 const eField = editFields[r.id] ?? { reason: r.reason ?? '', noticeDate: r.noticeDate ?? '', lastWorkingDay: r.lastWorkingDay ?? '' }
 
                 return (
-                  <div key={r.id} className={`bg-white dark:bg-gray-900 border rounded-xl overflow-hidden ${
+                  <div key={r.id} className={`card-premium overflow-hidden ${
                     r.status === 'completed' ? 'border-green-900' : r.type === 'termination' ? 'border-red-900/50' : 'border-gray-200 dark:border-gray-800'
                   }`}>
                     {/* Card header row */}
@@ -481,10 +483,10 @@ export default function SeparationPage() {
                           <span className="text-gray-900 dark:text-white font-medium text-sm">
                             {r.employeeFirstName} {r.employeeLastName}
                           </span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TYPE_COLORS[r.type] ?? 'bg-gray-700 text-gray-300 border-gray-600'}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${TYPE_COLORS[r.type] ?? 'badge badge-gray'}`}>
                             {SEP_TYPES.find(t => t.value === r.type)?.label ?? r.type}
                           </span>
-                          <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                          <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                             {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                           </span>
                         </div>
