@@ -5,6 +5,8 @@ import { eq, count, desc } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
+const ACCENT = '#7c3aed'
+
 async function getPlatformData() {
   try {
     const [allTenants, totalUsersResult, activeUsersResult, enabledModulesResult, recentLogs] =
@@ -13,169 +15,121 @@ async function getPlatformData() {
         db.select({ count: count() }).from(users),
         db.select({ count: count() }).from(users).where(eq(users.isActive, true)),
         db.select({ count: count() }).from(tenantModules).where(eq(tenantModules.isEnabled, true)),
-        db
-          .select({
-            id:        auditLogs.id,
-            action:    auditLogs.action,
-            resource:  auditLogs.resource,
-            createdAt: auditLogs.createdAt,
-            tenantId:  auditLogs.tenantId,
-          })
-          .from(auditLogs)
-          .orderBy(desc(auditLogs.createdAt))
-          .limit(6),
+        db.select({ id: auditLogs.id, action: auditLogs.action, resource: auditLogs.resource, createdAt: auditLogs.createdAt, tenantId: auditLogs.tenantId })
+          .from(auditLogs).orderBy(desc(auditLogs.createdAt)).limit(6),
       ])
-
-    // Tenant lookup for audit log labels
     const tenantMap = Object.fromEntries(allTenants.map((t) => [t.id, t.name]))
-
-    const recentLogsWithName = recentLogs.map((l) => ({
-      ...l,
-      tenantName: l.tenantId ? tenantMap[l.tenantId] ?? null : null,
-    }))
-
+    const recentLogsWithName = recentLogs.map((l) => ({ ...l, tenantName: l.tenantId ? tenantMap[l.tenantId] ?? null : null }))
     const activeTenants = allTenants.filter((t) => t.isActive)
     const prices: Record<string, number> = { starter: 57, professional: 120, enterprise: 217 }
     const mrr = activeTenants.reduce((sum, t) => sum + (prices[t.tier] ?? 0), 0)
-
     const clientsWithStatus = allTenants.slice(0, 5).map((c) => {
       const themed = c.primaryColor && c.primaryColor !== '#1a4fff'
       const score  = [c.isActive, themed, Boolean(c.slug)].filter(Boolean).length
       return { ...c, onboardingScore: score, onboardingTotal: 3 }
     })
-
     return {
-      totalClients:   allTenants.length,
-      activeClients:  activeTenants.length,
-      enterprise:     allTenants.filter((t) => t.tier === 'enterprise').length,
-      professional:   allTenants.filter((t) => t.tier === 'professional').length,
-      starter:        allTenants.filter((t) => t.tier === 'starter').length,
-      totalUsers:     Number(totalUsersResult[0]?.count ?? 0),
-      activeUsers:    Number(activeUsersResult[0]?.count ?? 0),
+      totalClients: allTenants.length, activeClients: activeTenants.length,
+      enterprise: allTenants.filter((t) => t.tier === 'enterprise').length,
+      professional: allTenants.filter((t) => t.tier === 'professional').length,
+      starter: allTenants.filter((t) => t.tier === 'starter').length,
+      totalUsers: Number(totalUsersResult[0]?.count ?? 0),
+      activeUsers: Number(activeUsersResult[0]?.count ?? 0),
       enabledModules: Number(enabledModulesResult[0]?.count ?? 0),
-      mrr,
-      recentLogs:     recentLogsWithName,
-      clients:        clientsWithStatus,
+      mrr, recentLogs: recentLogsWithName, clients: clientsWithStatus,
     }
   } catch {
-    return {
-      totalClients: 0, activeClients: 0, enterprise: 0, professional: 0, starter: 0,
-      totalUsers: 0, activeUsers: 0, enabledModules: 0, mrr: 0,
-      recentLogs: [], clients: [],
-    }
+    return { totalClients: 0, activeClients: 0, enterprise: 0, professional: 0, starter: 0, totalUsers: 0, activeUsers: 0, enabledModules: 0, mrr: 0, recentLogs: [], clients: [] }
   }
 }
 
-const ACTION_COLOR: Record<string, string> = {
-  login:  'text-blue-600 dark:text-blue-400', create: 'text-green-600 dark:text-green-400',
-  update: 'text-yellow-600 dark:text-yellow-400', delete: 'text-red-600 dark:text-red-400',
-  export: 'text-purple-600 dark:text-purple-400',
+const ACTION_DOT: Record<string, string> = {
+  login: '#3b82f6', create: '#22c55e', update: '#eab308', delete: '#ef4444', export: '#a855f7',
 }
-
-function actionColor(action: string) {
-  const key = Object.keys(ACTION_COLOR).find((k) => action.toLowerCase().includes(k))
-  return key ? ACTION_COLOR[key] : 'text-gray-600 dark:text-gray-400'
+function actionDot(action: string): string {
+  const key = Object.keys(ACTION_DOT).find((k) => action.toLowerCase().includes(k))
+  return key ? ACTION_DOT[key] : '#64748b'
 }
 
 export default async function SuperAdminDashboard() {
   const d = await getPlatformData()
-
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage all client tenants and platform settings</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-[22px] font-semibold tracking-tight text-white">Platform Dashboard</h1>
+        <p className="text-[13px] text-white/40 mt-0.5">Manage all client tenants and platform settings</p>
       </div>
 
-      {/* Primary stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Clients"   value={d.totalClients}   color="text-gray-900 dark:text-white"       sub={`${d.activeClients} active`} />
-        <StatCard label="Platform Users"  value={d.totalUsers}     color="text-blue-600 dark:text-blue-400"    sub={`${d.activeUsers} active`} />
-        <StatCard label="Active Modules"  value={d.enabledModules} color="text-purple-600 dark:text-purple-400"  sub="across all tenants" />
-        <StatCard label="Monthly Revenue" value={`$${d.mrr}`}      color="text-green-600 dark:text-green-400"   sub="AUD / month" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard label="Total Clients"   value={d.totalClients}   sub={`${d.activeClients} active`}  accent="#7c3aed" />
+        <StatCard label="Platform Users"  value={d.totalUsers}     sub={`${d.activeUsers} active`}    accent="#3b82f6" />
+        <StatCard label="Active Modules"  value={d.enabledModules} sub="across all tenants"           accent="#8b5cf6" />
+        <StatCard label="Monthly Revenue" value={`$${d.mrr}`}      sub="AUD / month"                 accent="#22c55e" />
       </div>
 
-      {/* Tier breakdown */}
-      <div className="grid grid-cols-3 gap-4">
-        <TierCard tier="Enterprise"   count={d.enterprise}   color="text-purple-600 dark:text-purple-400" bg="bg-purple-50 dark:bg-purple-100 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800" />
-        <TierCard tier="Professional" count={d.professional} color="text-blue-600 dark:text-blue-400"   bg="bg-blue-50 dark:bg-blue-100 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" />
-        <TierCard tier="Starter"      count={d.starter}      color="text-gray-600 dark:text-gray-300"   bg="bg-gray-100 dark:bg-gray-800/40 border-gray-300 dark:border-gray-700" />
+      <div className="grid grid-cols-3 gap-3">
+        <TierCard tier="Enterprise"   count={d.enterprise}   accent="#a855f7" />
+        <TierCard tier="Professional" count={d.professional} accent="#3b82f6" />
+        <TierCard tier="Starter"      count={d.starter}      accent="#64748b" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Quick actions */}
-        <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {[
-              { label: 'Add Client',     href: '/super-admin/clients/new',   desc: 'Onboard a new organisation' },
-              { label: 'Clients',        href: '/super-admin/clients',       desc: 'View, edit or deactivate' },
-              { label: 'Billing',        href: '/super-admin/billing',       desc: 'Subscriptions & revenue' },
-              { label: 'Modules',        href: '/super-admin/modules',       desc: 'Cross-tenant module usage' },
-              { label: 'Audit Logs',     href: '/super-admin/audit-logs',    desc: 'Platform-wide event log' },
-              { label: 'Announcements',  href: '/super-admin/announcements', desc: 'Broadcast to tenants' },
-              { label: '️  System Health', href: '/super-admin/system',        desc: 'DB status & infra checks' },
-              { label: 'Admins',         href: '/super-admin/admins',        desc: 'Super admin accounts' },
-              { label: '️  Settings',       href: '/super-admin/settings',      desc: 'Email, security, maintenance' },
-            ].map((a) => (
-              <Link
-                key={a.href}
-                href={a.href}
-                className="block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-purple-300 dark:border-purple-700 rounded-xl p-4 transition group"
-              >
-                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-700 dark:text-purple-300 transition">{a.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{a.desc}</p>
-              </Link>
-            ))}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 space-y-5">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30 mb-3">Quick Actions</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              {[
+                { label: 'Add Client',    href: '/super-admin/clients/new',   desc: 'Onboard a new organisation' },
+                { label: 'Clients',       href: '/super-admin/clients',       desc: 'View, edit or deactivate' },
+                { label: 'Billing',       href: '/super-admin/billing',       desc: 'Subscriptions & revenue' },
+                { label: 'Modules',       href: '/super-admin/modules',       desc: 'Cross-tenant module usage' },
+                { label: 'Audit Logs',    href: '/super-admin/audit-logs',    desc: 'Platform-wide event log' },
+                { label: 'Announcements', href: '/super-admin/announcements', desc: 'Broadcast to tenants' },
+                { label: 'System Health', href: '/super-admin/system',        desc: 'DB status & infra checks' },
+                { label: 'Admins',        href: '/super-admin/admins',        desc: 'Super admin accounts' },
+                { label: 'Settings',      href: '/super-admin/settings',      desc: 'Email, security, maintenance' },
+              ].map((a) => (
+                <Link key={a.href} href={a.href} className="group block rounded-xl p-3.5 transition-all duration-150"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <p className="text-[13px] font-semibold text-white/80 group-hover:text-white transition-colors leading-tight">{a.label}</p>
+                  <p className="text-[11px] text-white/30 mt-0.5 leading-snug">{a.desc}</p>
+                </Link>
+              ))}
+            </div>
           </div>
 
-          {/* Client onboarding status */}
           {d.clients.length > 0 && (
-            <div className="mt-2">
+            <div>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Client Setup Status</h2>
-                <Link href="/super-admin/clients" className="text-xs text-purple-400 hover:text-purple-700 dark:text-purple-300">View all →</Link>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">Client Setup Status</p>
+                <Link href="/super-admin/clients" className="text-[11px] text-purple-400/70 hover:text-purple-300 transition-colors">View all →</Link>
               </div>
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
-                {d.clients.map((c: any) => (
-                  <div key={c.id} className="flex items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800/20 transition">
-                    <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-900 dark:text-white text-xs font-bold shrink-0"
-                      style={{ backgroundColor: c.primaryColor || '#6d28d9' }}
-                    >
+              <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                {d.clients.map((c: any, i: number) => (
+                  <div key={c.id} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]"
+                    style={i < d.clients.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : {}}>
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
+                      style={{ background: `linear-gradient(135deg, ${c.primaryColor || ACCENT}, ${c.primaryColor || ACCENT}99)` }}>
                       {c.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900 dark:text-white font-medium truncate">{c.name}</p>
+                      <p className="text-[13px] text-white/80 font-medium truncate">{c.name}</p>
                       <div className="flex items-center gap-1 mt-1">
-                        {[
-                          { label: 'Active', done: c.isActive },
-                          { label: 'Themed', done: c.primaryColor !== '#1a4fff' },
-                          { label: 'Slug',   done: Boolean(c.slug) },
-                        ].map((step) => (
-                          <span
-                            key={step.label}
-                            className={`text-xs px-1.5 py-0.5 rounded ${step.done ? 'bg-green-50 dark:bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
-                          >
-                            {step.done ? '' : '○'} {step.label}
+                        {[{ label: 'Active', done: c.isActive }, { label: 'Themed', done: c.primaryColor !== '#1a4fff' }, { label: 'Slug', done: Boolean(c.slug) }].map((step) => (
+                          <span key={step.label} className="text-[10px] px-1.5 py-0.5 rounded"
+                            style={step.done ? { background: 'rgba(34,197,94,0.12)', color: '#4ade80' } : { background: 'rgba(255,255,255,0.05)', color: 'rgba(148,163,184,0.6)' }}>
+                            {step.done ? '✓ ' : '○ '}{step.label}
                           </span>
                         ))}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{c.onboardingScore}/{c.onboardingTotal}</p>
-                      <div className="w-16 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mt-1">
-                        <div
-                          className="h-1.5 rounded-full bg-purple-500"
-                          style={{ width: `${(c.onboardingScore / c.onboardingTotal) * 100}%` }}
-                        />
+                      <p className="text-[11px] text-white/30">{c.onboardingScore}/{c.onboardingTotal}</p>
+                      <div className="w-14 rounded-full h-1 mt-1" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                        <div className="h-1 rounded-full" style={{ width: `${(c.onboardingScore / c.onboardingTotal) * 100}%`, background: ACCENT }} />
                       </div>
                     </div>
-                    <Link href={`/super-admin/clients/${c.id}`} className="text-xs text-gray-500 hover:text-purple-600 dark:text-purple-400 transition shrink-0 dark:text-gray-400">→</Link>
+                    <Link href={`/super-admin/clients/${c.id}`} className="text-[12px] text-white/20 hover:text-purple-400 transition-colors shrink-0">→</Link>
                   </div>
                 ))}
               </div>
@@ -183,55 +137,53 @@ export default async function SuperAdminDashboard() {
           )}
         </div>
 
-        {/* Recent audit activity */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Recent Activity</h2>
-            <Link href="/super-admin/audit-logs" className="text-xs text-purple-400 hover:text-purple-700 dark:text-purple-300">View all →</Link>
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">Recent Activity</p>
+            <Link href="/super-admin/audit-logs" className="text-[11px] text-purple-400/70 hover:text-purple-300 transition-colors">View all →</Link>
           </div>
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+          <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
             {d.recentLogs.length === 0 ? (
-              <div className="px-4 py-8 text-center">
-                <div className="text-3xl mb-2"></div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">No audit events yet</p>
+              <div className="px-4 py-10 text-center">
+                <p className="text-3xl mb-2">📋</p>
+                <p className="text-[12px] text-white/25">No audit events yet</p>
               </div>
-            ) : d.recentLogs.map((log: any) => (
-              <div key={log.id} className="px-4 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <span className={`text-xs font-semibold ${actionColor(log.action)}`}>{log.action}</span>
-                    <span className="text-xs text-gray-500 ml-1 dark:text-gray-400">·</span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400 ml-1 truncate">{log.resource}</span>
-                  </div>
+            ) : d.recentLogs.map((log: any, i: number) => (
+              <div key={log.id} className="px-4 py-3 transition-colors hover:bg-white/[0.02]"
+                style={i < d.recentLogs.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : {}}>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: actionDot(log.action) }} />
+                  <span className="text-[12px] font-semibold text-white/70">{log.action}</span>
+                  <span className="text-[12px] text-white/30 truncate flex-1">{log.resource}</span>
                 </div>
-                <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">
+                <p className="text-[11px] text-white/25 mt-0.5 pl-3.5">
                   {log.tenantName ?? 'Platform'} · {new Date(log.createdAt).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             ))}
           </div>
         </div>
-
       </div>
     </div>
   )
 }
 
-function StatCard({ label, value, color, sub }: { label: string; value: string | number; color: string; sub: string }) {
+function StatCard({ label, value, sub, accent }: { label: string; value: string | number; sub: string; accent: string }) {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{label}</p>
-      <p className={`text-3xl font-bold ${color}`}>{value}</p>
-      <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{sub}</p>
+    <div className="rounded-xl p-4 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="absolute top-0 right-0 w-16 h-16 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${accent}18, transparent 70%)` }} />
+      <p className="text-[11px] text-white/35 uppercase tracking-[0.1em] mb-2">{label}</p>
+      <p className="text-2xl font-bold tabular-nums" style={{ color: accent }}>{value}</p>
+      <p className="text-[11px] text-white/25 mt-1">{sub}</p>
     </div>
   )
 }
 
-function TierCard({ tier, count, color, bg }: { tier: string; count: number; color: string; bg: string }) {
+function TierCard({ tier, count, accent }: { tier: string; count: number; accent: string }) {
   return (
-    <div className={`border rounded-xl p-4 ${bg}`}>
-      <p className={`text-2xl font-bold ${color}`}>{count}</p>
-      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{tier}</p>
+    <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${accent}25` }}>
+      <p className="text-2xl font-bold tabular-nums" style={{ color: accent }}>{count}</p>
+      <p className="text-[13px] text-white/40 mt-1 font-medium">{tier}</p>
     </div>
   )
 }
