@@ -379,6 +379,19 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
   )
 }
 
+type ProbationAlert = {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  probationEndDate: string
+  employmentType: string
+}
+
+function daysUntilProbationEnd(dateStr: string): number {
+  return Math.round((new Date(dateStr + 'T00:00:00').getTime() - Date.now()) / 86400000)
+}
+
 type Celebration = {
   id: string; name: string; jobTitle: string | null; photoUrl: string | null
   type: 'birthday' | 'anniversary'; daysUntil: number; yearsCount?: number
@@ -396,6 +409,7 @@ export default function DashboardPage() {
   const [greetingText,  setGreetingText]  = useState('')
   const [celebrations,  setCelebrations]  = useState<Celebration[]>([])
   const [activity,      setActivity]      = useState<ActivityItem[]>([])
+  const [probation,     setProbation]     = useState<ProbationAlert[]>([])
 
   useEffect(() => {
     // Greeting is computed client-side only to avoid SSR/CSR hydration mismatch
@@ -430,6 +444,11 @@ export default function DashboardPage() {
     fetchWithAuth('/api/tenant/dashboard/celebrations')
       .then(r => r.ok ? r.json() : { celebrations: [] })
       .then(d => setCelebrations(d.celebrations ?? []))
+      .catch(() => {})
+    // Probation ending soon (fire-and-forget; failure is silent)
+    fetchWithAuth('/api/tenant/employees/probation-alerts')
+      .then(r => r.json())
+      .then(d => setProbation(Array.isArray(d) ? d : []))
       .catch(() => {})
   }, [])
 
@@ -772,6 +791,46 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* ── Probation Ending Soon widget ── */}
+      {probation.length > 0 && (
+        <div className="card-premium border-l-4 border-amber-400">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">⏳</span>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Probation Ending Soon</h3>
+            <span className="ml-auto text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">
+              {probation.length} employee{probation.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="space-y-2">
+            {probation.map(emp => {
+              const days = daysUntilProbationEnd(emp.probationEndDate)
+              return (
+                <div key={emp.id} className="flex items-center gap-3 py-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/tenant/employee-management/${emp.id}`} className="text-sm font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 truncate block">
+                      {emp.firstName} {emp.lastName}
+                    </Link>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{emp.employmentType?.replace('_', ' ')}</p>
+                  </div>
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-lg flex-shrink-0 ${
+                    days <= 3
+                      ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                      : days <= 7
+                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                  }`}>
+                    {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+          <Link href="/tenant/employee-management?status=active" className="mt-3 block text-center text-xs text-indigo-500 hover:text-indigo-700">
+            View all employees →
+          </Link>
+        </div>
+      )}
 
       {/* ── Celebrations widget ── */}
       {celebrations.length > 0 && (

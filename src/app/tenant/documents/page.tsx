@@ -136,6 +136,8 @@ export default function DocumentsPage() {
   const [editing,    setEditing]    = useState<string | null>(null)
   const [editForm,   setEditForm]   = useState({ title: '', expiryDate: '', notes: '' })
   const [editSaving, setEditSaving] = useState(false)
+  const [selectedDocs,   setSelectedDocs]   = useState<Set<string>>(new Set())
+  const [bulkDocLoading, setBulkDocLoading] = useState(false)
   const [form, setForm] = useState({
     title: '', category: 'Police Check', blobUrl: '', employeeId: '',
     fileName: '', fileSizeBytes: 0, mimeType: '', expiryDate: '', notes: '',
@@ -150,6 +152,7 @@ export default function DocumentsPage() {
     const data = await fetchWithAuth(`/api/tenant/documents?${p}`).then(r => r.json())
     setDocs(data.documents ?? [])
     setStats(data.stats ?? { total:0, active:0, expired:0, expiringSoon:0, pendingReview:0 })
+    setSelectedDocs(new Set())
     setLoading(false)
   }, [filterCat, filterStat, expiryFilter])
 
@@ -180,6 +183,21 @@ export default function DocumentsPage() {
     setForm({ title:'', category:'Police Check', blobUrl:'', employeeId:'', fileName:'', fileSizeBytes:0, mimeType:'', expiryDate:'', notes:'' })
     setSaving(false)
     load()
+  }
+
+  async function bulkUpdateStatus(status: string) {
+    setBulkDocLoading(true)
+    try {
+      await Promise.all([...selectedDocs].map(id =>
+        fetchWithAuth('/api/tenant/documents', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, status }),
+        })
+      ))
+      setSelectedDocs(new Set())
+      load()
+    } finally { setBulkDocLoading(false) }
   }
 
   async function updateStatus(id: string, status: string) {
@@ -452,10 +470,37 @@ export default function DocumentsPage() {
         </div>
       ) : (
         <div className="card-premium rounded-2xl overflow-hidden">
+          {selectedDocs.size > 0 && (
+            <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800 flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{selectedDocs.size} selected</span>
+              <button
+                onClick={() => bulkUpdateStatus('archived')}
+                disabled={bulkDocLoading}
+                className="px-3 py-1 text-xs rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 disabled:opacity-50"
+              >
+                {bulkDocLoading ? 'Working…' : '📦 Archive'}
+              </button>
+              <button
+                onClick={() => bulkUpdateStatus('active')}
+                disabled={bulkDocLoading}
+                className="px-3 py-1 text-xs rounded-lg bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 disabled:opacity-50"
+              >
+                ✅ Mark active
+              </button>
+              <button onClick={() => setSelectedDocs(new Set())} className="ml-auto text-xs text-indigo-500 hover:text-indigo-700">Clear</button>
+            </div>
+          )}
           <div className="table-responsive">
             <table className="table-premium">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
+                <th className="w-8 px-3 py-3">
+                  <input type="checkbox"
+                    checked={docs.length > 0 && selectedDocs.size === docs.length}
+                    onChange={e => setSelectedDocs(e.target.checked ? new Set(docs.map(d => d.id)) : new Set())}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                </th>
                 <th className="px-4 py-3 text-left section-label">Document</th>
                 <th className="px-4 py-3 text-left section-label">Category</th>
                 <th className="px-4 py-3 text-left section-label">Employee</th>
@@ -468,6 +513,17 @@ export default function DocumentsPage() {
               {filtered.map(d => (
                 <>
                 <tr key={d.id} className="hover:bg-gray-100 dark:hover:bg-gray-800/30 group">
+                  <td className="px-3" onClick={e => e.stopPropagation()}>
+                    <input type="checkbox"
+                      checked={selectedDocs.has(d.id)}
+                      onChange={e => setSelectedDocs(prev => {
+                        const s = new Set(prev)
+                        e.target.checked ? s.add(d.id) : s.delete(d.id)
+                        return s
+                      })}
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <span className="text-lg shrink-0">{mimeIcon(d.mimeType)}</span>
@@ -559,7 +615,7 @@ export default function DocumentsPage() {
                 </tr>
                 {editing === d.id && (
                   <tr key={`${d.id}-edit`} className="bg-purple-950/20 border-b border-purple-900/40">
-                    <td colSpan={6} className="px-4 py-4">
+                    <td colSpan={7} className="px-4 py-4">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                         <div>
                           <label className={LABEL}>Title</label>

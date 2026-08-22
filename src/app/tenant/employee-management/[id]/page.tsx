@@ -39,6 +39,24 @@ type Employee = {
   updatedAt: string
 }
 
+function calcCompleteness(emp: Employee): { pct: number; missing: string[] } {
+  const checks: { label: string; filled: boolean }[] = [
+    { label: 'Phone number',    filled: !!emp.phone },
+    { label: 'Date of birth',   filled: !!emp.dateOfBirth },
+    { label: 'Address',         filled: !!emp.address },
+    { label: 'Gender',          filled: !!emp.gender },
+    { label: 'Position',        filled: !!emp.positionId },
+    { label: 'Department',      filled: !!emp.departmentId },
+    { label: 'Annual salary',   filled: !!emp.annualSalary },
+    { label: 'Profile photo',   filled: !!emp.photoUrl },
+    { label: 'Start date',      filled: !!emp.startDate },
+    { label: 'Employment type', filled: !!emp.employmentType },
+  ]
+  const filled  = checks.filter(c => c.filled).length
+  const missing = checks.filter(c => !c.filled).map(c => c.label)
+  return { pct: Math.round((filled / checks.length) * 100), missing }
+}
+
 const COMPLIANCE_BADGE: Record<string, { label: string; cls: string }> = {
   green:   { label: 'Compliant',     cls: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' },
   amber:   { label: 'Needs Review',  cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' },
@@ -649,6 +667,34 @@ export default function EmployeeProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Profile Completeness */}
+      {(() => {
+        const { pct, missing } = calcCompleteness(emp)
+        const color = pct >= 80 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'
+        return (
+          <div className="card-premium mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Profile completeness</span>
+              <span className={`text-sm font-bold ${pct >= 80 ? 'text-green-600 dark:text-green-400' : pct >= 50 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>
+                {pct}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-3">
+              <div className={`h-2 rounded-full transition-all duration-500 ${color}`} style={{ width: `${pct}%` }} />
+            </div>
+            {missing.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {missing.map(m => (
+                  <span key={m} className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                    + {m}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200 dark:border-gray-800">
