@@ -4,6 +4,9 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import FileUpload, { type UploadResult } from '@/components/ui/FileUpload'
+import EmptyState from '@/components/ui/EmptyState'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import ExportButton from '@/components/ui/ExportButton'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Doc = {
@@ -224,6 +227,28 @@ export default function DocumentsPage() {
     `${d.employeeFirstName ?? ''} ${d.employeeLastName ?? ''}`.toLowerCase().includes(search.toLowerCase())
   )
 
+  function handleExport() {
+    exportCsv({
+      filename: 'documents',
+      columns: [
+        { header: 'Title',    key: 'title' },
+        { header: 'Category', key: 'category' },
+        { header: 'Employee', key: 'employee' },
+        { header: 'Status',   key: 'status' },
+        { header: 'Expiry Date', key: 'expiryDate', format: fmtCsvDate },
+        { header: 'Created',     key: 'createdAt',  format: fmtCsvDate },
+      ],
+      rows: filtered.map(d => ({
+        title:     d.title,
+        category:  d.category,
+        employee:  d.employeeFirstName ? `${d.employeeFirstName} ${d.employeeLastName}` : 'Org-wide',
+        status:    d.status.replace('_', ' '),
+        expiryDate: d.expiryDate,
+        createdAt:  d.createdAt,
+      })),
+    })
+  }
+
   // Expiring soon — for alert banner
   const expiringDocs = docs.filter(d =>
     d.status === 'active' && d.expiryDate && d.expiryDate >= today && d.expiryDate <= in30
@@ -395,6 +420,7 @@ export default function DocumentsPage() {
             Clear
           </button>
         )}
+        <ExportButton onClick={handleExport} disabled={filtered.length === 0} />
       </div>
 
       {/* Document list */}

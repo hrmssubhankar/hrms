@@ -1,8 +1,12 @@
 'use client'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import ExportButton from '@/components/ui/ExportButton'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import EmptyState from '@/components/ui/EmptyState'
+import { SkeletonTable } from '@/components/ui/Skeleton'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Course = {
@@ -237,15 +241,12 @@ function LibraryTab() {
 
       {/* Course grid */}
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : courseList.length === 0 ? (
-        <div className="card-premium py-14 text-center">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
-                </svg>
-              </div>
-          <p className="text-gray-600 dark:text-gray-300 font-medium">No courses yet</p>
-          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create your first course to get started.</p>
-        </div>
+        <EmptyState
+          icon="🎓"
+          title="No courses yet"
+          message="Create your first course to get started."
+          action={{ label: 'New Course', onClick: () => setShowForm(true) }}
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
           {courseList.map(c => (
@@ -313,6 +314,26 @@ function RecordsTab() {
 
   useEffect(() => { load() }, [])
 
+  function handleExport() {
+    exportCsv({
+      filename: `training-records-${new Date().toISOString().slice(0,10)}`,
+      columns: [
+        { header: 'First Name',    key: 'employeeFirstName' },
+        { header: 'Last Name',     key: 'employeeLastName' },
+        { header: 'Email',         key: 'employeeEmail' },
+        { header: 'Course',        key: 'courseTitle' },
+        { header: 'Category',      key: 'courseCategory' },
+        { header: 'Mandatory',     key: 'courseMandatory', format: v => v ? 'Yes' : 'No' },
+        { header: 'Status',        key: 'status', format: v => String(v ?? '').charAt(0).toUpperCase() + String(v ?? '').slice(1) },
+        { header: 'Score',         key: 'score', format: v => v ? `${Number(v).toFixed(0)}%` : '' },
+        { header: 'Completed Date', key: 'completedAt', format: v => fmtCsvDate(v as string) },
+        { header: 'Expiry Date',   key: 'expiryDate', format: v => fmtCsvDate(v as string) },
+        { header: 'Attempts',      key: 'attempts' },
+      ],
+      rows: records,
+    })
+  }
+
   async function markComplete(id: string) {
     const score = prompt('Enter score (0-100) or leave blank:')
     setUpdating(id)
@@ -354,19 +375,16 @@ function RecordsTab() {
           <option value="completed">Completed</option>
           <option value="overdue">Overdue</option>
         </select>
+        <ExportButton onClick={handleExport} count={records.length} />
       </div>
 
       {/* Table */}
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
-        <div className="card-premium py-14 text-center">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
-                </svg>
-              </div>
-          <p className="text-gray-600 dark:text-gray-300 font-medium">No training records</p>
-          <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Enrol employees in a course from the Course Library tab.</p>
-        </div>
+        <EmptyState
+          icon="🎓"
+          title="No training records"
+          message="Training completions will appear here."
+        />
       ) : (
         <div className="card-premium overflow-hidden">
           <div className="table-responsive">
@@ -473,7 +491,7 @@ function GapTab() {
     URL.revokeObjectURL(url)
   }
 
-  if (loading) return <div className="text-center py-16 text-gray-400">Loading gap report…</div>
+  if (loading) return <SkeletonTable rows={4} cols={3} />
 
   if (mandatory.length === 0) return (
     <div className="card-premium p-8 text-center text-gray-400">

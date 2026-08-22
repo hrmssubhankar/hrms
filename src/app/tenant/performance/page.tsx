@@ -3,6 +3,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import EmptyState from '@/components/ui/EmptyState'
 
 type Review = {
   id: string; employeeId: string; reviewerId: string | null; type: string; status: string
@@ -463,10 +464,12 @@ export default function PerformancePage() {
 
           {/* Table */}
           {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : reviews.length === 0 ? (
-            <div className="card-premium py-14 text-center">
-              <p className="text-gray-600 dark:text-gray-300 font-medium">No reviews scheduled</p>
-              <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Schedule a review for an employee to get started.</p>
-            </div>
+            <EmptyState
+              icon="📊"
+              title="No performance reviews"
+              message="Performance reviews will appear here."
+              action={{ label: 'Schedule Review', onClick: () => setShowForm(true) }}
+            />
           ) : (
             <div className="card-premium overflow-hidden">
               <div className="table-responsive">
@@ -729,10 +732,12 @@ export default function PerformancePage() {
 
           {/* Goals list */}
           {goalsLoading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : goals.length === 0 ? (
-            <div className="card-premium py-14 text-center">
-              <p className="text-gray-600 dark:text-gray-300 font-medium">No goals found</p>
-              <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Create a goal for an employee to get started.</p>
-            </div>
+            <EmptyState
+              icon="🎯"
+              title="No goals found"
+              message="Create a goal for an employee to get started."
+              action={{ label: 'Add Goal', onClick: () => setShowGoalForm(true) }}
+            />
           ) : (
             <div className="space-y-3">
               {goals.map(g => (

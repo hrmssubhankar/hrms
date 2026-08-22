@@ -3,6 +3,9 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import EmptyState from '@/components/ui/EmptyState'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import ExportButton from '@/components/ui/ExportButton'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type ScreeningRecord = {
@@ -104,6 +107,24 @@ function ScreeningTab() {
   const [editId,    setEditId]    = useState<string | null>(null)
   const [editStatus, setEditStatus] = useState('')
 
+  function handleExport() {
+    exportCsv({
+      filename: `compliance-screening-${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { header: 'Employee', key: 'employeeFirstName', format: (_, r: ScreeningRecord) => `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim() },
+        { header: 'Email', key: 'employeeEmail' },
+        { header: 'Check Type', key: 'checkType' },
+        { header: 'Status', key: 'status', format: (v: string) => statusLabel(v) },
+        { header: 'Reference No.', key: 'referenceNumber', format: (v: string | null) => v ?? '' },
+        { header: 'Issued Date', key: 'issuedDate', format: (v: string | null) => fmtCsvDate(v) },
+        { header: 'Expiry Date', key: 'expiryDate', format: (v: string | null) => fmtCsvDate(v) },
+        { header: 'Verified At', key: 'verifiedAt', format: (v: string | null) => fmtCsvDate(v) },
+        { header: 'Notes', key: 'notes', format: (v: string | null) => v ?? '' },
+      ],
+      rows: records,
+    })
+  }
+
   const load = useCallback(async (s = search, f = filterStatus) => {
     setLoading(true)
     const p = new URLSearchParams()
@@ -177,6 +198,7 @@ function ScreeningTab() {
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
           {showForm ? 'Cancel' : '+ Add Check'}
         </button>
+        <ExportButton onClick={handleExport} count={records.length} />
       </div>
 
       {/* Add form */}

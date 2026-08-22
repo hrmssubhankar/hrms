@@ -4,6 +4,9 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Link from 'next/link'
+import EmptyState from '@/components/ui/EmptyState'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import ExportButton from '@/components/ui/ExportButton'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type LeaveRequest = {
@@ -174,6 +177,26 @@ export default function LeavePage() {
       .then(d => setEmployees(d.employees ?? []))
       .catch(() => {})
   }, [])
+
+  function handleExport() {
+    exportCsv({
+      filename: `leave-requests-${new Date().toISOString().slice(0, 10)}`,
+      columns: [
+        { header: 'Employee', key: 'employeeFirstName', format: (_, r: LeaveRequest) => `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim() },
+        { header: 'Email', key: 'employeeEmail', format: (v: string | null) => v ?? '' },
+        { header: 'Leave Type', key: 'leaveType' },
+        { header: 'Start Date', key: 'startDate', format: (v: string) => fmtCsvDate(v) },
+        { header: 'End Date', key: 'endDate', format: (v: string) => fmtCsvDate(v) },
+        { header: 'Days', key: 'totalDays' },
+        { header: 'Status', key: 'status', format: (v: string) => v.charAt(0).toUpperCase() + v.slice(1) },
+        { header: 'Reason', key: 'reason', format: (v: string | null) => v ?? '' },
+        { header: 'Review Note', key: 'reviewNote', format: (v: string | null) => v ?? '' },
+        { header: 'Reviewed At', key: 'reviewedAt', format: (v: string | null) => fmtCsvDate(v) },
+        { header: 'Submitted At', key: 'createdAt', format: (v: string) => fmtCsvDate(v) },
+      ],
+      rows: requests,
+    })
+  }
 
   // ── Load requests ──
   const loadRequests = useCallback(async (st = filterStatus, t = filterType) => {
@@ -409,6 +432,7 @@ export default function LeavePage() {
                 Clear filters
               </button>
             )}
+            <ExportButton onClick={handleExport} count={requests.length} />
             {/* Bulk action bar — only for managers when pending requests exist */}
             {canApprove && pendingRequests.length > 0 && (
               <div className="flex items-center gap-2 ml-auto">

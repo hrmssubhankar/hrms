@@ -3,6 +3,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
+import { SkeletonPage } from '@/components/ui/Skeleton'
 
 type Profile = {
   id:             string
@@ -44,7 +46,7 @@ function TwoFactorSection() {
   const [qrCode,       setQrCode]       = useState('')
   const [secret,       setSecret]       = useState('')
   const [code,         setCode]         = useState('')
-  const [msg2fa,       setMsg2fa]       = useState('')
+  const [toast2fa,     setToast2fa]     = useState<ToastState>(null)
   const [busy,         setBusy]         = useState(false)
 
   const refreshStatus = useCallback(() => {
@@ -56,10 +58,10 @@ function TwoFactorSection() {
   useEffect(() => { refreshStatus() }, [refreshStatus])
 
   async function startSetup() {
-    setBusy(true); setMsg2fa('')
+    setBusy(true); setToast2fa(null)
     const res  = await fetch('/api/auth/totp/setup')
     const data = await res.json()
-    if (!res.ok) { setMsg2fa(data.error ?? 'Failed to generate QR code'); setBusy(false); return }
+    if (!res.ok) { setToast2fa({ message: data.error ?? 'Failed to generate QR code', type: 'error' }); setBusy(false); return }
     setQrCode(data.qrCodeDataUrl)
     setSecret(data.secret)
     setCode('')
@@ -68,36 +70,36 @@ function TwoFactorSection() {
   }
 
   async function verifySetup() {
-    if (!code.trim()) { setMsg2fa('Enter the 6-digit code from your authenticator app.'); return }
-    setBusy(true); setMsg2fa('')
+    if (!code.trim()) { setToast2fa({ message: 'Enter the 6-digit code from your authenticator app.', type: 'error' }); return }
+    setBusy(true); setToast2fa(null)
     const res  = await fetch('/api/auth/totp/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ secret, code: code.trim() }),
     })
     const data = await res.json()
-    if (!res.ok) { setMsg2fa(data.error ?? 'Verification failed'); setBusy(false); return }
-    setMsg2fa('2FA enabled successfully.')
+    if (!res.ok) { setToast2fa({ message: data.error ?? 'Verification failed', type: 'error' }); setBusy(false); return }
+    setToast2fa({ message: '2FA enabled successfully.', type: 'success' })
     setStep('idle'); setEnabled(true); setCode(''); setQrCode(''); setSecret('')
     setBusy(false)
   }
 
   async function disableTotp() {
-    if (!code.trim()) { setMsg2fa('Enter your current 6-digit code to confirm.'); return }
-    setBusy(true); setMsg2fa('')
+    if (!code.trim()) { setToast2fa({ message: 'Enter your current 6-digit code to confirm.', type: 'error' }); return }
+    setBusy(true); setToast2fa(null)
     const res  = await fetch('/api/auth/totp/disable', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: code.trim() }),
     })
     const data = await res.json()
-    if (!res.ok) { setMsg2fa(data.error ?? 'Disable failed'); setBusy(false); return }
-    setMsg2fa('2FA has been disabled.')
+    if (!res.ok) { setToast2fa({ message: data.error ?? 'Disable failed', type: 'error' }); setBusy(false); return }
+    setToast2fa({ message: '2FA has been disabled.', type: 'success' })
     setStep('idle'); setEnabled(false); setCode('')
     setBusy(false)
   }
 
-  function cancelStep() { setStep('idle'); setCode(''); setMsg2fa(''); setQrCode(''); setSecret('') }
+  function cancelStep() { setStep('idle'); setCode(''); setToast2fa(null); setQrCode(''); setSecret('') }
 
   if (enabled === null) return null  // still loading
 
@@ -110,12 +112,6 @@ function TwoFactorSection() {
         </span>
       </div>
 
-      {msg2fa && (
-        <div className={`mb-4 rounded-lg px-4 py-2.5 text-sm border ${msg2fa.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
-          {msg2fa}
-        </div>
-      )}
-
       {step === 'idle' && (
         <>
           <p className="text-sm text-gray-500 mb-4 dark:text-gray-400">
@@ -124,7 +120,7 @@ function TwoFactorSection() {
               : 'Add an extra layer of security. You\'ll need an authenticator app (Google Authenticator, Authy, etc.).'}
           </p>
           <button
-            onClick={enabled ? () => { setStep('disable'); setCode(''); setMsg2fa('') } : startSetup}
+            onClick={enabled ? () => { setStep('disable'); setCode(''); setToast2fa(null) } : startSetup}
             disabled={busy}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50 ${
               enabled
@@ -195,6 +191,7 @@ function TwoFactorSection() {
           </div>
         </div>
       )}
+      <Toast state={toast2fa} onClose={() => setToast2fa(null)} />
     </div>
   )
 }
@@ -213,7 +210,7 @@ export default function MyProfilePage() {
   const [editing,    setEditing]    = useState(false)
   const [form,       setForm]       = useState({ preferredName: '', phone: '', address: '' })
   const [saving,     setSaving]     = useState(false)
-  const [msg,        setMsg]        = useState('')
+  const [toast,      setToast]      = useState<ToastState>(null)
 
   // Photo upload
   const [photoSaving, setPhotoSaving] = useState(false)
@@ -246,7 +243,7 @@ export default function MyProfilePage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true); setMsg('')
+    setSaving(true); setToast(null)
     try {
       const res  = await fetchWithAuth('/api/tenant/my-profile', {
         method: 'PATCH',
@@ -254,12 +251,12 @@ export default function MyProfilePage() {
         body: JSON.stringify(form),
       })
       const data = await res.json()
-      if (!res.ok) { setMsg(data.error ?? 'Save failed'); return }
+      if (!res.ok) { setToast({ message: data.error ?? 'Save failed', type: 'error' }); return }
       setProfile(prev => prev ? { ...prev, ...data.profile } : prev)
-      setMsg('✓ Profile updated successfully.')
+      setToast({ message: 'Profile updated successfully.', type: 'success' })
       setEditing(false)
     } catch {
-      setMsg('Save failed — please try again.')
+      setToast({ message: 'Save failed — please try again.', type: 'error' })
     } finally {
       setSaving(false)
     }
@@ -272,7 +269,7 @@ export default function MyProfilePage() {
       const fd = new FormData()
       fd.append('file', file)
       const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
-      if (!uploadRes.ok) { setMsg('Photo upload failed'); return }
+      if (!uploadRes.ok) { setToast({ message: 'Photo upload failed', type: 'error' }); return }
       const { url } = await uploadRes.json()
       const res = await fetchWithAuth('/api/tenant/my-profile', {
         method: 'PATCH',
@@ -282,7 +279,7 @@ export default function MyProfilePage() {
       const data = await res.json()
       if (res.ok) setProfile(prev => prev ? { ...prev, photoUrl: data.profile.photoUrl } : prev)
     } catch {
-      setMsg('Photo upload failed')
+      setToast({ message: 'Photo upload failed', type: 'error' })
     } finally {
       setPhotoSaving(false)
     }
@@ -339,16 +336,7 @@ export default function MyProfilePage() {
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
-        <div className="text-center">
-          <div className="text-4xl mb-3 animate-pulse"></div>
-          <p className="text-sm">Loading your profile…</p>
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <SkeletonPage rows={3} />
 
   if (!linked || !profile) {
     return (
@@ -421,19 +409,13 @@ export default function MyProfilePage() {
 
         {!editing && (
           <button
-            onClick={() => { setEditing(true); setMsg('') }}
+            onClick={() => { setEditing(true); setToast(null) }}
             className="px-4 py-2 rounded-lg text-sm font-medium border border-purple-600 text-purple-400 hover:bg-purple-900/20 transition"
           >
              Edit Contact Info
           </button>
         )}
       </div>
-
-      {msg && (
-        <div className={`rounded-lg px-4 py-2.5 text-sm border ${msg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
-          {msg}
-        </div>
-      )}
 
       {/* Edit form */}
       {editing && (
@@ -594,6 +576,7 @@ export default function MyProfilePage() {
       <TwoFactorSection />
 
       <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

@@ -918,6 +918,7 @@ export default function ParticipantsPage() {
           </div>
         </Modal>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }
@@ -1006,7 +1007,6 @@ function Modal({ title, onClose, onSave, saving, error, children, wide }: {
           </button>
         </div>
       </div>
-      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   )
 }

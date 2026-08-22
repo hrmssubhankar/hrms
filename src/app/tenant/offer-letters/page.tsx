@@ -4,6 +4,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { useSearchParams } from 'next/navigation'
+import EmptyState from '@/components/ui/EmptyState'
 
 type Offer = {
   id: string; candidateName: string; candidateEmail: string
@@ -531,14 +532,12 @@ export default function OfferLettersPage() {
           {loading ? (
             <p className="text-gray-500 text-sm text-center py-8 dark:text-gray-400">Loading…</p>
           ) : offers.length === 0 ? (
-            <div className="text-center py-12 text-gray-600 dark:text-gray-400">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
-                </svg>
-              </div>
-              <p className="text-sm">No offer letters yet. Create your first one.</p>
-            </div>
+            <EmptyState
+              icon="✉️"
+              title="No offer letters"
+              message="Generated offer letters will appear here."
+              action={{ label: 'New Offer Letter', onClick: initForm }}
+            />
           ) : offers.map(o => (
             <div key={o.id} onClick={() => selectOffer(o)}
               className={`p-4 rounded-xl border cursor-pointer transition ${selected?.id === o.id ? 'border-purple-600 bg-purple-900/20' : 'border-gray-800 bg-gray-900 hover:border-gray-600'}`}>

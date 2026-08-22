@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect } from 'react'
+import { SkeletonPage } from '@/components/ui/Skeleton'
 
 type Summary = { totalActive:number; fullTime:number; partTime:number; casual:number; contractor:number; departments:number; positions:number }
 type DeptRow  = { id:string; name:string; count:number; positions:number }
@@ -22,7 +23,7 @@ export default function WorkforcePage() {
     })
   }, [])
 
-  if (loading) return <div className="p-8 text-sm text-gray-600 dark:text-gray-400">Loading…</div>
+  if (loading) return <SkeletonPage />
 
   return (
     <div className="h-full flex flex-col">

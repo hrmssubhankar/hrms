@@ -3,6 +3,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import EmptyState from '@/components/ui/EmptyState'
 
 type Notification = {
   id: string
@@ -240,12 +241,11 @@ export default function NotificationsPage() {
         {loading ? (
           <div className="px-5 py-10 text-center text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
         ) : filtered.length === 0 ? (
-          <div className="px-5 py-12 text-center">
-            <p className="text-3xl mb-2">🔔</p>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              {typeFilter ? `No ${typeFilter} notifications` : 'No notifications yet.'}
-            </p>
-          </div>
+          <EmptyState
+            icon="🔔"
+            title="No notifications"
+            message={typeFilter ? `No ${typeFilter} notifications.` : 'System notifications will appear here.'}
+          />
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-gray-800">
             {filtered.map(n => {

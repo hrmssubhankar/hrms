@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Toast, { type ToastState } from '@/components/ui/Toast'
+import { SkeletonPage } from '@/components/ui/Skeleton'
 
 type Employee = {
   id: string
@@ -126,7 +128,7 @@ export default function EmployeeProfilePage() {
   const [loading, setLoading]= useState(true)
   const [tab,     setTab]    = useState<Tab>('Overview')
   const [saving,  setSaving] = useState(false)
-  const [msg,     setMsg]    = useState('')
+  const [toast,   setToast]  = useState<ToastState>(null)
 
   // Emergency contacts state
   const [contacts,      setContacts]      = useState<EmergencyContact[]>([])
@@ -174,13 +176,11 @@ export default function EmployeeProfilePage() {
     const file = e.target.files?.[0]
     if (!file || !emp) return
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
-      setMsg('Please select a JPG, PNG, WebP or GIF image.')
-      setTimeout(() => setMsg(''), 4000)
+      setToast({ message: 'Please select a JPG, PNG, WebP or GIF image.', type: 'error' })
       return
     }
     if (file.size > 2 * 1024 * 1024) {
-      setMsg('Image must be smaller than 2 MB.')
-      setTimeout(() => setMsg(''), 4000)
+      setToast({ message: 'Image must be smaller than 2 MB.', type: 'error' })
       return
     }
     setPhotoUploading(true)
@@ -199,15 +199,12 @@ export default function EmployeeProfilePage() {
       if (res.ok) {
         const d = await res.json()
         setEmp(d.employee ?? emp)
-        setMsg('Photo updated')
-        setTimeout(() => setMsg(''), 3000)
+        setToast({ message: 'Photo updated', type: 'success' })
       } else {
-        setMsg('Failed to save photo. Please try again.')
-        setTimeout(() => setMsg(''), 4000)
+        setToast({ message: 'Failed to save photo. Please try again.', type: 'error' })
       }
     } catch {
-      setMsg('Upload failed. Please try again.')
-      setTimeout(() => setMsg(''), 4000)
+      setToast({ message: 'Upload failed. Please try again.', type: 'error' })
     } finally {
       setPhotoUploading(false)
     }
@@ -538,9 +535,8 @@ export default function EmployeeProfilePage() {
       body: JSON.stringify({ isActive: !emp.isActive }),
     })
     const data = await res.json()
-    if (res.ok) { setEmp(data.employee); setMsg(data.employee.isActive ? 'Employee activated' : 'Employee deactivated') }
+    if (res.ok) { setEmp(data.employee); setToast({ message: data.employee.isActive ? 'Employee activated' : 'Employee deactivated', type: 'success' }) }
     setSaving(false)
-    setTimeout(() => setMsg(''), 3000)
   }
 
   async function setCompliance(status: string) {
@@ -552,12 +548,11 @@ export default function EmployeeProfilePage() {
       body: JSON.stringify({ complianceStatus: status }),
     })
     const data = await res.json()
-    if (res.ok) { setEmp(data.employee); setMsg('Compliance status updated') }
+    if (res.ok) { setEmp(data.employee); setToast({ message: 'Compliance status updated', type: 'success' }) }
     setSaving(false)
-    setTimeout(() => setMsg(''), 3000)
   }
 
-  if (loading) return <div className="flex items-center justify-center py-20 text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
+  if (loading) return <SkeletonPage rows={4} />
   if (!emp)    return (
     <div className="flex flex-col items-center justify-center py-20 gap-3">
       <span className="text-5xl"></span>
@@ -629,9 +624,6 @@ export default function EmployeeProfilePage() {
                 {badge.label}
               </span>
             </div>
-            {msg && (
-              <p className="mt-2 text-xs text-green-600 dark:text-green-400">{msg}</p>
-            )}
           </div>
 
           {/* Actions */}
@@ -1461,6 +1453,7 @@ export default function EmployeeProfilePage() {
           </div>
         )}
       </div>
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

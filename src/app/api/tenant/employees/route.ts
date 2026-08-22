@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { employees, departments, positions } from '@/lib/db/schema'
-import { eq, and, ilike, or, desc, asc } from 'drizzle-orm'
+import { eq, and, ilike, or, desc, asc, count } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
 // GET /api/tenant/employees?search=&status=&type=&page=1&limit=20
@@ -78,7 +78,21 @@ export async function GET(req: NextRequest) {
 
     const rows = await query
 
-    return NextResponse.json({ employees: rows, page, limit })
+    // Count total matching rows (without limit/offset)
+    const whereClause = search
+      ? and(...conditions, or(
+          ilike(employees.firstName, `%${search}%`),
+          ilike(employees.lastName,  `%${search}%`),
+          ilike(employees.email,     `%${search}%`),
+          ilike(employees.employeeNumber, `%${search}%`),
+        ))
+      : and(...conditions)
+    const [{ value: total }] = await db
+      .select({ value: count() })
+      .from(employees)
+      .where(whereClause)
+
+    return NextResponse.json({ employees: rows, page, limit, total: Number(total), pages: Math.ceil(Number(total) / limit) })
   } catch (err) {
     console.error('GET /api/tenant/employees', err)
     return NextResponse.json({ error: 'Failed to fetch employees' }, { status: 500 })

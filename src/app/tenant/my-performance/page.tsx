@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import { SkeletonPage } from '@/components/ui/Skeleton'
 
 type Review = {
   id: string; type: string; status: string
@@ -122,16 +123,7 @@ export default function MyPerformancePage() {
     loadData()
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
-        <div className="text-center">
-          <div className="text-4xl mb-3 animate-pulse">🎯</div>
-          <p className="text-sm">Loading your performance data…</p>
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <SkeletonPage rows={4} />
 
   const activeGoals    = goals.filter(g => g.status === 'active')
   const completedGoals = goals.filter(g => g.status === 'completed')

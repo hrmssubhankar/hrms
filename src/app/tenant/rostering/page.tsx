@@ -4,6 +4,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useState, useEffect, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import PermissionGate from '@/components/auth/PermissionGate'
+import EmptyState from '@/components/ui/EmptyState'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -858,16 +859,14 @@ export default function RosteringPage() {
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {visibleEmployees.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-16 text-center text-sm text-gray-600 dark:text-gray-400">
-                      No shifts this week.{' '}
-                      <PermissionGate permission="rostering:write">
-                        <button onClick={() => openCreate(weekStart)} className="text-blue-500 hover:underline">
-                          Add the first shift →
-                        </button>
-                      </PermissionGate>
-                    </td>
-                  </tr>
+                  <EmptyState
+                    as="table"
+                    cols={8}
+                    icon="🗓️"
+                    title="No shifts scheduled"
+                    message="Create shifts to start building your roster."
+                    action={{ label: 'Add Shift', onClick: () => openCreate(weekStart) }}
+                  />
                 ) : visibleEmployees.map(emp => (
                   <>
                     {/* Shift row */}

@@ -3,6 +3,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import EmptyState from '@/components/ui/EmptyState'
 
 type Benefit = {
   id: string

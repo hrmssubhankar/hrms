@@ -4,6 +4,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { SkeletonPage } from '@/components/ui/Skeleton'
 
 type Dept = { id: string; name: string }
 type Pos  = { id: string; title: string; departmentId: string | null }
@@ -148,9 +149,7 @@ export default function EditEmployeePage() {
     }
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-20 text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
-  )
+  if (loading) return <SkeletonPage rows={4} />
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">

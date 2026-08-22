@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import { SkeletonCards } from '@/components/ui/Skeleton'
 
 interface Employee {
   id: string
@@ -150,9 +151,7 @@ export default function SelfServicePage() {
     } finally { setSubmitting(false) }
   }
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500">Loading…</div>
-  }
+  if (loading) return <SkeletonCards count={3} />
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">

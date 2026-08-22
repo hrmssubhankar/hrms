@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import ExportButton from '@/components/ui/ExportButton'
 
 type Employee = { id: string; firstName: string; lastName: string; email: string }
 
@@ -252,6 +254,34 @@ export default function PayrollPage() {
     load()
   }
 
+  function handleExport() {
+    exportCsv({
+      filename: 'payroll',
+      columns: [
+        { header: 'Employee',         key: 'employee' },
+        { header: 'Period Start',     key: 'periodStart',      format: fmtCsvDate },
+        { header: 'Period End',       key: 'periodEnd',        format: fmtCsvDate },
+        { header: 'Gross Pay',        key: 'grossPay' },
+        { header: 'PAYG Withholding', key: 'paygWithholding' },
+        { header: 'Medicare Levy',    key: 'medicareLevy' },
+        { header: 'Super',            key: 'superContribution' },
+        { header: 'Net Pay',          key: 'netPay' },
+        { header: 'Status',           key: 'status' },
+      ],
+      rows: records.map(r => ({
+        employee:        `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim(),
+        periodStart:     r.periodStart,
+        periodEnd:       r.periodEnd,
+        grossPay:        r.grossPay ?? '',
+        paygWithholding: r.paygWithholding ?? '',
+        medicareLevy:    r.medicareLevy ?? '',
+        superContribution: r.superContribution ?? '',
+        netPay:          r.netPay ?? '',
+        status:          r.status,
+      })),
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -337,7 +367,7 @@ export default function PayrollPage() {
       )}
 
       {/* Filter */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center flex-wrap">
         {['', 'pending', 'approved', 'paid'].map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${statusFilter === s ? 'border-transparent text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900'}`}
@@ -345,6 +375,7 @@ export default function PayrollPage() {
             {s === '' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
           </button>
         ))}
+        <ExportButton onClick={handleExport} disabled={records.length === 0} />
       </div>
 
       {/* Table */}

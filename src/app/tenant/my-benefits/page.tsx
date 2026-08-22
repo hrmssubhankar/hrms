@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
+import { SkeletonCards } from '@/components/ui/Skeleton'
 
 type Benefit = {
   id: string
@@ -82,16 +83,7 @@ export default function MyBenefitsPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
-        <div className="text-center">
-          <div className="text-4xl mb-3 animate-pulse">🎁</div>
-          <p className="text-sm">Loading your benefits…</p>
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <SkeletonCards count={4} />
 
   if (!linked) {
     return (

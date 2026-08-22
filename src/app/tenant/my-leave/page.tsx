@@ -3,6 +3,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import EmptyState from '@/components/ui/EmptyState'
+import { SkeletonPage } from '@/components/ui/Skeleton'
 
 type LeaveRequest = {
   id: string
@@ -188,16 +190,7 @@ export default function MyLeavePage() {
     })
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-600 dark:text-gray-400">
-        <div className="text-center">
-          <div className="text-4xl mb-3 animate-pulse">🌴</div>
-          <p className="text-sm">Loading your leave…</p>
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <SkeletonPage rows={5} />
 
   if (!linked) {
     return (
@@ -347,11 +340,12 @@ export default function MyLeavePage() {
       {/* ─── HISTORY TAB ─────────────────────────────────────────────────── */}
       {tab === 'history' && (
         requests.length === 0 ? (
-          <div className="card-premium rounded-2xl py-16 text-center">
-            <div className="text-4xl mb-3">🌴</div>
-            <p className="text-gray-600 dark:text-gray-300 font-medium">No leave requests yet</p>
-            <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">Submit your first request using the button above.</p>
-          </div>
+          <EmptyState
+            icon="🌴"
+            title="No leave requests"
+            message="Your leave requests will appear here."
+            action={{ label: 'New Request', onClick: () => { setShowForm(true); setFormError(null) } }}
+          />
         ) : (
           <div className="space-y-3">
             {requests.map(r => {

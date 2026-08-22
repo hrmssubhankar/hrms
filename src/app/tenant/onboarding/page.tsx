@@ -4,6 +4,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Link from 'next/link'
+import EmptyState from '@/components/ui/EmptyState'
 
 type OnboardingRecord = {
   id: string
@@ -281,15 +282,11 @@ export default function OnboardingPage() {
 
           {/* Empty state */}
           {stats.total === 0 && !loading && (
-            <div className="card-premium py-14 text-center">
-              <div className="text-4xl mb-3">🚀</div>
-              <p className="text-gray-900 dark:text-gray-300 font-medium">No onboarding records yet</p>
-              <p className="text-gray-500 text-sm mt-1">Start onboarding a new employee to get going.</p>
-              <Link href="/tenant/onboarding/new"
-                className="inline-block mt-4 bg-purple-600 hover:bg-purple-700 text-white text-sm px-5 py-2 rounded-lg transition">
-                + Start Onboarding
-              </Link>
-            </div>
+            <EmptyState
+              icon="🚀"
+              title="No onboarding tasks"
+              message="Create onboarding checklists for new employees."
+            />
           )}
         </div>
       )}
@@ -332,15 +329,11 @@ export default function OnboardingPage() {
           {loading ? (
             <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
           ) : records.length === 0 ? (
-            <div className="card-premium p-12 text-center">
-              <div className="text-4xl mb-3">🔍</div>
-              <p className="text-gray-600 dark:text-gray-300 font-medium">No records match your filters</p>
-              <p className="text-gray-500 text-sm mt-1">Try adjusting the filters or start a new onboarding.</p>
-              <Link href="/tenant/onboarding/new"
-                className="inline-block mt-4 bg-purple-600 hover:bg-purple-700 text-white text-sm px-5 py-2 rounded-lg transition">
-                + Start Onboarding
-              </Link>
-            </div>
+            <EmptyState
+              icon="🚀"
+              title="No onboarding tasks"
+              message="Create onboarding checklists for new employees."
+            />
           ) : (
             <div className="space-y-3">
               {records.map(r => {

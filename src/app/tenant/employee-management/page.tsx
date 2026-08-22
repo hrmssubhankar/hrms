@@ -1,5 +1,7 @@
 'use client'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import ExportButton from '@/components/ui/ExportButton'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
@@ -201,6 +203,10 @@ export default function EmployeeManagementPage() {
   const [showImport, setShowImport] = useState(false)
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [screeningExpiry, setScreeningExpiry] = useState<ScreeningExpiry>({})
+  const [page,      setPage]        = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const PAGE_SIZE = 50
 
   // Fetch screening expiry data
   useEffect(() => {
@@ -210,32 +216,60 @@ export default function EmployeeManagementPage() {
       .catch(() => {})
   }, [])
 
+  // Reset to page 1 when filters change
+  useEffect(() => { setPage(1) }, [debouncedSearch, status, empType])
+
   // Debounce search
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300)
     return () => clearTimeout(t)
   }, [search])
 
-  const fetchEmployees = useCallback(async () => {
+  const fetchEmployees = useCallback(async (p = page) => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
       if (debouncedSearch) params.set('search', debouncedSearch)
       if (status)          params.set('status', status)
       if (empType)         params.set('type', empType)
-      params.set('limit', '50')
+      params.set('limit', String(PAGE_SIZE))
+      params.set('page',  String(p))
       const res  = await fetchWithAuth(`/api/tenant/employees?${params}`)
       if (res.status === 403) { setDenied(true); setLoading(false); return }
       const data = await res.json()
       setEmployees(data.employees ?? [])
+      setTotalPages(data.pages ?? 1)
+      setTotalCount(data.total ?? 0)
     } catch {
       setEmployees([])
     } finally {
       setLoading(false)
     }
-  }, [debouncedSearch, status, empType])
+  }, [debouncedSearch, status, empType, page])
 
   useEffect(() => { fetchEmployees() }, [fetchEmployees])
+
+  function handleExport() {
+    exportCsv({
+      filename: `employees-${new Date().toISOString().slice(0,10)}`,
+      columns: [
+        { header: 'Employee #',       key: 'employeeNumber' },
+        { header: 'First Name',       key: 'firstName' },
+        { header: 'Last Name',        key: 'lastName' },
+        { header: 'Email',            key: 'email' },
+        { header: 'Phone',            key: 'phone' },
+        { header: 'Employment Type',  key: 'employmentType', format: v => String(v ?? '').replace('_', ' ') },
+        { header: 'Department',       key: 'departmentName' },
+        { header: 'Position',         key: 'positionTitle' },
+        { header: 'Entity',           key: 'entityName' },
+        { header: 'Start Date',       key: 'startDate', format: v => fmtCsvDate(v as string) },
+        { header: 'Status',           key: 'isActive', format: v => v ? 'Active' : 'Inactive' },
+        { header: 'Compliance',       key: 'complianceStatus' },
+        { header: 'NDIS Worker',      key: 'ndisWorker', format: v => v ? 'Yes' : 'No' },
+      ],
+      rows: employees,
+    })
+  }
 
   const activeCount   = employees.filter(e => e.isActive).length
   const inactiveCount = employees.length - activeCount
@@ -344,6 +378,7 @@ export default function EmployeeManagementPage() {
             Clear
           </button>
         )}
+        <ExportButton onClick={handleExport} count={employees.length} />
       </div>
 
       {/* Table */}
@@ -458,8 +493,27 @@ export default function EmployeeManagementPage() {
                 })}
               </tbody>
             </table>
-            <div className="px-4 py-3 border-t border-black/[0.04] dark:border-white/[0.04] text-xs text-gray-500 dark:text-gray-400">
-              {employees.length} employee{employees.length !== 1 ? 's' : ''} shown
+            <div className="px-4 py-3 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <span>{totalCount} employee{totalCount !== 1 ? 's' : ''} total</span>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { const p = Math.max(1, page - 1); setPage(p); fetchEmployees(p) }}
+                    disabled={page === 1}
+                    className="px-3 py-1 rounded border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    ← Prev
+                  </button>
+                  <span>Page {page} of {totalPages}</span>
+                  <button
+                    onClick={() => { const p = Math.min(totalPages, page + 1); setPage(p); fetchEmployees(p) }}
+                    disabled={page === totalPages}
+                    className="px-3 py-1 rounded border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

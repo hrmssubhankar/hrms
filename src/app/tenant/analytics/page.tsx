@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
+import { SkeletonPage } from '@/components/ui/Skeleton'
 
 type Analytics = {
   headcount: {
@@ -69,11 +70,7 @@ export default function AnalyticsPage() {
       .catch(() => setLoading(false))
   }, [])
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <p className="text-gray-600 dark:text-gray-400">Loading analytics…</p>
-    </div>
-  )
+  if (loading) return <SkeletonPage rows={6} />
 
   if (denied) return (
     <div className="space-y-4">

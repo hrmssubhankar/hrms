@@ -2,6 +2,7 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect } from 'react'
+import { SkeletonPage } from '@/components/ui/Skeleton'
 
 type Employee = { id:string; firstName:string; lastName:string; startDate:string; isActive:boolean }
 
@@ -39,7 +40,7 @@ export default function ExperiencePage() {
     return nextMilestone && (nextMilestone - e.tenureMonths) <= 2
   })
 
-  if (loading) return <div className="p-8 text-sm text-gray-600 dark:text-gray-400">Loading…</div>
+  if (loading) return <SkeletonPage />
 
   return (
     <div className="h-full flex flex-col">
