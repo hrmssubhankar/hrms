@@ -48,14 +48,14 @@ const GOAL_STATUSES = [
 const GOAL_CATEGORIES = ['Communication', 'Leadership', 'Technical Skills', 'Teamwork', 'Customer Service', 'Process Improvement', 'Professional Development', 'Other']
 
 const STATUS_STYLE: Record<string, string> = {
-  scheduled: 'bg-blue-900/50 text-blue-300 border-blue-800',
-  completed: 'bg-green-900/50 text-green-300 border-green-800',
-  overdue:   'bg-red-900/50 text-red-300 border-red-800',
+  scheduled: 'badge badge-blue',
+  completed: 'badge badge-green',
+  overdue:   'badge badge-red',
 }
 
 const RATING_LABELS = ['', 'Unsatisfactory', 'Needs Improvement', 'Meets Expectations', 'Exceeds Expectations', 'Outstanding']
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 const BLANK_GOAL = { employeeId: '', reviewId: '', title: '', description: '', category: '', targetDate: '', status: 'active', progress: 0 }
 

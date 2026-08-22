@@ -63,7 +63,7 @@ type WorkforceData = {
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 const EMP_TYPE_CONFIG: Record<string, { label: string; bg: string }> = {
   full_time:  { label: 'Full-time',  bg: 'bg-indigo-500' },
@@ -73,9 +73,9 @@ const EMP_TYPE_CONFIG: Record<string, { label: string; bg: string }> = {
 }
 
 const PLAN_STATUS_STYLE: Record<string, string> = {
-  open:    'bg-blue-900/50 text-blue-300 border-blue-800',
-  filled:  'bg-green-900/50 text-green-300 border-green-800',
-  on_hold: 'bg-amber-900/50 text-amber-300 border-amber-800',
+  open:    'badge badge-blue',
+  filled:  'badge badge-green',
+  on_hold: 'badge badge-amber',
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -552,7 +552,7 @@ export default function WorkforcePlanningPage() {
             <select
               value={filterDept}
               onChange={e => setFilterDept(e.target.value)}
-              className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-purple-500"
+              className="input-premium"
             >
               <option value="">All departments</option>
               {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -560,7 +560,7 @@ export default function WorkforcePlanningPage() {
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value)}
-              className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-purple-500"
+              className="input-premium"
             >
               <option value="">All statuses</option>
               <option value="open">Open</option>

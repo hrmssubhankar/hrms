@@ -29,7 +29,7 @@ const BENEFIT_TYPES = [
   { value: 'other',             label: 'Other',                       emoji: '⭐', color: '#94a3b8' },
 ]
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
 const BLANK_FORM = { employeeId: '', type: 'eap', description: '', startDate: '', endDate: '', notes: '' }
@@ -45,10 +45,10 @@ function getStatus(b: Benefit): 'active' | 'expiring' | 'expired' | 'permanent' 
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  active:    'bg-green-900/40 text-green-300 border-green-800',
-  expiring:  'bg-amber-900/40 text-amber-300 border-amber-800',
-  expired:   'bg-gray-800 text-gray-500 border-gray-700',
-  permanent: 'bg-blue-900/40 text-blue-300 border-blue-800',
+  active:    'badge badge-green',
+  expiring:  'badge badge-amber',
+  expired:   'badge badge-gray',
+  permanent: 'badge badge-blue',
 }
 const STATUS_LABEL: Record<string, string> = {
   active: 'Active', expiring: 'Expiring Soon', expired: 'Expired', permanent: 'Ongoing',

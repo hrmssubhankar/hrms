@@ -15,16 +15,16 @@ const ROLES = [
 ]
 
 const ROLE_STYLE: Record<string, string> = {
-  director:            'bg-purple-900/50 text-purple-300 border-purple-800',
-  hr_officer:          'bg-blue-900/50 text-blue-300 border-blue-800',
-  compliance_manager:  'bg-amber-900/50 text-amber-300 border-amber-800',
-  operations_manager:  'bg-cyan-900/50 text-cyan-300 border-cyan-800',
-  team_leader:         'bg-teal-900/50 text-teal-300 border-teal-800',
-  payroll_officer:     'bg-green-900/50 text-green-300 border-green-800',
+  director:            'badge badge-purple',
+  hr_officer:          'badge badge-blue',
+  compliance_manager:  'badge badge-amber',
+  operations_manager:  'badge badge-teal',
+  team_leader:         'badge badge-teal',
+  payroll_officer:     'badge badge-green',
   employee:            'bg-gray-800 text-gray-300 border-gray-700',
-  contractor:          'bg-orange-900/50 text-orange-300 border-orange-800',
-  auditor:             'bg-pink-900/50 text-pink-300 border-pink-800',
-  it_admin:            'bg-red-900/50 text-red-300 border-red-800',
+  contractor:          'badge badge-amber',
+  auditor:             'badge badge-purple',
+  it_admin:            'badge badge-red',
 }
 
 const ROLE_LABEL: Record<string, string> = {
@@ -33,7 +33,7 @@ const ROLE_LABEL: Record<string, string> = {
   employee: 'Employee', contractor: 'Contractor', auditor: 'Auditor', it_admin: 'IT Admin',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 function generatePassword(length = 12) {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'
@@ -263,7 +263,7 @@ export default function RolesPage() {
                     {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('en-AU') : 'Never'}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full border ${u.isActive ? 'bg-green-900/50 text-green-300 border-green-800' : 'bg-gray-800 text-gray-500 border-gray-700'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${u.isActive ? 'badge badge-green' : 'badge badge-gray'}`}>
                       {u.isActive ? 'Active' : 'Suspended'}
                     </span>
                   </td>

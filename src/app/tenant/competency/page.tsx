@@ -96,7 +96,7 @@ export default function CompetencyPage() {
           <div className="space-y-4">
             <div className="max-w-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Select Employee</label>
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={selectedEmp} onChange={e => setSelectedEmp(e.target.value)}>
+              <select className="input-premium" value={selectedEmp} onChange={e => setSelectedEmp(e.target.value)}>
                 <option value="">Choose employee…</option>
                 {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
@@ -175,8 +175,8 @@ export default function CompetencyPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 dark:bg-gray-900">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-white">Add Competency</h3>
             <div className="space-y-3">
-              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Name *" value={compForm.name} onChange={e => setCompForm(f => ({...f, name:e.target.value}))} />
-              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Category (e.g. Clinical, Safety)" value={compForm.category} onChange={e => setCompForm(f => ({...f, category:e.target.value}))} />
+              <input className="input-premium" placeholder="Name *" value={compForm.name} onChange={e => setCompForm(f => ({...f, name:e.target.value}))} />
+              <input className="input-premium" placeholder="Category (e.g. Clinical, Safety)" value={compForm.category} onChange={e => setCompForm(f => ({...f, category:e.target.value}))} />
               <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none dark:border-gray-700" rows={2} placeholder="Description" value={compForm.description} onChange={e => setCompForm(f => ({...f, description:e.target.value}))} />
             </div>
             <div className="flex gap-3 mt-5">
@@ -193,21 +193,21 @@ export default function CompetencyPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 dark:bg-gray-900">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-white">Record Assessment</h3>
             <div className="space-y-3">
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={assessForm.competencyId} onChange={e => setAssessForm(f => ({...f, competencyId:e.target.value}))}>
+              <select className="input-premium" value={assessForm.competencyId} onChange={e => setAssessForm(f => ({...f, competencyId:e.target.value}))}>
                 <option value="">Select competency *</option>
                 {competencies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={assessForm.outcome} onChange={e => setAssessForm(f => ({...f, outcome:e.target.value}))}>
+              <select className="input-premium" value={assessForm.outcome} onChange={e => setAssessForm(f => ({...f, outcome:e.target.value}))}>
                 <option value="competent">Competent</option>
                 <option value="not_yet_competent">Not Yet Competent</option>
               </select>
               <div className="grid grid-cols-2 gap-2">
                 <div><label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">Assessed Date</label>
-                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={assessForm.assessedAt} onChange={e => setAssessForm(f => ({...f, assessedAt:e.target.value}))} /></div>
+                  <input type="date" className="input-premium" value={assessForm.assessedAt} onChange={e => setAssessForm(f => ({...f, assessedAt:e.target.value}))} /></div>
                 <div><label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">Expiry Date</label>
-                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={assessForm.expiryDate} onChange={e => setAssessForm(f => ({...f, expiryDate:e.target.value}))} /></div>
+                  <input type="date" className="input-premium" value={assessForm.expiryDate} onChange={e => setAssessForm(f => ({...f, expiryDate:e.target.value}))} /></div>
               </div>
-              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Evidence reference" value={assessForm.evidence} onChange={e => setAssessForm(f => ({...f, evidence:e.target.value}))} />
+              <input className="input-premium" placeholder="Evidence reference" value={assessForm.evidence} onChange={e => setAssessForm(f => ({...f, evidence:e.target.value}))} />
             </div>
             <div className="flex gap-3 mt-5">
               <button onClick={() => setShowAssess(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 dark:text-gray-400 dark:border-gray-700">Cancel</button>

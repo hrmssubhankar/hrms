@@ -361,11 +361,11 @@ export default function ReportsPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Date Range</p>
             <div>
               <label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">From</label>
-              <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
+              <input type="date" className="input-premium" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block dark:text-gray-400">To</label>
-              <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={dateTo} onChange={e => setDateTo(e.target.value)} />
+              <input type="date" className="input-premium" value={dateTo} onChange={e => setDateTo(e.target.value)} />
             </div>
             <button onClick={run} disabled={loading}
               className="w-full py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50">

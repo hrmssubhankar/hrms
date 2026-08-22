@@ -29,22 +29,22 @@ type Stats = { total: number; open: number; draft: number; closed: number; total
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const APP_STATUSES = [
-  { value: 'received',    label: 'Received',    color: 'bg-blue-900/50 text-blue-300 border-blue-800' },
-  { value: 'shortlisted', label: 'Shortlisted', color: 'bg-purple-900/50 text-purple-300 border-purple-800' },
-  { value: 'interviewed', label: 'Interviewed', color: 'bg-amber-900/50 text-amber-300 border-amber-800' },
-  { value: 'checks',      label: 'Ref Checks',  color: 'bg-orange-900/50 text-orange-300 border-orange-800' },
-  { value: 'offer',       label: 'Offer',       color: 'bg-teal-900/50 text-teal-300 border-teal-800' },
-  { value: 'hired',       label: 'Hired',       color: 'bg-green-900/50 text-green-300 border-green-800' },
-  { value: 'rejected',    label: 'Rejected',    color: 'bg-red-900/50 text-red-300 border-red-800' },
+  { value: 'received',    label: 'Received',    color: 'badge badge-blue' },
+  { value: 'shortlisted', label: 'Shortlisted', color: 'badge badge-purple' },
+  { value: 'interviewed', label: 'Interviewed', color: 'badge badge-amber' },
+  { value: 'checks',      label: 'Ref Checks',  color: 'badge badge-amber' },
+  { value: 'offer',       label: 'Offer',       color: 'badge badge-teal' },
+  { value: 'hired',       label: 'Hired',       color: 'badge badge-green' },
+  { value: 'rejected',    label: 'Rejected',    color: 'badge badge-red' },
 ]
 
 const REQ_STATUS_STYLE: Record<string, string> = {
   draft:  'badge badge-gray',
-  open:   'bg-green-900/50 text-green-300 border-green-800',
-  closed: 'bg-red-900/50 text-red-300 border-red-800',
+  open:   'badge badge-green',
+  closed: 'badge badge-red',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 const SOURCES = ['Seek', 'LinkedIn', 'Indeed', 'Referral', 'Walk-in', 'Agency', 'Internal', 'Other']
 
@@ -400,10 +400,10 @@ export default function RecruitmentPage() {
             <input
               type="search" placeholder="Search jobs…" value={jobSearch}
               onChange={e => setJobSearch(e.target.value)}
-              className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-purple-500 w-48"
+              className="input-premium w-48"
             />
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-              className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-purple-500">
+              className="input-premium">
               <option value="">All statuses</option>
               <option value="draft">Draft</option>
               <option value="open">Open</option>
@@ -693,7 +693,7 @@ export default function RecruitmentPage() {
           <input
             type="search" placeholder="Search candidates…" value={candSearch}
             onChange={e => setCandSearch(e.target.value)}
-            className="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:border-purple-500 w-64"
+            className="input-premium w-64"
           />
 
           {candidates.length === 0 ? (

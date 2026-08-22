@@ -31,12 +31,12 @@ const SEVERITIES = [
 ]
 
 const STATUS_STYLE: Record<string, string> = {
-  open:          'bg-red-900/50 text-red-300 border-red-800',
-  investigating: 'bg-amber-900/50 text-amber-300 border-amber-800',
+  open:          'badge badge-red',
+  investigating: 'badge badge-amber',
   closed:        'badge badge-gray',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 export default function WhsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([])
@@ -340,7 +340,7 @@ function ActionInput({ onAdd }: { onAdd: (a: string) => void }) {
       <input value={val} onChange={e => setVal(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && val.trim()) { onAdd(val.trim()); setVal('') } }}
         placeholder="Add corrective action… (press Enter)"
-        className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+        className="flex-1 input-premium py-1.5 text-xs" />
       <button type="button" onClick={() => { if (val.trim()) { onAdd(val.trim()); setVal('') } }}
         className="text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-3 py-1.5 rounded-lg transition">
         Add

@@ -163,7 +163,7 @@ export default function ScreeningPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">{f.label}</label>
                   <input
                     type={f.type ?? 'text'}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700"
+                    className="input-premium"
                     defaultValue={f.value ?? ''}
                     onBlur={e => patch(selected.id, { [f.field]: e.target.value || null })}
                   />
@@ -173,7 +173,7 @@ export default function ScreeningPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Status</label>
                 <select
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700"
+                  className="input-premium"
                   value={selected.status}
                   onChange={e => { patch(selected.id, { status: e.target.value }); setSelected({...selected, status:e.target.value}) }}
                 >
@@ -208,25 +208,25 @@ export default function ScreeningPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Employee *</label>
-                <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={form.employeeId} onChange={e => setForm(f => ({...f, employeeId:e.target.value}))}>
+                <select className="input-premium" value={form.employeeId} onChange={e => setForm(f => ({...f, employeeId:e.target.value}))}>
                   <option value="">Select…</option>
                   {employees.map(e => <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Check Type *</label>
-                <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={form.checkType} onChange={e => setForm(f => ({...f, checkType:e.target.value}))}>
+                <select className="input-premium" value={form.checkType} onChange={e => setForm(f => ({...f, checkType:e.target.value}))}>
                   {CHECK_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g,' ')}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Reference #</label>
-                  <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={form.referenceNumber} onChange={e => setForm(f => ({...f, referenceNumber:e.target.value}))} />
+                  <input className="input-premium" value={form.referenceNumber} onChange={e => setForm(f => ({...f, referenceNumber:e.target.value}))} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Expiry Date</label>
-                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={form.expiryDate} onChange={e => setForm(f => ({...f, expiryDate:e.target.value}))} />
+                  <input type="date" className="input-premium" value={form.expiryDate} onChange={e => setForm(f => ({...f, expiryDate:e.target.value}))} />
                 </div>
               </div>
             </div>

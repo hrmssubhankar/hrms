@@ -7,7 +7,7 @@ type Survey = { id: string; title: string; type: string | null; isAnonymous: boo
 type Response = { id: string; surveyId: string; employeeId: string | null; answers: unknown; submittedAt: string; employeeFirstName: string | null; employeeLastName: string | null }
 type Employee = { id: string; firstName: string; lastName: string }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 const SURVEY_TYPES = [
   { value: 'new_starter_30', label: 'New Starter 30-day' },
@@ -125,7 +125,7 @@ export default function EngagementPage() {
                     {s.isAnonymous && ' · Anonymous'}
                   </p>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full border shrink-0 ${s.isActive ? 'bg-green-900/50 text-green-300 border-green-800' : 'bg-gray-800 text-gray-500 border-gray-700'}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full border shrink-0 ${s.isActive ? 'badge badge-green' : 'badge badge-gray'}`}>
                   {s.isActive ? 'Active' : 'Closed'}
                 </span>
               </div>

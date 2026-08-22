@@ -50,9 +50,9 @@ const fmt = (n: number | string | null | undefined) =>
   n == null ? '—' : `$${Number(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 const STATUS_STYLE: Record<string, string> = {
-  pending:  'bg-yellow-900/40 text-yellow-300 border-yellow-800',
-  approved: 'bg-blue-900/40 text-blue-300 border-blue-800',
-  paid:     'bg-green-900/40 text-green-300 border-green-800',
+  pending:  'badge badge-amber',
+  approved: 'badge badge-blue',
+  paid:     'badge badge-green',
 }
 
 export default function PayrollPage() {

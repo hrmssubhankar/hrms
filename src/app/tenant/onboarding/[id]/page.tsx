@@ -50,9 +50,9 @@ const CATEGORY_COLOR: Record<string, string> = {
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  pending:     'bg-yellow-900/50 text-yellow-300 border-yellow-800',
-  in_progress: 'bg-blue-900/50 text-blue-300 border-blue-800',
-  completed:   'bg-green-900/50 text-green-300 border-green-800',
+  pending:     'badge badge-amber',
+  in_progress: 'badge badge-blue',
+  completed:   'badge badge-green',
 }
 
 export default function OnboardingDetailPage() {

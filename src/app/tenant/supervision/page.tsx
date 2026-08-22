@@ -20,12 +20,12 @@ const SUP_TYPES = [
 ]
 
 const STATUS_STYLE: Record<string, string> = {
-  scheduled: 'bg-blue-900/50 text-blue-300 border-blue-800',
-  completed: 'bg-green-900/50 text-green-300 border-green-800',
+  scheduled: 'badge badge-blue',
+  completed: 'badge badge-green',
   cancelled: 'badge badge-gray',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 export default function SupervisionPage() {
   const [records,   setRecords]   = useState<SupervisionRecord[]>([])
@@ -266,7 +266,7 @@ export default function SupervisionPage() {
                             onChange={e => setActionDraft(prev => ({ ...prev, [r.id]: e.target.value }))}
                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAction(r.id, r.actionItems) } }}
                             placeholder="Add action item… (Enter to add)"
-                            className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500" />
+                            className="flex-1 input-premium py-1.5 text-xs" />
                           <button onClick={() => addAction(r.id, r.actionItems)}
                             className="text-xs bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-purple-600 px-3 py-1.5 rounded-lg transition">
                             Add

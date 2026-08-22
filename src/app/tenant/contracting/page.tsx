@@ -113,14 +113,14 @@ export default function ContractingPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Status</label>
-                <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={selected.status}
+                <select className="input-premium" value={selected.status}
                   onChange={e=>{patch(selected.id,{status:e.target.value});setSelected({...selected,status:e.target.value})}}>
                   {['draft','sent','signed','expired'].map(s=><option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Super Fund</label>
-                <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" defaultValue={selected.superFund??''} onBlur={e=>patch(selected.id,{superFund:e.target.value||null})}/>
+                <input className="input-premium" defaultValue={selected.superFund??''} onBlur={e=>patch(selected.id,{superFund:e.target.value||null})}/>
               </div>
             </div>
 
@@ -165,11 +165,11 @@ export default function ContractingPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 dark:bg-gray-900">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-white">New Contract</h3>
             <div className="space-y-3">
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={form.employeeId} onChange={e=>setForm(f=>({...f,employeeId:e.target.value}))}>
+              <select className="input-premium" value={form.employeeId} onChange={e=>setForm(f=>({...f,employeeId:e.target.value}))}>
                 <option value="">Select employee *</option>
                 {employees.map(e=><option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))}>
+              <select className="input-premium" value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))}>
                 {CONTRACT_TYPES.map(t=><option key={t} value={t}>{t.replace(/_/g,' ')}</option>)}
               </select>
             </div>

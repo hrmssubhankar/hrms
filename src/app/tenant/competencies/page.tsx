@@ -13,11 +13,11 @@ type Assessment = {
 type Stats = { total: number; competent: number; notYet: number; expiringSoon: number; expired: number }
 type Employee = { id: string; firstName: string; lastName: string }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 const OUTCOME_STYLE: Record<string, string> = {
-  competent:          'bg-green-900/50 text-green-300 border-green-800',
-  not_yet_competent:  'bg-red-900/50 text-red-300 border-red-800',
+  competent:          'badge badge-green',
+  not_yet_competent:  'badge badge-red',
 }
 
 export default function CompetencyPage() {

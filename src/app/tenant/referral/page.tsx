@@ -127,12 +127,12 @@ export default function ReferralPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 dark:bg-gray-900">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 dark:text-white">Add Referral</h3>
             <div className="space-y-3">
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" value={form.referrerId} onChange={e=>setForm(f=>({...f,referrerId:e.target.value}))}>
+              <select className="input-premium" value={form.referrerId} onChange={e=>setForm(f=>({...f,referrerId:e.target.value}))}>
                 <option value="">Referred by (employee) *</option>
                 {employees.map(e=><option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>)}
               </select>
-              <input className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Candidate name *" value={form.referredName} onChange={e=>setForm(f=>({...f,referredName:e.target.value}))}/>
-              <input type="email" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm dark:border-gray-700" placeholder="Candidate email" value={form.referredEmail} onChange={e=>setForm(f=>({...f,referredEmail:e.target.value}))}/>
+              <input className="input-premium" placeholder="Candidate name *" value={form.referredName} onChange={e=>setForm(f=>({...f,referredName:e.target.value}))}/>
+              <input type="email" className="input-premium" placeholder="Candidate email" value={form.referredEmail} onChange={e=>setForm(f=>({...f,referredEmail:e.target.value}))}/>
               <textarea className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none dark:border-gray-700" rows={2} placeholder="Notes" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
             </div>
             <div className="flex gap-3 mt-5">

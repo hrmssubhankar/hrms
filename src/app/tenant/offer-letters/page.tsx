@@ -18,11 +18,11 @@ type Stats = { total: number; draft: number; sent: number; accepted: number; rej
 
 const STATUS_STYLE: Record<string, string> = {
   draft:     'badge badge-gray',
-  sent:      'bg-blue-900/50 text-blue-300 border-blue-800',
-  accepted:  'bg-green-900/50 text-green-300 border-green-800',
-  rejected:  'bg-red-900/50 text-red-300 border-red-800',
-  expired:   'bg-amber-900/50 text-amber-300 border-amber-800',
-  withdrawn: 'bg-gray-800 text-gray-500 border-gray-700',
+  sent:      'badge badge-blue',
+  accepted:  'badge badge-green',
+  rejected:  'badge badge-red',
+  expired:   'badge badge-amber',
+  withdrawn: 'badge badge-gray',
 }
 
 const EVENT_ICON: Record<string, string> = {
@@ -37,7 +37,7 @@ const EMP_TYPES = [
   { value: 'contractor',  label: 'Contractor' },
 ]
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
 type CustomTemplate = {

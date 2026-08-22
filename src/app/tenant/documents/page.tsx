@@ -61,10 +61,10 @@ const DOC_CATEGORIES = [
 ]
 
 const STATUS_STYLE: Record<string, string> = {
-  active:         'bg-green-900/50 text-green-300 border-green-800',
-  expired:        'bg-red-900/50 text-red-300 border-red-800',
+  active:         'badge badge-green',
+  expired:        'badge badge-red',
   archived:       'badge badge-gray',
-  pending_review: 'bg-amber-900/50 text-amber-300 border-amber-800',
+  pending_review: 'badge badge-amber',
 }
 
 // Categories that require expiry tracking
@@ -112,7 +112,7 @@ const expColor = (exp: string | null) => {
   return 'text-gray-400'
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
 // ── Page ──────────────────────────────────────────────────────────────────────

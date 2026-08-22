@@ -11,12 +11,12 @@ type AuditLog = {
 }
 
 const ACTION_COLOR: Record<string, string> = {
-  create: 'bg-green-900/50 text-green-300 border-green-800',
-  update: 'bg-blue-900/50 text-blue-300 border-blue-800',
-  delete: 'bg-red-900/50 text-red-300 border-red-800',
-  login:  'bg-purple-900/50 text-purple-300 border-purple-800',
+  create: 'badge badge-green',
+  update: 'badge badge-blue',
+  delete: 'badge badge-red',
+  login:  'badge badge-purple',
   logout: 'badge badge-gray',
-  export: 'bg-amber-900/50 text-amber-300 border-amber-800',
+  export: 'badge badge-amber',
 }
 
 const actionColor = (a: string) =>

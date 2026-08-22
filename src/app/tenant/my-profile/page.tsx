@@ -104,7 +104,7 @@ function TwoFactorSection() {
     <div className="card-premium rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Two-Factor Authentication</h2>
-        <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${enabled ? 'bg-green-900/40 text-green-300 border-green-800' : 'bg-gray-800 text-gray-500 border-gray-700'}`}>
+        <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${enabled ? 'badge badge-green' : 'badge badge-gray'}`}>
           {enabled ? 'Enabled' : 'Disabled'}
         </span>
       </div>
@@ -487,7 +487,7 @@ export default function MyProfilePage() {
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employment Type</span><span className="text-white text-sm">{employmentTypeLabel[profile.employmentType] ?? profile.employmentType}</span></div>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Start Date</span><span className="text-white text-sm">{fmt(profile.startDate)}</span></div>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Status</span>
-          <span className={`text-sm px-2 py-0.5 rounded-full border ${profile.isActive ? 'bg-green-900/40 text-green-300 border-green-800' : 'bg-red-900/40 text-red-300 border-red-800'}`}>
+          <span className={profile.isActive ? 'badge badge-green' : 'badge badge-red'}>
             {profile.isActive ? 'Active' : 'Inactive'}
           </span>
         </div>

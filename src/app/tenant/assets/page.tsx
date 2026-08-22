@@ -10,13 +10,13 @@ type Employee = { id: string; firstName: string; lastName: string }
 
 const ASSET_CATEGORIES = ['Laptop','Phone','Uniform','PPE','Keys','Access Card','Vehicle','Tool','Other']
 const STATUS_STYLE: Record<string, string> = {
-  available: 'bg-green-900/50 text-green-300 border-green-800',
-  assigned:  'bg-blue-900/50 text-blue-300 border-blue-800',
+  available: 'badge badge-green',
+  assigned:  'badge badge-blue',
   retired:   'badge badge-gray',
-  maintenance:'bg-amber-900/50 text-amber-300 border-amber-800',
+  maintenance:'badge badge-amber',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 export default function AssetsPage() {
   const [assets,      setAssets]      = useState<Asset[]>([])

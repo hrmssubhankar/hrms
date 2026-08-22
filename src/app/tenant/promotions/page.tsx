@@ -19,10 +19,10 @@ type Employee = { id: string; firstName: string; lastName: string; role?: string
 
 const STATUS_STYLE: Record<string, string> = {
   pending:      'bg-gray-800 text-gray-300 border-gray-600',
-  under_review: 'bg-blue-900/50 text-blue-300 border-blue-800',
-  approved:     'bg-green-900/50 text-green-300 border-green-800',
-  rejected:     'bg-red-900/50 text-red-300 border-red-800',
-  implemented:  'bg-purple-900/50 text-purple-300 border-purple-800',
+  under_review: 'badge badge-blue',
+  approved:     'badge badge-green',
+  rejected:     'badge badge-red',
+  implemented:  'badge badge-purple',
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -35,7 +35,7 @@ const EVENT_ICON: Record<string, string> = {
   implemented:'', note_added:'', updated:'️', salary_updated:'',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 const TEXTAREA = INPUT + ' min-h-[80px] resize-y'
 

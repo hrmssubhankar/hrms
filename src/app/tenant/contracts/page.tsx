@@ -24,12 +24,12 @@ const CONTRACT_TYPES = [
 
 const STATUS_STYLE: Record<string, string> = {
   draft:  'badge badge-gray',
-  sent:   'bg-blue-900/50 text-blue-300 border-blue-800',
-  signed: 'bg-green-900/50 text-green-300 border-green-800',
-  void:   'bg-red-900/50 text-red-300 border-red-800',
+  sent:   'badge badge-blue',
+  signed: 'badge badge-green',
+  void:   'badge badge-red',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 export default function ContractsPage() {
   const [contracts,  setContracts]  = useState<Contract[]>([])

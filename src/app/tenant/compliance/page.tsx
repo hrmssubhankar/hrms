@@ -42,7 +42,7 @@ const STATUS_DOT: Record<string, string> = {
   green: 'bg-green-400', amber: 'bg-amber-400', red: 'bg-red-400', pending: 'bg-gray-500',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 function statusLabel(s: string) {
   if (s === 'in_progress') return 'In Progress'

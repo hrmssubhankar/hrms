@@ -43,17 +43,17 @@ const STATUS_FLOW = [
 ]
 
 const STATUS_STYLE: Record<string, string> = {
-  new:      'bg-blue-900/50 text-blue-300 border-blue-800',
-  triage:   'bg-purple-900/50 text-purple-300 border-purple-800',
-  assigned: 'bg-indigo-900/50 text-indigo-300 border-indigo-800',
-  evidence: 'bg-amber-900/50 text-amber-300 border-amber-800',
-  response: 'bg-orange-900/50 text-orange-300 border-orange-800',
-  findings: 'bg-pink-900/50 text-pink-300 border-pink-800',
-  outcome:  'bg-teal-900/50 text-teal-300 border-teal-800',
+  new:      'badge badge-blue',
+  triage:   'badge badge-purple',
+  assigned: 'badge badge-indigo',
+  evidence: 'badge badge-amber',
+  response: 'badge badge-amber',
+  findings: 'badge badge-purple',
+  outcome:  'badge badge-teal',
   closed:   'badge badge-gray',
 }
 
-const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
+const INPUT = 'input-premium'
 
 export default function GrievancesPage() {
   const [records,   setRecords]   = useState<Grievance[]>([])
