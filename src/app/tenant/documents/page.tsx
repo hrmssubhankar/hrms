@@ -119,6 +119,102 @@ const expColor = (exp: string | null) => {
 const INPUT = 'input-premium'
 const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
+// ── DocPreviewModal ───────────────────────────────────────────────────────────
+function DocPreviewModal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
+  const isImage = doc.mimeType?.startsWith('image/')
+  const isPdf   = doc.mimeType === 'application/pdf'
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center p-4 backdrop-blur-sm bg-black/60 dark:bg-black/70"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-4xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-lg shrink-0">{mimeIcon(doc.mimeType)}</span>
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{doc.title}</h2>
+            {doc.fileName && (
+              <span className="text-xs text-gray-500 dark:text-gray-400 truncate hidden sm:block">— {doc.fileName}</span>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="ml-3 shrink-0 p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-white transition-colors"
+            aria-label="Close preview"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-auto flex items-center justify-center bg-gray-50 dark:bg-gray-950 min-h-0 p-4">
+          {isImage ? (
+            <img
+              src={doc.blobUrl}
+              alt={doc.title}
+              className="max-h-[80vh] max-w-full object-contain rounded"
+            />
+          ) : isPdf ? (
+            <iframe
+              src={doc.blobUrl}
+              className="w-full h-[80vh] rounded border-0"
+              title={doc.title}
+            />
+          ) : (
+            <div className="text-center py-12 space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Preview not available</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {doc.mimeType ? `File type: ${doc.mimeType}` : 'Unknown file type'}
+              </p>
+              <a
+                href={doc.blobUrl}
+                download
+                className="inline-flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 hover:underline"
+              >
+                Download file
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end px-5 py-3 border-t border-gray-200 dark:border-gray-700 shrink-0 bg-white dark:bg-gray-900">
+          <a
+            href={doc.blobUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6m0 0v6m0-6L10 14" />
+            </svg>
+            Open in new tab
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DocumentsPage() {
   const [docs,       setDocs]       = useState<Doc[]>([])
@@ -138,6 +234,7 @@ export default function DocumentsPage() {
   const [editSaving, setEditSaving] = useState(false)
   const [selectedDocs,   setSelectedDocs]   = useState<Set<string>>(new Set())
   const [bulkDocLoading, setBulkDocLoading] = useState(false)
+  const [preview, setPreview] = useState<Doc | null>(null)
   const [form, setForm] = useState({
     title: '', category: 'Police Check', blobUrl: '', employeeId: '',
     fileName: '', fileSizeBytes: 0, mimeType: '', expiryDate: '', notes: '',
@@ -574,6 +671,15 @@ export default function DocumentsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1 flex-wrap">
+                      {isRealUrl(d.blobUrl) && (
+                        <button
+                          onClick={e => { e.stopPropagation(); setPreview(d) }}
+                          className="text-xs bg-blue-900/20 border border-blue-800 text-blue-300 hover:bg-blue-900/40 px-2 py-1 rounded transition"
+                          title="Preview document"
+                        >
+                          👁
+                        </button>
+                      )}
                       <button
                         onClick={() => editing === d.id ? setEditing(null) : startEdit(d)}
                         className="text-xs bg-purple-900/20 border border-purple-800 text-purple-300 hover:bg-purple-900/40 px-2 py-1 rounded transition">
@@ -661,6 +767,7 @@ export default function DocumentsPage() {
         </div>
       )}
       <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      {preview && <DocPreviewModal doc={preview} onClose={() => setPreview(null)} />}
     </div>
   )
 }

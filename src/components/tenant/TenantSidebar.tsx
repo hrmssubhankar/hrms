@@ -103,12 +103,28 @@ export default function TenantSidebar({
   const [open, setOpen]         = useState(false)
   const [isDark, setIsDark]     = useState(false)
   const [expiryCount, setExpiryCount] = useState(0)
+  const [trainingExpiryCount, setTrainingExpiryCount] = useState(0)
+  const [screeningCount, setScreeningCount] = useState(0)
   const dropdownRef         = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/tenant/documents/expiry-count')
       .then(r => r.ok ? r.json() : { count: 0 })
       .then(d => setExpiryCount(d.count ?? 0))
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/tenant/training/expiry-count')
+      .then(r => r.ok ? r.json() : { count: 0 })
+      .then(d => setTrainingExpiryCount(d.count ?? 0))
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/tenant/employees/screening-count')
+      .then(r => r.ok ? r.json() : { count: 0 })
+      .then(d => setScreeningCount(d.count ?? 0))
       .catch(() => {})
   }, [])
 
@@ -258,7 +274,7 @@ export default function TenantSidebar({
         <NavLink navKey="dashboard" label="Dashboard" />
 
         {navItems.map(({ key, label, badge }) => (
-          <NavLink key={key} navKey={key} label={label} badge={key === 'documents' ? (expiryCount || badge) : badge} />
+          <NavLink key={key} navKey={key} label={label} badge={key === 'documents' ? (expiryCount || badge) : key === 'training' ? (trainingExpiryCount || badge) : key === 'screening' ? (screeningCount || badge) : badge} />
         ))}
 
         {/* My Portal */}

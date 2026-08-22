@@ -379,6 +379,14 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
   )
 }
 
+type TrainingOverdue = {
+  employeeId: string
+  firstName: string | null
+  lastName: string | null
+  courseTitle: string | null
+  expiryDate: string
+}
+
 type ProbationAlert = {
   id: string
   firstName: string
@@ -410,6 +418,7 @@ export default function DashboardPage() {
   const [celebrations,  setCelebrations]  = useState<Celebration[]>([])
   const [activity,      setActivity]      = useState<ActivityItem[]>([])
   const [probation,     setProbation]     = useState<ProbationAlert[]>([])
+  const [overdueTraining, setOverdueTraining] = useState<TrainingOverdue[]>([])
 
   useEffect(() => {
     // Greeting is computed client-side only to avoid SSR/CSR hydration mismatch
@@ -450,6 +459,8 @@ export default function DashboardPage() {
       .then(r => r.json())
       .then(d => setProbation(Array.isArray(d) ? d : []))
       .catch(() => {})
+    // Overdue mandatory training (fire-and-forget; failure is silent)
+    fetchWithAuth('/api/tenant/training/overdue').then(r => r.json()).then(d => setOverdueTraining(d.overdue ?? [])).catch(() => {})
   }, [])
 
   function loadDashboard() {
@@ -829,6 +840,32 @@ export default function DashboardPage() {
           <Link href="/tenant/employee-management?status=active" className="mt-3 block text-center text-xs text-indigo-500 hover:text-indigo-700">
             View all employees →
           </Link>
+        </div>
+      )}
+
+      {/* ── Overdue Training widget ── */}
+      {overdueTraining.length > 0 && (
+        <div className="card-premium p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200">⚠️ Overdue Training</h3>
+            <span className="badge badge-red">{overdueTraining.length}</span>
+          </div>
+          <div className="space-y-2">
+            {overdueTraining.slice(0, 5).map((t, i) => (
+              <div key={i} className="flex items-center justify-between text-xs">
+                <span className="text-gray-700 dark:text-gray-300 truncate max-w-[160px]">
+                  {t.firstName} {t.lastName}
+                </span>
+                <span className="text-gray-500 dark:text-gray-400 truncate max-w-[120px] ml-2">
+                  {t.courseTitle ?? 'Unknown course'}
+                </span>
+              </div>
+            ))}
+            {overdueTraining.length > 5 && (
+              <p className="text-xs text-gray-400 text-right">+{overdueTraining.length - 5} more</p>
+            )}
+          </div>
+          <a href="/tenant/training" className="block mt-3 text-xs text-indigo-500 hover:underline">View training →</a>
         </div>
       )}
 
