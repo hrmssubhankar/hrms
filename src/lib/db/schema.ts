@@ -1081,6 +1081,23 @@ export const notifications = pgTable('hrms_notifications', {
 }))
 
 // ──────────────────────────────────────────────
+// Employee Notes
+// ──────────────────────────────────────────────
+
+export const employeeNotes = pgTable('hrms_employee_notes', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  tenantId:   uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+  employeeId: uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  authorId:   uuid('author_id').notNull().references(() => users.id),
+  authorEmail:varchar('author_email', { length: 255 }).notNull(),
+  content:    text('content').notNull(),
+  createdAt:  timestamp('created_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('employee_notes_tenant_idx').on(t.tenantId),
+  employeeIdx: index('employee_notes_employee_idx').on(t.employeeId),
+}))
+
+// ──────────────────────────────────────────────
 // Platform — Super Admins (no tenant FK)
 // ──────────────────────────────────────────────
 

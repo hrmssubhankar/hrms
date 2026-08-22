@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ExportButton from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type SupervisionRecord = {
   id: string; employeeId: string; supervisorId: string; scheduledDate: string
@@ -97,6 +99,29 @@ export default function SupervisionPage() {
   const today = new Date().toISOString().split('T')[0]
   const isOverdue = (r: SupervisionRecord) => r.status === 'scheduled' && r.scheduledDate < today
 
+  function exportSupervision() {
+    exportCsv({
+      filename: 'supervision-sessions',
+      columns: [
+        { header: 'Employee First Name', key: 'employeeFirstName' },
+        { header: 'Employee Last Name', key: 'employeeLastName' },
+        { header: 'Employee Email', key: 'employeeEmail' },
+        { header: 'Supervisor', key: 'supervisorId', format: (_v, row) => {
+          const sup = employees.find(e => e.id === row.supervisorId)
+          return sup ? `${sup.firstName} ${sup.lastName}` : ''
+        }},
+        { header: 'Type', key: 'type', format: v => SUP_TYPES.find(t => t.value === v)?.label ?? v ?? 'Regular' },
+        { header: 'Status', key: 'status', format: v => v ? (v as string).charAt(0).toUpperCase() + (v as string).slice(1) : '' },
+        { header: 'Scheduled Date', key: 'scheduledDate', format: v => fmtCsvDate(v as string) },
+        { header: 'Conducted At', key: 'conductedAt', format: v => fmtCsvDate(v as string | null) },
+        { header: 'Notes', key: 'notes' },
+        { header: 'Action Items', key: 'actionItems', format: v => (v as string[]).join('; ') },
+        { header: 'Created At', key: 'createdAt', format: v => fmtCsvDate(v as string) },
+      ],
+      rows: records,
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -104,10 +129,13 @@ export default function SupervisionPage() {
           <h1 className="text-2xl font-bold text-white">Supervision Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Schedule and track employee supervision sessions and action items</p>
         </div>
-        <button onClick={() => setShowForm(v => !v)}
-          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-          {showForm ? 'Cancel' : '+ Schedule Session'}
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportSupervision} disabled={records.length === 0} />
+          <button onClick={() => setShowForm(v => !v)}
+            className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+            {showForm ? 'Cancel' : '+ Schedule Session'}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

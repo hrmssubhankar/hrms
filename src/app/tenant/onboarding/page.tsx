@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ExportButton from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Link from 'next/link'
 import EmptyState from '@/components/ui/EmptyState'
@@ -104,6 +106,25 @@ export default function OnboardingPage() {
     })
   }
 
+  function exportOnboarding() {
+    exportCsv({
+      filename: 'onboarding',
+      columns: [
+        { header: 'Employee First Name', key: 'employeeFirstName' },
+        { header: 'Employee Last Name', key: 'employeeLastName' },
+        { header: 'Employee Email', key: 'employeeEmail' },
+        { header: 'Stage', key: 'stage', format: v => STAGE_LABELS[v as string] ?? v ?? '' },
+        { header: 'Status', key: 'status', format: v => v === 'in_progress' ? 'In Progress' : v ? (v as string).charAt(0).toUpperCase() + (v as string).slice(1) : '' },
+        { header: 'Start Date', key: 'employeeStartDate', format: v => fmtCsvDate(v as string | null) },
+        { header: 'Completion Date', key: 'completedAt', format: v => fmtCsvDate(v as string | null) },
+        { header: 'Onboarding Created', key: 'createdAt', format: v => fmtCsvDate(v as string) },
+        { header: 'Notes', key: 'notes' },
+        { header: 'Tasks Done', key: 'checklist', format: v => `${(v as OnboardingRecord['checklist']).filter(t => t.done).length}/${(v as OnboardingRecord['checklist']).length}` },
+      ],
+      rows: records,
+    })
+  }
+
   function progress(checklist: OnboardingRecord['checklist']) {
     if (!checklist?.length) return 0
     return Math.round(checklist.filter(t => t.done).length / checklist.length * 100)
@@ -134,10 +155,13 @@ export default function OnboardingPage() {
           <h1 className="text-2xl font-bold text-white">Onboarding & Induction</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track new employee onboarding progress across all stages</p>
         </div>
-        <Link href="/tenant/onboarding/new"
-          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-          + Start Onboarding
-        </Link>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportOnboarding} disabled={records.length === 0} />
+          <Link href="/tenant/onboarding/new"
+            className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+            + Start Onboarding
+          </Link>
+        </div>
       </div>
 
       {/* Stat cards — clickable to filter Pipeline tab */}

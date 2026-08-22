@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ExportButton from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type Grievance = {
   id: string; lodgedBy: string | null; subjectId: string | null; type: string
@@ -123,6 +125,27 @@ export default function GrievancesPage() {
 
   const risk = (v: string | null) => RISK_RATINGS.find(r => r.value === v) ?? RISK_RATINGS[1]
 
+  function exportGrievances() {
+    exportCsv({
+      filename: 'grievances',
+      columns: [
+        { header: 'Type', key: 'type', format: v => TYPES.find(t => t.value === v)?.label ?? v ?? '' },
+        { header: 'Status', key: 'status', format: v => STATUS_FLOW.find(s => s.value === v)?.label ?? v ?? '' },
+        { header: 'Risk Rating', key: 'riskRating', format: v => RISK_RATINGS.find(r => r.value === v)?.label ?? v ?? '' },
+        { header: 'Anonymous', key: 'isAnonymous', format: v => v ? 'Yes' : 'No' },
+        { header: 'Description', key: 'description' },
+        { header: 'Subject First Name', key: 'subjectFirstName' },
+        { header: 'Subject Last Name', key: 'subjectLastName' },
+        { header: 'Subject Email', key: 'subjectEmail' },
+        { header: 'Outcome', key: 'outcome' },
+        { header: 'Submitted Date', key: 'createdAt', format: v => fmtCsvDate(v as string) },
+        { header: 'Resolved Date', key: 'closedAt', format: v => fmtCsvDate(v as string | null) },
+        { header: 'Updated At', key: 'updatedAt', format: v => fmtCsvDate(v as string) },
+      ],
+      rows: records,
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -130,10 +153,13 @@ export default function GrievancesPage() {
           <h1 className="text-2xl font-bold text-white">Grievances & Investigations</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Lodge and manage grievances, misconduct, and NDIS safeguarding concerns</p>
         </div>
-        <button onClick={() => setShowForm(v => !v)}
-          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-          {showForm ? 'Cancel' : '+ Lodge Grievance'}
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportGrievances} disabled={records.length === 0} />
+          <button onClick={() => setShowForm(v => !v)}
+            className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+            {showForm ? 'Cancel' : '+ Lodge Grievance'}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

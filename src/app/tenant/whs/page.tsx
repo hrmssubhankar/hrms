@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ExportButton from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type Incident = {
   id: string; reportedBy: string; employeeId: string | null; type: string
@@ -118,6 +120,27 @@ export default function WhsPage() {
 
   const sev = (v: string | null) => SEVERITIES.find(s => s.value === v) ?? SEVERITIES[0]
 
+  function exportIncidents() {
+    exportCsv({
+      filename: 'whs-incidents',
+      columns: [
+        { header: 'Incident Type', key: 'type', format: v => INCIDENT_TYPES.find(t => t.value === v)?.label ?? v ?? '' },
+        { header: 'Severity', key: 'severity', format: v => SEVERITIES.find(s => s.value === v)?.label ?? v ?? '' },
+        { header: 'Status', key: 'status', format: v => v ? (v as string).charAt(0).toUpperCase() + (v as string).slice(1) : '' },
+        { header: 'Date & Time', key: 'occurredAt', format: v => fmtCsvDate(v as string) },
+        { header: 'Location', key: 'location' },
+        { header: 'Description', key: 'description' },
+        { header: 'Reported By', key: 'reportedBy' },
+        { header: 'Employee First Name', key: 'employeeFirstName' },
+        { header: 'Employee Last Name', key: 'employeeLastName' },
+        { header: 'Employee Email', key: 'employeeEmail' },
+        { header: 'Closed At', key: 'closedAt', format: v => fmtCsvDate(v as string | null) },
+        { header: 'Created At', key: 'createdAt', format: v => fmtCsvDate(v as string) },
+      ],
+      rows: incidents,
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -125,10 +148,13 @@ export default function WhsPage() {
           <h1 className="text-2xl font-bold text-white">WHS & Injury Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Report incidents, track investigations and corrective actions</p>
         </div>
-        <button onClick={() => setShowForm(v => !v)}
-          className="bg-red-700 hover:bg-red-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-          {showForm ? 'Cancel' : '+ Report Incident'}
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportIncidents} disabled={incidents.length === 0} />
+          <button onClick={() => setShowForm(v => !v)}
+            className="bg-red-700 hover:bg-red-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+            {showForm ? 'Cancel' : '+ Report Incident'}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

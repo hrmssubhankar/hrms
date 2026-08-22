@@ -84,7 +84,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-const TABS = ['Overview', 'Employment', 'Emergency Contacts', 'Compliance', 'Documents', 'Training', 'Promotions'] as const
+const TABS = ['Overview', 'Employment', 'Emergency Contacts', 'Compliance', 'Documents', 'Training', 'Promotions', 'Notes'] as const
 type Tab = typeof TABS[number]
 
 type PromotionRecord = {
@@ -187,6 +187,14 @@ export default function EmployeeProfilePage() {
   const [enrolSaving,     setEnrolSaving]     = useState(false)
   const [trainingUpdating, setTrainingUpdating] = useState<string | null>(null)
 
+  // Notes state
+  const [notes,        setNotes]        = useState<{ id: string; authorId: string; authorEmail: string; content: string; createdAt: string }[]>([])
+  const [notesLoaded,  setNotesLoaded]  = useState(false)
+  const [noteContent,  setNoteContent]  = useState('')
+  const [noteSaving,   setNoteSaving]   = useState(false)
+  const [deletingNote, setDeletingNote] = useState<string | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
   // Photo upload state
   const [photoUploading, setPhotoUploading] = useState(false)
 
@@ -274,6 +282,24 @@ export default function EmployeeProfilePage() {
         .catch(() => setPromotionsLoaded(true))
     }
   }, [tab, id, promotionsLoaded])
+
+  // Load notes when Notes tab is first opened
+  useEffect(() => {
+    if (tab === 'Notes' && !notesLoaded) {
+      fetchWithAuth(`/api/tenant/employees/${id}/notes`)
+        .then(r => r.json())
+        .then(d => { setNotes(d.notes ?? []); setNotesLoaded(true) })
+        .catch(() => setNotesLoaded(true))
+    }
+  }, [tab, id, notesLoaded])
+
+  // Fetch current user session info (for own-note detection)
+  useEffect(() => {
+    fetchWithAuth('/api/auth/me')
+      .then(r => r.json())
+      .then(d => { if (d?.user?.sub) setCurrentUserId(d.user.sub) })
+      .catch(() => {})
+  }, [])
 
   // Load training records + course library when Training tab is first opened
   useEffect(() => {
@@ -1342,6 +1368,125 @@ export default function EmployeeProfilePage() {
                   </div>
                 )
               })
+            )}
+          </div>
+        )}
+
+        {/* ── Notes Tab ────────────────────────────────────────────────────── */}
+        {tab === 'Notes' && (
+          <div className="space-y-5">
+            {/* Add note form */}
+            <div className="space-y-2">
+              <textarea
+                value={noteContent}
+                onChange={e => setNoteContent(e.target.value)}
+                placeholder="Add a note about this employee…"
+                rows={3}
+                className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-400 resize-y"
+              />
+              <div className="flex justify-end">
+                <button
+                  disabled={!noteContent.trim() || noteSaving}
+                  onClick={async () => {
+                    if (!noteContent.trim()) return
+                    setNoteSaving(true)
+                    try {
+                      const res = await fetchWithAuth(`/api/tenant/employees/${id}/notes`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ content: noteContent.trim() }),
+                      })
+                      if (res.ok) {
+                        const d = await res.json()
+                        setNotes(prev => [d.note, ...prev])
+                        setNoteContent('')
+                        setToast({ message: 'Note added', type: 'success' })
+                      } else {
+                        setToast({ message: 'Failed to add note', type: 'error' })
+                      }
+                    } catch {
+                      setToast({ message: 'Network error — please try again.', type: 'error' })
+                    } finally {
+                      setNoteSaving(false)
+                    }
+                  }}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-40"
+                  style={{ background: 'var(--primary)' }}
+                >
+                  {noteSaving ? 'Saving…' : 'Add Note'}
+                </button>
+              </div>
+            </div>
+
+            {/* Notes list */}
+            {!notesLoaded ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400 py-4">Loading…</p>
+            ) : notes.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                <p className="text-3xl mb-2">📝</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">No notes yet. Add the first one above.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {notes.map(note => {
+                  const isOwn = currentUserId === note.authorId
+                  const initials = note.authorEmail.slice(0, 2).toUpperCase()
+                  const relTime = (() => {
+                    const diff = Date.now() - new Date(note.createdAt).getTime()
+                    const mins  = Math.floor(diff / 60000)
+                    const hours = Math.floor(diff / 3600000)
+                    const days  = Math.floor(diff / 86400000)
+                    if (mins < 2)   return 'just now'
+                    if (mins < 60)  return `${mins} min ago`
+                    if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`
+                    if (days < 30)  return `${days} day${days > 1 ? 's' : ''} ago`
+                    return new Date(note.createdAt).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })
+                  })()
+
+                  return (
+                    <div key={note.id} className="flex gap-3 p-4 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700">
+                      <div
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                        style={{ background: 'var(--primary)' }}
+                      >
+                        {initials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{note.authorEmail}</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">{relTime}</span>
+                        </div>
+                        <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{note.content}</p>
+                      </div>
+                      {isOwn && (
+                        <button
+                          title="Delete note"
+                          disabled={deletingNote === note.id}
+                          onClick={async () => {
+                            setDeletingNote(note.id)
+                            try {
+                              const res = await fetchWithAuth(`/api/tenant/employees/${id}/notes/${note.id}`, { method: 'DELETE' })
+                              if (res.ok) {
+                                setNotes(prev => prev.filter(n => n.id !== note.id))
+                                setToast({ message: 'Note deleted', type: 'success' })
+                              } else {
+                                setToast({ message: 'Failed to delete note', type: 'error' })
+                              }
+                            } catch {
+                              setToast({ message: 'Network error', type: 'error' })
+                            } finally {
+                              setDeletingNote(null)
+                            }
+                          }}
+                          className="shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-40 transition text-lg leading-none mt-0.5"
+                        >
+                          {deletingNote === note.id ? '…' : '×'}
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
         )}
