@@ -44,10 +44,10 @@ function getStatus(b: Benefit): 'active' | 'expiring' | 'expired' | 'permanent' 
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  active:    'bg-green-900/40 text-green-300 border-green-800',
-  expiring:  'bg-amber-900/40 text-amber-300 border-amber-800',
-  expired:   'bg-gray-800 text-gray-500 border-gray-700',
-  permanent: 'bg-blue-900/40 text-blue-300 border-blue-800',
+  active:    'badge badge-green',
+  expiring:  'badge badge-amber',
+  expired:   'badge badge-gray',
+  permanent: 'badge badge-blue',
 }
 const STATUS_LABEL: Record<string, string> = {
   active: 'Active', expiring: 'Expiring Soon', expired: 'Expired', permanent: 'Ongoing',
@@ -172,7 +172,7 @@ export default function MyBenefitsPage() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="text-right">
-                      <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${STATUS_STYLE[status]}`}>
+                      <span className={`${STATUS_STYLE[status]}`}>
                         {STATUS_LABEL[status]}
                       </span>
                       {daysLeft !== null && (

@@ -48,10 +48,10 @@ type LeaveTypeConfig = {
 type Employee = { id: string; firstName: string; lastName: string }
 
 const STATUS_STYLE: Record<string, string> = {
-  pending:   'bg-yellow-900/50 text-yellow-300 border-yellow-700',
-  approved:  'bg-green-900/50  text-green-300  border-green-700',
-  rejected:  'bg-red-900/50    text-red-300    border-red-700',
-  cancelled: 'bg-gray-800      text-gray-400   border-gray-700',
+  pending:   'badge badge-amber',
+  approved:  'badge badge-green',
+  rejected:  'badge badge-red',
+  cancelled: 'badge badge-gray',
 }
 
 const STATUS_ICON: Record<string, string> = {
@@ -368,7 +368,7 @@ export default function MyLeavePage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className={`text-xs px-2.5 py-1 rounded-full border font-medium capitalize ${STATUS_STYLE[r.status] ?? 'text-gray-400 border-gray-700'}`}>
+                      <span className={`capitalize ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                         {STATUS_ICON[r.status]} {r.status}
                       </span>
                       <svg className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}

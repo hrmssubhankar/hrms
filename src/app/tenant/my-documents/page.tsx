@@ -35,11 +35,11 @@ const MY_DOC_CATEGORIES = [
   'Other',
 ]
 
-const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  active:         { bg: 'bg-green-900/40 border-green-800', text: 'text-green-300', label: 'Active' },
-  pending_review: { bg: 'bg-amber-900/40 border-amber-800', text: 'text-amber-300', label: 'Pending Review' },
-  expired:        { bg: 'bg-red-900/40 border-red-800',    text: 'text-red-300',   label: 'Expired' },
-  archived:       { bg: 'bg-gray-800 border-gray-700',      text: 'text-gray-400',  label: 'Archived' },
+const STATUS_STYLE: Record<string, { badge: string; border: string; label: string }> = {
+  active:         { badge: 'badge badge-green',  border: 'border-green-800/60 dark:border-green-800',   label: 'Active' },
+  pending_review: { badge: 'badge badge-amber',  border: 'border-amber-800/60 dark:border-amber-800',   label: 'Pending Review' },
+  expired:        { badge: 'badge badge-red',    border: 'border-red-800/60 dark:border-red-800',       label: 'Expired' },
+  archived:       { badge: 'badge badge-gray',   border: 'border-gray-300 dark:border-gray-700',        label: 'Archived' },
 }
 
 const MIME_ICON: Record<string, string> = {
@@ -335,15 +335,15 @@ function DocSection({
           const badge = expiryBadge(d.expiryDate)
           const ss = STATUS_STYLE[d.status]
           return (
-            <div key={d.id} className={`border rounded-xl p-4 flex items-start gap-4 ${ss?.bg ?? 'bg-gray-900 border-gray-800'}`}>
+            <div key={d.id} className={`card-premium border p-4 flex items-start gap-4 ${ss?.border ?? 'border-gray-700'}`}>
               <span className="text-2xl mt-0.5 shrink-0">{mimeIcon(d.mimeType)}</span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start gap-2 flex-wrap">
                   <a href={d.blobUrl} target="_blank" rel="noopener noreferrer"
-                    className={`text-sm font-semibold underline underline-offset-2 ${ss?.text ?? 'text-purple-400 hover:text-purple-300'}`}>
+                    className="text-sm font-semibold underline underline-offset-2 text-purple-400 hover:text-purple-300">
                     {d.title} ↗
                   </a>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border ${ss?.bg} ${ss?.text}`}>
+                  <span className={ss?.badge ?? 'badge badge-gray'}>
                     {ss?.label ?? d.status}
                   </span>
                 </div>
