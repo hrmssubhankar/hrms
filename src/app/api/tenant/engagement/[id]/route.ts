@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const guard = await apiGuard('engagement:write')
     if (guard.error) return guard.error
     const { session } = guard
@@ -15,7 +16,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!title) return NextResponse.json({ error: 'title required' }, { status: 400 })
     const [updated] = await db.update(surveys).set({
       title, type: type || null, isAnonymous: isAnonymous ?? true,
-    }).where(and(eq(surveys.id, params.id), eq(surveys.tenantId, session.tenantId))).returning()
+    }).where(and(eq(surveys.id, id), eq(surveys.tenantId, session.tenantId))).returning()
     if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json({ record: updated })
   } catch {
@@ -25,10 +26,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const guard = await apiGuard('engagement:write')
     if (guard.error) return guard.error
     const { session } = guard
-    await db.delete(surveys).where(and(eq(surveys.id, params.id), eq(surveys.tenantId, session.tenantId)))
+    await db.delete(surveys).where(and(eq(surveys.id, id), eq(surveys.tenantId, session.tenantId)))
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
