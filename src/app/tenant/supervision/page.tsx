@@ -2,7 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
-import ExportButton from '@/components/ui/ExportButton'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type SupervisionRecord = {
@@ -41,6 +42,8 @@ export default function SupervisionPage() {
   const [filterType,   setFilterType]   = useState('')
   const [form, setForm] = useState({ employeeId:'', supervisorId:'', scheduledDate:'', type:'regular', notes:'' })
   const [actionDraft, setActionDraft] = useState<Record<string, string>>({})
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [deleting, setDeleting]         = useState(false)
 
   const load = useCallback(async (st = filterStatus, t = filterType) => {
     setLoading(true)
@@ -84,6 +87,18 @@ export default function SupervisionPage() {
       body: JSON.stringify({ id, actionItems: updated }),
     })
     setActionDraft(prev => ({ ...prev, [id]: '' }))
+    load()
+  }
+
+  async function deleteRecord() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    await fetchWithAuth('/api/tenant/supervision', {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: deleteTarget }),
+    })
+    setDeleting(false)
+    setDeleteTarget(null)
     load()
   }
 
@@ -320,6 +335,13 @@ export default function SupervisionPage() {
                     {r.status === 'completed' && r.conductedAt && (
                       <p className="text-xs text-green-400">Completed {new Date(r.conductedAt).toLocaleDateString('en-AU')}</p>
                     )}
+
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-800 flex justify-end">
+                      <button onClick={() => setDeleteTarget(r.id)}
+                        className="text-xs text-red-400 hover:text-red-300 transition">
+                        Delete Session
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -327,6 +349,16 @@ export default function SupervisionPage() {
           })}
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Delete Supervision Session"
+        message="This session and all its action items will be permanently removed."
+        confirmLabel="Delete"
+        onConfirm={deleteRecord}
+        onCancel={() => setDeleteTarget(null)}
+        loading={deleting}
+      />
     </div>
   )
 }

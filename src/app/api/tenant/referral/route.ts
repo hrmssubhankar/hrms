@@ -68,6 +68,21 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ referral }, { status: 201 })
 }
 
+export async function DELETE(req: NextRequest) {
+  const guard = await apiGuard('referrals:write')
+  if (guard.error) return guard.error
+  const { session } = guard
+
+  const body = await req.json()
+  const { id } = body
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  await db.delete(referrals)
+    .where(and(eq(referrals.id, id), eq(referrals.tenantId, session.tenantId)))
+
+  return NextResponse.json({ success: true })
+}
+
 export async function PATCH(req: NextRequest) {
   const guard = await apiGuard('referrals:write')
   if (guard.error) return guard.error

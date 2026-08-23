@@ -93,6 +93,26 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function DELETE(req: NextRequest) {
+  try {
+    const guard = await apiGuard('supervision:write')
+    if (guard.error) return guard.error
+    const { session } = guard
+
+    const body = await req.json()
+    const { id } = body
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+    await db.delete(supervisionRecords)
+      .where(and(eq(supervisionRecords.id, id), eq(supervisionRecords.tenantId, session.tenantId)))
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('DELETE /api/tenant/supervision', err)
+    return NextResponse.json({ error: 'Failed to delete supervision record' }, { status: 500 })
+  }
+}
+
 export async function PATCH(req: NextRequest) {
   try {
     const guard = await apiGuard('supervision:write')
