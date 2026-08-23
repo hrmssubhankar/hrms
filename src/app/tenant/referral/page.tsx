@@ -185,13 +185,12 @@ export default function ReferralPage() {
       )}
 
       <ConfirmModal
-        open={!!deleteTarget}
-        title="Delete Referral"
-        message="This referral record will be permanently removed."
-        confirmLabel="Delete"
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteTarget(null)}
-        loading={deleting}
+        state={deleteTarget ? {
+          message: 'This referral record will be permanently removed.',
+          confirmLabel: 'Delete',
+          onConfirm: handleDelete,
+        } : null}
+        onClose={() => setDeleteTarget(null)}
       />
     </div>
   )

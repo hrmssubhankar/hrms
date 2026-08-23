@@ -351,13 +351,12 @@ export default function SupervisionPage() {
       )}
 
       <ConfirmModal
-        open={!!deleteTarget}
-        title="Delete Supervision Session"
-        message="This session and all its action items will be permanently removed."
-        confirmLabel="Delete"
-        onConfirm={deleteRecord}
-        onCancel={() => setDeleteTarget(null)}
-        loading={deleting}
+        state={deleteTarget ? {
+          message: 'This session and all its action items will be permanently removed.',
+          confirmLabel: 'Delete',
+          onConfirm: deleteRecord,
+        } : null}
+        onClose={() => setDeleteTarget(null)}
       />
     </div>
   )
