@@ -3,6 +3,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -262,6 +264,57 @@ export default function RecruitmentPage() {
     }
   }
 
+  // ── CSV Exports ───────────────────────────────────────────────────────────────
+
+  function exportJobs() {
+    exportCsv({
+      filename: 'job-requisitions',
+      columns: [
+        { header: 'Job Title',     key: 'title' },
+        { header: 'Status',        key: 'status', format: v => (v as string).charAt(0).toUpperCase() + (v as string).slice(1) },
+        { header: 'Applications',  key: 'applicationCount' },
+        { header: 'Hired',         key: 'hiredCount' },
+        { header: 'Description',   key: 'description', format: v => v ?? '' },
+        { header: 'Created Date',  key: 'createdAt',  format: v => fmtCsvDate(v as string) },
+        { header: 'Closed Date',   key: 'closedAt',   format: v => fmtCsvDate(v as string | null) },
+      ],
+      rows: requisitions,
+    })
+  }
+
+  function exportApplications() {
+    exportCsv({
+      filename: `pipeline-${selectedReq?.title ?? 'applications'}`,
+      columns: [
+        { header: 'First Name',      key: 'candidateFirstName', format: v => v ?? '' },
+        { header: 'Last Name',       key: 'candidateLastName',  format: v => v ?? '' },
+        { header: 'Email',           key: 'candidateEmail',     format: v => v ?? '' },
+        { header: 'Source',          key: 'candidateSource',    format: v => v ?? '' },
+        { header: 'Stage',           key: 'status',             format: v => appLabel(v as string) },
+        { header: 'Interview Score', key: 'interviewScore',     format: v => v ?? '' },
+        { header: 'Notes',           key: 'notes',              format: v => v ?? '' },
+        { header: 'Applied Date',    key: 'createdAt',          format: v => fmtCsvDate(v as string) },
+        { header: 'Last Updated',    key: 'updatedAt',          format: v => fmtCsvDate(v as string) },
+      ],
+      rows: applications,
+    })
+  }
+
+  function exportCandidates() {
+    exportCsv({
+      filename: 'candidates',
+      columns: [
+        { header: 'First Name', key: 'firstName' },
+        { header: 'Last Name',  key: 'lastName' },
+        { header: 'Email',      key: 'email' },
+        { header: 'Phone',      key: 'phone',     format: v => v ?? '' },
+        { header: 'Source',     key: 'source',    format: v => v ?? '' },
+        { header: 'Added Date', key: 'createdAt', format: v => fmtCsvDate(v as string) },
+      ],
+      rows: candidates,
+    })
+  }
+
   // ── Filtered data ─────────────────────────────────────────────────────────────
 
   const visibleReqs = requisitions.filter(r => {
@@ -426,6 +479,7 @@ export default function RecruitmentPage() {
                 Clear
               </button>
             )}
+            <ExportButton onClick={exportJobs} disabled={requisitions.length === 0} />
           </div>
 
           {/* Jobs list */}
@@ -557,6 +611,13 @@ export default function RecruitmentPage() {
                 {saving ? 'Adding…' : 'Add to Pipeline'}
               </button>
             </form>
+          )}
+
+          {/* Pipeline actions */}
+          {applications.length > 0 && (
+            <div className="flex justify-end">
+              <ExportButton onClick={exportApplications} />
+            </div>
           )}
 
           {/* Kanban board */}
@@ -701,11 +762,14 @@ export default function RecruitmentPage() {
       {/* ── CANDIDATES TAB ───────────────────────────────────────────────────── */}
       {tab === 'candidates' && (
         <div className="space-y-4">
-          <input
-            type="search" placeholder="Search candidates…" value={candSearch}
-            onChange={e => setCandSearch(e.target.value)}
-            className="input-premium w-64"
-          />
+          <div className="flex items-center gap-3">
+            <input
+              type="search" placeholder="Search candidates…" value={candSearch}
+              onChange={e => setCandSearch(e.target.value)}
+              className="input-premium w-64"
+            />
+            <ExportButton onClick={exportCandidates} disabled={candidates.length === 0} />
+          </div>
 
           {candidates.length === 0 ? (
             <div className="card-premium py-14 text-center">
