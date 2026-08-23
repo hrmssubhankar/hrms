@@ -3,7 +3,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import { ExportButton } from '@/components/ui/ExportButton'
-import { ConfirmModal } from '@/components/ui/ConfirmModal'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type SupervisionRecord = {
