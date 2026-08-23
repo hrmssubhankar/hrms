@@ -6,7 +6,7 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 
 export const dynamic = 'force-dynamic'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const guard = await apiGuard('recognition:write')
     if (guard.error) return guard.error
@@ -24,7 +24,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const guard = await apiGuard('recognition:write')
     if (guard.error) return guard.error

@@ -6,12 +6,12 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 
 export const dynamic = 'force-dynamic'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const guard = await apiGuard('assets:write')
     if (guard.error) return guard.error
     const { session } = guard
-    const { id } = params
+    const { id } = await params
     const body = await req.json()
     const { name, category, serialNumber, notes, status } = body
     if (!name || !category) return NextResponse.json({ error: 'name and category required' }, { status: 400 })
@@ -26,12 +26,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const guard = await apiGuard('assets:write')
     if (guard.error) return guard.error
     const { session } = guard
-    const { id } = params
+    const { id } = await params
     const [deleted] = await db.delete(assets)
       .where(and(eq(assets.id, id), eq(assets.tenantId, session.tenantId)))
       .returning()

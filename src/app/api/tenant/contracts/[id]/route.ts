@@ -8,14 +8,14 @@ export const dynamic = 'force-dynamic'
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const guard = await apiGuard('contracts:write')
     if (guard.error) return guard.error
     const { session } = guard
 
-    const { id } = params
+    const { id } = await params
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
     await db.delete(contracts)
@@ -30,14 +30,14 @@ export async function DELETE(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const guard = await apiGuard('contracts:write')
     if (guard.error) return guard.error
     const { session } = guard
 
-    const { id } = params
+    const { id } = await params
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
     const body = await req.json()

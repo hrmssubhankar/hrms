@@ -4,7 +4,7 @@ import { employees } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const guard = await apiGuard('employees:write')
   if (guard.error) return guard.error
   const { session } = guard
