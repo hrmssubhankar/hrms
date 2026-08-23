@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -197,6 +199,29 @@ export default function ParticipantsPage() {
   const blankContact = { contactType: 'emergency', firstName: '', lastName: '', relationship: '', phone: '', email: '', address: '', isPrimary: false, notes: '' }
   const [contactForm, setContactForm] = useState({ ...blankContact })
 
+  // ── CSV export ─────────────────────────────────────────────────────────────
+  const exportParticipantsCsv = () => {
+    exportCsv({
+      filename: 'participants',
+      columns: [
+        { header: 'First Name',    key: 'firstName' },
+        { header: 'Last Name',     key: 'lastName' },
+        { header: 'Preferred Name', key: 'preferredName' },
+        { header: 'NDIS Number',   key: 'ndisNumber' },
+        { header: 'Date of Birth', key: 'dateOfBirth', format: fmtCsvDate },
+        { header: 'Funding Body',  key: 'fundingBody' },
+        { header: 'Support Level', key: 'supportLevel' },
+        { header: 'Status',        key: 'isActive', format: (v: unknown) => v ? 'Active' : 'Inactive' },
+        { header: 'Phone',         key: 'phone' },
+        { header: 'Email',         key: 'email' },
+        { header: 'Plan Start',    key: 'planStartDate', format: fmtCsvDate },
+        { header: 'Plan End',      key: 'planEndDate',   format: fmtCsvDate },
+        { header: 'Created',       key: 'createdAt',     format: fmtCsvDate },
+      ],
+      rows: participants,
+    })
+  }
+
   // ── Fetch participants ──────────────────────────────────────────────────────
   const fetchParticipants = useCallback(async () => {
     setLoading(true)
@@ -371,10 +396,13 @@ export default function ParticipantsPage() {
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Participants</h1>
-            <button onClick={openCreate}
-              className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
-              + New
-            </button>
+            <div className="flex gap-2">
+              <ExportButton onClick={exportParticipantsCsv} disabled={participants.length === 0} />
+              <button onClick={openCreate}
+                className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                + New
+              </button>
+            </div>
           </div>
           <input
             type="text" placeholder="Search name, NDIS number…" value={search}

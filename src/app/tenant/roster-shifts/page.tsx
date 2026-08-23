@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv } from '@/lib/exportCsv'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -218,6 +220,28 @@ export default function RosterShiftsPage() {
   const inputCls = 'input-premium'
   const labelCls = 'block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1'
 
+  function exportShiftsCsv() {
+    exportCsv({
+      filename: 'roster-shifts',
+      columns: [
+        { header: 'Employee Name', key: 'firstName', format: (v, r) => `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() },
+        { header: 'Shift Date',    key: 'startTime', format: v => v ? (v as string).split('T')[0] : '' },
+        { header: 'Start Time',   key: 'startTime', format: v => v ? formatTime(v as string) : '' },
+        { header: 'End Time',     key: 'endTime',   format: v => v ? formatTime(v as string) : '' },
+        { header: 'Hours',        key: 'startTime', format: (v, r) => {
+          if (!r.startTime || !r.endTime) return ''
+          const diff = (new Date(r.endTime).getTime() - new Date(r.startTime).getTime()) / 3600000
+          return diff.toFixed(2)
+        }},
+        { header: 'Position',     key: 'shiftType',  format: v => (v as string) ?? '' },
+        { header: 'Location',     key: 'location',   format: v => (v as string) ?? '' },
+        { header: 'Status',       key: 'status' },
+        { header: 'Notes',        key: 'notes',      format: v => (v as string) ?? '' },
+      ],
+      rows: shifts,
+    })
+  }
+
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
@@ -229,9 +253,12 @@ export default function RosterShiftsPage() {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">📅 Roster &amp; Shifts</h2>
           <div className="flex items-center gap-2">
             {activeTab === 'roster' && (
-              <button onClick={() => openAddShift()} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-                + Add Shift
-              </button>
+              <>
+                <ExportButton onClick={exportShiftsCsv} disabled={shifts.length === 0} />
+                <button onClick={() => openAddShift()} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                  + Add Shift
+                </button>
+              </>
             )}
           </div>
         </div>

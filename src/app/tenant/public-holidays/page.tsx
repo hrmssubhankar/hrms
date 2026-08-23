@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type Holiday = {
   id: string
@@ -195,6 +197,20 @@ export default function PublicHolidaysPage() {
 
   const nextHoliday = holidays.find(h => daysUntil(h.date) >= 0)
 
+  function exportHolidays() {
+    exportCsv({
+      filename: 'public-holidays',
+      columns: [
+        { header: 'Name', key: 'name' },
+        { header: 'Date', key: 'date', format: v => fmtCsvDate(v) },
+        { header: 'Country', key: 'country' },
+        { header: 'State / Territory', key: 'state', format: v => v ?? '' },
+        { header: 'National', key: 'isNational', format: v => v ? 'Yes' : 'No' },
+      ],
+      rows: holidays,
+    })
+  }
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
 
@@ -210,6 +226,7 @@ export default function PublicHolidaysPage() {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
+          <ExportButton onClick={exportHolidays} disabled={holidays.length === 0} />
           {/* Year selector */}
           <div className="flex items-center gap-2">
             <button

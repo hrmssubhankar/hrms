@@ -3,6 +3,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -245,6 +247,23 @@ export default function WorkforcePlanningPage() {
     { key: 'contractor', count: summary.contractor },
   ] : []
 
+  function exportPlansCsv() {
+    exportCsv({
+      filename: 'workforce-plans',
+      columns: [
+        { header: 'Position Title',     key: 'positionTitle',  format: v => (v as string) ?? 'General' },
+        { header: 'Department',         key: 'departmentName', format: v => (v as string) ?? '' },
+        { header: 'Headcount Target',   key: 'plannedCount' },
+        { header: 'Current Count',      key: 'currentCount' },
+        { header: 'Gap (Vacancies)',    key: 'vacancyCount' },
+        { header: 'Status',             key: 'status' },
+        { header: 'Target Date',        key: 'targetDate',     format: fmtCsvDate },
+        { header: 'Notes',              key: 'notes',          format: v => (v as string) ?? '' },
+      ],
+      rows: visiblePlans,
+    })
+  }
+
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
@@ -259,12 +278,15 @@ export default function WorkforcePlanningPage() {
           </p>
         </div>
         {tab === 'plans' && (
-          <button
-            onClick={showForm ? cancelForm : openAdd}
-            className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition"
-          >
-            {showForm ? 'Cancel' : '+ Add Plan'}
-          </button>
+          <div className="flex items-center gap-2">
+            <ExportButton onClick={exportPlansCsv} disabled={visiblePlans.length === 0} />
+            <button
+              onClick={showForm ? cancelForm : openAdd}
+              className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition"
+            >
+              {showForm ? 'Cancel' : '+ Add Plan'}
+            </button>
+          </div>
         )}
       </div>
 

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -190,11 +192,29 @@ function LeadsTab() {
 
   const stageLeads = (s: string) => leads.filter(l => l.stage === s)
 
+  const exportLeadsCsv = () => exportCsv({
+    filename: 'crm-leads',
+    columns: [
+      { header: 'First Name', key: 'firstName' },
+      { header: 'Last Name',  key: 'lastName' },
+      { header: 'Email',      key: 'email' },
+      { header: 'Phone',      key: 'phone' },
+      { header: 'Company',    key: 'company' },
+      { header: 'Job Title',  key: 'jobTitle' },
+      { header: 'Source',     key: 'source' },
+      { header: 'Stage',      key: 'stage' },
+      { header: 'Score',      key: 'score' },
+      { header: 'Created',    key: 'createdAt', format: fmtCsvDate },
+    ],
+    rows: leads,
+  })
+
   return (
     <div>
       <div className="flex gap-3 mb-5 flex-wrap">
         <input placeholder="Search leads…" value={search} onChange={e => setSearch(e.target.value)}
           className="input-premium max-w-[280px]" />
+        <ExportButton onClick={exportLeadsCsv} disabled={leads.length === 0} />
         <button onClick={() => setModal(true)}
           className="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + New Lead
@@ -342,10 +362,24 @@ function ContactsTab() {
     else setToast({ message: 'Failed to delete contact', type: 'error' })
   }
 
+  const exportContactsCsv = () => exportCsv({
+    filename: 'crm-contacts',
+    columns: [
+      { header: 'First Name', key: 'firstName' },
+      { header: 'Last Name',  key: 'lastName' },
+      { header: 'Email',      key: 'email' },
+      { header: 'Phone',      key: 'phone' },
+      { header: 'Job Title',  key: 'jobTitle' },
+      { header: 'Created',    key: 'createdAt', format: fmtCsvDate },
+    ],
+    rows: contacts,
+  })
+
   return (
     <div>
       <div className="flex gap-3 mb-5 flex-wrap">
         <input placeholder="Search contacts…" value={search} onChange={e => setSearch(e.target.value)} className="input-premium max-w-[280px]" />
+        <ExportButton onClick={exportContactsCsv} disabled={contacts.length === 0} />
         <button onClick={() => setModal(true)}
           className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + New Contact
@@ -478,10 +512,26 @@ function AccountsTab() {
   const ACCOUNT_TYPES = ['prospect','customer','partner','vendor']
   const TYPE_COLORS: Record<string,string> = { prospect:'#6366f1', customer:'#10b981', partner:'#f59e0b', vendor:'#6b7280' }
 
+  const exportAccountsCsv = () => exportCsv({
+    filename: 'crm-accounts',
+    columns: [
+      { header: 'Name',     key: 'name' },
+      { header: 'Industry', key: 'industry' },
+      { header: 'Type',     key: 'type' },
+      { header: 'Email',    key: 'email' },
+      { header: 'Phone',    key: 'phone' },
+      { header: 'City',     key: 'city' },
+      { header: 'Country',  key: 'country' },
+      { header: 'Created',  key: 'createdAt', format: fmtCsvDate },
+    ],
+    rows: accounts,
+  })
+
   return (
     <div>
       <div className="flex gap-3 mb-5 flex-wrap">
         <input placeholder="Search accounts…" value={search} onChange={e => setSearch(e.target.value)} className="input-premium max-w-[280px]" />
+        <ExportButton onClick={exportAccountsCsv} disabled={accounts.length === 0} />
         <button onClick={() => setModal(true)}
           className="ml-auto bg-blue-600 hover:bg-blue-700 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + New Account
@@ -618,6 +668,21 @@ function DealsTab() {
   const stageDeals = (s: string) => deals.filter(d => d.stage === s)
   const stageValue = (s: string) => stageDeals(s).reduce((sum, d) => sum + Number(d.value ?? 0), 0)
 
+  const exportDealsCsv = () => exportCsv({
+    filename: 'crm-deals',
+    columns: [
+      { header: 'Title',       key: 'title' },
+      { header: 'Value',       key: 'value' },
+      { header: 'Stage',       key: 'stage' },
+      { header: 'Probability', key: 'probability' },
+      { header: 'Close Date',  key: 'closeDate',  format: fmtCsvDate },
+      { header: 'Account',     key: 'accountName' },
+      { header: 'Assigned To', key: 'assignedTo' },
+      { header: 'Created',     key: 'createdAt',  format: fmtCsvDate },
+    ],
+    rows: deals,
+  })
+
   return (
     <div>
       <div className="flex gap-3 mb-5 flex-wrap items-center">
@@ -633,6 +698,7 @@ function DealsTab() {
             ) : null
           })}
         </div>
+        <ExportButton onClick={exportDealsCsv} disabled={deals.length === 0} />
         <button onClick={() => setModal(true)}
           className="ml-auto bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + New Deal
@@ -786,6 +852,19 @@ function ActivitiesTab() {
             </button>
           ))}
         </div>
+        <ExportButton onClick={() => exportCsv({
+          filename: 'crm-activities',
+          columns: [
+            { header: 'Type',        key: 'type' },
+            { header: 'Subject',     key: 'subject' },
+            { header: 'Notes',       key: 'notes' },
+            { header: 'Due Date',    key: 'dueDate',    format: fmtCsvDate },
+            { header: 'Done',        key: 'isDone',     format: (v: unknown) => v ? 'Yes' : 'No' },
+            { header: 'Assigned To', key: 'assignedTo' },
+            { header: 'Created',     key: 'createdAt',  format: fmtCsvDate },
+          ],
+          rows: activities,
+        })} disabled={activities.length === 0} />
         <button onClick={() => setModal(true)}
           className="ml-auto bg-amber-500 hover:bg-amber-600 text-white border-none rounded-lg px-4 py-2 font-semibold cursor-pointer text-sm transition-colors">
           + Log Activity

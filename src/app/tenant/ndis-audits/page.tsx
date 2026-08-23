@@ -4,6 +4,8 @@ import { useState, useCallback, useEffect } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useRouter } from 'next/navigation'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -315,6 +317,23 @@ export default function NDISAuditsPage() {
   const nonConf     = audits.filter(a => a.result === 'non_conformant').length
   const scheduled   = audits.filter(a => a.status === 'scheduled').length
 
+  function exportAudits() {
+    exportCsv({
+      filename: 'ndis-audits',
+      columns: [
+        { header: 'Title', key: 'title' },
+        { header: 'Audit Type', key: 'auditType', format: v => AUDIT_TYPES[v] ?? v },
+        { header: 'Status', key: 'status', format: v => STATUS_BADGE[v]?.label ?? v },
+        { header: 'Scheduled Date', key: 'scheduledDate', format: v => fmtCsvDate(v) },
+        { header: 'Completed Date', key: 'completedDate', format: v => fmtCsvDate(v) },
+        { header: 'Outcome', key: 'result', format: v => v ? (RESULT_BADGE[v]?.label ?? v) : '' },
+        { header: 'Auditor Name', key: 'auditorName', format: v => v ?? '' },
+        { header: 'Notes', key: 'notes', format: v => v ?? '' },
+      ],
+      rows: audits,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {showModal && (
@@ -331,11 +350,14 @@ export default function NDISAuditsPage() {
           <h1 className="page-premium-title">NDIS Practice Standards Audit</h1>
           <p className="page-premium-subtitle mt-0.5">Track audits, findings and corrective actions</p>
         </div>
-        <button
-          onClick={() => { setEditAudit(null); setShowModal(true) }}
-          className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition">
-          + New Audit
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportAudits} disabled={audits.length === 0} />
+          <button
+            onClick={() => { setEditAudit(null); setShowModal(true) }}
+            className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition">
+            + New Audit
+          </button>
+        </div>
       </div>
 
       {/* KPI tiles */}

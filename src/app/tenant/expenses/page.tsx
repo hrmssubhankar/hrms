@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate, fmtCsvCurrency } from '@/lib/exportCsv'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -371,6 +373,22 @@ export default function ExpensesPage() {
   const totApproved = totalByStatus(claims, 'approved')
   const totPaid     = totalByStatus(claims, 'paid')
 
+  function exportExpenses() {
+    exportCsv({
+      filename: 'expenses',
+      columns: [
+        { header: 'Employee Name', key: 'employeeFirstName', format: (_, r) => `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim() },
+        { header: 'Category', key: 'category', format: v => CAT_LABELS[v] ?? v },
+        { header: 'Amount', key: 'amount', format: v => fmtCsvCurrency(v) },
+        { header: 'Date', key: 'expenseDate', format: v => fmtCsvDate(v) },
+        { header: 'Status', key: 'status' },
+        { header: 'Description', key: 'description', format: v => v ?? '' },
+        { header: 'Receipt', key: 'receiptUrl', format: v => v ?? '' },
+      ],
+      rows: claims,
+    })
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -379,10 +397,13 @@ export default function ExpensesPage() {
           <h1 className="page-premium-title">Expense Claims</h1>
           <p className="page-premium-subtitle mt-1">Submit and manage employee expense reimbursements</p>
         </div>
-        <button onClick={() => setShowSubmit(true)}
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportExpenses} disabled={claims.length === 0} />
+          <button onClick={() => setShowSubmit(true)}
           className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
           + Submit Claim
         </button>
+        </div>
       </div>
 
       {/* Summary cards */}

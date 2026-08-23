@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import PermissionGate from '@/components/auth/PermissionGate'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type User = {
   id: string; email: string; role: string; isActive: boolean
@@ -124,6 +126,21 @@ export default function RolesPage() {
     return acc
   }, {})
 
+  function exportUsersCsv() {
+    exportCsv({
+      filename: 'roles-users',
+      columns: [
+        { header: 'Email',      key: 'email' },
+        { header: 'Role',       key: 'role', format: v => ROLE_LABEL[v as string] ?? (v as string) },
+        { header: '2FA Enabled',key: 'totpEnabled', format: v => v ? 'Yes' : 'No' },
+        { header: 'Last Login', key: 'lastLoginAt', format: fmtCsvDate },
+        { header: 'Status',     key: 'isActive',    format: v => v ? 'Active' : 'Suspended' },
+        { header: 'Created',    key: 'createdAt',   format: fmtCsvDate },
+      ],
+      rows: users,
+    })
+  }
+
   if (denied) return (
     <div className="space-y-4">
       <div>
@@ -153,6 +170,7 @@ export default function RolesPage() {
             {showForm ? 'Cancel' : '+ Invite User'}
           </button>
         </PermissionGate>
+        <ExportButton onClick={exportUsersCsv} disabled={users.length === 0} />
       </div>
 
       {/* Stats */}

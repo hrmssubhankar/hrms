@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate, fmtCsvCurrency } from '@/lib/exportCsv'
 
 interface PayrollRun {
   id: string
@@ -131,6 +133,26 @@ export default function PayrollFinancePage() {
     if (selected?.id === runId) setSelected(s => s ? { ...s, status: 'paid' } : s)
   }
 
+  function exportRunsCsv() {
+    exportCsv({
+      filename: 'payroll-runs',
+      columns: [
+        { header: 'Run Name',       key: 'name' },
+        { header: 'Period Start',   key: 'periodStart',    format: fmtCsvDate },
+        { header: 'Period End',     key: 'periodEnd',      format: fmtCsvDate },
+        { header: 'Pay Date',       key: 'payDate',        format: fmtCsvDate },
+        { header: 'Frequency',      key: 'frequency',      format: v => FREQ_LABELS[v as string] ?? (v as string) },
+        { header: 'Status',         key: 'status' },
+        { header: 'Employees',      key: 'employeeCount' },
+        { header: 'Total Gross',    key: 'totalGross',     format: fmtCsvCurrency },
+        { header: 'Total Tax',      key: 'totalTax',       format: fmtCsvCurrency },
+        { header: 'Total Super',    key: 'totalSuper',     format: fmtCsvCurrency },
+        { header: 'Total Net',      key: 'totalNet',       format: fmtCsvCurrency },
+      ],
+      rows: runs,
+    })
+  }
+
   const totalsByStatus = runs.reduce((acc, r) => {
     acc[r.status] = (acc[r.status] || 0) + 1
     return acc
@@ -143,10 +165,13 @@ export default function PayrollFinancePage() {
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">💰 Payroll Runs</h2>
-            <button
-              onClick={() => setShowModal(true)}
-              className="px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700"
-            >+ New Run</button>
+            <div className="flex items-center gap-2">
+              <ExportButton onClick={exportRunsCsv} disabled={runs.length === 0} />
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700"
+              >+ New Run</button>
+            </div>
           </div>
           {/* Status summary chips */}
           <div className="flex flex-wrap gap-2">

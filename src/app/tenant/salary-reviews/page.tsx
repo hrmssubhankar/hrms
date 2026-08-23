@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate, fmtCsvCurrency } from '@/lib/exportCsv'
 
 interface SalaryReview {
   id: string
@@ -181,18 +183,37 @@ export default function SalaryReviewsPage() {
   const pending = reviews.filter(r => ['submitted', 'under_review'].includes(r.status)).length
   const approved = reviews.filter(r => r.status === 'approved').length
 
+  function exportSalaryReviews() {
+    exportCsv({
+      filename: 'salary-reviews',
+      columns: [
+        { header: 'Employee Name', key: 'employeeName', format: v => v ?? '' },
+        { header: 'Current Salary', key: 'currentSalary', format: v => fmtCsvCurrency(v) },
+        { header: 'New Salary', key: 'proposedSalary', format: v => fmtCsvCurrency(v) },
+        { header: 'Effective Date', key: 'effectiveDate', format: v => fmtCsvDate(v) },
+        { header: 'Status', key: 'status', format: v => STATUS_LABEL[v] ?? v },
+        { header: 'Performance Rating', key: 'performanceRating', format: v => v ?? '' },
+        { header: 'HR Notes', key: 'hrNotes', format: v => v ?? '' },
+      ],
+      rows: reviews,
+    })
+  }
+
   return (
     <div className="flex h-full gap-4 p-6">
       {/* Left panel */}
       <div className="w-80 flex flex-col gap-3 shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Salary Reviews</h2>
+          <div className="flex items-center gap-2">
+          <ExportButton onClick={exportSalaryReviews} disabled={reviews.length === 0} />
           <button
             onClick={() => { setShowModal(true); setForm(EMPTY_FORM) }}
             className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
           >
             + New
           </button>
+          </div>
         </div>
 
         {/* KPI mini cards */}

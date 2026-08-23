@@ -5,6 +5,8 @@ import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
 import EmptyState from '@/components/ui/EmptyState'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type Benefit = {
   id: string
@@ -169,6 +171,21 @@ export default function BenefitsPage() {
 
   const typeInfo = (type: string) => BENEFIT_TYPES.find(t => t.value === type)
 
+  function exportBenefits() {
+    exportCsv({
+      filename: 'benefits',
+      columns: [
+        { header: 'Employee Name', key: 'employeeFirstName', format: (_, r) => `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim() },
+        { header: 'Benefit Type', key: 'type', format: v => BENEFIT_TYPES.find(t => t.value === v)?.label ?? v },
+        { header: 'Description', key: 'description', format: v => v ?? '' },
+        { header: 'Start Date', key: 'startDate', format: v => fmtCsvDate(v) },
+        { header: 'End Date', key: 'endDate', format: v => fmtCsvDate(v) },
+        { header: 'Status', key: 'id', format: (_, r) => STATUS_LABEL[getStatus(r)] ?? '' },
+      ],
+      rows: benefits,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -177,10 +194,13 @@ export default function BenefitsPage() {
           <h1 className="text-2xl font-bold text-white">Employee Benefits</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track and manage benefit assignments across the team</p>
         </div>
+        <div className="flex items-center gap-2">
+        <ExportButton onClick={exportBenefits} disabled={benefits.length === 0} />
         <button onClick={() => { setForm(BLANK_FORM); setEditingId(null); setShowForm(v => !v) }}
           className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
           {showForm && !editingId ? 'Cancel' : '+ Assign Benefit'}
         </button>
+        </div>
       </div>
 
       {/* Stats */}

@@ -5,6 +5,8 @@ import { useState, useEffect, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import PermissionGate from '@/components/auth/PermissionGate'
 import EmptyState from '@/components/ui/EmptyState'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv } from '@/lib/exportCsv'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -734,6 +736,23 @@ export default function RosteringPage() {
     return shifts.filter(s => s.employeeId === empId && s.startTime.startsWith(d))
   }
 
+  function exportRosterCsv() {
+    exportCsv({
+      filename: 'roster',
+      columns: [
+        { header: 'Employee Name', key: 'empFirst',   format: (v, r) => `${r.empFirst ?? ''} ${r.empLast ?? ''}`.trim() },
+        { header: 'Shift Date',    key: 'startTime',  format: v => v ? (v as string).split('T')[0] : '' },
+        { header: 'Start Time',    key: 'startTime',  format: v => v ? fmtTime(v as string) : '' },
+        { header: 'End Time',      key: 'endTime',    format: v => v ? fmtTime(v as string) : '' },
+        { header: 'Hours',         key: 'startTime',  format: (v, r) => r.startTime && r.endTime ? shiftDuration(r.startTime, r.endTime) : '' },
+        { header: 'Department',    key: 'clientSite', format: v => (v as string) ?? '' },
+        { header: 'Position',      key: 'shiftType',  format: v => (v as string) ?? '' },
+        { header: 'Status',        key: 'status' },
+      ],
+      rows: shifts,
+    })
+  }
+
   return (
     <div className="space-y-5">
       {modal && (
@@ -804,6 +823,7 @@ export default function RosteringPage() {
                   {publishing ? 'Publishing…' : `Publish ${draftCount} draft${draftCount !== 1 ? 's' : ''}`}
                 </button>
               )}
+              <ExportButton onClick={exportRosterCsv} disabled={shifts.length === 0} />
               <button onClick={() => openCreate(weekStart)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition hover:opacity-90"
                 style={{ background: 'var(--primary)' }}>

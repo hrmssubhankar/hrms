@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import EmptyState from '@/components/ui/EmptyState'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type SeparationRecord = {
   id: string; employeeId: string; type: string; reason: string | null
@@ -180,6 +182,23 @@ export default function SeparationPage() {
     return Math.round((done / 3) * 100)
   }
 
+  function exportSeparationCsv() {
+    exportCsv({
+      filename: 'separation-records',
+      columns: [
+        { header: 'Employee Name',       key: 'employeeFirstName', format: (v, r) => `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim() },
+        { header: 'Separation Type',     key: 'type' },
+        { header: 'Reason',              key: 'reason',           format: v => v ?? '' },
+        { header: 'Notice Date',         key: 'noticeDate',       format: fmtCsvDate },
+        { header: 'Last Working Day',    key: 'lastWorkingDay',   format: fmtCsvDate },
+        { header: 'Status',              key: 'status' },
+        { header: 'Exit Interview Done', key: 'exitInterviewAt',  format: v => v ? 'Yes' : 'No' },
+        { header: 'Notes',               key: 'exitInterviewNotes', format: v => v ?? '' },
+      ],
+      rows: records,
+    })
+  }
+
   // ── Overview helpers ──────────────────────────────────────────────
   const allRecords = records  // stats always use all records (load without filters for overview)
   const typeBreakdown = SEP_TYPES.map(t => ({
@@ -210,10 +229,13 @@ export default function SeparationPage() {
           <h1 className="text-2xl font-bold text-white">Separation & Exit Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage employee departures, offboarding checklists, and exit interviews</p>
         </div>
-        <button onClick={() => { setShowForm(v => !v); setTab('Records') }}
-          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-          {showForm ? 'Cancel' : '+ Initiate Separation'}
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportSeparationCsv} disabled={records.length === 0} />
+          <button onClick={() => { setShowForm(v => !v); setTab('Records') }}
+            className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+            {showForm ? 'Cancel' : '+ Initiate Separation'}
+          </button>
+        </div>
       </div>
 
       {/* Stats bar */}

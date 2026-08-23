@@ -5,6 +5,8 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { useSearchParams } from 'next/navigation'
 import EmptyState from '@/components/ui/EmptyState'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate, fmtCsvCurrency } from '@/lib/exportCsv'
 
 type Offer = {
   id: string; candidateName: string; candidateEmail: string
@@ -302,6 +304,24 @@ export default function OfferLettersPage() {
     notes: '', expiresAt: '', templateContent: '',
   })
 
+  const exportOffersCsv = () => {
+    exportCsv({
+      filename: 'offer-letters',
+      columns: [
+        { header: 'Candidate Name', key: 'candidateName' },
+        { header: 'Position',       key: 'position' },
+        { header: 'Department',     key: 'department' },
+        { header: 'Employment Type', key: 'employmentType' },
+        { header: 'Salary',         key: 'salaryAmount', format: fmtCsvCurrency },
+        { header: 'Start Date',     key: 'startDate',   format: fmtCsvDate },
+        { header: 'Status',         key: 'status' },
+        { header: 'Sent Date',      key: 'sentAt',      format: fmtCsvDate },
+        { header: 'Accepted Date',  key: 'acceptedAt',  format: fmtCsvDate },
+      ],
+      rows: offers,
+    })
+  }
+
   const load = useCallback(async () => {
     setLoading(true)
     const params = new URLSearchParams()
@@ -524,6 +544,7 @@ export default function OfferLettersPage() {
           <option value="">All Status</option>
           {Object.keys(STATUS_STYLE).map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
         </select>
+        <ExportButton onClick={exportOffersCsv} disabled={offers.length === 0} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 interface Announcement {
   id: string
@@ -148,6 +150,21 @@ export default function EssAnnouncementsPage() {
     }
   }
 
+  function exportAnnouncementsCsv() {
+    exportCsv({
+      filename: 'ess-announcements',
+      columns: [
+        { header: 'Title',          key: 'title' },
+        { header: 'Body',           key: 'body' },
+        { header: 'Published Date', key: 'publishedAt',  format: fmtCsvDate },
+        { header: 'Author',         key: 'createdBy',    format: v => (v as string) ?? '' },
+        { header: 'Target Role',    key: 'targetRole',   format: v => (v as string) ?? 'All' },
+        { header: 'Priority',       key: 'priority' },
+      ],
+      rows: announcements,
+    })
+  }
+
   const filtered = announcements.filter(a => {
     if (filterPriority && a.priority !== filterPriority) return false
     if (search) {
@@ -177,6 +194,7 @@ export default function EssAnnouncementsPage() {
           </svg>
           New Announcement
         </button>
+        <ExportButton onClick={exportAnnouncementsCsv} disabled={announcements.length === 0} />
       </div>
 
       {/* Filters */}

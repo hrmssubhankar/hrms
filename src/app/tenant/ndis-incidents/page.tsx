@@ -3,6 +3,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -342,6 +344,23 @@ export default function NDISIncidentsPage() {
   const critical   = incidents.filter(i => i.severity === 'critical').length
   const unnotified = incidents.filter(i => i.isReportable && !i.commissionNotified).length
 
+  function exportIncidents() {
+    exportCsv({
+      filename: 'ndis-incidents',
+      columns: [
+        { header: 'Incident Type', key: 'incidentType', format: v => INCIDENT_TYPES[v] ?? v },
+        { header: 'Severity', key: 'severity', format: v => SEVERITY_BADGE[v]?.label ?? v },
+        { header: 'Date', key: 'incidentDate', format: v => fmtCsvDate(v) },
+        { header: 'Status', key: 'status', format: v => STATUS_BADGE[v]?.label ?? v },
+        { header: 'Participant Name', key: 'participantName', format: v => v ?? '' },
+        { header: 'Description', key: 'description' },
+        { header: 'Reported By', key: 'workerName', format: v => v ?? '' },
+        { header: 'Notes', key: 'notes', format: v => v ?? '' },
+      ],
+      rows: incidents,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {showModal && (
@@ -358,11 +377,14 @@ export default function NDISIncidentsPage() {
           <h1 className="page-premium-title">NDIS Reportable Incidents</h1>
           <p className="page-premium-subtitle mt-0.5">Manage, investigate and report incidents to the NDIS Commission</p>
         </div>
-        <button
-          onClick={() => { setEditIncident(null); setShowModal(true) }}
-          className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition">
-          + Log Incident
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportIncidents} disabled={incidents.length === 0} />
+          <button
+            onClick={() => { setEditIncident(null); setShowModal(true) }}
+            className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition">
+            + Log Incident
+          </button>
+        </div>
       </div>
 
       {/* KPI tiles */}

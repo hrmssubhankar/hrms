@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate, fmtCsvCurrency } from '@/lib/exportCsv'
 
 type Promotion = {
   id: string; employeeId: string
@@ -146,6 +148,23 @@ export default function PromotionsPage() {
     return `${diff > 0 ? '+' : ''}$${diff.toLocaleString()} (${pct}%)`
   }
 
+  function exportPromotions() {
+    exportCsv({
+      filename: 'promotions',
+      columns: [
+        { header: 'Employee Name', key: 'employeeFirstName', format: (_, r) => `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim() },
+        { header: 'From Title', key: 'currentTitle', format: v => v ?? '' },
+        { header: 'To Title', key: 'proposedTitle' },
+        { header: 'Effective Date', key: 'effectiveDate', format: v => fmtCsvDate(v) },
+        { header: 'Status', key: 'status', format: v => STATUS_LABEL[v] ?? v },
+        { header: 'Salary Before', key: 'currentSalary', format: v => fmtCsvCurrency(v) },
+        { header: 'Salary After', key: 'proposedSalary', format: v => fmtCsvCurrency(v) },
+        { header: 'Notes', key: 'justification' },
+      ],
+      rows: promotions,
+    })
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -154,6 +173,8 @@ export default function PromotionsPage() {
           <h1 className="text-2xl font-bold text-white">Promotions</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-0.5">Raise, review and track promotion cases</p>
         </div>
+        <div className="flex items-center gap-2">
+        <ExportButton onClick={exportPromotions} disabled={promotions.length === 0} />
         <button onClick={()=>{
           setForm({employeeId:'',proposedTitle:'',proposedSalary:'',effectiveDate:'',
             justification:'',currentTitle:'',currentSalary:'',raisedByName:''})
@@ -161,6 +182,7 @@ export default function PromotionsPage() {
         }} className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition">
           + Raise Promotion
         </button>
+        </div>
       </div>
 
       {/* Stats */}

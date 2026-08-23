@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type Competency = { id: string; name: string; description: string | null; category: string | null; isActive: boolean }
 type Assessment = {
@@ -118,6 +120,19 @@ export default function CompetencyPage() {
     return 'text-gray-400'
   }
 
+  function exportCompetencies() {
+    exportCsv({
+      filename: 'competencies',
+      columns: [
+        { header: 'Name', key: 'name' },
+        { header: 'Category', key: 'category', format: v => v ?? '' },
+        { header: 'Description', key: 'description', format: v => v ?? '' },
+        { header: 'Active', key: 'isActive', format: v => v ? 'Yes' : 'No' },
+      ],
+      rows: competencies,
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -126,6 +141,7 @@ export default function CompetencyPage() {
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Define competency frameworks and track employee assessments</p>
         </div>
         <div className="flex gap-2">
+          <ExportButton onClick={exportCompetencies} disabled={competencies.length === 0} />
           {tab === 'library' && (
             <button onClick={() => setShowCompForm(v => !v)}
               className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2.5 rounded-lg transition">

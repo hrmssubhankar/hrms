@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type Contract = {
   id:string; employeeId:string; type:string; status:string
@@ -73,6 +75,21 @@ export default function ContractingPage() {
     load(); if(selected?.id===id) setSelected(s=>s?{...s,...updates as any}:s)
   }
 
+  function exportContracts() {
+    exportCsv({
+      filename: 'contracts',
+      columns: [
+        { header: 'Contractor Name', key: 'firstName', format: (_, r) => `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() },
+        { header: 'Contract Type', key: 'type', format: v => v.replace(/_/g, ' ') },
+        { header: 'Sent Date', key: 'sentAt', format: v => fmtCsvDate(v) },
+        { header: 'Signed Date', key: 'signedAt', format: v => fmtCsvDate(v) },
+        { header: 'Status', key: 'status' },
+        { header: 'Employment Type', key: 'employmentType', format: v => v ?? '' },
+      ],
+      rows: contracts,
+    })
+  }
+
   return (
     <div className="h-full flex flex-col">
       <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between dark:bg-gray-900 dark:border-gray-700">
@@ -80,7 +97,10 @@ export default function ContractingPage() {
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Contracting</h1>
           <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">Employment contracts — draft, send, track signatures</p>
         </div>
-        <button onClick={()=>setShowCreate(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">+ New Contract</button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportContracts} disabled={contracts.length === 0} />
+          <button onClick={()=>setShowCreate(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">+ New Contract</button>
+        </div>
       </div>
 
       <div className="px-6 py-3 bg-gray-50 border-b border-gray-100 flex gap-6 dark:bg-gray-800 dark:border-gray-800">

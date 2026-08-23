@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -192,6 +194,11 @@ export default function MedicationHealthPage() {
   const [confirm, setConfirm]           = useState<ConfirmState>(null)
   const [toast, setToast]               = useState<ToastState>(null)
 
+  // Edit IDs
+  const [editMedId, setEditMedId]       = useState<string | null>(null)
+  const [editCondId, setEditCondId]     = useState<string | null>(null)
+  const [editApptId, setEditApptId]     = useState<string | null>(null)
+
   // Forms
   const blankMed = {
     medicationName: '', genericName: '', dosage: '', form: 'tablet', route: 'oral',
@@ -295,13 +302,120 @@ export default function MedicationHealthPage() {
     else setToast({ message: 'Failed to delete appointment', type: 'error' })
   }
 
+  // ── Edit open handlers ────────────────────────────────────────────────────
+  const openEditMed = (m: Medication) => {
+    setEditMedId(m.id)
+    setMedForm({
+      medicationName: m.medicationName, genericName: m.genericName || '',
+      dosage: m.dosage || '', form: m.form, route: m.route,
+      frequency: m.frequency || '', prescribedBy: m.prescribedBy || '',
+      indication: m.indication || '', instructions: m.instructions || '',
+      startDate: m.startDate || '', endDate: m.endDate || '',
+      status: m.status, requiresAssist: m.requiresAssist, refrigerated: m.refrigerated,
+      notes: m.notes || '',
+    })
+    setError(''); setShowMed(true)
+  }
+
+  const openEditCond = (c: HealthCondition) => {
+    setEditCondId(c.id)
+    setCondForm({
+      conditionName: c.conditionName, conditionType: c.conditionType,
+      icdCode: c.icdCode || '', severity: c.severity,
+      diagnosedDate: c.diagnosedDate || '', diagnosedBy: c.diagnosedBy || '',
+      status: c.status, description: c.description || '',
+      managementPlan: c.managementPlan || '', alerts: c.alerts || '',
+    })
+    setError(''); setShowCond(true)
+  }
+
+  const openEditAppt = (a: Appointment) => {
+    setEditApptId(a.id)
+    setApptForm({
+      appointmentType: a.appointmentType, providerName: a.providerName || '',
+      providerOrg: a.providerOrg || '', appointmentDate: a.appointmentDate,
+      appointmentTime: a.appointmentTime || '', location: a.location || '',
+      purpose: a.purpose || '', outcome: a.outcome || '',
+      followUpDate: a.followUpDate || '', followUpNotes: a.followUpNotes || '',
+      status: a.status, requiresTransport: a.requiresTransport,
+      supportWorkerNeeded: a.supportWorkerNeeded,
+    })
+    setError(''); setShowAppt(true)
+  }
+
+  // ── CSV exports ───────────────────────────────────────────────────────────
+  const exportMedsCsv = () => {
+    exportCsv({
+      filename: `medications-${selected?.firstName}-${selected?.lastName}`,
+      columns: [
+        { header: 'Medication',   key: 'medicationName' },
+        { header: 'Generic Name', key: 'genericName' },
+        { header: 'Dosage',       key: 'dosage' },
+        { header: 'Form',         key: 'form' },
+        { header: 'Route',        key: 'route' },
+        { header: 'Frequency',    key: 'frequency' },
+        { header: 'Status',       key: 'status' },
+        { header: 'Prescribed By', key: 'prescribedBy' },
+        { header: 'Indication',   key: 'indication' },
+        { header: 'Start Date',   key: 'startDate',   format: fmtCsvDate },
+        { header: 'End Date',     key: 'endDate',     format: fmtCsvDate },
+        { header: 'Requires Assist', key: 'requiresAssist', format: v => v ? 'Yes' : 'No' },
+        { header: 'Refrigerated', key: 'refrigerated', format: v => v ? 'Yes' : 'No' },
+      ],
+      rows: medications,
+    })
+  }
+
+  const exportCondsCsv = () => {
+    exportCsv({
+      filename: `conditions-${selected?.firstName}-${selected?.lastName}`,
+      columns: [
+        { header: 'Condition',    key: 'conditionName' },
+        { header: 'Type',         key: 'conditionType' },
+        { header: 'Severity',     key: 'severity' },
+        { header: 'Status',       key: 'status' },
+        { header: 'ICD Code',     key: 'icdCode' },
+        { header: 'Diagnosed Date', key: 'diagnosedDate', format: fmtCsvDate },
+        { header: 'Diagnosed By', key: 'diagnosedBy' },
+        { header: 'Description',  key: 'description' },
+        { header: 'Management Plan', key: 'managementPlan' },
+        { header: 'Alerts',       key: 'alerts' },
+      ],
+      rows: conditions,
+    })
+  }
+
+  const exportApptsCsv = () => {
+    exportCsv({
+      filename: `appointments-${selected?.firstName}-${selected?.lastName}`,
+      columns: [
+        { header: 'Type',         key: 'appointmentType' },
+        { header: 'Date',         key: 'appointmentDate', format: fmtCsvDate },
+        { header: 'Time',         key: 'appointmentTime' },
+        { header: 'Status',       key: 'status' },
+        { header: 'Provider',     key: 'providerName' },
+        { header: 'Organisation', key: 'providerOrg' },
+        { header: 'Location',     key: 'location' },
+        { header: 'Purpose',      key: 'purpose' },
+        { header: 'Outcome',      key: 'outcome' },
+        { header: 'Follow-up Date', key: 'followUpDate', format: fmtCsvDate },
+        { header: 'Transport Needed', key: 'requiresTransport', format: v => v ? 'Yes' : 'No' },
+        { header: 'Support Worker', key: 'supportWorkerNeeded', format: v => v ? 'Yes' : 'No' },
+      ],
+      rows: appointments,
+    })
+  }
+
   // ── Save handlers ──────────────────────────────────────────────────────────
   const saveMedication = async () => {
     if (!selected) return
     setSaving(true); setError('')
     try {
-      const res = await fetchWithAuth(`/api/tenant/medication-health/participants/${selected.id}/medications`, {
-        method: 'POST',
+      const url = editMedId
+        ? `/api/tenant/medication-health/participants/${selected.id}/medications/${editMedId}`
+        : `/api/tenant/medication-health/participants/${selected.id}/medications`
+      const res = await fetchWithAuth(url, {
+        method: editMedId ? 'PATCH' : 'POST',
         body: JSON.stringify({
           ...medForm,
           startDate: medForm.startDate || null,
@@ -309,8 +423,9 @@ export default function MedicationHealthPage() {
         }),
       })
       if (!res.ok) { const d = await res.json(); setError(d.error || 'Save failed'); return }
-      setShowMed(false); setMedForm({ ...blankMed })
+      setShowMed(false); setMedForm({ ...blankMed }); setEditMedId(null)
       fetchTab('medications', selected.id)
+      setToast({ message: editMedId ? 'Medication updated' : 'Medication added', type: 'success' })
     } finally { setSaving(false) }
   }
 
@@ -338,16 +453,20 @@ export default function MedicationHealthPage() {
     if (!selected) return
     setSaving(true); setError('')
     try {
-      const res = await fetchWithAuth(`/api/tenant/medication-health/participants/${selected.id}/conditions`, {
-        method: 'POST',
+      const url = editCondId
+        ? `/api/tenant/medication-health/participants/${selected.id}/conditions/${editCondId}`
+        : `/api/tenant/medication-health/participants/${selected.id}/conditions`
+      const res = await fetchWithAuth(url, {
+        method: editCondId ? 'PATCH' : 'POST',
         body: JSON.stringify({
           ...condForm,
           diagnosedDate: condForm.diagnosedDate || null,
         }),
       })
       if (!res.ok) { const d = await res.json(); setError(d.error || 'Save failed'); return }
-      setShowCond(false); setCondForm({ ...blankCond })
+      setShowCond(false); setCondForm({ ...blankCond }); setEditCondId(null)
       fetchTab('conditions', selected.id)
+      setToast({ message: editCondId ? 'Condition updated' : 'Condition added', type: 'success' })
     } finally { setSaving(false) }
   }
 
@@ -355,8 +474,11 @@ export default function MedicationHealthPage() {
     if (!selected) return
     setSaving(true); setError('')
     try {
-      const res = await fetchWithAuth(`/api/tenant/medication-health/participants/${selected.id}/appointments`, {
-        method: 'POST',
+      const url = editApptId
+        ? `/api/tenant/medication-health/participants/${selected.id}/appointments/${editApptId}`
+        : `/api/tenant/medication-health/participants/${selected.id}/appointments`
+      const res = await fetchWithAuth(url, {
+        method: editApptId ? 'PATCH' : 'POST',
         body: JSON.stringify({
           ...apptForm,
           followUpDate: apptForm.followUpDate || null,
@@ -364,8 +486,9 @@ export default function MedicationHealthPage() {
         }),
       })
       if (!res.ok) { const d = await res.json(); setError(d.error || 'Save failed'); return }
-      setShowAppt(false); setApptForm({ ...blankAppt })
+      setShowAppt(false); setApptForm({ ...blankAppt }); setEditApptId(null)
       fetchTab('appointments', selected.id)
+      setToast({ message: editApptId ? 'Appointment updated' : 'Appointment added', type: 'success' })
     } finally { setSaving(false) }
   }
 
@@ -495,10 +618,13 @@ export default function MedicationHealthPage() {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white">Medications ({medications.length})</h3>
-                  <button onClick={() => { setMedForm({ ...blankMed }); setError(''); setShowMed(true) }}
-                    className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
-                    + Add Medication
-                  </button>
+                  <div className="flex gap-2">
+                    <ExportButton onClick={exportMedsCsv} disabled={medications.length === 0} />
+                    <button onClick={() => { setMedForm({ ...blankMed }); setEditMedId(null); setError(''); setShowMed(true) }}
+                      className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                      + Add Medication
+                    </button>
+                  </div>
                 </div>
                 {subLoading ? <Spinner /> : medications.length === 0 ? <Empty label="No medications recorded" /> : (
                   <div className="space-y-3">
@@ -516,6 +642,7 @@ export default function MedicationHealthPage() {
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${medStatusColor[m.status] || ''}`}>
                               {MED_STATUS_LABELS[m.status] || m.status}
                             </span>
+                            <button onClick={() => openEditMed(m)} className="opacity-0 group-hover:opacity-100 text-xs px-2 py-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Edit</button>
                             <button onClick={() => setConfirm({ message: `Delete medication ${m.medicationName}?`, confirmLabel: 'Delete', onConfirm: () => deleteMedication(m.id) })}
                               className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -554,10 +681,13 @@ export default function MedicationHealthPage() {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white">Health Conditions ({conditions.length})</h3>
-                  <button onClick={() => { setCondForm({ ...blankCond }); setError(''); setShowCond(true) }}
-                    className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
-                    + Add Condition
-                  </button>
+                  <div className="flex gap-2">
+                    <ExportButton onClick={exportCondsCsv} disabled={conditions.length === 0} />
+                    <button onClick={() => { setCondForm({ ...blankCond }); setEditCondId(null); setError(''); setShowCond(true) }}
+                      className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                      + Add Condition
+                    </button>
+                  </div>
                 </div>
                 {subLoading ? <Spinner /> : conditions.length === 0 ? <Empty label="No health conditions recorded" /> : (
                   <div className="space-y-3">
@@ -586,6 +716,7 @@ export default function MedicationHealthPage() {
                               : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
                               {CONDITION_STATUS_LABELS[c.status] || c.status}
                             </span>
+                            <button onClick={() => openEditCond(c)} className="opacity-0 group-hover:opacity-100 text-xs px-2 py-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Edit</button>
                             <button onClick={() => setConfirm({ message: `Delete condition ${c.conditionName}?`, confirmLabel: 'Delete', onConfirm: () => deleteCondition(c.id) })}
                               className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -615,10 +746,13 @@ export default function MedicationHealthPage() {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white">Health Appointments ({appointments.length})</h3>
-                  <button onClick={() => { setApptForm({ ...blankAppt }); setError(''); setShowAppt(true) }}
-                    className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
-                    + Add Appointment
-                  </button>
+                  <div className="flex gap-2">
+                    <ExportButton onClick={exportApptsCsv} disabled={appointments.length === 0} />
+                    <button onClick={() => { setApptForm({ ...blankAppt }); setEditApptId(null); setError(''); setShowAppt(true) }}
+                      className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                      + Add Appointment
+                    </button>
+                  </div>
                 </div>
                 {subLoading ? <Spinner /> : appointments.length === 0 ? <Empty label="No appointments recorded" /> : (
                   <div className="space-y-3">
@@ -644,6 +778,7 @@ export default function MedicationHealthPage() {
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${apptStatusColor[a.status] || ''}`}>
                               {APPT_STATUS_LABELS[a.status] || a.status}
                             </span>
+                            <button onClick={() => openEditAppt(a)} className="opacity-0 group-hover:opacity-100 text-xs px-2 py-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Edit</button>
                             <button onClick={() => setConfirm({ message: `Delete this appointment?`, confirmLabel: 'Delete', onConfirm: () => deleteAppointment(a.id) })}
                               className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -679,7 +814,7 @@ export default function MedicationHealthPage() {
 
       {/* Add Medication */}
       {showMed && (
-        <Modal title="Add Medication" onClose={() => setShowMed(false)} onSave={saveMedication} saving={saving} error={error} wide>
+        <Modal title={editMedId ? 'Edit Medication' : 'Add Medication'} onClose={() => { setShowMed(false); setEditMedId(null) }} onSave={saveMedication} saving={saving} error={error} wide>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <Label>Medication Name *</Label>
@@ -777,7 +912,7 @@ export default function MedicationHealthPage() {
 
       {/* Add Health Condition */}
       {showCond && (
-        <Modal title="Add Health Condition" onClose={() => setShowCond(false)} onSave={saveCondition} saving={saving} error={error} wide>
+        <Modal title={editCondId ? 'Edit Health Condition' : 'Add Health Condition'} onClose={() => { setShowCond(false); setEditCondId(null) }} onSave={saveCondition} saving={saving} error={error} wide>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <Label>Condition Name *</Label>
@@ -834,7 +969,7 @@ export default function MedicationHealthPage() {
 
       {/* Add Appointment */}
       {showAppt && (
-        <Modal title="Add Appointment" onClose={() => setShowAppt(false)} onSave={saveAppointment} saving={saving} error={error} wide>
+        <Modal title={editApptId ? 'Edit Appointment' : 'Add Appointment'} onClose={() => { setShowAppt(false); setEditApptId(null) }} onSave={saveAppointment} saving={saving} error={error} wide>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Appointment Type</Label>

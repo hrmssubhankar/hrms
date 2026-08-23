@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate, fmtCsvCurrency } from '@/lib/exportCsv'
 
 interface Employee {
   id: string
@@ -227,6 +229,25 @@ export default function SuperannuationPage() {
   const pending = contributions.filter(c => c.status === 'pending').length
   const overdue = contributions.filter(c => c.status === 'overdue').length
 
+  function exportContributionsCsv() {
+    const fundMap = new Map(funds.map(f => [f.id, f]))
+    const empName = selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : ''
+    exportCsv({
+      filename: 'superannuation-contributions',
+      columns: [
+        { header: 'Employee Name',     key: 'employeeId',        format: () => empName },
+        { header: 'Fund Name',         key: 'superFundId',       format: v => fundMap.get(v as string)?.fundName ?? '' },
+        { header: 'Member Number',     key: 'superFundId',       format: v => fundMap.get(v as string)?.memberNumber ?? '' },
+        { header: 'SG Rate',           key: 'sgRate',            format: v => `${(parseFloat(String(v ?? 0)) * 100).toFixed(1)}%` },
+        { header: 'Total Contribution',key: 'totalContribution', format: fmtCsvCurrency },
+        { header: 'Status',            key: 'status' },
+        { header: 'Period Start',      key: 'periodStart',       format: fmtCsvDate },
+        { header: 'Period End',        key: 'periodEnd',         format: fmtCsvDate },
+      ],
+      rows: contributions,
+    })
+  }
+
   return (
     <div className="flex h-full gap-4 p-6">
       {/* Employee list */}
@@ -293,6 +314,7 @@ export default function SuperannuationPage() {
                 >
                   + Record Contribution
                 </button>
+                <ExportButton onClick={exportContributionsCsv} disabled={!selectedEmployee || contributions.length === 0} />
               </div>
             </div>
 

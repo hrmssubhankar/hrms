@@ -5,6 +5,8 @@ import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
 import EmptyState from '@/components/ui/EmptyState'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 type Review = {
   id: string; employeeId: string; reviewerId: string | null; type: string; status: string
@@ -288,6 +290,22 @@ export default function PerformancePage() {
 
   const goalStatusStyle = (s: string) => GOAL_STATUSES.find(x => x.value === s)?.color ?? 'text-gray-400 border-gray-700 bg-gray-800/30'
 
+  function exportReviews() {
+    exportCsv({
+      filename: 'performance-reviews',
+      columns: [
+        { header: 'Employee Name', key: 'employeeFirstName', format: (_, r) => `${r.employeeFirstName ?? ''} ${r.employeeLastName ?? ''}`.trim() },
+        { header: 'Review Type', key: 'type', format: v => REVIEW_TYPES.find(t => t.value === v)?.label ?? v },
+        { header: 'Status', key: 'status' },
+        { header: 'Scheduled Date', key: 'scheduledDate', format: v => fmtCsvDate(v) },
+        { header: 'Completed Date', key: 'completedAt', format: v => fmtCsvDate(v) },
+        { header: 'Overall Rating', key: 'overallRating', format: v => v ?? '' },
+        { header: 'Outcome', key: 'outcome', format: v => v ?? '' },
+      ],
+      rows: reviews,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -297,10 +315,13 @@ export default function PerformancePage() {
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Probation check-ins, KPI reviews and performance plans</p>
         </div>
         {tab === 'reviews' ? (
+          <div className="flex items-center gap-2">
+          <ExportButton onClick={exportReviews} disabled={reviews.length === 0} />
           <button onClick={() => setShowForm(v => !v)}
             className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
             {showForm ? 'Cancel' : '+ Schedule Review'}
           </button>
+          </div>
         ) : (
           <button onClick={() => setShowGoalForm(v => !v)}
             className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">

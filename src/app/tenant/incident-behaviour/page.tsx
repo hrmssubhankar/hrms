@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -149,6 +153,13 @@ export default function IncidentBehaviourPage() {
 
   const [saving, setSaving] = useState(false)
 
+  // Edit state
+  const [editIncidentId, setEditIncidentId]     = useState<string | null>(null)
+  const [editBehaviourId, setEditBehaviourId]   = useState<string | null>(null)
+  const [editRestrictiveId, setEditRestrictiveId] = useState<string | null>(null)
+  const [confirmState, setConfirmState]         = useState<ConfirmState>(null)
+  const [toast, setToast]                       = useState<ToastState>(null)
+
   // ─── Fetch participants ───────────────────────────────────────────────────
   useEffect(() => {
     const t = setTimeout(async () => {
@@ -185,24 +196,138 @@ export default function IncidentBehaviourPage() {
   const selectedParticipant = participants.find(p => p.id === selectedId)
 
   // ─── Submit handlers ──────────────────────────────────────────────────────
+  const blankIncident = {
+    incidentDate: '', incidentTime: '', location: '', incidentType: 'general',
+    severity: 'minor', description: '', immediateAction: '', witnesses: '',
+    reportedBy: '', reportedTo: '', ndisReportable: false, policeReport: false,
+    policeReportNumber: '', status: 'open', outcome: '',
+    followUpRequired: false, followUpDate: '', followUpNotes: '',
+  }
+  const blankBehaviour = {
+    planName: '', behaviourType: '', triggers: '', earlyWarnings: '',
+    preventionStrategies: '', deEscalationStrategies: '', responseStrategies: '',
+    postIncidentSupport: '', authorisedBy: '', reviewDate: '', status: 'active', notes: '',
+  }
+  const blankRestrictive = {
+    practiceType: '', description: '', authorisedBy: '', authorisedDate: '',
+    expiryDate: '', regulatoryApproval: false, approvalReference: '',
+    monitoringFrequency: '', lastReviewDate: '', nextReviewDate: '',
+    status: 'active', notes: '',
+  }
+
+  const openEditIncident = (inc: Incident) => {
+    setEditIncidentId(inc.id)
+    setIncidentForm({
+      incidentDate: inc.incidentDate, incidentTime: inc.incidentTime || '',
+      location: inc.location || '', incidentType: inc.incidentType,
+      severity: inc.severity, description: inc.description,
+      immediateAction: inc.immediateAction || '', witnesses: inc.witnesses || '',
+      reportedBy: inc.reportedBy || '', reportedTo: inc.reportedTo || '',
+      ndisReportable: inc.ndisReportable, policeReport: inc.policeReport,
+      policeReportNumber: inc.policeReportNumber || '', status: inc.status,
+      outcome: inc.outcome || '', followUpRequired: inc.followUpRequired,
+      followUpDate: inc.followUpDate || '', followUpNotes: inc.followUpNotes || '',
+    })
+    setShowIncidentModal(true)
+  }
+
+  const openEditBehaviour = (plan: BehaviourPlan) => {
+    setEditBehaviourId(plan.id)
+    setBehaviourForm({
+      planName: plan.planName, behaviourType: plan.behaviourType || '',
+      triggers: plan.triggers || '', earlyWarnings: plan.earlyWarnings || '',
+      preventionStrategies: plan.preventionStrategies || '',
+      deEscalationStrategies: plan.deEscalationStrategies || '',
+      responseStrategies: plan.responseStrategies || '',
+      postIncidentSupport: plan.postIncidentSupport || '',
+      authorisedBy: plan.authorisedBy || '', reviewDate: plan.reviewDate || '',
+      status: plan.status, notes: plan.notes || '',
+    })
+    setShowBehaviourModal(true)
+  }
+
+  const openEditRestrictive = (rp: RestrictivePractice) => {
+    setEditRestrictiveId(rp.id)
+    setRestrictiveForm({
+      practiceType: rp.practiceType, description: rp.description,
+      authorisedBy: rp.authorisedBy || '', authorisedDate: rp.authorisedDate || '',
+      expiryDate: rp.expiryDate || '', regulatoryApproval: rp.regulatoryApproval,
+      approvalReference: rp.approvalReference || '',
+      monitoringFrequency: rp.monitoringFrequency || '',
+      lastReviewDate: rp.lastReviewDate || '', nextReviewDate: rp.nextReviewDate || '',
+      status: rp.status, notes: rp.notes || '',
+    })
+    setShowRestrictiveModal(true)
+  }
+
+  const deleteIncident = (id: string) => {
+    if (!selectedId) return
+    setConfirmState({
+      message: 'Delete this incident record?',
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        const res = await fetchWithAuth(
+          `/api/tenant/incident-behaviour/participants/${selectedId}/incidents/${id}`,
+          { method: 'DELETE' }
+        )
+        if (res.ok) { setToast({ message: 'Incident deleted', type: 'success' }); fetchDetail(selectedId) }
+        else setToast({ message: 'Failed to delete incident', type: 'error' })
+      }
+    })
+  }
+
+  const deleteBehaviourPlan = (id: string) => {
+    if (!selectedId) return
+    setConfirmState({
+      message: 'Delete this behaviour support plan?',
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        const res = await fetchWithAuth(
+          `/api/tenant/incident-behaviour/participants/${selectedId}/behaviour-plans/${id}`,
+          { method: 'DELETE' }
+        )
+        if (res.ok) { setToast({ message: 'Plan deleted', type: 'success' }); fetchDetail(selectedId) }
+        else setToast({ message: 'Failed to delete plan', type: 'error' })
+      }
+    })
+  }
+
+  const deleteRestrictivePractice = (id: string) => {
+    if (!selectedId) return
+    setConfirmState({
+      message: 'Delete this restrictive practice?',
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        const res = await fetchWithAuth(
+          `/api/tenant/incident-behaviour/participants/${selectedId}/restrictive-practices/${id}`,
+          { method: 'DELETE' }
+        )
+        if (res.ok) { setToast({ message: 'Practice deleted', type: 'success' }); fetchDetail(selectedId) }
+        else setToast({ message: 'Failed to delete practice', type: 'error' })
+      }
+    })
+  }
+
   const submitIncident = async () => {
     if (!selectedId || !incidentForm.incidentDate || !incidentForm.description) return
     setSaving(true)
     try {
-      const res = await fetchWithAuth(`/api/tenant/incident-behaviour/participants/${selectedId}/incidents`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const url = editIncidentId
+        ? `/api/tenant/incident-behaviour/participants/${selectedId}/incidents/${editIncidentId}`
+        : `/api/tenant/incident-behaviour/participants/${selectedId}/incidents`
+      const res = await fetchWithAuth(url, {
+        method: editIncidentId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(incidentForm),
       })
       if (res.ok) {
         setShowIncidentModal(false)
-        setIncidentForm({
-          incidentDate: '', incidentTime: '', location: '', incidentType: 'general',
-          severity: 'minor', description: '', immediateAction: '', witnesses: '',
-          reportedBy: '', reportedTo: '', ndisReportable: false, policeReport: false,
-          policeReportNumber: '', status: 'open', outcome: '',
-          followUpRequired: false, followUpDate: '', followUpNotes: '',
-        })
+        setEditIncidentId(null)
+        setIncidentForm({ ...blankIncident })
         fetchDetail(selectedId)
+        setToast({ message: editIncidentId ? 'Incident updated' : 'Incident logged', type: 'success' })
+      } else {
+        setToast({ message: 'Failed to save incident', type: 'error' })
       }
     } finally { setSaving(false) }
   }
@@ -211,18 +336,22 @@ export default function IncidentBehaviourPage() {
     if (!selectedId || !behaviourForm.planName) return
     setSaving(true)
     try {
-      const res = await fetchWithAuth(`/api/tenant/incident-behaviour/participants/${selectedId}/behaviour-plans`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const url = editBehaviourId
+        ? `/api/tenant/incident-behaviour/participants/${selectedId}/behaviour-plans/${editBehaviourId}`
+        : `/api/tenant/incident-behaviour/participants/${selectedId}/behaviour-plans`
+      const res = await fetchWithAuth(url, {
+        method: editBehaviourId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(behaviourForm),
       })
       if (res.ok) {
         setShowBehaviourModal(false)
-        setBehaviourForm({
-          planName: '', behaviourType: '', triggers: '', earlyWarnings: '',
-          preventionStrategies: '', deEscalationStrategies: '', responseStrategies: '',
-          postIncidentSupport: '', authorisedBy: '', reviewDate: '', status: 'active', notes: '',
-        })
+        setEditBehaviourId(null)
+        setBehaviourForm({ ...blankBehaviour })
         fetchDetail(selectedId)
+        setToast({ message: editBehaviourId ? 'Plan updated' : 'Plan added', type: 'success' })
+      } else {
+        setToast({ message: 'Failed to save plan', type: 'error' })
       }
     } finally { setSaving(false) }
   }
@@ -231,21 +360,96 @@ export default function IncidentBehaviourPage() {
     if (!selectedId || !restrictiveForm.practiceType || !restrictiveForm.description) return
     setSaving(true)
     try {
-      const res = await fetchWithAuth(`/api/tenant/incident-behaviour/participants/${selectedId}/restrictive-practices`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const url = editRestrictiveId
+        ? `/api/tenant/incident-behaviour/participants/${selectedId}/restrictive-practices/${editRestrictiveId}`
+        : `/api/tenant/incident-behaviour/participants/${selectedId}/restrictive-practices`
+      const res = await fetchWithAuth(url, {
+        method: editRestrictiveId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(restrictiveForm),
       })
       if (res.ok) {
         setShowRestrictiveModal(false)
-        setRestrictiveForm({
-          practiceType: '', description: '', authorisedBy: '', authorisedDate: '',
-          expiryDate: '', regulatoryApproval: false, approvalReference: '',
-          monitoringFrequency: '', lastReviewDate: '', nextReviewDate: '',
-          status: 'active', notes: '',
-        })
+        setEditRestrictiveId(null)
+        setRestrictiveForm({ ...blankRestrictive })
         fetchDetail(selectedId)
+        setToast({ message: editRestrictiveId ? 'Practice updated' : 'Practice added', type: 'success' })
+      } else {
+        setToast({ message: 'Failed to save practice', type: 'error' })
       }
     } finally { setSaving(false) }
+  }
+
+  const exportIncidentsCsv = () => {
+    const p = selectedParticipant
+    const name = p ? `${p.preferredName || p.firstName}-${p.lastName}` : 'participant'
+    exportCsv({
+      filename: `incidents-${name}`,
+      columns: [
+        { header: 'Date',          key: 'incidentDate',  format: fmtCsvDate },
+        { header: 'Time',          key: 'incidentTime' },
+        { header: 'Type',          key: 'incidentType',  format: v => String(v).replace(/_/g, ' ') },
+        { header: 'Severity',      key: 'severity' },
+        { header: 'Status',        key: 'status' },
+        { header: 'Location',      key: 'location' },
+        { header: 'Description',   key: 'description' },
+        { header: 'Immediate Action', key: 'immediateAction' },
+        { header: 'Reported By',   key: 'reportedBy' },
+        { header: 'Reported To',   key: 'reportedTo' },
+        { header: 'NDIS Reportable', key: 'ndisReportable', format: v => v ? 'Yes' : 'No' },
+        { header: 'Police Report', key: 'policeReport',  format: v => v ? 'Yes' : 'No' },
+        { header: 'Outcome',       key: 'outcome' },
+        { header: 'Follow-up Date', key: 'followUpDate', format: fmtCsvDate },
+        { header: 'Created At',    key: 'createdAt',     format: fmtCsvDate },
+      ],
+      rows: incidents,
+    })
+  }
+
+  const exportBehaviourCsv = () => {
+    const p = selectedParticipant
+    const name = p ? `${p.preferredName || p.firstName}-${p.lastName}` : 'participant'
+    exportCsv({
+      filename: `behaviour-plans-${name}`,
+      columns: [
+        { header: 'Plan Name',       key: 'planName' },
+        { header: 'Behaviour Type',  key: 'behaviourType' },
+        { header: 'Status',          key: 'status' },
+        { header: 'Triggers',        key: 'triggers' },
+        { header: 'Early Warnings',  key: 'earlyWarnings' },
+        { header: 'Prevention',      key: 'preventionStrategies' },
+        { header: 'De-escalation',   key: 'deEscalationStrategies' },
+        { header: 'Response',        key: 'responseStrategies' },
+        { header: 'Post Incident',   key: 'postIncidentSupport' },
+        { header: 'Authorised By',   key: 'authorisedBy' },
+        { header: 'Review Date',     key: 'reviewDate', format: fmtCsvDate },
+        { header: 'Created At',      key: 'createdAt',  format: fmtCsvDate },
+      ],
+      rows: behaviourPlans,
+    })
+  }
+
+  const exportRestrictiveCsv = () => {
+    const p = selectedParticipant
+    const name = p ? `${p.preferredName || p.firstName}-${p.lastName}` : 'participant'
+    exportCsv({
+      filename: `restrictive-practices-${name}`,
+      columns: [
+        { header: 'Practice Type',      key: 'practiceType' },
+        { header: 'Status',             key: 'status' },
+        { header: 'Description',        key: 'description' },
+        { header: 'Authorised By',      key: 'authorisedBy' },
+        { header: 'Authorised Date',    key: 'authorisedDate',  format: fmtCsvDate },
+        { header: 'Expiry Date',        key: 'expiryDate',      format: fmtCsvDate },
+        { header: 'Regulatory Approval', key: 'regulatoryApproval', format: v => v ? 'Yes' : 'No' },
+        { header: 'Approval Reference', key: 'approvalReference' },
+        { header: 'Monitoring',         key: 'monitoringFrequency' },
+        { header: 'Last Review',        key: 'lastReviewDate',  format: fmtCsvDate },
+        { header: 'Next Review',        key: 'nextReviewDate',  format: fmtCsvDate },
+        { header: 'Created At',         key: 'createdAt',       format: fmtCsvDate },
+      ],
+      rows: restrictivePractices,
+    })
   }
 
   const inputCls = 'input-premium'
@@ -314,24 +518,33 @@ export default function IncidentBehaviourPage() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">NDIS: {selectedParticipant.ndisNumber}</p>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   {activeTab === 'incidents' && (
-                    <button onClick={() => setShowIncidentModal(true)}
-                      className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
-                      + Log Incident
-                    </button>
+                    <>
+                      <ExportButton onClick={exportIncidentsCsv} disabled={incidents.length === 0} />
+                      <button onClick={() => { setEditIncidentId(null); setIncidentForm({ ...blankIncident }); setShowIncidentModal(true) }}
+                        className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                        + Log Incident
+                      </button>
+                    </>
                   )}
                   {activeTab === 'behaviour' && (
-                    <button onClick={() => setShowBehaviourModal(true)}
-                      className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
-                      + Add Plan
-                    </button>
+                    <>
+                      <ExportButton onClick={exportBehaviourCsv} disabled={behaviourPlans.length === 0} />
+                      <button onClick={() => { setEditBehaviourId(null); setBehaviourForm({ ...blankBehaviour }); setShowBehaviourModal(true) }}
+                        className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
+                        + Add Plan
+                      </button>
+                    </>
                   )}
                   {activeTab === 'restrictive' && (
-                    <button onClick={() => setShowRestrictiveModal(true)}
-                      className="px-3 py-1.5 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700">
-                      + Add Practice
-                    </button>
+                    <>
+                      <ExportButton onClick={exportRestrictiveCsv} disabled={restrictivePractices.length === 0} />
+                      <button onClick={() => { setEditRestrictiveId(null); setRestrictiveForm({ ...blankRestrictive }); setShowRestrictiveModal(true) }}
+                        className="px-3 py-1.5 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700">
+                        + Add Practice
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -386,9 +599,11 @@ export default function IncidentBehaviourPage() {
                               {statusBadge(inc.status)}
                               <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">{inc.incidentType.replace(/_/g, ' ')}</span>
                             </div>
-                            <div className="text-right flex-shrink-0">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <p className="text-sm font-medium text-gray-900 dark:text-white">{inc.incidentDate}</p>
                               {inc.incidentTime && <p className="text-xs text-gray-500 dark:text-gray-400">{inc.incidentTime}</p>}
+                              <button onClick={() => openEditIncident(inc)} className="text-xs px-2 py-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Edit</button>
+                              <button onClick={() => deleteIncident(inc.id)} className="text-xs px-2 py-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Delete</button>
                             </div>
                           </div>
                           {inc.location && (
@@ -432,7 +647,11 @@ export default function IncidentBehaviourPage() {
                         <div key={plan.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                           <div className="flex items-center justify-between mb-3">
                             <h4 className="font-semibold text-gray-900 dark:text-white">{plan.planName}</h4>
-                            {statusBadge(plan.status)}
+                            <div className="flex items-center gap-2">
+                              {statusBadge(plan.status)}
+                              <button onClick={() => openEditBehaviour(plan)} className="text-xs px-2 py-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Edit</button>
+                              <button onClick={() => deleteBehaviourPlan(plan.id)} className="text-xs px-2 py-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Delete</button>
+                            </div>
                           </div>
                           {plan.behaviourType && (
                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Behaviour: {plan.behaviourType}</p>
@@ -482,6 +701,8 @@ export default function IncidentBehaviourPage() {
                                 <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">✓ Approved</span>
                               )}
                               {statusBadge(rp.status)}
+                              <button onClick={() => openEditRestrictive(rp)} className="text-xs px-2 py-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">Edit</button>
+                              <button onClick={() => deleteRestrictivePractice(rp.id)} className="text-xs px-2 py-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition">Delete</button>
                             </div>
                           </div>
                           <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">{rp.description}</p>
@@ -516,7 +737,7 @@ export default function IncidentBehaviourPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Log Incident</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{editIncidentId ? 'Edit Incident' : 'Log Incident'}</h3>
               <button onClick={() => setShowIncidentModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl">✕</button>
             </div>
             <div className="overflow-y-auto p-6 space-y-4">
@@ -632,10 +853,10 @@ export default function IncidentBehaviourPage() {
               </div>
             </div>
             <div className="flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-              <button onClick={() => setShowIncidentModal(false)} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
+              <button onClick={() => { setShowIncidentModal(false); setEditIncidentId(null) }} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
               <button onClick={submitIncident} disabled={saving || !incidentForm.incidentDate || !incidentForm.description}
                 className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
-                {saving ? 'Saving…' : 'Log Incident'}
+                {saving ? 'Saving…' : editIncidentId ? 'Update Incident' : 'Log Incident'}
               </button>
             </div>
           </div>
@@ -649,7 +870,7 @@ export default function IncidentBehaviourPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add Behaviour Support Plan</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{editBehaviourId ? 'Edit Behaviour Support Plan' : 'Add Behaviour Support Plan'}</h3>
               <button onClick={() => setShowBehaviourModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl">✕</button>
             </div>
             <div className="overflow-y-auto p-6 space-y-4">
@@ -711,10 +932,10 @@ export default function IncidentBehaviourPage() {
               </div>
             </div>
             <div className="flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-              <button onClick={() => setShowBehaviourModal(false)} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
+              <button onClick={() => { setShowBehaviourModal(false); setEditBehaviourId(null) }} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
               <button onClick={submitBehaviourPlan} disabled={saving || !behaviourForm.planName}
                 className="px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50">
-                {saving ? 'Saving…' : 'Save Plan'}
+                {saving ? 'Saving…' : editBehaviourId ? 'Update Plan' : 'Save Plan'}
               </button>
             </div>
           </div>
@@ -728,7 +949,7 @@ export default function IncidentBehaviourPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add Restrictive Practice</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{editRestrictiveId ? 'Edit Restrictive Practice' : 'Add Restrictive Practice'}</h3>
               <button onClick={() => setShowRestrictiveModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl">✕</button>
             </div>
             <div className="overflow-y-auto p-6 space-y-4">
@@ -803,16 +1024,18 @@ export default function IncidentBehaviourPage() {
               </div>
             </div>
             <div className="flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-              <button onClick={() => setShowRestrictiveModal(false)} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
+              <button onClick={() => { setShowRestrictiveModal(false); setEditRestrictiveId(null) }} className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
               <button onClick={submitRestrictive} disabled={saving || !restrictiveForm.practiceType || !restrictiveForm.description}
                 className="px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50">
-                {saving ? 'Saving…' : 'Save Practice'}
+                {saving ? 'Saving…' : editRestrictiveId ? 'Update Practice' : 'Save Practice'}
               </button>
             </div>
           </div>
         </div>
       )}
 
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

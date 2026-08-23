@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import Toast, { type ToastState } from '@/components/ui/Toast'
+import { ExportButton } from '@/components/ui/ExportButton'
+import { exportCsv } from '@/lib/exportCsv'
 
 interface ToilEntry {
   id: string
@@ -169,16 +171,34 @@ export default function ToilPage() {
     return `${n >= 0 ? '+' : ''}${n.toFixed(2)}h`
   }
 
+  function exportToilCsv() {
+    exportCsv({
+      filename: 'toil-balances',
+      columns: [
+        { header: 'Employee Name',  key: 'employeeName',  format: (v, r) => (v as string) ?? r.employeeId },
+        { header: 'Hours Accrued',  key: 'totalAccrued',  format: v => parseFloat(String(v ?? 0)).toFixed(2) },
+        { header: 'Hours Taken',    key: 'totalTaken',    format: v => parseFloat(String(v ?? 0)).toFixed(2) },
+        { header: 'Balance',        key: 'balanceHours',  format: v => parseFloat(String(v ?? 0)).toFixed(2) },
+        { header: 'Expiry Date',    key: 'expiryDate',    format: v => v ?? '' },
+        { header: 'Last Updated',   key: 'updatedAt',     format: v => v ? new Date(v as string).toLocaleDateString('en-AU') : '' },
+      ],
+      rows: balances,
+    })
+  }
+
   return (
     <div className="flex flex-col h-full p-6 gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">TOIL Tracking</h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition font-medium"
-        >
-          + Record TOIL
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton onClick={exportToilCsv} disabled={balances.length === 0} />
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition font-medium"
+          >
+            + Record TOIL
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
