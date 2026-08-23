@@ -432,7 +432,7 @@ export default function LeavePage() {
                 Clear filters
               </button>
             )}
-            <ExportButton onClick={handleExport} count={requests.length} />
+            <ExportButton onClick={handleExport} />
             {/* Bulk action bar — only for managers when pending requests exist */}
             {canApprove && pendingRequests.length > 0 && (
               <div className="flex items-center gap-2 ml-auto">

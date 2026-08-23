@@ -396,7 +396,7 @@ function RecordsTab() {
           <option value="completed">Completed</option>
           <option value="overdue">Overdue</option>
         </select>
-        <ExportButton onClick={handleExport} count={records.length} />
+        <ExportButton onClick={handleExport} />
       </div>
 
       {/* Table */}

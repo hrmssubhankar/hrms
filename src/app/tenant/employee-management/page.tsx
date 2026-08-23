@@ -424,7 +424,7 @@ export default function EmployeeManagementPage() {
             Clear
           </button>
         )}
-        <ExportButton onClick={handleExport} count={employees.length} />
+        <ExportButton onClick={handleExport} />
       </div>
 
       {/* Table */}
