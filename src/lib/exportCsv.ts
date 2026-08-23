@@ -39,7 +39,7 @@ function escapeCsv(value: unknown): string {
   return str
 }
 
-export function exportCsv<T extends Record<string, unknown>>({
+export function exportCsv<T extends object>({
   filename,
   columns,
   rows,
