@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -316,6 +318,8 @@ export default function ExpensesPage() {
   const [search, setSearch]         = useState('')
   const [showSubmit, setShowSubmit] = useState(false)
   const [reviewing, setReviewing]   = useState<Claim | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
+  const [toast, setToast]           = useState<ToastState>(null)
 
   async function load() {
     setLoading(true)
@@ -343,6 +347,24 @@ export default function ExpensesPage() {
       CAT_LABELS[c.category]?.toLowerCase().includes(q)
     )
   })
+
+  function handleDelete(c: Claim) {
+    setConfirmState({
+      message: `Delete expense claim "${c.title}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        try {
+          const res = await fetchWithAuth(`/api/tenant/expenses/${c.id}`, { method: 'DELETE' })
+          if (!res.ok) throw new Error()
+          setClaims(prev => prev.filter(x => x.id !== c.id))
+          setToast({ message: 'Expense claim deleted', type: 'success' })
+        } catch {
+          setToast({ message: 'Failed to delete claim', type: 'error' })
+        }
+      },
+    })
+  }
 
   const pending  = claims.filter(c => c.status === 'pending').length
   const totPending  = totalByStatus(claims, 'pending')
@@ -447,16 +469,27 @@ export default function ExpensesPage() {
                     <Badge status={c.status} />
                   </td>
                   <td className="px-4 py-3">
-                    <button onClick={() => setReviewing(c)}
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                      {c.status === 'pending' ? 'Review' : 'View'}
-                    </button>
-                    {c.receiptUrl && (
-                      <a href={c.receiptUrl} target="_blank" rel="noopener noreferrer"
-                        className="ml-3 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                        Receipt
-                      </a>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setReviewing(c)}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                        {c.status === 'pending' ? 'Review' : 'View'}
+                      </button>
+                      {c.receiptUrl && (
+                        <a href={c.receiptUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                          Receipt
+                        </a>
+                      )}
+                      {c.status === 'pending' && <button onClick={() => handleDelete(c)}
+                        title="Delete"
+                        className="text-gray-400 hover:text-red-500 transition"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -469,6 +502,8 @@ export default function ExpensesPage() {
       {/* Modals */}
       {showSubmit && <SubmitModal onClose={() => setShowSubmit(false)} onSaved={load} />}
       {reviewing  && <ReviewModal claim={reviewing} onClose={() => setReviewing(null)} onSaved={load} />}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

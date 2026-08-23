@@ -5,6 +5,7 @@ import ExportButton from '@/components/ui/ExportButton'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 import EmptyState from '@/components/ui/EmptyState'
 import { SkeletonTable } from '@/components/ui/Skeleton'
 
@@ -299,6 +300,8 @@ function RecordsTab() {
   const [search,  setSearch]  = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
+  const [toast, setToast] = useState<ToastState>(null)
 
   const load = useCallback(async (s = search, f = filterStatus) => {
     setLoading(true)
@@ -331,6 +334,24 @@ function RecordsTab() {
         { header: 'Attempts',      key: 'attempts' },
       ],
       rows: records,
+    })
+  }
+
+  function deleteRecord(r: TrainingRecord) {
+    setConfirmState({
+      message: `Delete training record for ${r.employeeFirstName} ${r.employeeLastName} — ${r.courseTitle}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        try {
+          const res = await fetchWithAuth(`/api/tenant/training/records?id=${r.id}`, { method: 'DELETE' })
+          if (!res.ok) throw new Error()
+          setRecords(prev => prev.filter(x => x.id !== r.id))
+          setToast({ message: 'Training record deleted', type: 'success' })
+        } catch {
+          setToast({ message: 'Failed to delete record', type: 'error' })
+        }
+      },
     })
   }
 
@@ -397,6 +418,7 @@ function RecordsTab() {
                 <th>Score</th>
                 <th>Expiry</th>
                 <th>Action</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -447,6 +469,15 @@ function RecordsTab() {
                         </span>
                       )}
                     </td>
+                    <td className="px-5 py-3.5">
+                      <button onClick={() => deleteRecord(r)} title="Delete"
+                        className="text-gray-500 hover:text-red-400 transition">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </td>
                   </tr>
                 )
               })}
@@ -455,6 +486,8 @@ function RecordsTab() {
           </div>
         </div>
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

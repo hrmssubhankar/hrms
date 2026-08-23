@@ -1905,3 +1905,25 @@ export const toilEntries = pgTable('hrms_toil_entries', {
   employeeIdx: index('toil_entries_employee_idx').on(t.employeeId),
   dateIdx:     index('toil_entries_date_idx').on(t.workDate),
 }))
+
+// ─── Module 46: Employee Work History / Experience ───────────────────────────
+
+export const employeeExperience = pgTable('hrms_employee_experience', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  tenantId:       uuid('tenant_id').notNull(),
+  employeeId:     uuid('employee_id').notNull().references(() => employees.id, { onDelete: 'cascade' }),
+  companyName:    varchar('company_name', { length: 255 }).notNull(),
+  jobTitle:       varchar('job_title', { length: 255 }).notNull(),
+  employmentType: varchar('employment_type', { length: 50 }).notNull().default('full_time'),
+  startDate:      date('start_date').notNull(),
+  endDate:        date('end_date'),
+  isCurrent:      boolean('is_current').notNull().default(false),
+  location:       varchar('location', { length: 255 }),
+  description:    text('description'),
+  reasonForLeaving: varchar('reason_for_leaving', { length: 255 }),
+  createdAt:      timestamp('created_at').notNull().defaultNow(),
+  updatedAt:      timestamp('updated_at').notNull().defaultNow(),
+}, (t) => ({
+  tenantIdx:   index('employee_experience_tenant_idx').on(t.tenantId),
+  employeeIdx: index('employee_experience_employee_idx').on(t.employeeId),
+}))

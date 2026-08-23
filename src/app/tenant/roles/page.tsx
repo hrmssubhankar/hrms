@@ -3,6 +3,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
 import PermissionGate from '@/components/auth/PermissionGate'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 type User = {
   id: string; email: string; role: string; isActive: boolean
@@ -50,6 +52,8 @@ export default function RolesPage() {
   const [editRole, setEditRole] = useState('')
   const [copied,   setCopied]   = useState('')
   const [form, setForm] = useState({ email: '', role: 'employee', password: generatePassword() })
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
+  const [toast,        setToast]        = useState<ToastState>(null)
 
   const load = async () => {
     setLoading(true)
@@ -77,6 +81,24 @@ export default function RolesPage() {
       body: JSON.stringify({ id, role }),
     })
     setEditId(null); load()
+  }
+
+  function confirmDelete(u: User) {
+    setConfirmState({
+      message: `Delete "${u.email}"? This will permanently remove their portal access and cannot be undone. Any data assigned to this user (leave requests, documents, etc.) will remain but their login will be removed.`,
+      confirmLabel: 'Delete User',
+      danger: true,
+      onConfirm: async () => {
+        const res = await fetchWithAuth(`/api/tenant/roles/${u.id}`, { method: 'DELETE' })
+        if (res.ok) {
+          setToast({ message: `${u.email} deleted`, type: 'success' })
+          load()
+        } else {
+          const d = await res.json().catch(() => ({}))
+          setToast({ message: d.error ?? 'Failed to delete user', type: 'error' })
+        }
+      },
+    })
   }
 
   async function toggleActive(id: string, isActive: boolean) {
@@ -219,7 +241,7 @@ export default function RolesPage() {
             <table className="table-premium">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
-                {['Email', 'Role', '2FA', 'Last Login', 'Status', ''].map(h => (
+                {['Email', 'Role', '2FA', 'Last Login', 'Status', '', ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left section-label">{h}</th>
                 ))}
               </tr>
@@ -277,6 +299,17 @@ export default function RolesPage() {
                       </button>
                     </PermissionGate>
                   </td>
+                  <td className="px-4 py-3">
+                    <PermissionGate permission="roles:write">
+                      <button
+                        onClick={() => confirmDelete(u)}
+                        className="text-xs px-2.5 py-1 rounded border border-red-200 dark:border-red-900 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                        title="Delete user"
+                      >
+                        Delete
+                      </button>
+                    </PermissionGate>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -284,6 +317,9 @@ export default function RolesPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

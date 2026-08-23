@@ -6,6 +6,8 @@ import PermissionGate from '@/components/auth/PermissionGate'
 import { usePermissions } from '@/hooks/usePermissions'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 import { ExportButton } from '@/components/ui/ExportButton'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -245,12 +247,13 @@ function ClockCard({ onAction }: { onAction: () => void }) {
 // ── Timesheet row ──────────────────────────────────────────────────────────────
 
 function TimesheetRow({
-  ts, isManager, onApprove, onReject, isSelected, onToggleSelect,
+  ts, isManager, onApprove, onReject, onDelete, isSelected, onToggleSelect,
 }: {
   ts: Timesheet
   isManager: boolean
   onApprove: (id: string) => void
   onReject: (id: string) => void
+  onDelete: (id: string) => void
   isSelected?: boolean
   onToggleSelect?: (id: string) => void
 }) {
@@ -313,21 +316,32 @@ function TimesheetRow({
       </td>
       {isManager && (
         <td className="px-4 py-3 whitespace-nowrap">
-          {ts.status === 'submitted' && (
-            <div className="flex gap-1.5">
-              <button onClick={() => onApprove(ts.id)}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition">
-                Approve
+          <div className="flex gap-1.5 items-center">
+            {ts.status === 'submitted' && (
+              <>
+                <button onClick={() => onApprove(ts.id)}
+                  className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-green-600 text-white hover:bg-green-700 transition">
+                  Approve
+                </button>
+                <button onClick={() => onReject(ts.id)}
+                  className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                  Reject
+                </button>
+              </>
+            )}
+            {ts.status === 'approved' && (
+              <span className="text-xs text-gray-600 dark:text-gray-400">{fmtDateTime(ts.approvedAt)}</span>
+            )}
+            {ts.status === 'pending' && (
+              <button onClick={() => onDelete(ts.id)}
+                title="Delete timesheet"
+                className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
               </button>
-              <button onClick={() => onReject(ts.id)}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                Reject
-              </button>
-            </div>
-          )}
-          {ts.status === 'approved' && (
-            <span className="text-xs text-gray-600 dark:text-gray-400">{fmtDateTime(ts.approvedAt)}</span>
-          )}
+            )}
+          </div>
         </td>
       )}
     </tr>
@@ -347,6 +361,8 @@ export default function TimesheetsPage() {
   const [rejectId,     setRejectId]     = useState<string | null>(null)
   const [selected,     setSelected]     = useState<Set<string>>(new Set())
   const [bulkApproving,setBulkApproving]= useState(false)
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
+  const [toast,        setToast]        = useState<ToastState>(null)
 
   const fetchTimesheets = useCallback(async () => {
     setLoading(true)
@@ -392,6 +408,25 @@ export default function TimesheetsPage() {
     setSelected(new Set())
     setBulkApproving(false)
     fetchTimesheets()
+  }
+
+  function deleteTimesheet(id: string) {
+    setConfirmState({
+      message: 'Delete this timesheet entry? This cannot be undone.',
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        const r = await fetchWithAuth(`/api/tenant/timesheets/${id}`, { method: 'DELETE' })
+        if (r.ok) {
+          setTimesheets(prev => prev.filter(t => t.id !== id))
+          setToast({ message: 'Timesheet deleted', type: 'success' })
+        } else {
+          const d = await r.json()
+          setToast({ message: d.error ?? 'Failed to delete timesheet', type: 'error' })
+        }
+        setConfirmState(null)
+      },
+    })
   }
 
   const approvable = timesheets.filter(t => t.status === 'pending' || t.status === 'submitted')
@@ -442,6 +477,8 @@ export default function TimesheetsPage() {
       {rejectId && (
         <RejectModal onConfirm={r => reject(rejectId, r)} onClose={() => setRejectId(null)} />
       )}
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -557,6 +594,7 @@ export default function TimesheetsPage() {
                     isManager={isManager}
                     onApprove={approve}
                     onReject={id => setRejectId(id)}
+                    onDelete={deleteTimesheet}
                     isSelected={selected.has(ts.id)}
                     onToggleSelect={toggleOne}
                   />

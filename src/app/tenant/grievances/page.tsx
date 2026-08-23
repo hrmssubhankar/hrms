@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import ExportButton from '@/components/ui/ExportButton'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 type Grievance = {
   id: string; lodgedBy: string | null; subjectId: string | null; type: string
@@ -72,6 +74,8 @@ export default function GrievancesPage() {
     riskRating:'medium', description:'',
   })
   const [outcomeText, setOutcomeText] = useState<Record<string, string>>({})
+  const [confirm,   setConfirm]   = useState<ConfirmState>(null)
+  const [toast,     setToast]     = useState<ToastState>(null)
 
   const load = useCallback(async (st = filterStatus, t = filterType) => {
     setLoading(true)
@@ -112,6 +116,17 @@ export default function GrievancesPage() {
       body: JSON.stringify({ id, status: next }),
     })
     load()
+  }
+
+  async function deleteGrievance(id: string) {
+    const res = await fetchWithAuth(`/api/tenant/grievances/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setRecords(prev => prev.filter(g => g.id !== id))
+      setExpanded(prev => prev === id ? null : prev)
+      setToast({ message: 'Grievance deleted', type: 'success' })
+    } else {
+      setToast({ message: 'Failed to delete grievance', type: 'error' })
+    }
   }
 
   async function close(id: string) {
@@ -277,7 +292,7 @@ export default function GrievancesPage() {
             const isOpen = expanded === g.id
             const stageIdx = STATUS_FLOW.findIndex(s => s.value === g.status)
             return (
-              <div key={g.id} className={`card-premium overflow-hidden ${
+              <div key={g.id} className={`card-premium overflow-hidden group ${
                 g.riskRating === 'critical' ? 'border-red-800' :
                 g.riskRating === 'high'     ? 'border-orange-800/60' : 'border-gray-800'
               }`}>
@@ -303,9 +318,18 @@ export default function GrievancesPage() {
                       <p className="text-gray-600 text-xs mt-0.5 dark:text-gray-400">Subject: {g.subjectFirstName} {g.subjectLastName}</p>
                     )}
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(g.createdAt).toLocaleDateString('en-AU')}</p>
-                    <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{isOpen ? '▲' : '▼'}</p>
+                  <div className="text-right shrink-0 flex items-center gap-2">
+                    <button
+                      onClick={e => { e.stopPropagation(); setConfirm({ message: 'Delete this grievance record? This cannot be undone.', confirmLabel: 'Delete', onConfirm: () => deleteGrievance(g.id) }) }}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-500 hover:text-red-500 hover:bg-red-900/20 transition"
+                      title="Delete grievance"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(g.createdAt).toLocaleDateString('en-AU')}</p>
+                      <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{isOpen ? '▲' : '▼'}</p>
+                    </div>
                   </div>
                 </div>
 
@@ -372,6 +396,8 @@ export default function GrievancesPage() {
           })}
         </div>
       )}
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

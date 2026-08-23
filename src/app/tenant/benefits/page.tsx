@@ -3,6 +3,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 import EmptyState from '@/components/ui/EmptyState'
 
 type Benefit = {
@@ -74,6 +75,7 @@ export default function BenefitsPage() {
   const [filterStatus, setFilterStatus] = useState('')
   const [view,       setView]       = useState<'list' | 'grouped'>('list')
   const [confirmState, setConfirmState] = useState<ConfirmState>(null)
+  const [toast, setToast] = useState<ToastState>(null)
 
   const load = useCallback(async (empId = filterEmp) => {
     setLoading(true)
@@ -124,12 +126,20 @@ export default function BenefitsPage() {
   async function remove(id: string) {
     setConfirmState({
       message: 'Remove this benefit?',
+      confirmLabel: 'Remove',
+      danger: true,
       onConfirm: async () => {
-        await fetchWithAuth('/api/tenant/benefits', {
-          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id }),
-        })
-        load()
+        try {
+          const res = await fetchWithAuth('/api/tenant/benefits', {
+            method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id }),
+          })
+          if (!res.ok) throw new Error()
+          setBenefits(prev => prev.filter(b => b.id !== id))
+          setToast({ message: 'Benefit removed', type: 'success' })
+        } catch {
+          setToast({ message: 'Failed to remove benefit', type: 'error' })
+        }
       }
     })
   }
@@ -399,6 +409,7 @@ export default function BenefitsPage() {
       )}
 
       <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {/* Expiry alert banner */}
       {stats.expiring > 0 && (

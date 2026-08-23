@@ -125,3 +125,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   return NextResponse.json({ promotion: updated })
 }
+
+// DELETE /api/tenant/promotions/[id]
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { error, session } = await apiGuard('performance:write')
+  if (error) return error
+
+  const { id } = await params
+
+  const [deleted] = await db
+    .delete(promotionRequests)
+    .where(and(eq(promotionRequests.id, id), eq(promotionRequests.tenantId, session.tenantId)))
+    .returning()
+
+  if (!deleted) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json({ success: true })
+}

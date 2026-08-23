@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 interface SalaryReview {
   id: string
@@ -85,6 +87,8 @@ export default function SalaryReviewsPage() {
   const [saving, setSaving] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
   const [hrNotes, setHrNotes] = useState('')
+  const [confirm, setConfirm] = useState<ConfirmState>(null)
+  const [toast, setToast] = useState<ToastState>(null)
 
   useEffect(() => {
     loadReviews()
@@ -137,6 +141,18 @@ export default function SalaryReviewsPage() {
     if (d.review) {
       setSelected(d.review)
       loadReviews()
+    }
+  }
+
+  async function deleteReview(id: string) {
+    try {
+      const r = await fetchWithAuth(`/api/tenant/salary-reviews/${id}`, { method: 'DELETE' })
+      if (!r.ok) throw new Error()
+      setReviews(prev => prev.filter(rv => rv.id !== id))
+      if (selected?.id === id) setSelected(null)
+      setToast({ message: 'Salary review deleted', type: 'success' })
+    } catch {
+      setToast({ message: 'Failed to delete review', type: 'error' })
     }
   }
 
@@ -214,14 +230,14 @@ export default function SalaryReviewsPage() {
             <p className="text-sm text-gray-400 text-center py-8">No reviews found</p>
           )}
           {reviews.map(review => (
-            <button
+            <div
               key={review.id}
-              onClick={() => openReview(review)}
-              className={`w-full text-left px-3 py-3 rounded-xl transition border ${
+              className={`group relative w-full text-left px-3 py-3 rounded-xl transition border cursor-pointer ${
                 selected?.id === review.id
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                   : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
+              onClick={() => openReview(review)}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -230,16 +246,25 @@ export default function SalaryReviewsPage() {
                   </p>
                   <p className="text-xs text-gray-500 capitalize">{REVIEW_TYPE_LABEL[review.reviewType] ?? review.reviewType} · {review.reviewDate}</p>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap shrink-0 ${STATUS_COLORS[review.status] ?? ''}`}>
-                  {STATUS_LABEL[review.status] ?? review.status}
-                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${STATUS_COLORS[review.status] ?? ''}`}>
+                    {STATUS_LABEL[review.status] ?? review.status}
+                  </span>
+                  <button
+                    onClick={e => { e.stopPropagation(); setConfirm({ message: 'Delete this salary review?', confirmLabel: 'Delete', onConfirm: () => deleteReview(review.id) }) }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500 p-0.5"
+                    title="Delete"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 {fmtSalary(review.currentSalary, review.currentBasis)}
                 {review.proposedSalary && ` → ${fmtSalary(review.proposedSalary, review.proposedBasis)}`}
                 {review.incrementPercent && ` (+${parseFloat(review.incrementPercent).toFixed(1)}%)`}
               </p>
-            </button>
+            </div>
           ))}
         </div>
       </div>
@@ -390,6 +415,9 @@ export default function SalaryReviewsPage() {
           </div>
         )}
       </div>
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {/* New Review Modal */}
       {showModal && (

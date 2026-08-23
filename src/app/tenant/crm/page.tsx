@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -152,6 +154,8 @@ function LeadsTab() {
   const [dragging, setDragging] = useState<string | null>(null)
   const [form, setForm]         = useState({ firstName:'', lastName:'', email:'', phone:'', company:'', jobTitle:'', source:'', stage:'new', notes:'' })
   const [saving, setSaving]     = useState(false)
+  const [confirm, setConfirm]   = useState<ConfirmState>(null)
+  const [toast, setToast]       = useState<ToastState>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -176,6 +180,12 @@ function LeadsTab() {
   const moveStage = async (id: string, stage: string) => {
     await fetchWithAuth(`/api/tenant/crm/leads/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ stage }) })
     setLeads(prev => prev.map(l => l.id === id ? { ...l, stage } : l))
+  }
+
+  const deleteLead = async (id: string) => {
+    const res = await fetchWithAuth(`/api/tenant/crm/leads/${id}`, { method:'DELETE' })
+    if (res.ok) { setLeads(prev => prev.filter(l => l.id !== id)); setToast({ message: 'Lead deleted', type: 'success' }) }
+    else setToast({ message: 'Failed to delete lead', type: 'error' })
   }
 
   const stageLeads = (s: string) => leads.filter(l => l.stage === s)
@@ -212,9 +222,15 @@ function LeadsTab() {
                   <div key={lead.id} draggable
                     onDragStart={() => setDragging(lead.id)}
                     onDragEnd={() => setDragging(null)}
-                    className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm cursor-grab select-none border-2 transition-colors"
+                    className="group bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm cursor-grab select-none border-2 transition-colors relative"
                     style={{ borderColor: dragging === lead.id ? stage.color : 'transparent' }}>
-                    <div className="font-semibold text-[13px] text-gray-900 dark:text-white mb-0.5">
+                    <button
+                      onClick={e => { e.stopPropagation(); setConfirm({ message: `Delete lead ${lead.firstName} ${lead.lastName}?`, confirmLabel: 'Delete', onConfirm: () => deleteLead(lead.id) }) }}
+                      className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 p-0.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    <div className="font-semibold text-[13px] text-gray-900 dark:text-white mb-0.5 pr-5">
                       {lead.firstName} {lead.lastName}
                     </div>
                     {lead.company && <div className="text-[11px] text-gray-500 dark:text-gray-400">{lead.company}</div>}
@@ -233,6 +249,9 @@ function LeadsTab() {
           ))}
         </div>
       )}
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {modal && (
         <Modal title="New Lead" onClose={() => setModal(false)}>
@@ -294,6 +313,8 @@ function ContactsTab() {
   const [modal, setModal]       = useState(false)
   const [form, setForm]         = useState({ firstName:'', lastName:'', email:'', phone:'', mobile:'', jobTitle:'', department:'', notes:'' })
   const [saving, setSaving]     = useState(false)
+  const [confirm, setConfirm]   = useState<ConfirmState>(null)
+  const [toast, setToast]       = useState<ToastState>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -315,6 +336,12 @@ function ContactsTab() {
     } finally { setSaving(false) }
   }
 
+  const deleteContact = async (id: string) => {
+    const res = await fetchWithAuth(`/api/tenant/crm/contacts/${id}`, { method:'DELETE' })
+    if (res.ok) { setContacts(prev => prev.filter(c => c.id !== id)); setToast({ message: 'Contact deleted', type: 'success' }) }
+    else setToast({ message: 'Failed to delete contact', type: 'error' })
+  }
+
   return (
     <div>
       <div className="flex gap-3 mb-5 flex-wrap">
@@ -332,14 +359,14 @@ function ContactsTab() {
           <table className="table-premium">
             <thead>
               <tr>
-                {['Name','Email','Phone','Job Title','Created'].map(h => (
+                {['Name','Email','Phone','Job Title','Created',''].map(h => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {contacts.map(c => (
-                <tr key={c.id}>
+                <tr key={c.id} className="group">
                   <td>
                     <div className="flex items-center gap-2.5">
                       <Avatar name={`${c.firstName} ${c.lastName ?? ''}`} size={32} />
@@ -353,6 +380,12 @@ function ContactsTab() {
                   <td>{c.phone ?? '—'}</td>
                   <td>{c.jobTitle ?? '—'}</td>
                   <td className="text-xs text-gray-400">{new Date(c.createdAt).toLocaleDateString('en-AU')}</td>
+                  <td>
+                    <button onClick={() => setConfirm({ message: `Delete contact ${c.firstName} ${c.lastName}?`, confirmLabel: 'Delete', onConfirm: () => deleteContact(c.id) })}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </td>
                 </tr>
               ))}
               {contacts.length === 0 && (
@@ -362,6 +395,9 @@ function ContactsTab() {
           </table>
         </div>
       )}
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {modal && (
         <Modal title="New Contact" onClose={() => setModal(false)}>
@@ -410,6 +446,8 @@ function AccountsTab() {
   const [modal, setModal]       = useState(false)
   const [form, setForm]         = useState({ name:'', industry:'', website:'', phone:'', email:'', address:'', city:'', state:'', abn:'', type:'prospect', notes:'' })
   const [saving, setSaving]     = useState(false)
+  const [confirm, setConfirm]   = useState<ConfirmState>(null)
+  const [toast, setToast]       = useState<ToastState>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -431,6 +469,12 @@ function AccountsTab() {
     } finally { setSaving(false) }
   }
 
+  const deleteAccount = async (id: string) => {
+    const res = await fetchWithAuth(`/api/tenant/crm/accounts/${id}`, { method:'DELETE' })
+    if (res.ok) { setAccounts(prev => prev.filter(a => a.id !== id)); setToast({ message: 'Account deleted', type: 'success' }) }
+    else setToast({ message: 'Failed to delete account', type: 'error' })
+  }
+
   const ACCOUNT_TYPES = ['prospect','customer','partner','vendor']
   const TYPE_COLORS: Record<string,string> = { prospect:'#6366f1', customer:'#10b981', partner:'#f59e0b', vendor:'#6b7280' }
 
@@ -449,7 +493,11 @@ function AccountsTab() {
       ) : (
         <div className="grid gap-3.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {accounts.map(a => (
-            <div key={a.id} className="card-premium p-4">
+            <div key={a.id} className="card-premium p-4 group relative">
+              <button onClick={() => setConfirm({ message: `Delete account ${a.name}?`, confirmLabel: 'Delete', onConfirm: () => deleteAccount(a.id) })}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
               <div className="flex items-start gap-3 mb-2.5">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-lg flex-shrink-0">🏢</div>
                 <div className="flex-1 min-w-0">
@@ -470,6 +518,9 @@ function AccountsTab() {
           )}
         </div>
       )}
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {modal && (
         <Modal title="New Account" onClose={() => setModal(false)}>
@@ -529,6 +580,8 @@ function DealsTab() {
   const [dragging, setDragging] = useState<string | null>(null)
   const [form, setForm]         = useState({ title:'', value:'', stage:'prospecting', probability:10, closeDate:'', notes:'' })
   const [saving, setSaving]     = useState(false)
+  const [confirm, setConfirm]   = useState<ConfirmState>(null)
+  const [toast, setToast]       = useState<ToastState>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -554,6 +607,12 @@ function DealsTab() {
     const ds = DEAL_STAGES.find(s => s.key === stage)
     await fetchWithAuth(`/api/tenant/crm/deals/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ stage, probability: ds?.prob }) })
     setDeals(prev => prev.map(d => d.id === id ? { ...d, stage, probability: ds?.prob ?? d.probability } : d))
+  }
+
+  const deleteDeal = async (id: string) => {
+    const res = await fetchWithAuth(`/api/tenant/crm/deals/${id}`, { method:'DELETE' })
+    if (res.ok) { setDeals(prev => prev.filter(d => d.id !== id)); setToast({ message: 'Deal deleted', type: 'success' }) }
+    else setToast({ message: 'Failed to delete deal', type: 'error' })
   }
 
   const stageDeals = (s: string) => deals.filter(d => d.stage === s)
@@ -604,9 +663,13 @@ function DealsTab() {
                   <div key={deal.id} draggable
                     onDragStart={() => setDragging(deal.id)}
                     onDragEnd={() => setDragging(null)}
-                    className="bg-white dark:bg-gray-800 rounded-lg p-2.5 shadow-sm cursor-grab select-none border-2 transition-colors"
+                    className="group bg-white dark:bg-gray-800 rounded-lg p-2.5 shadow-sm cursor-grab select-none border-2 transition-colors relative"
                     style={{ borderColor: dragging === deal.id ? stageColor(stage.key) : 'transparent' }}>
-                    <div className="font-semibold text-[12px] text-gray-900 dark:text-white mb-0.5">{deal.title}</div>
+                    <button onClick={e => { e.stopPropagation(); setConfirm({ message: `Delete deal "${deal.title}"?`, confirmLabel: 'Delete', onConfirm: () => deleteDeal(deal.id) }) }}
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    <div className="font-semibold text-[12px] text-gray-900 dark:text-white mb-0.5 pr-4">{deal.title}</div>
                     {deal.accountName && <div className="text-[11px] text-gray-500 dark:text-gray-400">{deal.accountName}</div>}
                     {deal.value      && <div className="text-[12px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">{fmt(deal.value)}</div>}
                     {deal.closeDate  && <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Close: {deal.closeDate}</div>}
@@ -620,6 +683,9 @@ function DealsTab() {
           ))}
         </div>
       )}
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {modal && (
         <Modal title="New Deal" onClose={() => setModal(false)}>
@@ -670,6 +736,8 @@ function ActivitiesTab() {
   const [filter, setFilter]         = useState<'all'|'pending'|'done'>('all')
   const [form, setForm]             = useState({ type:'call', subject:'', notes:'', dueDate:'', assignedTo:'' })
   const [saving, setSaving]         = useState(false)
+  const [confirm, setConfirm]       = useState<ConfirmState>(null)
+  const [toast, setToast]           = useState<ToastState>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -690,6 +758,12 @@ function ActivitiesTab() {
       await fetchWithAuth('/api/tenant/crm/activities', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(form) })
       setModal(false); setForm({ type:'call', subject:'', notes:'', dueDate:'', assignedTo:'' }); load()
     } finally { setSaving(false) }
+  }
+
+  const deleteActivity = async (id: string) => {
+    const res = await fetchWithAuth(`/api/tenant/crm/activities/${id}`, { method:'DELETE' })
+    if (res.ok) { setActivities(prev => prev.filter(a => a.id !== id)); setToast({ message: 'Activity deleted', type: 'success' }) }
+    else setToast({ message: 'Failed to delete activity', type: 'error' })
   }
 
   const markDone = async (id: string) => {
@@ -723,7 +797,7 @@ function ActivitiesTab() {
       ) : (
         <div className="flex flex-col gap-2">
           {activities.map(a => (
-            <div key={a.id} className={`card-premium p-3 px-4 flex items-center gap-3.5 transition-opacity ${a.isDone ? 'opacity-60' : ''}`}>
+            <div key={a.id} className={`group card-premium p-3 px-4 flex items-center gap-3.5 transition-opacity ${a.isDone ? 'opacity-60' : ''}`}>
               <div className="text-xl">{ACTIVITY_ICONS[a.type] ?? '📋'}</div>
               <div className="flex-1 min-w-0">
                 <div className={`font-semibold text-sm ${a.isDone ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
@@ -741,6 +815,10 @@ function ActivitiesTab() {
                 </button>
               )}
               {a.isDone && <span className="badge badge-green">Done</span>}
+              <button onClick={() => setConfirm({ message: `Delete activity "${a.subject}"?`, confirmLabel: 'Delete', onConfirm: () => deleteActivity(a.id) })}
+                className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
             </div>
           ))}
           {activities.length === 0 && (
@@ -748,6 +826,9 @@ function ActivitiesTab() {
           )}
         </div>
       )}
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {modal && (
         <Modal title="Log Activity" onClose={() => setModal(false)}>

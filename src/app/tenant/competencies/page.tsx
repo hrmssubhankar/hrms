@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 type Competency = { id: string; name: string; description: string | null; category: string | null; isActive: boolean }
 type Assessment = {
@@ -31,6 +33,9 @@ export default function CompetencyPage() {
   const [showAssForm,  setShowAssForm]  = useState(false)
   const [saving,       setSaving]       = useState(false)
   const [filterEmp,    setFilterEmp]    = useState('')
+  const [confirm, setConfirm] = useState<ConfirmState>(null)
+  const [toast,   setToast]   = useState<ToastState>(null)
+  const [searchComp, setSearchComp] = useState('')
   const [compForm, setCompForm] = useState({ name: '', description: '', category: '' })
   const [assForm, setAssForm]   = useState({
     employeeId: '', competencyId: '', assessorId: '',
@@ -61,6 +66,28 @@ export default function CompetencyPage() {
     setShowCompForm(false); setCompForm({ name:'', description:'', category:'' }); setSaving(false); load()
   }
 
+  async function deleteCompetency(id: string) {
+    try {
+      const r = await fetchWithAuth(`/api/tenant/competencies/${id}?type=competency`, { method: 'DELETE' })
+      if (!r.ok) throw new Error()
+      setCompetencies(prev => prev.filter(c => c.id !== id))
+      setToast({ message: 'Competency deleted', type: 'success' })
+    } catch {
+      setToast({ message: 'Failed to delete competency', type: 'error' })
+    }
+  }
+
+  async function deleteAssessment(id: string) {
+    try {
+      const r = await fetchWithAuth(`/api/tenant/competencies/${id}?type=assessment`, { method: 'DELETE' })
+      if (!r.ok) throw new Error()
+      setAssessments(prev => prev.filter(a => a.id !== id))
+      setToast({ message: 'Assessment deleted', type: 'success' })
+    } catch {
+      setToast({ message: 'Failed to delete assessment', type: 'error' })
+    }
+  }
+
   async function createAss(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
@@ -70,7 +97,11 @@ export default function CompetencyPage() {
     setSaving(false); load()
   }
 
-  const grouped = competencies.reduce<Record<string, Competency[]>>((acc, c) => {
+  const filteredComps = searchComp
+    ? competencies.filter(c => c.name.toLowerCase().includes(searchComp.toLowerCase()) || (c.category ?? '').toLowerCase().includes(searchComp.toLowerCase()))
+    : competencies
+
+  const grouped = filteredComps.reduce<Record<string, Competency[]>>((acc, c) => {
     const cat = c.category ?? 'General'
     if (!acc[cat]) acc[cat] = []
     acc[cat].push(c)
@@ -223,6 +254,15 @@ export default function CompetencyPage() {
         </form>
       )}
 
+      {tab === 'library' && !loading && (
+        <input
+          className="input-premium max-w-xs"
+          placeholder="Search competencies…"
+          value={searchComp}
+          onChange={e => setSearchComp(e.target.value)}
+        />
+      )}
+
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : (
         <>
           {tab === 'library' && (
@@ -246,10 +286,19 @@ export default function CompetencyPage() {
                         const compAss = assessments.filter(a => a.competencyId === c.id)
                         const pass    = compAss.filter(a => a.outcome === 'competent').length
                         return (
-                          <div key={c.id} className="card-premium p-4">
+                          <div key={c.id} className="group card-premium p-4">
                             <div className="flex items-start justify-between gap-2">
                               <p className="text-sm font-medium text-white">{c.name}</p>
-                              <span className="text-xs text-gray-500 shrink-0 dark:text-gray-400">{pass}/{compAss.length} competent</span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-xs text-gray-500 dark:text-gray-400">{pass}/{compAss.length} competent</span>
+                                <button
+                                  onClick={() => setConfirm({ message: `Delete competency "${c.name}"?`, confirmLabel: 'Delete', onConfirm: () => deleteCompetency(c.id) })}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-400"
+                                  title="Delete"
+                                >
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                              </div>
                             </div>
                             {c.description && <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">{c.description}</p>}
                           </div>
@@ -293,6 +342,7 @@ export default function CompetencyPage() {
                         <th className="px-4 py-3 section-label">Assessed</th>
                         <th className="px-4 py-3 section-label">Expiry</th>
                         <th className="px-4 py-3 section-label">Assessor</th>
+                        <th className="px-4 py-3 section-label"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -300,7 +350,7 @@ export default function CompetencyPage() {
                         const comp = competencies.find(c => c.id === a.competencyId)
                         const emp  = employees.find(e => e.id === a.employeeId)
                         return (
-                          <tr key={a.id} className="hover:bg-gray-100 dark:hover:bg-gray-800/40">
+                          <tr key={a.id} className="group hover:bg-gray-100 dark:hover:bg-gray-800/40">
                             <td className="px-4 py-3 text-gray-700 dark:text-gray-200">{emp ? `${emp.firstName} ${emp.lastName}` : '—'}</td>
                             <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{comp?.name ?? '—'}</td>
                             <td className="px-4 py-3">
@@ -319,6 +369,15 @@ export default function CompetencyPage() {
                             <td className="px-4 py-3 text-gray-500 text-xs dark:text-gray-400">
                               {a.assessorFirstName ? `${a.assessorFirstName} ${a.assessorLastName}` : '—'}
                             </td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => setConfirm({ message: 'Delete this assessment?', confirmLabel: 'Delete', onConfirm: () => deleteAssessment(a.id) })}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-400"
+                                title="Delete"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                              </button>
+                            </td>
                           </tr>
                         )
                       })}
@@ -331,6 +390,8 @@ export default function CompetencyPage() {
           )}
         </>
       )}
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

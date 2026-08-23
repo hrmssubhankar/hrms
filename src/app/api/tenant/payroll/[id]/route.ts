@@ -4,6 +4,8 @@ import { payrollRecords, employees } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
+export const dynamic = 'force-dynamic'
+
 type RouteContext = { params: Promise<{ id: string }> }
 
 // GET /api/tenant/payroll/[id]
@@ -47,4 +49,25 @@ export async function GET(_req: NextRequest, ctx: RouteContext) {
     console.error('GET /api/tenant/payroll/[id]', err)
     return NextResponse.json({ error: 'Failed to fetch record' }, { status: 500 })
   }
+}
+
+// DELETE /api/tenant/payroll/[id]
+export async function DELETE(_req: NextRequest, ctx: RouteContext) {
+  const { id } = await ctx.params
+  const guard = await apiGuard('payroll:write')
+  if (guard.error) return guard.error
+  const { session } = guard
+
+  const [existing] = await db
+    .select({ id: payrollRecords.id, status: payrollRecords.status })
+    .from(payrollRecords)
+    .where(and(eq(payrollRecords.id, id), eq(payrollRecords.tenantId, session.tenantId)))
+
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (existing.status !== 'pending') {
+    return NextResponse.json({ error: 'Only pending pay runs can be deleted' }, { status: 409 })
+  }
+
+  await db.delete(payrollRecords).where(and(eq(payrollRecords.id, id), eq(payrollRecords.tenantId, session.tenantId)))
+  return NextResponse.json({ ok: true })
 }

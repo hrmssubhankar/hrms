@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 import ExportButton from '@/components/ui/ExportButton'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 type Employee = { id: string; firstName: string; lastName: string; email: string }
 
@@ -70,6 +72,8 @@ export default function PayrollPage() {
   const [exporting,    setExporting]   = useState<Set<string>>(new Set())
   const [myobExporting, setMyobExporting] = useState<Set<string>>(new Set())
   const [exportMsg,    setExportMsg]   = useState('')
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null)
+  const [toast,        setToast]        = useState<ToastState>(null)
 
   const [form, setForm] = useState({
     employeeId: '', periodStart: '', periodEnd: '',
@@ -254,6 +258,25 @@ export default function PayrollPage() {
     load()
   }
 
+  function deletePayroll(id: string) {
+    setConfirmState({
+      message: 'Delete this pay run? This cannot be undone.',
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        const r = await fetchWithAuth(`/api/tenant/payroll/${id}`, { method: 'DELETE' })
+        if (r.ok) {
+          setRecords(prev => prev.filter(rec => rec.id !== id))
+          setToast({ message: 'Pay run deleted', type: 'success' })
+        } else {
+          const d = await r.json()
+          setToast({ message: d.error ?? 'Failed to delete pay run', type: 'error' })
+        }
+        setConfirmState(null)
+      },
+    })
+  }
+
   function handleExport() {
     exportCsv({
       filename: 'payroll-summary.csv',
@@ -292,6 +315,8 @@ export default function PayrollPage() {
 
   return (
     <div className="space-y-6">
+      <ConfirmModal state={confirmState} onClose={() => setConfirmState(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -452,6 +477,14 @@ export default function PayrollPage() {
                       <button onClick={() => setSelected(r)} className="text-xs px-2 py-1 rounded border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">View</button>
                       {r.status === 'pending'  && <button onClick={() => updateStatus(r.id, 'approved')} className="text-xs px-2 py-1 rounded border border-blue-700 text-blue-400 hover:bg-blue-900/20 transition">Approve</button>}
                       {r.status === 'approved' && <button onClick={() => updateStatus(r.id, 'paid')}     className="text-xs px-2 py-1 rounded border border-green-700 text-green-400 hover:bg-green-900/20 transition">Mark Paid</button>}
+                      {r.status === 'pending'  && (
+                        <button onClick={() => deletePayroll(r.id)} title="Delete pay run"
+                          className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-900/20 transition">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

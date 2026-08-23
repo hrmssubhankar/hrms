@@ -4,6 +4,8 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { useEffect, useState, useCallback } from 'react'
 import ExportButton from '@/components/ui/ExportButton'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 type Incident = {
   id: string; reportedBy: string; employeeId: string | null; type: string
@@ -51,6 +53,8 @@ export default function WhsPage() {
   const [showForm,  setShowForm]  = useState(false)
   const [saving,    setSaving]    = useState(false)
   const [expanded,  setExpanded]  = useState<string | null>(null)
+  const [confirm,   setConfirm]   = useState<ConfirmState>(null)
+  const [toast,     setToast]     = useState<ToastState>(null)
   const [form, setForm] = useState({
     reportedBy: '', employeeId: '', type: 'near_miss', severity: 'low',
     description: '', location: '', occurredAt: new Date().toISOString().slice(0,16),
@@ -105,6 +109,17 @@ export default function WhsPage() {
       body: JSON.stringify({ id: incident.id, correctiveActions: actions }),
     })
     load()
+  }
+
+  async function deleteIncident(id: string) {
+    const res = await fetchWithAuth(`/api/tenant/whs/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setIncidents(prev => prev.filter(i => i.id !== id))
+      setExpanded(prev => prev === id ? null : prev)
+      setToast({ message: 'Incident deleted', type: 'success' })
+    } else {
+      setToast({ message: 'Failed to delete incident', type: 'error' })
+    }
   }
 
   async function toggleAction(incident: Incident, actionId: string) {
@@ -270,7 +285,7 @@ export default function WhsPage() {
             const s = sev(inc.severity)
             const isOpen = expanded === inc.id
             return (
-              <div key={inc.id} className={`card-premium overflow-hidden transition ${
+              <div key={inc.id} className={`card-premium overflow-hidden transition group ${
                 inc.severity === 'critical' ? 'border-red-800' : inc.severity === 'high' ? 'border-orange-800/60' : 'border-gray-800'
               }`}>
                 {/* Summary row */}
@@ -297,7 +312,16 @@ export default function WhsPage() {
                       {(inc.employeeFirstName) && ` · ${inc.employeeFirstName} ${inc.employeeLastName}`}
                     </p>
                   </div>
-                  <span className="text-gray-500 text-xs shrink-0 dark:text-gray-400">{isOpen ? '▲' : '▼'}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={e => { e.stopPropagation(); setConfirm({ message: 'Delete this incident report? This cannot be undone.', confirmLabel: 'Delete', onConfirm: () => deleteIncident(inc.id) }) }}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-500 hover:text-red-500 hover:bg-red-900/20 transition"
+                      title="Delete incident"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    <span className="text-gray-500 text-xs dark:text-gray-400">{isOpen ? '▲' : '▼'}</span>
+                  </div>
                 </div>
 
                 {/* Expanded detail */}
@@ -355,6 +379,8 @@ export default function WhsPage() {
           })}
         </div>
       )}
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

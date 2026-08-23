@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -187,6 +189,8 @@ export default function MedicationHealthPage() {
   const [showAppt, setShowAppt]         = useState(false)
   const [saving, setSaving]             = useState(false)
   const [error, setError]               = useState('')
+  const [confirm, setConfirm]           = useState<ConfirmState>(null)
+  const [toast, setToast]               = useState<ToastState>(null)
 
   // Forms
   const blankMed = {
@@ -267,6 +271,28 @@ export default function MedicationHealthPage() {
       const r = await fetchWithAuth(`/api/tenant/medication-health/participants/${selected.id}/medications/${med.id}/logs`)
       setMedLogs((await r.json()).logs || [])
     } finally { setSubLoading(false) }
+  }
+
+  // ── Delete handlers ────────────────────────────────────────────────────────
+  const deleteMedication = async (medId: string) => {
+    if (!selected) return
+    const res = await fetchWithAuth(`/api/tenant/medication-health/participants/${selected.id}/medications/${medId}`, { method: 'DELETE' })
+    if (res.ok) { setMedications(prev => prev.filter(m => m.id !== medId)); setToast({ message: 'Medication deleted', type: 'success' }) }
+    else setToast({ message: 'Failed to delete medication', type: 'error' })
+  }
+
+  const deleteCondition = async (condId: string) => {
+    if (!selected) return
+    const res = await fetchWithAuth(`/api/tenant/medication-health/participants/${selected.id}/conditions/${condId}`, { method: 'DELETE' })
+    if (res.ok) { setConditions(prev => prev.filter(c => c.id !== condId)); setToast({ message: 'Condition deleted', type: 'success' }) }
+    else setToast({ message: 'Failed to delete condition', type: 'error' })
+  }
+
+  const deleteAppointment = async (apptId: string) => {
+    if (!selected) return
+    const res = await fetchWithAuth(`/api/tenant/medication-health/participants/${selected.id}/appointments/${apptId}`, { method: 'DELETE' })
+    if (res.ok) { setAppointments(prev => prev.filter(a => a.id !== apptId)); setToast({ message: 'Appointment deleted', type: 'success' }) }
+    else setToast({ message: 'Failed to delete appointment', type: 'error' })
   }
 
   // ── Save handlers ──────────────────────────────────────────────────────────
@@ -477,7 +503,7 @@ export default function MedicationHealthPage() {
                 {subLoading ? <Spinner /> : medications.length === 0 ? <Empty label="No medications recorded" /> : (
                   <div className="space-y-3">
                     {medications.map(m => (
-                      <div key={m.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                      <div key={m.id} className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="flex items-center gap-2">
@@ -490,6 +516,10 @@ export default function MedicationHealthPage() {
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${medStatusColor[m.status] || ''}`}>
                               {MED_STATUS_LABELS[m.status] || m.status}
                             </span>
+                            <button onClick={() => setConfirm({ message: `Delete medication ${m.medicationName}?`, confirmLabel: 'Delete', onConfirm: () => deleteMedication(m.id) })}
+                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
@@ -532,7 +562,7 @@ export default function MedicationHealthPage() {
                 {subLoading ? <Spinner /> : conditions.length === 0 ? <Empty label="No health conditions recorded" /> : (
                   <div className="space-y-3">
                     {conditions.map(c => (
-                      <div key={c.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                      <div key={c.id} className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                         {c.alerts && (
                           <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
                             <span className="text-red-500 flex-shrink-0">⚠️</span>
@@ -556,6 +586,10 @@ export default function MedicationHealthPage() {
                               : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}>
                               {CONDITION_STATUS_LABELS[c.status] || c.status}
                             </span>
+                            <button onClick={() => setConfirm({ message: `Delete condition ${c.conditionName}?`, confirmLabel: 'Delete', onConfirm: () => deleteCondition(c.id) })}
+                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
                           </div>
                         </div>
                         {c.description && <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{c.description}</p>}
@@ -589,7 +623,7 @@ export default function MedicationHealthPage() {
                 {subLoading ? <Spinner /> : appointments.length === 0 ? <Empty label="No appointments recorded" /> : (
                   <div className="space-y-3">
                     {appointments.map(a => (
-                      <div key={a.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                      <div key={a.id} className="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="flex items-center gap-2">
@@ -606,9 +640,15 @@ export default function MedicationHealthPage() {
                               </p>
                             )}
                           </div>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${apptStatusColor[a.status] || ''}`}>
-                            {APPT_STATUS_LABELS[a.status] || a.status}
-                          </span>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${apptStatusColor[a.status] || ''}`}>
+                              {APPT_STATUS_LABELS[a.status] || a.status}
+                            </span>
+                            <button onClick={() => setConfirm({ message: `Delete this appointment?`, confirmLabel: 'Delete', onConfirm: () => deleteAppointment(a.id) })}
+                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </div>
                         </div>
                         {a.location && <p className="text-xs text-gray-400 mt-1">📍 {a.location}</p>}
                         <div className="flex gap-2 mt-2">
@@ -788,6 +828,9 @@ export default function MedicationHealthPage() {
           </div>
         </Modal>
       )}
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {/* Add Appointment */}
       {showAppt && (

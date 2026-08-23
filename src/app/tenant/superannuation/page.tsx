@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 interface Employee {
   id: string
@@ -88,6 +90,8 @@ export default function SuperannuationPage() {
   const [editingFund, setEditingFund] = useState<SuperFund | null>(null)
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
+  const [confirm, setConfirm] = useState<ConfirmState>(null)
+  const [toast, setToast] = useState<ToastState>(null)
 
   useEffect(() => {
     fetchWithAuth('/api/tenant/employees?limit=200')
@@ -165,6 +169,28 @@ export default function SuperannuationPage() {
       loadContributions(selectedEmployee.id)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function deleteFund(id: string) {
+    try {
+      const r = await fetchWithAuth(`/api/tenant/superannuation/${id}`, { method: 'DELETE' })
+      if (!r.ok) throw new Error()
+      setFunds(prev => prev.filter(f => f.id !== id))
+      setToast({ message: 'Super fund deleted', type: 'success' })
+    } catch {
+      setToast({ message: 'Failed to delete fund', type: 'error' })
+    }
+  }
+
+  async function deleteContribution(id: string) {
+    try {
+      const r = await fetchWithAuth(`/api/tenant/superannuation/contributions?id=${id}`, { method: 'DELETE' })
+      if (!r.ok) throw new Error()
+      setContributions(prev => prev.filter(c => c.id !== id))
+      setToast({ message: 'Contribution deleted', type: 'success' })
+    } catch {
+      setToast({ message: 'Failed to delete contribution', type: 'error' })
     }
   }
 
@@ -338,12 +364,21 @@ export default function SuperannuationPage() {
                         )}
                         {fund.notes && <p className="mt-1 text-xs text-gray-400">{fund.notes}</p>}
                       </div>
-                      <button
-                        onClick={() => openEditFund(fund)}
-                        className="ml-4 text-sm text-blue-600 hover:underline"
-                      >
-                        Edit
-                      </button>
+                      <div className="flex gap-3 ml-4 shrink-0">
+                        <button
+                          onClick={() => openEditFund(fund)}
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setConfirm({ message: `Delete "${fund.fundName}"?`, confirmLabel: 'Delete', onConfirm: () => deleteFund(fund.id) })}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                          title="Delete fund"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -373,7 +408,7 @@ export default function SuperannuationPage() {
                       <tr><td colSpan={9} className="py-8 text-center text-gray-400">No contributions recorded</td></tr>
                     )}
                     {contributions.map(c => (
-                      <tr key={c.id} className="text-gray-700 dark:text-gray-300">
+                      <tr key={c.id} className="group text-gray-700 dark:text-gray-300">
                         <td className="py-2.5 pr-4">{c.periodStart} → {c.periodEnd}</td>
                         <td className="py-2.5 pr-4">${parseFloat(c.grossEarnings).toLocaleString('en-AU', { minimumFractionDigits: 2 })}</td>
                         <td className="py-2.5 pr-4">{(parseFloat(c.sgRate) * 100).toFixed(1)}%</td>
@@ -387,9 +422,18 @@ export default function SuperannuationPage() {
                           </span>
                         </td>
                         <td className="py-2.5">
-                          {c.status === 'pending' && (
-                            <button onClick={() => markPaid(c)} className="text-xs text-green-600 hover:underline">Mark Paid</button>
-                          )}
+                          <div className="flex items-center gap-3">
+                            {c.status === 'pending' && (
+                              <button onClick={() => markPaid(c)} className="text-xs text-green-600 hover:underline">Mark Paid</button>
+                            )}
+                            <button
+                              onClick={() => setConfirm({ message: 'Delete this contribution record?', confirmLabel: 'Delete', onConfirm: () => deleteContribution(c.id) })}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
+                              title="Delete contribution"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -401,6 +445,9 @@ export default function SuperannuationPage() {
           </>
         )}
       </div>
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {/* Fund Modal */}
       {showFundModal && (

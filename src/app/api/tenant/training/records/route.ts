@@ -246,3 +246,21 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to update record' }, { status: 500 })
   }
 }
+
+export const dynamic = 'force-dynamic'
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const guard = await apiGuard('training:write')
+    if (guard.error) return guard.error
+    const { session } = guard
+    const id = req.nextUrl.searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+    await db.delete(trainingRecords)
+      .where(and(eq(trainingRecords.id, id), eq(trainingRecords.tenantId, session.tenantId)))
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('DELETE /api/tenant/training/records', err)
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+  }
+}

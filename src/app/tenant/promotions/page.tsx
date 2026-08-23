@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 type Promotion = {
   id: string; employeeId: string
@@ -52,6 +54,8 @@ export default function PromotionsPage() {
   const [reviewNote,    setReviewNote]    = useState('')
   const [addingNote,    setAddingNote]    = useState(false)
   const [inlineNote,    setInlineNote]    = useState('')
+  const [confirm, setConfirm] = useState<ConfirmState>(null)
+  const [toast,   setToast]   = useState<ToastState>(null)
 
   const [form, setForm] = useState({
     employeeId: '', proposedTitle: '', proposedSalary: '',
@@ -115,6 +119,19 @@ export default function PromotionsPage() {
     })
     setInlineNote(''); setAddingNote(false)
     selectPromotion(selected)
+  }
+
+  async function deletePromotion(id: string) {
+    try {
+      const r = await fetchWithAuth(`/api/tenant/promotions/${id}`, { method: 'DELETE' })
+      if (!r.ok) throw new Error()
+      setPromotions(prev => prev.filter(p => p.id !== id))
+      if (selected?.id === id) setSelected(null)
+      setToast({ message: 'Promotion case deleted', type: 'success' })
+      load()
+    } catch {
+      setToast({ message: 'Failed to delete promotion', type: 'error' })
+    }
   }
 
   function fmt(d: string | null) {
@@ -188,14 +205,23 @@ export default function PromotionsPage() {
             </div>
           ) : promotions.map(p => (
             <div key={p.id} onClick={() => selectPromotion(p)}
-              className={`p-4 rounded-xl border cursor-pointer transition ${selected?.id === p.id ? 'border-purple-600 bg-purple-900/20' : 'border-gray-800 bg-gray-900 hover:border-gray-600'}`}>
+              className={`group p-4 rounded-xl border cursor-pointer transition ${selected?.id === p.id ? 'border-purple-600 bg-purple-900/20' : 'border-gray-800 bg-gray-900 hover:border-gray-600'}`}>
               <div className="flex items-start justify-between gap-2 mb-1">
                 <p className="text-sm font-semibold text-white truncate">
                   {p.employeeFirstName} {p.employeeLastName}
                 </p>
-                <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[p.status] ?? ''}`}>
-                  {STATUS_LABEL[p.status] ?? p.status}
-                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[p.status] ?? ''}`}>
+                    {STATUS_LABEL[p.status] ?? p.status}
+                  </span>
+                  <button
+                    onClick={e => { e.stopPropagation(); setConfirm({ message: 'Delete this promotion case?', confirmLabel: 'Delete', onConfirm: () => deletePromotion(p.id) }) }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-400 p-0.5"
+                    title="Delete"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
               </div>
               <p className="text-xs text-gray-600 dark:text-gray-400">{p.currentTitle || '—'} → <span className="text-purple-300">{p.proposedTitle}</span></p>
               {salaryDiff(p.currentSalary, p.proposedSalary) && (
@@ -349,6 +375,9 @@ export default function PromotionsPage() {
           )}
         </div>
       </div>
+
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
 
       {/* New Promotion Modal */}
       {showForm && (

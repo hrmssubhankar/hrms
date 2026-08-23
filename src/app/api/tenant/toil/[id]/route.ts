@@ -46,3 +46,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   return NextResponse.json({ entry })
 }
+
+// DELETE /api/tenant/toil/[id]
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { error, session } = await apiGuard('toil:write')
+  if (error) return error
+
+  const { id } = await params
+
+  const [deleted] = await db
+    .delete(toilEntries)
+    .where(and(eq(toilEntries.id, id), eq(toilEntries.tenantId, session.tenantId)))
+    .returning()
+
+  if (!deleted) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json({ success: true })
+}

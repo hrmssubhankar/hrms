@@ -132,3 +132,24 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
+
+export async function DELETE(_req: NextRequest, { params }: Params) {
+  const guard = await apiGuard('timesheets:write')
+  if (guard.error) return guard.error
+  const { session } = guard
+  const { id } = await params
+
+  const [existing] = await db
+    .select({ id: timesheets.id, status: timesheets.status })
+    .from(timesheets)
+    .where(and(eq(timesheets.id, id), eq(timesheets.tenantId, session.tenantId)))
+    .limit(1)
+
+  if (!existing) return NextResponse.json({ error: 'Timesheet not found' }, { status: 404 })
+  if (existing.status !== 'pending') {
+    return NextResponse.json({ error: 'Only pending timesheets can be deleted' }, { status: 409 })
+  }
+
+  await db.delete(timesheets).where(and(eq(timesheets.id, id), eq(timesheets.tenantId, session.tenantId)))
+  return NextResponse.json({ ok: true })
+}

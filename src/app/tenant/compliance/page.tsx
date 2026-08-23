@@ -3,6 +3,7 @@ import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 import EmptyState from '@/components/ui/EmptyState'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 import ExportButton from '@/components/ui/ExportButton'
@@ -106,6 +107,8 @@ function ScreeningTab() {
   const [form, setForm] = useState({ employeeId:'', checkType:'Police Check', referenceNumber:'', issuedDate:'', expiryDate:'', notes:'' })
   const [editId,    setEditId]    = useState<string | null>(null)
   const [editStatus, setEditStatus] = useState('')
+  const [confirm,   setConfirm]   = useState<ConfirmState>(null)
+  const [toast,     setToast]     = useState<ToastState>(null)
 
   function handleExport() {
     exportCsv({
@@ -162,6 +165,24 @@ function ScreeningTab() {
     })
     setEditId(null)
     load()
+  }
+
+  function doDelete(r: ScreeningRecord) {
+    setConfirm({
+      message: `Delete ${r.checkType} check for ${r.employeeFirstName} ${r.employeeLastName}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        try {
+          const res = await fetchWithAuth(`/api/tenant/compliance/screening?id=${r.id}`, { method: 'DELETE' })
+          if (!res.ok) throw new Error()
+          setRecords(prev => prev.filter(x => x.id !== r.id))
+          setToast({ message: 'Screening record deleted', type: 'success' })
+        } catch {
+          setToast({ message: 'Failed to delete record', type: 'error' })
+        }
+      },
+    })
   }
 
   return (
@@ -308,10 +329,19 @@ function ScreeningTab() {
                         ) : '—'}
                       </td>
                       <td className="px-5 py-3.5">
-                        <button onClick={() => setEditId(editId === r.id ? null : r.id)}
-                          className="text-xs text-purple-400 hover:text-purple-300 font-medium">
-                          {editId === r.id ? 'Cancel' : 'Update ↓'}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setEditId(editId === r.id ? null : r.id)}
+                            className="text-xs text-purple-400 hover:text-purple-300 font-medium">
+                            {editId === r.id ? 'Cancel' : 'Update ↓'}
+                          </button>
+                          <button onClick={() => doDelete(r)} title="Delete"
+                            className="text-gray-500 hover:text-red-400 transition">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -322,6 +352,8 @@ function ScreeningTab() {
           )}
         </div>
       )}
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }
@@ -335,6 +367,8 @@ function TrackingTab() {
   const [showForm,  setShowForm]  = useState(false)
   const [saving,    setSaving]    = useState(false)
   const [form, setForm] = useState({ employeeId:'', itemType:'', dueDate:'', notes:'' })
+  const [confirmTrk, setConfirmTrk] = useState<ConfirmState>(null)
+  const [toastTrk,   setToastTrk]   = useState<ToastState>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -369,6 +403,24 @@ function TrackingTab() {
       body: JSON.stringify({ id, status }),
     })
     load()
+  }
+
+  function deleteTrk(r: TrackingRecord) {
+    setConfirmTrk({
+      message: `Delete compliance item "${r.itemType}" for ${r.employeeFirstName} ${r.employeeLastName}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+      onConfirm: async () => {
+        try {
+          const res = await fetchWithAuth(`/api/tenant/compliance/tracking?id=${r.id}`, { method: 'DELETE' })
+          if (!res.ok) throw new Error()
+          setRecords(prev => prev.filter(x => x.id !== r.id))
+          setToastTrk({ message: 'Compliance item deleted', type: 'success' })
+        } catch {
+          setToastTrk({ message: 'Failed to delete item', type: 'error' })
+        }
+      },
+    })
   }
 
   return (
@@ -467,13 +519,22 @@ function TrackingTab() {
                       {r.lastCheckedAt ? new Date(r.lastCheckedAt).toLocaleDateString('en-AU') : '—'}
                     </td>
                     <td className="px-5 py-3.5">
-                      <div className="flex gap-1">
-                        {(['green','amber','red'] as const).map(s => (
-                          <button key={s} onClick={() => updateStatus(r.id, s)}
-                            className={`${STATUS_BADGE[s]} transition hover:opacity-80 cursor-pointer ${r.status === s ? 'ring-1 ring-white/30' : ''}`}>
-                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                          </button>
-                        ))}
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          {(['green','amber','red'] as const).map(s => (
+                            <button key={s} onClick={() => updateStatus(r.id, s)}
+                              className={`${STATUS_BADGE[s]} transition hover:opacity-80 cursor-pointer ${r.status === s ? 'ring-1 ring-white/30' : ''}`}>
+                              {s.charAt(0).toUpperCase() + s.slice(1)}
+                            </button>
+                          ))}
+                        </div>
+                        <button onClick={() => deleteTrk(r)} title="Delete"
+                          className="text-gray-500 hover:text-red-400 transition">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -484,6 +545,8 @@ function TrackingTab() {
           )}
         </div>
       )}
+      <ConfirmModal state={confirmTrk} onClose={() => setConfirmTrk(null)} />
+      <Toast state={toastTrk} onClose={() => setToastTrk(null)} />
     </div>
   )
 }

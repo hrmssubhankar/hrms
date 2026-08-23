@@ -2,6 +2,8 @@
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
+import Toast, { type ToastState } from '@/components/ui/Toast'
 
 type Contract = {
   id:string; employeeId:string; type:string; status:string
@@ -30,6 +32,8 @@ export default function ContractingPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [saving, setSaving]       = useState(false)
   const [form, setForm]           = useState({ employeeId:'', type:'employment' })
+  const [confirm,   setConfirm]   = useState<ConfirmState>(null)
+  const [toast,     setToast]     = useState<ToastState>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -51,6 +55,17 @@ export default function ContractingPage() {
     const res = await fetchWithAuth('/api/tenant/contracting', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
     if (res.ok) { const d = await res.json(); setShowCreate(false); await load(); setSelected(d.contract ?? null) }
     setSaving(false)
+  }
+
+  async function deleteContract(id: string) {
+    const res = await fetchWithAuth(`/api/tenant/contracting/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setContracts(prev => prev.filter(c => c.id !== id))
+      if (selected?.id === id) setSelected(null)
+      setToast({ message: 'Contract deleted', type: 'success' })
+    } else {
+      setToast({ message: 'Failed to delete contract', type: 'error' })
+    }
   }
 
   async function patch(id:string, updates:Record<string,unknown>) {
@@ -85,17 +100,25 @@ export default function ContractingPage() {
           </div>
           <div className="flex-1 overflow-y-auto">
             {loading ? <p className="p-4 text-sm text-gray-600 dark:text-gray-400">Loading…</p> : contracts.length===0 ? <p className="p-6 text-sm text-gray-600 dark:text-gray-400 text-center">No contracts</p> : contracts.map(c=>(
-              <button key={c.id} onClick={()=>setSelected(c)}
-                className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition dark:border-gray-800 ${selected?.id===c.id?'bg-indigo-50 border-l-2 border-l-indigo-500':''}`}>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate dark:text-white">{c.firstName} {c.lastName}</p>
-                    <p className="text-xs text-gray-500 capitalize dark:text-gray-400">{c.type.replace(/_/g,' ')}</p>
+              <div key={c.id} className={`group relative border-b border-gray-100 hover:bg-gray-50 transition dark:border-gray-800 ${selected?.id===c.id?'bg-indigo-50 border-l-2 border-l-indigo-500':''}`}>
+                <button onClick={()=>setSelected(c)} className="w-full text-left px-4 py-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate dark:text-white">{c.firstName} {c.lastName}</p>
+                      <p className="text-xs text-gray-500 capitalize dark:text-gray-400">{c.type.replace(/_/g,' ')}</p>
+                    </div>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${STATUS_COLORS[c.status]??''}`}>{c.status}</span>
                   </div>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${STATUS_COLORS[c.status]??''}`}>{c.status}</span>
-                </div>
-                <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>
-              </button>
+                  <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>
+                </button>
+                <button
+                  onClick={e=>{ e.stopPropagation(); setConfirm({ message: `Delete contract for ${c.firstName} ${c.lastName}? This cannot be undone.`, confirmLabel: 'Delete', onConfirm: () => deleteContract(c.id) }) }}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                  title="Delete contract"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+              </div>
             ))}
           </div>
         </div>
@@ -180,6 +203,8 @@ export default function ContractingPage() {
           </div>
         </div>
       )}
+      <ConfirmModal state={confirm} onClose={() => setConfirm(null)} />
+      <Toast state={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

@@ -90,3 +90,24 @@ export async function PATCH(req: NextRequest) {
   if (!contribution) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json({ contribution })
 }
+
+// DELETE /api/tenant/superannuation/contributions?id=...
+export async function DELETE(req: NextRequest) {
+  const { error, session } = await apiGuard('superannuation:write')
+  if (error) return error
+
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  const [deleted] = await db
+    .delete(superContributions)
+    .where(and(
+      eq(superContributions.id, id),
+      eq(superContributions.tenantId, session.tenantId),
+    ))
+    .returning()
+
+  if (!deleted) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json({ success: true })
+}
