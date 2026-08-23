@@ -20,7 +20,8 @@ type CsvColumn<T> = {
   header: string
   key: keyof T
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  format?: (value: any, row: T) => string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  format?: (value: any, row: any) => string
 }
 
 type ExportCsvOptions<T> = {
