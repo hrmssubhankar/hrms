@@ -6,7 +6,7 @@ import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import FileUpload, { type UploadResult } from '@/components/ui/FileUpload'
 import EmptyState from '@/components/ui/EmptyState'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
-import ExportButton from '@/components/ui/ExportButton'
+import { ExportButton } from '@/components/ui/ExportButton'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Doc = {

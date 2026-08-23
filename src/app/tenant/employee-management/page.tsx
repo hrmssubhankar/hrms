@@ -1,7 +1,7 @@
 'use client'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
-import ExportButton from '@/components/ui/ExportButton'
+import { ExportButton } from '@/components/ui/ExportButton'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
