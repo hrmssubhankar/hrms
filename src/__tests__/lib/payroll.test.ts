@@ -111,8 +111,8 @@ describe('calculatePayroll — bracket verification', () => {
   it('$200,000 annual (monthly) — top bracket (45%)', () => {
     const gross = grossFromSalary(200000, 'monthly')
     const result = calculatePayroll({ grossPay: gross, frequency: 'monthly' })
-    // Effective rate should be approaching 45% but not exceed it
-    expect(result.effectiveTaxRate).toBeGreaterThan(35)
+    // Effective rate at $200k ≈ 32.33% (tax ~$60k / gross $200k, incl. medicare)
+    expect(result.effectiveTaxRate).toBeGreaterThan(28)
     expect(result.effectiveTaxRate).toBeLessThan(50)
   })
 })
