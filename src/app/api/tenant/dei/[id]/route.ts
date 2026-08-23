@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const guard = await apiGuard('dei:write')
     if (guard.error) return guard.error
     const { session } = guard
@@ -18,7 +19,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       disabilityStatus: disabilityStatus ?? null,
       culturalBackground: culturalBackground || null,
       adjustmentsRequired: adjustmentsRequired || null,
-    }).where(and(eq(diversityData.id, params.id), eq(diversityData.tenantId, session.tenantId))).returning()
+    }).where(and(eq(diversityData.id, id), eq(diversityData.tenantId, session.tenantId))).returning()
     if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json({ record: updated })
   } catch {
@@ -28,10 +29,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const guard = await apiGuard('dei:write')
     if (guard.error) return guard.error
     const { session } = guard
-    await db.delete(diversityData).where(and(eq(diversityData.id, params.id), eq(diversityData.tenantId, session.tenantId)))
+    await db.delete(diversityData).where(and(eq(diversityData.id, id), eq(diversityData.tenantId, session.tenantId)))
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })

@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const guard = await apiGuard('recognition:write')
     if (guard.error) return guard.error
     const { session } = guard
@@ -15,7 +16,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!recipientId || !type) return NextResponse.json({ error: 'recipientId and type required' }, { status: 400 })
     const [record] = await db.update(recognitions)
       .set({ recipientId, nominatedBy: nominatedBy || null, type, reason: reason || null, period: period || null, isPublic: isPublic ?? true })
-      .where(and(eq(recognitions.id, params.id), eq(recognitions.tenantId, session.tenantId)))
+      .where(and(eq(recognitions.id, id), eq(recognitions.tenantId, session.tenantId)))
       .returning()
     if (!record) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json({ record })
@@ -26,11 +27,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const guard = await apiGuard('recognition:write')
     if (guard.error) return guard.error
     const { session } = guard
     const [record] = await db.delete(recognitions)
-      .where(and(eq(recognitions.id, params.id), eq(recognitions.tenantId, session.tenantId)))
+      .where(and(eq(recognitions.id, id), eq(recognitions.tenantId, session.tenantId)))
       .returning()
     if (!record) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json({ ok: true })
