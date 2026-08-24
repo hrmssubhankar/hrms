@@ -1,15 +1,18 @@
 /**
- * API route tests — GET /api/auth/me
- * src/app/api/auth/me/route.ts
+ * API route tests — GET /api/auth/refresh
+ * src/app/api/auth/refresh/route.ts
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // ── Next.js stubs ─────────────────────────────────────────────────────────────
 
+const mockCookiesSet = vi.fn()
+
 vi.mock('next/server', () => ({
   NextResponse: {
     json: (body: unknown, init?: ResponseInit) => ({
       _tag: 'NextResponse', body, status: init?.status ?? 200,
+      cookies: { set: mockCookiesSet },
     }),
   },
 }))
@@ -18,16 +21,24 @@ vi.mock('next/headers', () => ({
   cookies: vi.fn(() => Promise.resolve({ get: vi.fn(() => undefined) })),
 }))
 
-// ── Session stub ──────────────────────────────────────────────────────────────
+// ── Session / JWT stubs ───────────────────────────────────────────────────────
 
 const mockGetSession = vi.fn()
+const mockSignToken  = vi.fn()
+
 vi.mock('@/lib/auth/session', () => ({
-  getSession: () => mockGetSession(),
+  getSession:           () => mockGetSession(),
+  sessionCookieOptions: vi.fn((token: string) => ({ name: 'session', value: token })),
+}))
+
+vi.mock('@/lib/auth/jwt', () => ({
+  signToken: (...a: unknown[]) => mockSignToken(...a),
 }))
 
 // ── Import after mocks ────────────────────────────────────────────────────────
 
-import { GET } from '@/app/api/auth/me/route'
+import { GET } from '@/app/api/auth/refresh/route'
+import { sessionCookieOptions } from '@/lib/auth/session'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -36,11 +47,15 @@ const SESSION = {
   role: 'tenant_user', tenantId: 't-1', userRole: 'director',
 }
 
-beforeEach(() => vi.resetAllMocks())
+beforeEach(() => {
+  vi.resetAllMocks()
+  mockSignToken.mockResolvedValue('new-token-xyz')
+  vi.mocked(sessionCookieOptions).mockImplementation((token: string) => ({ name: 'session', value: token }) as any)
+})
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
-describe('GET /api/auth/me', () => {
+describe('GET /api/auth/refresh', () => {
   it('returns 401 when no session exists', async () => {
     mockGetSession.mockResolvedValue(null)
     const res = await GET() as any
@@ -48,19 +63,14 @@ describe('GET /api/auth/me', () => {
     expect(res.body.error).toMatch(/unauthenticated/i)
   })
 
-  it('returns 200 with session data and userRole', async () => {
+  it('returns 200 and sets a fresh session cookie', async () => {
     mockGetSession.mockResolvedValue(SESSION)
     const res = await GET() as any
     expect(res.status).toBe(200)
-    expect(res.body.user).toEqual(SESSION)
-    expect(res.body.userRole).toBe('director')
-    expect(res.body.role).toBe('tenant_user')
-  })
-
-  it('defaults userRole to "employee" when session has none', async () => {
-    const { userRole: _, ...noRole } = SESSION
-    mockGetSession.mockResolvedValue(noRole)
-    const res = await GET() as any
-    expect(res.body.userRole).toBe('employee')
+    expect(res.body.ok).toBe(true)
+    expect(mockSignToken).toHaveBeenCalledWith(expect.objectContaining({ sub: 'u-1' }))
+    expect(mockCookiesSet).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'session', value: 'new-token-xyz' }),
+    )
   })
 })
