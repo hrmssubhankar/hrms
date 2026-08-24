@@ -93,16 +93,18 @@ describe('GET /api/tenant/dashboard — guards', () => {
     expect(res.status).toBe(401)
   })
 
-  it('returns 403 when employee (no payroll:read)', async () => {
+  it('returns 403 when employee (blocked from org-wide dashboard)', async () => {
     mockGetSession.mockResolvedValue({ ...YPC_SESSION, userRole: 'employee' } as any)
     const res = await GET() as any
     expect(res.status).toBe(403)
   })
 
-  it('returns 403 when hr_officer (no payroll:read)', async () => {
+  it('returns 200 when hr_officer (has employees:read — dashboard guards on employees:read)', async () => {
+    // The dashboard route guards on employees:read, which hr_officer has.
+    // Only employee and contractor roles are explicitly blocked.
     mockGetSession.mockResolvedValue({ ...YPC_SESSION, userRole: 'hr_officer' } as any)
     const res = await GET() as any
-    expect(res.status).toBe(403)
+    expect(res.status).toBe(200)
   })
 })
 

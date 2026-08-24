@@ -81,7 +81,12 @@ function makeRequest(url: string) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockDb.select = vi.fn(() => makeChain([]) as any)
+  // GET makes two db.select calls: rows query + count query.
+  // Queue them: first returns [], second returns [{ value: 0 }].
+  mockDb.select = vi.fn()
+    .mockReturnValueOnce(makeChain([]) as any)
+    .mockReturnValueOnce(makeChain([{ value: 0 }]) as any)
+    .mockReturnValue(makeChain([{ value: 0 }]) as any)
 })
 
 // ── GET — guards ───────────────────────────────────────────────────────────────
@@ -93,12 +98,11 @@ describe('GET /api/tenant/employees — guards', () => {
     expect(res.status).toBe(401)
   })
 
-  it('returns 403 when contractor (no employees:read)', async () => {
+  it('returns 403 when contractor (org-wide directory is blocked; use /api/tenant/my-profile)', async () => {
     mockGetSession.mockResolvedValue({ ...YPC_SESSION, userRole: 'contractor' } as any)
     const res = await GET(makeRequest('https://app.test/api/tenant/employees')) as any
-    // Contractors DO have employees:read (own profile) — should be 200
-    // This validates our permission matrix is applied correctly
-    expect(res.status).toBe(200)
+    // The route explicitly blocks contractor from the org-wide employee directory.
+    expect(res.status).toBe(403)
   })
 
   it('returns 200 for director', async () => {
@@ -113,6 +117,11 @@ describe('GET /api/tenant/employees — guards', () => {
 describe('GET /api/tenant/employees — response shape', () => {
   beforeEach(() => {
     mockGetSession.mockResolvedValue(YPC_SESSION as any)
+    // Re-queue for each shape test (outer beforeEach runs first, inner runs after)
+    mockDb.select = vi.fn()
+      .mockReturnValueOnce(makeChain([]) as any)
+      .mockReturnValueOnce(makeChain([{ value: 0 }]) as any)
+      .mockReturnValue(makeChain([{ value: 0 }]) as any)
   })
 
   it('returns employees array and pagination metadata', async () => {
