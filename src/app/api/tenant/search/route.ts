@@ -17,14 +17,12 @@ export async function GET(req: NextRequest) {
   const isRestricted = session.userRole === 'employee' || session.userRole === 'contractor'
 
   try {
-    const [empRows, docRows, partRows] = await Promise.all([
-      isRestricted ? Promise.resolve([]) : db.select({ id: employees.id, firstName: employees.firstName, lastName: employees.lastName, email: employees.email, employeeNumber: employees.employeeNumber, isActive: employees.isActive }).from(employees).where(and(eq(employees.tenantId, tid), or(ilike(employees.firstName, like), ilike(employees.lastName, like), ilike(employees.email, like), ilike(employees.employeeNumber, like)))).limit(5),
-      db.select({ id: documents.id, title: documents.title, category: documents.category, status: documents.status, employeeId: documents.employeeId }).from(documents).where(and(eq(documents.tenantId, tid), or(ilike(documents.title, like), ilike(documents.category, like)))).limit(5),
-      isRestricted ? Promise.resolve([]) : db.select({ id: participants.id, firstName: participants.firstName, lastName: participants.lastName, ndisNumber: participants.ndisNumber, isActive: participants.isActive }).from(participants).where(and(eq(participants.tenantId, tid), or(ilike(participants.firstName, like), ilike(participants.lastName, like), ilike(participants.ndisNumber, like)))).limit(5),
-    ])
+    const empRows = isRestricted ? [] : await db.select({ id: employees.id, firstName: employees.firstName, lastName: employees.lastName, email: employees.email, employeeNumber: employees.employeeNumber, isActive: employees.isActive }).from(employees).where(and(eq(employees.tenantId, tid), or(ilike(employees.firstName, like), ilike(employees.lastName, like), ilike(employees.email, like), ilike(employees.employeeNumber, like)))).limit(5)
+    const docRows = await db.select({ id: documents.id, title: documents.title, category: documents.category, status: documents.status, employeeId: documents.employeeId }).from(documents).where(and(eq(documents.tenantId, tid), or(ilike(documents.title, like), ilike(documents.category, like)))).limit(5)
+    const partRows = isRestricted ? [] : await db.select({ id: participants.id, firstName: participants.firstName, lastName: participants.lastName, ndisNumber: participants.ndisNumber, isActive: participants.isActive }).from(participants).where(and(eq(participants.tenantId, tid), or(ilike(participants.firstName, like), ilike(participants.lastName, like), ilike(participants.ndisNumber, like)))).limit(5)
     return NextResponse.json({ employees: empRows, documents: docRows, participants: partRows })
   } catch (err) {
     console.error('GET /api/tenant/search', err)
-    return NextResponse.json({ error: 'Search failed' }, { status: 500 })
+    return NextResponse.json({ error: 'Search failed', detail: String(err) }, { status: 500 })
   }
 }
