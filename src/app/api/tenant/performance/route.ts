@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ records: filtered, stats })
   } catch (err) {
     console.error('GET /api/tenant/performance', err)
-    return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch reviews', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ review }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/performance', err)
-    return NextResponse.json({ error: 'Failed to create review' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create review', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -220,6 +220,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ review: updated })
   } catch (err) {
     console.error('PATCH /api/tenant/performance', err)
-    return NextResponse.json({ error: 'Failed to update review' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update review', detail: String(err) }, { status: 500 })
   }
 }

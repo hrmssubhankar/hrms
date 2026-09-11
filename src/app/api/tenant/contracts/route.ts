@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ contracts: rows, stats })
   } catch (err) {
     console.error('GET /api/tenant/contracts', err)
-    return NextResponse.json({ error: 'Failed to fetch contracts' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch contracts', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/contracts', err)
-    return NextResponse.json({ error: 'Failed to create contract' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create contract', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -152,6 +152,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ record: updated })
   } catch (err) {
     console.error('PATCH /api/tenant/contracts', err)
-    return NextResponse.json({ error: 'Failed to update contract' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update contract', detail: String(err) }, { status: 500 })
   }
 }

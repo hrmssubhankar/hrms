@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ competencies: comps, assessments, stats })
   } catch (err) {
     console.error('GET /api/tenant/competency', err)
-    return NextResponse.json({ error: 'Failed to fetch competencies' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch competencies', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/competency', err)
-    return NextResponse.json({ error: 'Failed to create' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -139,6 +139,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ record: updated })
   } catch (err) {
     console.error('PATCH /api/tenant/competency', err)
-    return NextResponse.json({ error: 'Failed to update assessment' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update assessment', detail: String(err) }, { status: 500 })
   }
 }

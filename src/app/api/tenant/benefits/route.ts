@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       .where(and(...conditions)).orderBy(desc(employeeBenefits.createdAt))
     return NextResponse.json({ benefits: rows })
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     }).returning()
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to create' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -67,7 +67,7 @@ export async function PATCH(req: NextRequest) {
     if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json({ record: updated })
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -81,6 +81,6 @@ export async function DELETE(req: NextRequest) {
       .where(and(eq(employeeBenefits.id, id), eq(employeeBenefits.tenantId, session.tenantId)))
     return NextResponse.json({ ok: true })
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to delete', detail: String(err) }, { status: 500 })
   }
 }

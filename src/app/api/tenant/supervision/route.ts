@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ records, stats })
   } catch (err) {
     console.error('GET /api/tenant/supervision', err)
-    return NextResponse.json({ error: 'Failed to fetch supervision records' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch supervision records', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/supervision', err)
-    return NextResponse.json({ error: 'Failed to schedule supervision' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to schedule supervision', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -109,7 +109,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('DELETE /api/tenant/supervision', err)
-    return NextResponse.json({ error: 'Failed to delete supervision record' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to delete supervision record', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -138,6 +138,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ record: updated })
   } catch (err) {
     console.error('PATCH /api/tenant/supervision', err)
-    return NextResponse.json({ error: 'Failed to update supervision record' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update supervision record', detail: String(err) }, { status: 500 })
   }
 }

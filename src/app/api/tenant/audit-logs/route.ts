@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ logs: rows, resources: allResources.map(r => r.resource) })
   } catch (err) {
     console.error('GET /api/tenant/audit-logs', err)
-    return NextResponse.json({ error: 'Failed to fetch audit logs' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch audit logs', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -81,6 +81,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/audit-logs', err)
-    return NextResponse.json({ error: 'Failed to write audit log' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to write audit log', detail: String(err) }, { status: 500 })
   }
 }

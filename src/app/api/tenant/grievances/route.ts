@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ records, stats })
   } catch (err) {
     console.error('GET /api/tenant/grievances', err)
-    return NextResponse.json({ error: 'Failed to fetch grievances' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch grievances', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/grievances', err)
-    return NextResponse.json({ error: 'Failed to lodge grievance' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to lodge grievance', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -166,6 +166,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ record: updated })
   } catch (err) {
     console.error('PATCH /api/tenant/grievances', err)
-    return NextResponse.json({ error: 'Failed to update grievance' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update grievance', detail: String(err) }, { status: 500 })
   }
 }

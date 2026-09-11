@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ records: filtered, stats, stageBreakdown, avgDaysToComplete })
   } catch (err) {
     console.error('GET /api/tenant/onboarding', err)
-    return NextResponse.json({ error: 'Failed to fetch onboarding records' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch onboarding records', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -159,13 +159,13 @@ export async function POST(req: NextRequest) {
           body:  `${emp.firstName} ${emp.lastName} has been added to the onboarding pipeline.`,
           link:  `/tenant/onboarding/${record.id}`,
         })
-      } catch { /* non-blocking */ }
+      } catch (err) { /* non-blocking */ }
     })()
 
     return NextResponse.json({ record }, { status: 201 })
   } catch (err: any) {
     console.error('POST /api/tenant/onboarding', err)
-    return NextResponse.json({ error: 'Failed to create onboarding record' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create onboarding record', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -185,6 +185,6 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('DELETE /api/tenant/onboarding', err)
-    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to delete', detail: String(err) }, { status: 500 })
   }
 }

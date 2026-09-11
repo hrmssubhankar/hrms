@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ employees: rows, page, limit, total: Number(total), pages: Math.ceil(Number(total) / limit) })
   } catch (err) {
     console.error('GET /api/tenant/employees', err)
-    return NextResponse.json({ error: 'Failed to fetch employees' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch employees', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -160,6 +160,6 @@ export async function POST(req: NextRequest) {
     if (err?.code === '23505') {
       return NextResponse.json({ error: 'An employee with this number or email already exists' }, { status: 409 })
     }
-    return NextResponse.json({ error: 'Failed to create employee' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create employee', detail: String(err) }, { status: 500 })
   }
 }

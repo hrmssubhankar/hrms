@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ records: filtered, stats })
   } catch (err) {
     console.error('GET /api/tenant/separation', err)
-    return NextResponse.json({ error: 'Failed to fetch separation records' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch separation records', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
     console.error('POST /api/tenant/separation', err)
-    return NextResponse.json({ error: 'Failed to create separation record' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create separation record', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -137,7 +137,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('DELETE /api/tenant/separation', err)
-    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to delete', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -182,6 +182,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ record: updated })
   } catch (err) {
     console.error('PATCH /api/tenant/separation', err)
-    return NextResponse.json({ error: 'Failed to update record' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update record', detail: String(err) }, { status: 500 })
   }
 }

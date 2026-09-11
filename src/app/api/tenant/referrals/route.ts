@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     }
     return NextResponse.json({ referrals: rows, stats })
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     }).returning()
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to create' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create', detail: String(err) }, { status: 500 })
   }
 }
 
@@ -63,6 +63,6 @@ export async function PATCH(req: NextRequest) {
       .where(and(eq(referrals.id, id), eq(referrals.tenantId, session.tenantId))).returning()
     return NextResponse.json({ record: updated })
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to update', detail: String(err) }, { status: 500 })
   }
 }
