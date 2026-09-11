@@ -16,7 +16,7 @@ import { hasPermission } from '@/lib/auth/permissions'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  const guard = await apiGuard('rostering:read')
+  const guard = await apiGuard('roster_shifts:read')
   if (guard.error) return guard.error
   const { session } = guard
 
