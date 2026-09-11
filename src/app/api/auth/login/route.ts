@@ -43,10 +43,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
       }
 
-      // Update last login
+      // Update last login (best-effort — column may not exist in older DB migrations)
       await db.update(superAdmins)
         .set({ lastLoginAt: new Date() })
         .where(eq(superAdmins.id, admin.id))
+        .catch(() => {})
 
       const token = await signToken({
         sub:   admin.id,
@@ -92,6 +93,7 @@ export async function POST(req: NextRequest) {
     await db.update(users)
       .set({ lastLoginAt: new Date() })
       .where(eq(users.id, user.id))
+      .catch(() => {})
 
     const jwtPayload = {
       sub:        user.id,
