@@ -47,34 +47,44 @@ export async function GET() {
   const session = await getSession()
   if (guard(session)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  await bootstrap()
+  try {
+    await bootstrap()
 
-  const result = await db.execute(sql`SELECT key, value FROM platform_config`)
-  const stored: Record<string, unknown> = {}
-  for (const row of result as unknown as { key: string; value: unknown }[]) {
-    stored[row.key] = row.value
+    const result = await db.execute(sql`SELECT key, value FROM platform_config`)
+    const stored: Record<string, unknown> = {}
+    for (const row of result as unknown as { key: string; value: unknown }[]) {
+      stored[row.key] = row.value
+    }
+
+    return NextResponse.json({ settings: { ...DEFAULTS, ...stored } })
+  } catch (err) {
+    console.error('[settings] GET error:', err)
+    return NextResponse.json({ error: 'Failed to load settings', detail: String(err) }, { status: 500 })
   }
-
-  return NextResponse.json({ settings: { ...DEFAULTS, ...stored } })
 }
 
 export async function PATCH(req: NextRequest) {
   const session = await getSession()
   if (guard(session)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  await bootstrap()
+  try {
+    await bootstrap()
 
-  const body = await req.json() as Record<string, unknown>
+    const body = await req.json() as Record<string, unknown>
 
-  for (const [key, value] of Object.entries(body)) {
-    // Only persist whitelisted keys
-    if (!(key in DEFAULTS)) continue
-    await db.execute(sql`
-      INSERT INTO platform_config (key, value)
-      VALUES (${key}, ${JSON.stringify(value)}::jsonb)
-      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
-    `)
+    for (const [key, value] of Object.entries(body)) {
+      // Only persist whitelisted keys
+      if (!(key in DEFAULTS)) continue
+      await db.execute(sql`
+        INSERT INTO platform_config (key, value)
+        VALUES (${key}, ${JSON.stringify(value)}::jsonb)
+        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+      `)
+    }
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('[settings] PATCH error:', err)
+    return NextResponse.json({ error: 'Failed to save settings', detail: String(err) }, { status: 500 })
   }
-
-  return NextResponse.json({ ok: true })
 }

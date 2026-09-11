@@ -52,6 +52,6 @@ export async function GET() {
     })
   } catch (err) {
     console.error('GET /api/super-admin/stats error:', err)
-    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch stats', detail: String(err) }, { status: 500 })
   }
 }

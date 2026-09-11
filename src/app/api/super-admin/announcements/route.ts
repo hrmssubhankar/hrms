@@ -79,7 +79,7 @@ export async function GET() {
     return NextResponse.json({ announcements })
   } catch (err) {
     console.error('GET /api/super-admin/announcements error:', err)
-    return NextResponse.json({ error: 'Failed to fetch announcements' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch announcements', detail: String(err) }, { status: 500 })
   }
 }
 

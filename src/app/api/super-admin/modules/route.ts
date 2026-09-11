@@ -62,6 +62,6 @@ export async function GET() {
     return NextResponse.json({ modules: moduleStats, tenantCount: allTenants.length })
   } catch (err) {
     console.error('GET /api/super-admin/modules error:', err)
-    return NextResponse.json({ error: 'Failed to fetch module stats' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch module stats', detail: String(err) }, { status: 500 })
   }
 }

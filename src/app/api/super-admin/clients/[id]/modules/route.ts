@@ -8,12 +8,17 @@ type RouteContext = { params: Promise<{ id: string }> }
 // GET — list all modules for a tenant
 export async function GET(_: NextRequest, ctx: RouteContext) {
   const { id } = await ctx.params
-  const modules = await db
-    .select()
-    .from(tenantModules)
-    .where(eq(tenantModules.tenantId, id))
-    .orderBy(tenantModules.moduleId)
-  return NextResponse.json({ modules })
+  try {
+    const modules = await db
+      .select()
+      .from(tenantModules)
+      .where(eq(tenantModules.tenantId, id))
+      .orderBy(tenantModules.moduleId)
+    return NextResponse.json({ modules })
+  } catch (err) {
+    console.error('[client-modules] GET error:', err)
+    return NextResponse.json({ error: 'Failed to fetch modules', detail: String(err) }, { status: 500 })
+  }
 }
 
 // PATCH — toggle a module on/off

@@ -67,21 +67,24 @@ function EditClientInner() {
       .then(r => r.json())
       .then(data => {
         const t = data.tenant
-        if (!t) return
+        if (!t) { setError('Client not found'); setLoading(false); return }
         const tier = t.tier ?? 'enterprise'
         setForm({ name: t.name ?? '', slug: t.slug ?? '', tier, primaryColor: t.primaryColor ?? '#1a4fff', isActive: t.isActive ?? true })
         setOriginalTier(tier)
         setLogoUrl(t.logoUrl ?? '')
         const s = typeof t.settings === 'string' ? JSON.parse(t.settings) : (t.settings ?? {})
+        // Theme settings may be nested under s.theme (from API) or at top level (legacy)
+        const themeSettings = s.theme ?? s
         setDeploymentUrl(s.deploymentUrl ?? '')
         setTheme({
-          accentColor:  s.accentColor  ?? '#7c3aed',
-          fontFamily:   s.fontFamily   ?? 'Inter',
-          borderRadius: s.borderRadius ?? '8px',
-          sidebarDark:  s.sidebarDark  !== false,
+          accentColor:  themeSettings.accentColor  ?? s.accentColor  ?? '#7c3aed',
+          fontFamily:   themeSettings.fontFamily   ?? s.fontFamily   ?? 'Inter',
+          borderRadius: themeSettings.borderRadius ?? s.borderRadius ?? '8px',
+          sidebarDark:  (themeSettings.sidebarDark ?? s.sidebarDark) !== false,
         })
         setLoading(false)
       })
+      .catch(err => { console.error('[edit-client] fetch error:', err); setError('Failed to load client'); setLoading(false) })
   }, [id])
 
   // ── Logo upload ───────────────────────────────────────
