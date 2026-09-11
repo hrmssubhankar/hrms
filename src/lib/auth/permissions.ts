@@ -199,6 +199,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'employees:read', 'employees:write',
     'roles:read',
     'audit_logs:read',
+    'payroll:read', 'payroll:write',
     'compliance:read', 'compliance:write',
     'documents:read', 'documents:write',
     'onboarding:read', 'onboarding:write',
