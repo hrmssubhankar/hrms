@@ -25,7 +25,7 @@ export async function GET(_: NextRequest, ctx: RouteContext) {
 
     return NextResponse.json({ users: tenantUsers })
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch users', detail: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch users', detail: String(error) }, { status: 500 })
   }
 }
 
