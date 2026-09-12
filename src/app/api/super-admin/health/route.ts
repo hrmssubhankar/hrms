@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, sql as pgClient } from '@/lib/db'
 import { tenants, users, auditLogs } from '@/lib/db/schema'
 import { count, desc } from 'drizzle-orm'
 import { getSession } from '@/lib/auth/session'
+import { MIGRATIONS } from '@/lib/db/migration-registry'
 
 export async function GET() {
   const session = await getSession()
@@ -46,6 +47,28 @@ export async function GET() {
   checks.environment = {
     status: missingEnv.length === 0 ? 'ok' : 'warn',
     message: missingEnv.length === 0 ? 'All required env vars set' : `Missing: ${missingEnv.join(', ')}`,
+  }
+
+  // Migration status
+  try {
+    await pgClient`
+      CREATE TABLE IF NOT EXISTS hrms_schema_migrations (
+        name        VARCHAR(200) PRIMARY KEY,
+        applied_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+        duration_ms INTEGER
+      )
+    `
+    const rows = await pgClient<{ name: string }[]>`SELECT name FROM hrms_schema_migrations`
+    const appliedNames = new Set(rows.map(r => r.name))
+    const pendingCount = MIGRATIONS.filter(m => !appliedNames.has(m.name)).length
+    checks.migrations = {
+      status: pendingCount === 0 ? 'ok' : 'warn',
+      message: pendingCount === 0
+        ? `All ${MIGRATIONS.length} migrations applied`
+        : `${pendingCount} migration(s) pending — visit /super-admin/migrations to apply`,
+    }
+  } catch (err: any) {
+    checks.migrations = { status: 'error', message: err.message ?? 'Could not check migration status' }
   }
 
   const overallStatus = Object.values(checks).some(c => c.status === 'error')
