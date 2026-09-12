@@ -11,7 +11,9 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  const guard = await apiGuard('analytics:read')
+  // reports_analytics:read covers team_leader, auditor, compliance_manager, operations_manager, payroll_officer
+  // analytics:read covers director, hr_officer — both grant access
+  const guard = await apiGuard('reports_analytics:read')
   if (guard.error) return guard.error
   const { session } = guard
 
