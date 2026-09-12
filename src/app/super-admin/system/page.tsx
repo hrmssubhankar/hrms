@@ -26,6 +26,7 @@ const CHECK_LABELS: Record<string, string> = {
   database:    '️  Database',
   auditLog:    'Audit Log',
   environment: 'Environment',
+  migrations:  'Schema Migrations',
 }
 
 export default function SystemHealthPage() {

@@ -1,0 +1,347 @@
+From f96f010d4fc8fe51da15830755bc0a8e1b76d5c2 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 12 Sep 2026 18:01:25 +0000
+Subject: [PATCH] feat: add /super-admin/migrations UI page
+
+- New page at /super-admin/migrations showing all migrations with
+  applied/pending badges, summary stat cards (total/applied/pending),
+  and an "Apply N Pending" button that calls POST /api/super-admin/migrations
+  and displays per-migration results with duration.
+
+- Sidebar: add Migrations nav item between Announcements and System Health
+  using a new 'database' icon.
+
+- Dashboard quick actions: add Migrations card.
+
+- System Health page: label the new 'migrations' check as
+  "Schema Migrations" in the checks grid.
+
+- Icon: add 'database' (cylinder / three-layer) SVG path.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01GuG33ES5Dv1To9X1kqPze4
+---
+ src/app/super-admin/migrations/page.tsx     | 250 ++++++++++++++++++++
+ src/app/super-admin/page.tsx                |   1 +
+ src/app/super-admin/system/page.tsx         |   1 +
+ src/components/super-admin/AdminSidebar.tsx |   1 +
+ src/components/ui/Icon.tsx                  |   3 +-
+ 5 files changed, 255 insertions(+), 1 deletion(-)
+ create mode 100644 src/app/super-admin/migrations/page.tsx
+
+diff --git a/src/app/super-admin/migrations/page.tsx b/src/app/super-admin/migrations/page.tsx
+new file mode 100644
+index 0000000..52e09c3
+--- /dev/null
++++ b/src/app/super-admin/migrations/page.tsx
+@@ -0,0 +1,250 @@
++'use client'
++
++import { useEffect, useState, useCallback } from 'react'
++
++// ── Types ────────────────────────────────────────────────────────────────────
++
++type MigrationStatus = 'applied' | 'pending'
++
++type Migration = {
++  name:        string
++  description: string
++  status:      MigrationStatus
++}
++
++type ListResponse = {
++  summary: { total: number; applied: number; pending: number }
++  migrations: Migration[]
++}
++
++type RunResult = {
++  name:       string
++  status:     'applied' | 'error'
++  durationMs: number
++  error?:     string
++}
++
++type RunResponse = {
++  message: string
++  results: RunResult[]
++}
++
++// ── Constants ────────────────────────────────────────────────────────────────
++
++const ACCENT = '#7c3aed'
++
++// ── Helpers ──────────────────────────────────────────────────────────────────
++
++function MigBadge({ status }: { status: MigrationStatus }) {
++  return status === 'applied' ? (
++    <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full
++      bg-green-900/40 text-green-300 border border-green-700/50">
++      <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
++      Applied
++    </span>
++  ) : (
++    <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full
++      bg-yellow-900/30 text-yellow-300 border border-yellow-700/50">
++      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block animate-pulse" />
++      Pending
++    </span>
++  )
++}
++
++function ResultBadge({ status }: { status: 'applied' | 'error' }) {
++  return status === 'applied' ? (
++    <span className="text-[11px] font-semibold text-green-400">✓ Applied</span>
++  ) : (
++    <span className="text-[11px] font-semibold text-red-400">✗ Error</span>
++  )
++}
++
++// ── Page ─────────────────────────────────────────────────────────────────────
++
++export default function MigrationsPage() {
++  const [data,    setData]    = useState<ListResponse | null>(null)
++  const [loading, setLoading] = useState(true)
++  const [error,   setError]   = useState<string | null>(null)
++
++  const [applying,   setApplying]   = useState(false)
++  const [runResults, setRunResults] = useState<RunResult[] | null>(null)
++  const [runMessage, setRunMessage] = useState<string | null>(null)
++  const [runError,   setRunError]   = useState<string | null>(null)
++
++  const fetchMigrations = useCallback(async () => {
++    setLoading(true)
++    setError(null)
++    try {
++      const res  = await fetch('/api/super-admin/migrations')
++      const json = await res.json()
++      if (res.ok) setData(json)
++      else setError(json.error ?? `Error ${res.status}`)
++    } catch {
++      setError('Network error — could not reach migrations API')
++    }
++    setLoading(false)
++  }, [])
++
++  useEffect(() => { fetchMigrations() }, [fetchMigrations])
++
++  async function applyPending() {
++    setApplying(true)
++    setRunResults(null)
++    setRunMessage(null)
++    setRunError(null)
++    try {
++      const res  = await fetch('/api/super-admin/migrations', { method: 'POST' })
++      const json: RunResponse = await res.json()
++      setRunResults(json.results ?? [])
++      setRunMessage(json.message ?? null)
++      if (!res.ok && res.status !== 207) setRunError(json.message ?? `Error ${res.status}`)
++    } catch {
++      setRunError('Network error — could not reach migrations API')
++    }
++    setApplying(false)
++    // Refresh list after run
++    await fetchMigrations()
++  }
++
++  const pending = data?.summary.pending ?? 0
++
++  return (
++    <div className="space-y-6">
++
++      {/* Header */}
++      <div className="flex items-start justify-between gap-4">
++        <div>
++          <h1 className="text-[22px] font-semibold tracking-tight text-white">Schema Migrations</h1>
++          <p className="text-[13px] text-white/40 mt-0.5">
++            All tenants share one database — running migrations here keeps every client in sync automatically.
++          </p>
++        </div>
++        <div className="flex items-center gap-2 shrink-0">
++          <button
++            onClick={fetchMigrations}
++            disabled={loading}
++            className="text-[13px] px-3 py-2 rounded-lg border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 transition disabled:opacity-40"
++          >
++            {loading ? '⟳' : '⟳ Refresh'}
++          </button>
++          <button
++            onClick={applyPending}
++            disabled={applying || loading || pending === 0}
++            className="text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
++            style={{
++              background: pending > 0
++                ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT}cc)`
++                : 'rgba(255,255,255,0.06)',
++              boxShadow: pending > 0 ? `0 0 20px ${ACCENT}40` : 'none',
++            }}
++          >
++            {applying
++              ? '⟳ Applying…'
++              : pending === 0
++              ? '✓ All Applied'
++              : `Apply ${pending} Pending`}
++          </button>
++        </div>
++      </div>
++
++      {/* Summary cards */}
++      {data && (
++        <div className="grid grid-cols-3 gap-3">
++          {[
++            { label: 'Total',   value: data.summary.total,   accent: 'rgba(255,255,255,0.5)' },
++            { label: 'Applied', value: data.summary.applied, accent: '#4ade80' },
++            { label: 'Pending', value: data.summary.pending, accent: data.summary.pending > 0 ? '#fbbf24' : '#4ade80' },
++          ].map(c => (
++            <div key={c.label} className="rounded-xl p-4"
++              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
++              <p className="text-[11px] uppercase tracking-widest text-white/30 mb-1">{c.label}</p>
++              <p className="text-2xl font-bold tabular-nums" style={{ color: c.accent }}>{c.value}</p>
++            </div>
++          ))}
++        </div>
++      )}
++
++      {/* Run results */}
++      {runResults && runResults.length > 0 && (
++        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
++          <div className="px-4 py-3 flex items-center justify-between"
++            style={{ background: runError ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
++            <p className="text-[13px] font-semibold" style={{ color: runError ? '#f87171' : '#4ade80' }}>
++              {runMessage}
++            </p>
++          </div>
++          {runResults.map((r, i) => (
++            <div key={r.name}
++              className="flex items-center gap-3 px-4 py-3"
++              style={i < runResults.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : {}}>
++              <ResultBadge status={r.status} />
++              <span className="text-[13px] text-white/70 font-mono flex-1 truncate">{r.name}</span>
++              <span className="text-[11px] text-white/25 shrink-0">{r.durationMs}ms</span>
++              {r.error && <span className="text-[11px] text-red-400 truncate max-w-[200px]">{r.error}</span>}
++            </div>
++          ))}
++        </div>
++      )}
++
++      {runResults && runResults.length === 0 && runMessage && (
++        <div className="rounded-xl px-4 py-3 text-[13px] text-white/50"
++          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
++          {runMessage}
++        </div>
++      )}
++
++      {/* Error state */}
++      {error && (
++        <div className="rounded-xl px-4 py-4"
++          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
++          <p className="text-[13px] font-medium text-red-400">{error}</p>
++        </div>
++      )}
++
++      {/* Migration list */}
++      {loading && !data ? (
++        <div className="space-y-2">
++          {Array.from({ length: 6 }).map((_, i) => (
++            <div key={i} className="h-14 rounded-xl animate-pulse"
++              style={{ background: 'rgba(255,255,255,0.03)' }} />
++          ))}
++        </div>
++      ) : data && (
++        <div className="rounded-xl overflow-hidden"
++          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
++          {/* Column headers */}
++          <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-2.5 border-b border-white/[0.05]">
++            <span className="text-[10px] uppercase tracking-widest text-white/25 font-semibold">Migration</span>
++            <span className="text-[10px] uppercase tracking-widest text-white/25 font-semibold text-right">Status</span>
++          </div>
++
++          {data.migrations.map((m, i) => (
++            <div
++              key={m.name}
++              className="grid grid-cols-[1fr_auto] gap-4 px-4 py-3.5 items-center hover:bg-white/[0.02] transition-colors"
++              style={i < data.migrations.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.04)' } : {}}
++            >
++              <div className="min-w-0">
++                <p className="text-[13px] font-mono text-white/80 truncate">{m.name}</p>
++                <p className="text-[11px] text-white/30 mt-0.5 truncate">{m.description}</p>
++              </div>
++              <MigBadge status={m.status} />
++            </div>
++          ))}
++        </div>
++      )}
++
++      {/* Info footer */}
++      <div className="rounded-xl px-4 py-3.5 flex items-start gap-3"
++        style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
++        <span className="text-purple-400 text-[16px] shrink-0 mt-0.5">ℹ</span>
++        <p className="text-[12px] text-white/40 leading-relaxed">
++          All migrations use <code className="text-purple-300/70 text-[11px]">CREATE TABLE IF NOT EXISTS</code> /
++          {' '}<code className="text-purple-300/70 text-[11px]">ADD COLUMN IF NOT EXISTS</code> — they are safe to
++          run multiple times. New clients added via the platform automatically share this database and inherit the
++          current schema with no extra steps.
++        </p>
++      </div>
++    </div>
++  )
++}
+diff --git a/src/app/super-admin/page.tsx b/src/app/super-admin/page.tsx
+index 0483871..7d21758 100644
+--- a/src/app/super-admin/page.tsx
++++ b/src/app/super-admin/page.tsx
+@@ -85,6 +85,7 @@ export default async function SuperAdminDashboard() {
+                 { label: 'Modules',       href: '/super-admin/modules',       desc: 'Cross-tenant module usage' },
+                 { label: 'Audit Logs',    href: '/super-admin/audit-logs',    desc: 'Platform-wide event log' },
+                 { label: 'Announcements', href: '/super-admin/announcements', desc: 'Broadcast to tenants' },
++                { label: 'Migrations',    href: '/super-admin/migrations',    desc: 'Apply pending schema changes' },
+                 { label: 'System Health', href: '/super-admin/system',        desc: 'DB status & infra checks' },
+                 { label: 'Admins',        href: '/super-admin/admins',        desc: 'Super admin accounts' },
+                 { label: 'Settings',      href: '/super-admin/settings',      desc: 'Email, security, maintenance' },
+diff --git a/src/app/super-admin/system/page.tsx b/src/app/super-admin/system/page.tsx
+index d23c2be..87f81b4 100644
+--- a/src/app/super-admin/system/page.tsx
++++ b/src/app/super-admin/system/page.tsx
+@@ -26,6 +26,7 @@ const CHECK_LABELS: Record<string, string> = {
+   database:    '️  Database',
+   auditLog:    'Audit Log',
+   environment: 'Environment',
++  migrations:  'Schema Migrations',
+ }
+ 
+ export default function SystemHealthPage() {
+diff --git a/src/components/super-admin/AdminSidebar.tsx b/src/components/super-admin/AdminSidebar.tsx
+index 1216181..dfb15d0 100644
+--- a/src/components/super-admin/AdminSidebar.tsx
++++ b/src/components/super-admin/AdminSidebar.tsx
+@@ -15,6 +15,7 @@ const NAV: NavItem[] = [
+   { href: '/super-admin/modules',          label: 'Modules',         icon: 'puzzle' },
+   { href: '/super-admin/audit-logs',       label: 'Audit Logs',      icon: 'clipboard-list' },
+   { href: '/super-admin/announcements',    label: 'Announcements',   icon: 'megaphone' },
++  { href: '/super-admin/migrations',        label: 'Migrations',      icon: 'database' },
+   { href: '/super-admin/system',           label: 'System Health',   icon: 'server' },
+   { href: '/super-admin/admins',           label: 'Admins',          icon: 'admin' },
+   { href: '/super-admin/settings',         label: 'Settings',        icon: 'gear' },
+diff --git a/src/components/ui/Icon.tsx b/src/components/ui/Icon.tsx
+index 730fd68..9aa6457 100644
+--- a/src/components/ui/Icon.tsx
++++ b/src/components/ui/Icon.tsx
+@@ -18,7 +18,7 @@ export type IconName =
+   | 'pin' | 'building' | 'intake' | 'cost' | 'billing' | 'puzzle'
+   | 'megaphone' | 'server' | 'admin' | 'screening' | 'promotions'
+   | 'star' | 'flag' | 'link' | 'rostering' | 'timesheet' | 'arrow-right'
+-  | 'password' | 'sparkle' | 'info' | 'mail'
++  | 'password' | 'sparkle' | 'info' | 'mail' | 'database'
+ 
+ const PATHS: Record<IconName, JSX.Element> = {
+   dashboard:      <><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
+@@ -94,6 +94,7 @@ const PATHS: Record<IconName, JSX.Element> = {
+   sparkle:        <><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></>,
+   info:           <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
+   mail:           <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></>,
++  database:       <><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></>,
+ }
+ 
+ type Props = {
+-- 
+2.43.0
+

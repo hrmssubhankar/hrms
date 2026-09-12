@@ -85,6 +85,7 @@ export default async function SuperAdminDashboard() {
                 { label: 'Modules',       href: '/super-admin/modules',       desc: 'Cross-tenant module usage' },
                 { label: 'Audit Logs',    href: '/super-admin/audit-logs',    desc: 'Platform-wide event log' },
                 { label: 'Announcements', href: '/super-admin/announcements', desc: 'Broadcast to tenants' },
+                { label: 'Migrations',    href: '/super-admin/migrations',    desc: 'Apply pending schema changes' },
                 { label: 'System Health', href: '/super-admin/system',        desc: 'DB status & infra checks' },
                 { label: 'Admins',        href: '/super-admin/admins',        desc: 'Super admin accounts' },
                 { label: 'Settings',      href: '/super-admin/settings',      desc: 'Email, security, maintenance' },

@@ -15,6 +15,7 @@ const NAV: NavItem[] = [
   { href: '/super-admin/modules',          label: 'Modules',         icon: 'puzzle' },
   { href: '/super-admin/audit-logs',       label: 'Audit Logs',      icon: 'clipboard-list' },
   { href: '/super-admin/announcements',    label: 'Announcements',   icon: 'megaphone' },
+  { href: '/super-admin/migrations',        label: 'Migrations',      icon: 'database' },
   { href: '/super-admin/system',           label: 'System Health',   icon: 'server' },
   { href: '/super-admin/admins',           label: 'Admins',          icon: 'admin' },
   { href: '/super-admin/settings',         label: 'Settings',        icon: 'gear' },
