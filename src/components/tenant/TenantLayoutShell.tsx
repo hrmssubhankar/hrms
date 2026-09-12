@@ -7,6 +7,7 @@ import TenantSidebar from '@/components/tenant/TenantSidebar'
 import TenantUserDropdown from '@/components/tenant/TenantUserDropdown'
 import CommandPalette from '@/components/ui/CommandPalette'
 import QuickAdd from '@/components/ui/QuickAdd'
+import PlatformAnnouncementBanner from '@/components/tenant/PlatformAnnouncementBanner'
 
 type NavItem = { key: string; label: string }
 
@@ -103,6 +104,9 @@ export default function TenantLayoutShell({
             />
           </div>
         </header>
+
+        {/* Platform-wide announcement banner (super admin broadcasts) */}
+        <PlatformAnnouncementBanner />
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5 bg-[#f3f4f8] dark:bg-[#050817]">
