@@ -65,3 +65,12 @@ FETCH_HEAD
 check-users.ts
 fix-superadmin.ts
 hrms-premium-redesign.patch
+
+# Claude working files — never commit
+Claude outputs/
+*.patch
+*.bundle
+*.sql.bak
+hrms-*.bundle
+yahweh_schema_backup.sql
+supabase/.temp/
