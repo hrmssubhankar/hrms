@@ -393,17 +393,6 @@ export const MIGRATIONS: Migration[] = [
     `,
   },
 
-  // ── 0057: password reset columns ──────────────────────────────────────────
-  {
-    name: '0057_password_reset_columns',
-    description: 'Add password_changed_at, password_reset_token, password_reset_expiry to hrms_users',
-    sql: `
-      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_changed_at  TIMESTAMPTZ;
-      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_reset_token TEXT;
-      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_reset_expiry TIMESTAMPTZ;
-    `,
-  },
-
   // ── 0057: password reset columns ────────────────────────────────────────────
   {
     name: '0057_password_reset_columns',
@@ -415,14 +404,41 @@ export const MIGRATIONS: Migration[] = [
     `,
   },
 
-  // ── 0057: password reset columns ────────────────────────────────────────────
+  // ── 0058: Missing columns on hrms_employees ─────────────────────────────────
   {
-    name: '0057_password_reset_columns',
-    description: 'Add password_changed_at, password_reset_token, password_reset_expiry to hrms_users',
+    name: '0058_employees_missing_columns',
+    description: 'Add entity_name, ndis_worker, compliance_status and other columns to hrms_employees if missing',
     sql: `
-      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_changed_at  TIMESTAMPTZ;
-      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_reset_token TEXT;
-      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_reset_expiry TIMESTAMPTZ;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS preferred_name          VARCHAR(100);
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS date_of_birth           DATE;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS gender                  VARCHAR(50);
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS address                 TEXT;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS photo_url               TEXT;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS entity_name             VARCHAR(100);
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS position_id             UUID;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS manager_id              UUID;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS award_classification    VARCHAR(100);
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS pay_level               VARCHAR(50);
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS hourly_rate             NUMERIC(10,4);
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS annual_salary           NUMERIC(12,2);
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS ordinary_hours_per_week NUMERIC(5,2) DEFAULT 38;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS probation_end_date      DATE;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS end_date                DATE;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS ndis_worker             BOOLEAN NOT NULL DEFAULT false;
+      ALTER TABLE hrms_employees ADD COLUMN IF NOT EXISTS compliance_status       VARCHAR(50) NOT NULL DEFAULT 'pending';
+    `,
+  },
+
+  // ── 0059: Missing columns on hrms_users ─────────────────────────────────────
+  {
+    name: '0059_users_missing_columns',
+    description: 'Add role, permissions, is_active, totp_secret, totp_enabled to hrms_users if missing',
+    sql: `
+      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS role         VARCHAR(100) NOT NULL DEFAULT 'employee';
+      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS permissions  JSONB        NOT NULL DEFAULT '[]';
+      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS is_active    BOOLEAN      NOT NULL DEFAULT true;
+      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS totp_secret  TEXT;
+      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN      NOT NULL DEFAULT false;
     `,
   },
 
