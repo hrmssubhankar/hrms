@@ -442,4 +442,257 @@ export const MIGRATIONS: Migration[] = [
     `,
   },
 
+  // ── 0060: Participant tables (NDIS CRM) ──────────────────────────────────────
+  {
+    name: '0060_participant_tables',
+    description: 'Create hrms_participants and all participant CRM/health/behaviour tables',
+    sql: `
+      CREATE TABLE IF NOT EXISTS hrms_participants (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id       UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        first_name      VARCHAR(100) NOT NULL,
+        last_name       VARCHAR(100) NOT NULL,
+        preferred_name  VARCHAR(100),
+        ndis_number     VARCHAR(20),
+        date_of_birth   DATE,
+        address         TEXT,
+        phone           VARCHAR(20),
+        email           VARCHAR(255),
+        support_level   VARCHAR(100),
+        funding_body    VARCHAR(100) DEFAULT 'NDIS',
+        plan_start_date DATE,
+        plan_end_date   DATE,
+        notes           TEXT,
+        is_active       BOOLEAN NOT NULL DEFAULT true,
+        created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at      TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participants_tenant_idx ON hrms_participants (tenant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_goals (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id       UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id  UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        goal_category   VARCHAR(100) NOT NULL DEFAULT 'daily_living',
+        title           VARCHAR(255) NOT NULL,
+        description     TEXT,
+        status          VARCHAR(50) NOT NULL DEFAULT 'not_started',
+        target_date     DATE,
+        achieved_date   DATE,
+        progress_notes  TEXT,
+        created_by      VARCHAR(255),
+        created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at      TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_goals_tenant_idx       ON hrms_participant_goals (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_goals_participant_idx  ON hrms_participant_goals (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_support_plans (
+        id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id         UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id    UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        plan_type         VARCHAR(50) NOT NULL DEFAULT 'initial',
+        title             VARCHAR(255) NOT NULL,
+        status            VARCHAR(50) NOT NULL DEFAULT 'draft',
+        plan_start_date   DATE,
+        plan_end_date     DATE,
+        review_date       DATE,
+        total_budget      NUMERIC(12,2),
+        funded_supports   TEXT,
+        coordinator_name  VARCHAR(255),
+        coordinator_org   VARCHAR(255),
+        coordinator_email VARCHAR(255),
+        notes             TEXT,
+        created_by        VARCHAR(255),
+        created_at        TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at        TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_support_plans_tenant_idx       ON hrms_participant_support_plans (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_support_plans_participant_idx  ON hrms_participant_support_plans (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_notes (
+        id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id      UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        note_type      VARCHAR(50) NOT NULL DEFAULT 'case_note',
+        title          VARCHAR(255),
+        content        TEXT NOT NULL,
+        visibility     VARCHAR(50) NOT NULL DEFAULT 'internal',
+        created_by     VARCHAR(255),
+        created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at     TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_notes_tenant_idx       ON hrms_participant_notes (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_notes_participant_idx  ON hrms_participant_notes (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_contacts (
+        id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id      UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        contact_type   VARCHAR(50) NOT NULL DEFAULT 'emergency',
+        first_name     VARCHAR(100) NOT NULL,
+        last_name      VARCHAR(100),
+        relationship   VARCHAR(100),
+        phone          VARCHAR(20),
+        email          VARCHAR(255),
+        address        TEXT,
+        is_primary     BOOLEAN NOT NULL DEFAULT false,
+        notes          TEXT,
+        created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at     TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_contacts_tenant_idx       ON hrms_participant_contacts (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_contacts_participant_idx  ON hrms_participant_contacts (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_medications (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id       UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id  UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        medication_name VARCHAR(255) NOT NULL,
+        generic_name    VARCHAR(255),
+        dosage          VARCHAR(100),
+        form            VARCHAR(50) NOT NULL DEFAULT 'tablet',
+        route           VARCHAR(50) NOT NULL DEFAULT 'oral',
+        frequency       VARCHAR(100),
+        prescribed_by   VARCHAR(255),
+        indication      TEXT,
+        instructions    TEXT,
+        start_date      DATE,
+        end_date        DATE,
+        status          VARCHAR(50) NOT NULL DEFAULT 'active',
+        requires_assist BOOLEAN NOT NULL DEFAULT true,
+        refrigerated    BOOLEAN NOT NULL DEFAULT false,
+        notes           TEXT,
+        created_by      VARCHAR(255),
+        created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at      TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_medications_tenant_idx       ON hrms_participant_medications (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_medications_participant_idx  ON hrms_participant_medications (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_medication_logs (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id       UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        medication_id   UUID NOT NULL REFERENCES hrms_participant_medications(id) ON DELETE CASCADE,
+        participant_id  UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        scheduled_time  TIMESTAMP NOT NULL,
+        administered_at TIMESTAMP,
+        outcome         VARCHAR(50) NOT NULL DEFAULT 'given',
+        administered_by VARCHAR(255),
+        notes           TEXT,
+        created_at      TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS medication_logs_tenant_idx       ON hrms_participant_medication_logs (tenant_id);
+      CREATE INDEX IF NOT EXISTS medication_logs_medication_idx   ON hrms_participant_medication_logs (medication_id);
+      CREATE INDEX IF NOT EXISTS medication_logs_participant_idx  ON hrms_participant_medication_logs (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_health_conditions (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id       UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id  UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        condition_name  VARCHAR(255) NOT NULL,
+        condition_type  VARCHAR(100) NOT NULL DEFAULT 'chronic',
+        icd_code        VARCHAR(20),
+        severity        VARCHAR(50) NOT NULL DEFAULT 'moderate',
+        diagnosed_date  DATE,
+        diagnosed_by    VARCHAR(255),
+        status          VARCHAR(50) NOT NULL DEFAULT 'active',
+        description     TEXT,
+        management_plan TEXT,
+        alerts          TEXT,
+        created_by      VARCHAR(255),
+        created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at      TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_health_conditions_tenant_idx       ON hrms_participant_health_conditions (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_health_conditions_participant_idx  ON hrms_participant_health_conditions (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_health_appointments (
+        id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id        UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id   UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        appointment_type VARCHAR(100) NOT NULL DEFAULT 'gp',
+        provider_name    VARCHAR(255),
+        provider_org     VARCHAR(255),
+        appointment_date TIMESTAMP NOT NULL,
+        duration_minutes INTEGER DEFAULT 30,
+        location         VARCHAR(255),
+        status           VARCHAR(50) NOT NULL DEFAULT 'scheduled',
+        purpose          TEXT,
+        outcome          TEXT,
+        follow_up        TEXT,
+        transport_needed BOOLEAN NOT NULL DEFAULT false,
+        support_needed   BOOLEAN NOT NULL DEFAULT false,
+        created_by       VARCHAR(255),
+        created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_health_appts_tenant_idx       ON hrms_participant_health_appointments (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_health_appts_participant_idx  ON hrms_participant_health_appointments (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_incidents (
+        id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id        UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id   UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        incident_type    VARCHAR(100) NOT NULL DEFAULT 'behavioural',
+        severity         VARCHAR(50) NOT NULL DEFAULT 'minor',
+        occurred_at      TIMESTAMP NOT NULL,
+        location         VARCHAR(255),
+        description      TEXT NOT NULL,
+        immediate_action TEXT,
+        reported_by      VARCHAR(255),
+        witnesses        TEXT,
+        notified_parties TEXT,
+        status           VARCHAR(50) NOT NULL DEFAULT 'open',
+        review_date      DATE,
+        resolution       TEXT,
+        created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_incidents_tenant_idx       ON hrms_participant_incidents (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_incidents_participant_idx  ON hrms_participant_incidents (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_behaviour_plans (
+        id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id        UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id   UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        plan_name        VARCHAR(255) NOT NULL,
+        behaviour_type   VARCHAR(100),
+        triggers         TEXT,
+        proactive_strats TEXT,
+        reactive_strats  TEXT,
+        de_escalation    TEXT,
+        post_incident    TEXT,
+        review_date      DATE,
+        approved_by      VARCHAR(255),
+        status           VARCHAR(50) NOT NULL DEFAULT 'active',
+        created_by       VARCHAR(255),
+        created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_behaviour_plans_tenant_idx       ON hrms_participant_behaviour_plans (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_behaviour_plans_participant_idx  ON hrms_participant_behaviour_plans (participant_id);
+
+      CREATE TABLE IF NOT EXISTS hrms_participant_restrictive_practices (
+        id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id        UUID NOT NULL REFERENCES hrms_tenants(id) ON DELETE CASCADE,
+        participant_id   UUID NOT NULL REFERENCES hrms_participants(id) ON DELETE CASCADE,
+        practice_type    VARCHAR(100) NOT NULL,
+        description      TEXT NOT NULL,
+        justification    TEXT,
+        authorised_by    VARCHAR(255),
+        authorised_date  DATE,
+        review_date      DATE,
+        expiry_date      DATE,
+        status           VARCHAR(50) NOT NULL DEFAULT 'active',
+        monitoring_notes TEXT,
+        created_by       VARCHAR(255),
+        created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS participant_restrictive_practices_tenant_idx       ON hrms_participant_restrictive_practices (tenant_id);
+      CREATE INDEX IF NOT EXISTS participant_restrictive_practices_participant_idx  ON hrms_participant_restrictive_practices (participant_id);
+    `,
+  },
+
 ]
