@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { tenants, tenantModules, users } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
-import { sendEmail } from '@/lib/email/resend'
+import { sendEmail, tenantEmailSettings } from '@/lib/email/resend'
 import { tenantSuspendedEmail, tenantReactivatedEmail, tenantTierChangedEmail } from '@/lib/email/templates'
 
 type RouteContext = { params: Promise<{ id: string }> }
@@ -59,25 +59,33 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
 
     // Email notifications (fire-and-forget)
     try {
-      const loginUrl = (existingSettings.deploymentUrl as string | undefined) ?? `https://${updated.slug}-hrmsapp.vercel.app`
+      // Prefer the newly saved deploymentUrl from settings, fall back to slug-based URL
+      const savedSettings = newSettings as Record<string, unknown>
+      const loginUrl = (savedSettings.deploymentUrl as string | undefined)?.trim()
+        || `https://${updated.slug}-hrmsapp.vercel.app`
+
+      // Per-tenant email settings (Resend key, From address, Reply-To)
+      const emailOpts = tenantEmailSettings(savedSettings)
+
       // Get tenant admin emails
       const admins = await db.select({ email: users.email })
         .from(users)
         .where(and(eq(users.tenantId, id), eq(users.isActive, true), eq(users.role, 'director')))
       const adminEmails = admins.map(a => a.email)
+
       if (adminEmails.length) {
         if (isActive === false) {
           const tmpl = tenantSuspendedEmail({ recipientName: 'Portal Admin', orgName: updated.name, loginUrl })
-          sendEmail({ to: adminEmails, ...tmpl }).catch(console.error)
+          sendEmail(tmpl, emailOpts).catch(console.error)
         } else if (isActive === true && existing) {
           const tmpl = tenantReactivatedEmail({ recipientName: 'Portal Admin', orgName: updated.name, loginUrl })
-          sendEmail({ to: adminEmails, ...tmpl }).catch(console.error)
+          sendEmail(tmpl, emailOpts).catch(console.error)
         }
         if (tier !== undefined && existing) {
           const prev = await db.select({ tier: tenants.tier }).from(tenants).where(eq(tenants.id, id))
           if (prev[0]?.tier && prev[0].tier !== tier) {
             const tmpl = tenantTierChangedEmail({ recipientName: 'Portal Admin', orgName: updated.name, oldTier: prev[0].tier, newTier: tier, loginUrl })
-            sendEmail({ to: adminEmails, ...tmpl }).catch(console.error)
+            sendEmail(tmpl, emailOpts).catch(console.error)
           }
         }
       }

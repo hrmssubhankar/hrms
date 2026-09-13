@@ -37,11 +37,13 @@ const PRESET_THEMES = [
 const INPUT = 'w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500'
 const LABEL = 'block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1'
 
+type TabId = 'general' | 'branding' | 'theme' | 'errorPages' | 'config'
+
 function EditClientInner() {
-  const { id }    = useParams<{ id: string }>()
-  const router    = useRouter()
+  const { id }       = useParams<{ id: string }>()
+  const router       = useRouter()
   const searchParams = useSearchParams()
-  const fileRef   = useRef<HTMLInputElement>(null)
+  const fileRef      = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     name: '', slug: '', tier: 'enterprise',
@@ -50,23 +52,48 @@ function EditClientInner() {
   const [theme, setTheme] = useState({
     accentColor: '#7c3aed', fontFamily: 'Inter', borderRadius: '8px', sidebarDark: true,
   })
+  const [logoUrl,       setLogoUrl]       = useState<string>('')
+  const [logoUploading, setLogoUploading] = useState(false)
+  const [deploymentUrl, setDeploymentUrl] = useState<string>('')
+  const [originalTier,  setOriginalTier]  = useState('enterprise')
+
+  // ── 404 / Error page config ──────────────────────────────
   const [notFound, setNotFound] = useState({
     headline: 'Page not found',
     message:  "The page you're looking for doesn't exist or has been moved.",
     ctaLabel: 'Go to dashboard',
     ctaHref:  '/tenant/dashboard',
   })
-  const [logoUrl,        setLogoUrl]        = useState<string>('')
-  const [logoUploading,  setLogoUploading]  = useState(false)
-  const [deploymentUrl,  setDeploymentUrl]  = useState<string>('')
-  const [originalTier,   setOriginalTier]   = useState('enterprise')
+
+  // ── Configuration (email / SMTP / limits) ────────────────
+  const [emailConfig, setEmailConfig] = useState({
+    emailFrom:    '',   // e.g. "Yahweh Care <noreply@yahwehcare.com.au>"
+    supportEmail: '',
+    replyTo:      '',
+  })
+  const [smtpConfig, setSmtpConfig] = useState({
+    resendApiKey: '',
+    useSmtp:      false,
+    smtpHost:     '',
+    smtpPort:     '587',
+    smtpUser:     '',
+    smtpPass:     '',
+  })
+  const [limits, setLimits] = useState({
+    maxEmployees:   '',
+    maxStorageMb:   '',
+    allowedFileTypes: 'pdf,docx,xlsx,png,jpg',
+  })
+  const [resendKeyVisible, setResendKeyVisible] = useState(false)
+  const [smtpPassVisible,  setSmtpPassVisible]  = useState(false)
+
   const [loading,      setLoading]      = useState(true)
   const [saving,       setSaving]       = useState(false)
   const [applyingTier, setApplyingTier] = useState(false)
-  const initialTab = (searchParams.get('tab') as 'general'|'branding'|'theme'|'errorPages') ?? 'general'
-  const [activeTab,    setActiveTab]    = useState<'general'|'branding'|'theme'|'errorPages'>(initialTab)
-  const [error,        setError]        = useState('')
-  const [success,      setSuccess]      = useState('')
+  const initialTab = (searchParams.get('tab') as TabId) ?? 'general'
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab)
+  const [error,   setError]   = useState('')
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     fetch(`/api/super-admin/clients/${id}`)
@@ -79,7 +106,6 @@ function EditClientInner() {
         setOriginalTier(tier)
         setLogoUrl(t.logoUrl ?? '')
         const s = typeof t.settings === 'string' ? JSON.parse(t.settings) : (t.settings ?? {})
-        // Theme settings may be nested under s.theme (from API) or at top level (legacy)
         const themeSettings = s.theme ?? s
         setDeploymentUrl(s.deploymentUrl ?? '')
         setTheme({
@@ -88,16 +114,28 @@ function EditClientInner() {
           borderRadius: themeSettings.borderRadius ?? s.borderRadius ?? '8px',
           sidebarDark:  (themeSettings.sidebarDark ?? s.sidebarDark) !== false,
         })
-        // Load custom 404 config if set
+        // notFound config
         if (s.notFound && typeof s.notFound === 'object') {
           setNotFound(prev => ({ ...prev, ...s.notFound }))
+        }
+        // email config
+        if (s.email && typeof s.email === 'object') {
+          setEmailConfig(prev => ({ ...prev, ...s.email }))
+        }
+        // smtp config
+        if (s.smtp && typeof s.smtp === 'object') {
+          setSmtpConfig(prev => ({ ...prev, ...s.smtp }))
+        }
+        // limits
+        if (s.limits && typeof s.limits === 'object') {
+          setLimits(prev => ({ ...prev, ...s.limits }))
         }
         setLoading(false)
       })
       .catch(err => { console.error('[edit-client] fetch error:', err); setError('Failed to load client'); setLoading(false) })
   }, [id])
 
-  // ── Logo upload ───────────────────────────────────────
+  // ── Logo upload ───────────────────────────────────────────
   async function handleLogoFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -123,12 +161,10 @@ function EditClientInner() {
     setLogoUrl(''); setSuccess('Logo removed.')
   }
 
-  // ── Save general ──────────────────────────────────────
+  // ── Save general ──────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError(''); setSuccess('')
     try {
-      // General tab: only save form fields — do NOT send logoUrl or settings
-      // (logo is managed by its own API; settings by the Theme tab)
       const res  = await fetch(`/api/super-admin/clients/${id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body:   JSON.stringify({ name: form.name, slug: form.slug, tier: form.tier, isActive: form.isActive }),
@@ -141,7 +177,7 @@ function EditClientInner() {
     finally { setSaving(false); setTimeout(() => setSuccess(''), 3000) }
   }
 
-  // ── Save theme ────────────────────────────────────────
+  // ── Save theme ────────────────────────────────────────────
   async function saveTheme() {
     setSaving(true); setError(''); setSuccess('')
     const settings = { ...theme, primaryColor: form.primaryColor, logoUrl }
@@ -156,7 +192,7 @@ function EditClientInner() {
     finally { setSaving(false); setTimeout(() => setSuccess(''), 4000) }
   }
 
-  // ── Save 404 / error page config ──────────────────────
+  // ── Save notFound (Error Pages tab) ──────────────────────
   async function saveNotFound() {
     setSaving(true); setError(''); setSuccess('')
     try {
@@ -170,7 +206,32 @@ function EditClientInner() {
     finally { setSaving(false); setTimeout(() => setSuccess(''), 4000) }
   }
 
-  // ── Apply tier modules ────────────────────────────────
+  // ── Save configuration ────────────────────────────────────
+  async function saveConfig() {
+    setSaving(true); setError(''); setSuccess('')
+    try {
+      const res = await fetch(`/api/super-admin/clients/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: {
+            deploymentUrl: deploymentUrl.trim(),
+            email:  emailConfig,
+            smtp:   smtpConfig,
+            limits: {
+              ...limits,
+              maxEmployees: limits.maxEmployees ? Number(limits.maxEmployees) : undefined,
+              maxStorageMb: limits.maxStorageMb ? Number(limits.maxStorageMb) : undefined,
+            },
+          },
+        }),
+      })
+      if (!res.ok) throw new Error('Save failed')
+      setSuccess('Configuration saved — email and limits apply immediately.')
+    } catch (err: any) { setError(err.message) }
+    finally { setSaving(false); setTimeout(() => setSuccess(''), 4000) }
+  }
+
+  // ── Apply tier modules ────────────────────────────────────
   async function applyTierDefaults() {
     setApplyingTier(true); setError('')
     const modules = ENTERPRISE_MODULES.map(moduleId => ({
@@ -189,9 +250,14 @@ function EditClientInner() {
 
   if (loading) return <div className="text-gray-600 dark:text-gray-400 p-6">Loading client…</div>
 
-
   const tierChanged = form.tier !== originalTier
-  const previewBg   = form.primaryColor
+  const TABS: { id: TabId; label: string }[] = [
+    { id: 'general',    label: 'General' },
+    { id: 'branding',   label: 'Logo & Branding' },
+    { id: 'theme',      label: 'Theme & Colours' },
+    { id: 'errorPages', label: 'Error Pages' },
+    { id: 'config',     label: 'Configuration' },
+  ]
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -220,8 +286,8 @@ function EditClientInner() {
       </div>
 
       {/* Alerts */}
-      {error   && <div className="bg-red-50 dark:bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
-      {success && <div className="bg-green-50 dark:bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">{success}</div>}
+      {error   && <div className="bg-red-50 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
+      {success && <div className="bg-green-50 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg p-3 text-sm text-green-700 dark:text-green-300">{success}</div>}
 
       {/* Tier-change banner */}
       {tierChanged && (
@@ -238,15 +304,10 @@ function EditClientInner() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
-        {([
-          { id: 'general',    label: '️ General' },
-          { id: 'branding',   label: 'Logo & Branding' },
-          { id: 'theme',      label: 'Theme & Colours' },
-          { id: 'errorPages', label: 'Error Pages' },
-        ] as { id: 'general'|'branding'|'theme'|'errorPages'; label: string }[]).map(t => (
+      <div className="flex overflow-x-auto border-b border-gray-200 dark:border-gray-800 gap-0">
+        {TABS.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition ${activeTab === t.id ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300'}`}>
+            className={`shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${activeTab === t.id ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>
             {t.label}
           </button>
         ))}
@@ -264,7 +325,7 @@ function EditClientInner() {
             </div>
             <button type="button" onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}
               className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${form.isActive ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
-              <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform  dark:bg-gray-900${form.isActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform ${form.isActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
           </div>
 
@@ -289,7 +350,7 @@ function EditClientInner() {
             <div className="space-y-2 mt-2">
               {TIERS.map(t => (
                 <label key={t.value} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
-                  form.tier === t.value ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30' : 'border-gray-300 dark:border-gray-700 hover:border-gray-600'}`}>
+                  form.tier === t.value ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : 'border-gray-300 dark:border-gray-700 hover:border-gray-600'}`}>
                   <input type="radio" name="tier" value={t.value} checked={form.tier === t.value}
                     onChange={() => setForm(f => ({ ...f, tier: t.value }))} className="mt-0.5" />
                   <div className="flex-1">
@@ -305,23 +366,23 @@ function EditClientInner() {
             </div>
           </div>
 
-          {/* Deployment URL */}
+          {/* Deployment URL read-only summary */}
           <div className="rounded-lg bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 px-4 py-3">
             <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Vercel Deployment URL</p>
             {deploymentUrl ? (
               <div className="flex items-center gap-2">
                 <a href={deploymentUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-sm text-purple-400 hover:text-purple-700 dark:text-purple-300 truncate flex-1 underline underline-offset-2">
+                  className="text-sm text-purple-600 dark:text-purple-400 hover:underline truncate flex-1">
                   {deploymentUrl}
                 </a>
                 <a href={`${deploymentUrl}/login`} target="_blank" rel="noopener noreferrer"
-                  className="shrink-0 text-xs border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:bg-purple-900/30 px-2.5 py-1 rounded-lg transition">
+                  className="shrink-0 text-xs border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 px-2.5 py-1 rounded-lg transition">
                   Open Portal →
                 </a>
               </div>
             ) : (
               <p className="text-sm text-gray-500 italic dark:text-gray-400">
-                Not yet deployed — set <code className="text-gray-600 dark:text-gray-400">VERCEL_API_TOKEN</code> + <code className="text-gray-600 dark:text-gray-400">VERCEL_TEAM_ID</code> in env vars to auto-create on next client add.
+                Not set — add it in the <button type="button" onClick={() => setActiveTab('config')} className="underline text-purple-600 dark:text-purple-400">Configuration tab</button>.
               </p>
             )}
           </div>
@@ -332,7 +393,7 @@ function EditClientInner() {
               {saving ? 'Saving…' : 'Save Changes'}
             </button>
             <button type="button" onClick={() => router.push('/super-admin/clients')}
-              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white text-sm px-4 py-2.5 rounded-lg transition">
+              className="border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm px-4 py-2.5 rounded-lg transition">
               ← Clients
             </button>
           </div>
@@ -342,8 +403,6 @@ function EditClientInner() {
       {/* ── BRANDING TAB ── */}
       {activeTab === 'branding' && (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-6">
-
-          {/* Logo upload */}
           <div>
             <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">Organisation Logo</p>
             <div className="flex items-start gap-4">
@@ -351,19 +410,19 @@ function EditClientInner() {
                 {logoUrl ? (
                   <img src={logoUrl} alt="Logo" className="max-h-full max-w-full object-contain p-2" />
                 ) : (
-                  <span className="text-3xl text-gray-600 dark:text-gray-400"></span>
+                  <span className="text-3xl text-gray-400">🖼</span>
                 )}
               </div>
               <div className="space-y-2 flex-1">
                 <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"
                   className="hidden" onChange={handleLogoFile} />
                 <button onClick={() => fileRef.current?.click()} disabled={logoUploading}
-                  className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-700 disabled:opacity-60 text-gray-900 dark:text-white text-sm px-4 py-2.5 rounded-lg transition">
+                  className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700 disabled:opacity-60 text-gray-900 dark:text-white text-sm px-4 py-2.5 rounded-lg transition">
                   {logoUploading ? '⏳ Uploading…' : 'Upload Logo'}
                 </button>
                 {logoUrl && (
                   <button onClick={removeLogo}
-                    className="w-full border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-100 dark:bg-red-900/30 text-sm px-4 py-2.5 rounded-lg transition">
+                    className="w-full border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 text-sm px-4 py-2.5 rounded-lg transition">
                     Remove Logo
                   </button>
                 )}
@@ -372,14 +431,12 @@ function EditClientInner() {
             </div>
           </div>
 
-          {/* Portal name */}
           <div>
             <label className={LABEL}>Portal Display Name</label>
             <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={INPUT} />
             <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Shown on login page, browser tab, and portal header.</p>
           </div>
 
-          {/* Live preview */}
           <div className="rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700">
             <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 text-xs text-gray-500 font-medium dark:text-gray-400">Login page preview</div>
             <div className="bg-gray-50 dark:bg-gray-950 flex items-center justify-center py-8 px-4">
@@ -387,7 +444,7 @@ function EditClientInner() {
                 {logoUrl ? (
                   <img src={logoUrl} alt="Logo" className="h-12 mx-auto object-contain" />
                 ) : (
-                  <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-gray-900 dark:text-white text-xl font-bold"
+                  <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center text-white text-xl font-bold"
                     style={{ background: form.primaryColor }}>
                     {form.name[0] ?? 'C'}
                   </div>
@@ -427,8 +484,6 @@ function EditClientInner() {
       {/* ── THEME TAB ── */}
       {activeTab === 'theme' && (
         <div className="space-y-5">
-
-          {/* Preset pills */}
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
             <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">Preset Themes</p>
             <div className="flex flex-wrap gap-2">
@@ -436,7 +491,7 @@ function EditClientInner() {
                 <button key={p.label}
                   onClick={() => { setForm(f => ({ ...f, primaryColor: p.primaryColor })); setTheme(t => ({ ...t, accentColor: p.accentColor })) }}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition ${
-                    form.primaryColor === p.primaryColor ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-500'}`}>
+                    form.primaryColor === p.primaryColor ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-500'}`}>
                   <span className="w-3 h-3 rounded-full" style={{ background: p.primaryColor }} />
                   {p.label}
                 </button>
@@ -445,8 +500,6 @@ function EditClientInner() {
           </div>
 
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 space-y-5">
-
-            {/* Primary + Accent colors */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={LABEL}>Primary Colour</label>
@@ -474,13 +527,12 @@ function EditClientInner() {
               </div>
             </div>
 
-            {/* Font */}
             <div>
               <label className={LABEL}>Font Family</label>
               <div className="flex flex-wrap gap-2">
                 {FONT_OPTIONS.map(f => (
                   <button key={f} onClick={() => setTheme(t => ({ ...t, fontFamily: f }))}
-                    className={`px-3 py-1.5 rounded-lg border text-sm transition ${theme.fontFamily === f ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
+                    className={`px-3 py-1.5 rounded-lg border text-sm transition ${theme.fontFamily === f ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
                     style={{ fontFamily: f }}>
                     {f}
                   </button>
@@ -488,13 +540,12 @@ function EditClientInner() {
               </div>
             </div>
 
-            {/* Border radius */}
             <div>
               <label className={LABEL}>Border Radius</label>
               <div className="flex gap-2">
                 {RADIUS_OPTIONS.map(r => (
                   <button key={r.value} onClick={() => setTheme(t => ({ ...t, borderRadius: r.value }))}
-                    className={`flex-1 py-2 text-xs border transition ${theme.borderRadius === r.value ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30 text-white' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
+                    className={`flex-1 py-2 text-xs border transition ${theme.borderRadius === r.value ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-600'}`}
                     style={{ borderRadius: r.value }}>
                     {r.label}
                   </button>
@@ -502,7 +553,6 @@ function EditClientInner() {
               </div>
             </div>
 
-            {/* Sidebar dark toggle */}
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Dark Sidebar</p>
@@ -510,7 +560,7 @@ function EditClientInner() {
               </div>
               <button onClick={() => setTheme(t => ({ ...t, sidebarDark: !t.sidebarDark }))}
                 className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${theme.sidebarDark ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform  dark:bg-gray-900${theme.sidebarDark ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform ${theme.sidebarDark ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </button>
             </div>
 
@@ -518,7 +568,7 @@ function EditClientInner() {
             <div className="rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700" style={{ fontFamily: theme.fontFamily }}>
               <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">Live preview</div>
               <div className="flex h-48">
-                <div className="w-32 flex flex-col text-gray-900 dark:text-white text-xs" style={{ background: theme.sidebarDark ? '#111827' : form.primaryColor }}>
+                <div className="w-32 flex flex-col text-white text-xs" style={{ background: theme.sidebarDark ? '#111827' : form.primaryColor }}>
                   <div className="px-3 py-2.5 border-b border-white/10 font-bold truncate" style={{ borderRadius: theme.borderRadius }}>
                     {form.name || 'Client Portal'}
                   </div>
@@ -532,13 +582,13 @@ function EditClientInner() {
                 <div className="flex-1 bg-gray-50 dark:bg-gray-950 p-3 space-y-2">
                   <div className="flex gap-2">
                     {[{ label: '48 Staff', bg: form.primaryColor }, { label: '3 Leave', bg: theme.accentColor }, { label: '2 Due', bg: '#64748b' }].map(s => (
-                      <div key={s.label} className="flex-1 rounded py-1.5 text-center text-gray-900 dark:text-white text-xs font-semibold"
+                      <div key={s.label} className="flex-1 rounded py-1.5 text-center text-white text-xs font-semibold"
                         style={{ background: s.bg, borderRadius: theme.borderRadius }}>{s.label}</div>
                     ))}
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-400">Recent Activity</div>
                   <div className="bg-white dark:bg-gray-900 rounded p-2 text-xs text-gray-500 dark:text-gray-400" style={{ borderRadius: theme.borderRadius }}>John Smith — Leave Approved</div>
-                  <button className="text-xs text-gray-900 dark:text-white px-3 py-1 font-medium"
+                  <button className="text-xs text-white px-3 py-1 font-medium"
                     style={{ background: form.primaryColor, borderRadius: theme.borderRadius }}>+ Add Employee</button>
                 </div>
               </div>
@@ -557,100 +607,250 @@ function EditClientInner() {
 
       {/* ── ERROR PAGES TAB ── */}
       {activeTab === 'errorPages' && (
-        <div className="space-y-5">
-
-          {/* Info banner */}
-          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-            <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Custom 404 page</p>
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              These settings control what this tenant's users see when they navigate to a page that doesn't exist.
-              Changes are live immediately — no rebuild required.
-            </p>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-5">
+          <div>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">404 Page Content</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Customise what users see when they hit a page that doesn't exist. Changes are live immediately — no redeploy needed.</p>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-5">
+          <div>
+            <label className={LABEL}>Headline</label>
+            <input value={notFound.headline} onChange={e => setNotFound(n => ({ ...n, headline: e.target.value }))} className={INPUT} placeholder="Page not found" />
+          </div>
 
+          <div>
+            <label className={LABEL}>Message</label>
+            <textarea rows={3} value={notFound.message} onChange={e => setNotFound(n => ({ ...n, message: e.target.value }))}
+              className={INPUT + ' resize-none'} placeholder="The page you're looking for doesn't exist or has been moved." />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={LABEL}>Headline</label>
-              <input
-                value={notFound.headline}
-                onChange={e => setNotFound(n => ({ ...n, headline: e.target.value }))}
-                placeholder="Page not found"
-                className={INPUT}
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">The large heading on the 404 page.</p>
+              <label className={LABEL}>Button Label</label>
+              <input value={notFound.ctaLabel} onChange={e => setNotFound(n => ({ ...n, ctaLabel: e.target.value }))} className={INPUT} placeholder="Go to dashboard" />
             </div>
-
             <div>
-              <label className={LABEL}>Message</label>
-              <textarea
-                value={notFound.message}
-                onChange={e => setNotFound(n => ({ ...n, message: e.target.value }))}
-                placeholder="The page you're looking for doesn't exist or has been moved."
-                rows={3}
-                className={INPUT + ' resize-none'}
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Shown below the headline. Keep it short and helpful.</p>
+              <label className={LABEL}>Button URL</label>
+              <input value={notFound.ctaHref} onChange={e => setNotFound(n => ({ ...n, ctaHref: e.target.value }))} className={INPUT} placeholder="/tenant/dashboard" />
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={LABEL}>Primary button label</label>
-                <input
-                  value={notFound.ctaLabel}
-                  onChange={e => setNotFound(n => ({ ...n, ctaLabel: e.target.value }))}
-                  placeholder="Go to dashboard"
-                  className={INPUT}
-                />
-              </div>
-              <div>
-                <label className={LABEL}>Primary button destination</label>
-                <input
-                  value={notFound.ctaHref}
-                  onChange={e => setNotFound(n => ({ ...n, ctaHref: e.target.value }))}
-                  placeholder="/tenant/dashboard"
-                  className={INPUT}
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Relative path or full URL.</p>
-              </div>
-            </div>
-
-            {/* Live mini-preview */}
-            <div className="rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700">
-              <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">404 page preview</div>
-              <div className="bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center py-10 px-6 gap-3">
-                {/* Logo mark */}
-                {logoUrl ? (
-                  <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain mb-1" />
-                ) : (
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm mb-1"
-                    style={{ background: form.primaryColor }}>
-                    {form.name[0] ?? 'H'}
-                  </div>
-                )}
-                <p className="text-5xl font-extrabold text-gray-200 dark:text-gray-800 select-none">404</p>
-                <p className="text-base font-semibold text-gray-900 dark:text-gray-100 text-center">
-                  {notFound.headline || 'Page not found'}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-center max-w-xs">
-                  {notFound.message || "The page you're looking for doesn't exist or has been moved."}
-                </p>
-                <div className="flex gap-2 mt-1">
-                  <span className="inline-flex items-center px-4 py-1.5 rounded-lg text-xs font-medium text-white"
-                    style={{ background: form.primaryColor }}>
-                    {notFound.ctaLabel || 'Go to dashboard'}
-                  </span>
-                  <span className="inline-flex items-center px-4 py-1.5 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                    Back to login
-                  </span>
+          {/* Live mini-preview */}
+          <div className="rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700">
+            <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 font-medium">404 page preview</div>
+            <div className="bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center py-8 px-4 text-center gap-2">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="h-10 object-contain mb-1" />
+              ) : (
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg mb-1"
+                  style={{ background: form.primaryColor }}>
+                  {form.name[0] ?? 'H'}
                 </div>
+              )}
+              <p className="text-5xl font-extrabold text-gray-200 dark:text-gray-700 select-none">404</p>
+              <p className="text-base font-semibold text-gray-900 dark:text-white">{notFound.headline || 'Page not found'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">{notFound.message}</p>
+              <div className="flex gap-2 mt-2">
+                <span className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-medium text-white" style={{ background: form.primaryColor }}>
+                  {notFound.ctaLabel}
+                </span>
+                <span className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  Back to login
+                </span>
               </div>
             </div>
           </div>
 
           <button onClick={saveNotFound} disabled={saving}
             className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
-            {saving ? 'Saving…' : 'Save — applies immediately to tenant portal'}
+            {saving ? 'Saving…' : 'Save 404 Page'}
+          </button>
+        </div>
+      )}
+
+      {/* ── CONFIGURATION TAB ── */}
+      {activeTab === 'config' && (
+        <div className="space-y-5">
+
+          {/* Section: Deployment */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Deployment</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">The public URL for this client's portal — used in email notification links.</p>
+            </div>
+            <div>
+              <label className={LABEL}>Portal URL</label>
+              <input
+                value={deploymentUrl}
+                onChange={e => setDeploymentUrl(e.target.value)}
+                className={INPUT}
+                placeholder="https://yahwehcare-hrmsapp.vercel.app"
+              />
+              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Include the full URL with https://</p>
+            </div>
+          </div>
+
+          {/* Section: Email */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Email Settings</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Controls the From / Reply-To addresses on all emails sent for this client.</p>
+            </div>
+            <div>
+              <label className={LABEL}>From Address</label>
+              <input
+                value={emailConfig.emailFrom}
+                onChange={e => setEmailConfig(c => ({ ...c, emailFrom: e.target.value }))}
+                className={INPUT}
+                placeholder='Yahweh Care HR <noreply@yahwehcare.com.au>'
+              />
+              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Format: <code className="text-xs text-gray-600 dark:text-gray-400">Name &lt;email@domain.com&gt;</code></p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Support Email</label>
+                <input
+                  value={emailConfig.supportEmail}
+                  onChange={e => setEmailConfig(c => ({ ...c, supportEmail: e.target.value }))}
+                  className={INPUT}
+                  placeholder="support@yahwehcare.com.au"
+                />
+              </div>
+              <div>
+                <label className={LABEL}>Reply-To</label>
+                <input
+                  value={emailConfig.replyTo}
+                  onChange={e => setEmailConfig(c => ({ ...c, replyTo: e.target.value }))}
+                  className={INPUT}
+                  placeholder="noreply@yahwehcare.com.au"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section: SMTP / Resend */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">Email Provider</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Leave blank to use the platform default Resend key. Set a per-client key for complete email isolation.</p>
+              </div>
+              {/* SMTP toggle */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-gray-600 dark:text-gray-400">Resend</span>
+                <button
+                  onClick={() => setSmtpConfig(c => ({ ...c, useSmtp: !c.useSmtp }))}
+                  className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${smtpConfig.useSmtp ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                  <span className={`inline-block h-5 w-5 mt-0.5 rounded-full bg-white shadow transition-transform ${smtpConfig.useSmtp ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
+                <span className="text-xs text-gray-600 dark:text-gray-400">SMTP</span>
+              </div>
+            </div>
+
+            {!smtpConfig.useSmtp ? (
+              <div>
+                <label className={LABEL}>Resend API Key</label>
+                <div className="flex gap-2">
+                  <input
+                    type={resendKeyVisible ? 'text' : 'password'}
+                    value={smtpConfig.resendApiKey}
+                    onChange={e => setSmtpConfig(c => ({ ...c, resendApiKey: e.target.value }))}
+                    className={INPUT}
+                    placeholder="re_••••••••••••••••••••••••"
+                    autoComplete="off"
+                  />
+                  <button type="button" onClick={() => setResendKeyVisible(v => !v)}
+                    className="shrink-0 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-lg text-xs transition">
+                    {resendKeyVisible ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
+                  Get your key at <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-purple-600 dark:text-purple-400 underline">resend.com/api-keys</a>. Stored securely in tenant settings.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={LABEL}>SMTP Host</label>
+                    <input value={smtpConfig.smtpHost} onChange={e => setSmtpConfig(c => ({ ...c, smtpHost: e.target.value }))}
+                      className={INPUT} placeholder="smtp.sendgrid.net" />
+                  </div>
+                  <div>
+                    <label className={LABEL}>SMTP Port</label>
+                    <input value={smtpConfig.smtpPort} onChange={e => setSmtpConfig(c => ({ ...c, smtpPort: e.target.value }))}
+                      className={INPUT} placeholder="587" type="number" />
+                  </div>
+                </div>
+                <div>
+                  <label className={LABEL}>SMTP Username</label>
+                  <input value={smtpConfig.smtpUser} onChange={e => setSmtpConfig(c => ({ ...c, smtpUser: e.target.value }))}
+                    className={INPUT} placeholder="apikey" autoComplete="off" />
+                </div>
+                <div>
+                  <label className={LABEL}>SMTP Password</label>
+                  <div className="flex gap-2">
+                    <input
+                      type={smtpPassVisible ? 'text' : 'password'}
+                      value={smtpConfig.smtpPass}
+                      onChange={e => setSmtpConfig(c => ({ ...c, smtpPass: e.target.value }))}
+                      className={INPUT}
+                      placeholder="••••••••••••"
+                      autoComplete="new-password"
+                    />
+                    <button type="button" onClick={() => setSmtpPassVisible(v => !v)}
+                      className="shrink-0 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-lg text-xs transition">
+                      {smtpPassVisible ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section: Feature Limits */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Feature Limits</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Optional caps enforced by the tenant portal. Leave blank for unlimited.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Max Employees</label>
+                <input
+                  type="number" min="1"
+                  value={limits.maxEmployees}
+                  onChange={e => setLimits(l => ({ ...l, maxEmployees: e.target.value }))}
+                  className={INPUT}
+                  placeholder="e.g. 500"
+                />
+              </div>
+              <div>
+                <label className={LABEL}>Max Storage (MB)</label>
+                <input
+                  type="number" min="1"
+                  value={limits.maxStorageMb}
+                  onChange={e => setLimits(l => ({ ...l, maxStorageMb: e.target.value }))}
+                  className={INPUT}
+                  placeholder="e.g. 5120"
+                />
+              </div>
+            </div>
+            <div>
+              <label className={LABEL}>Allowed File Types</label>
+              <input
+                value={limits.allowedFileTypes}
+                onChange={e => setLimits(l => ({ ...l, allowedFileTypes: e.target.value }))}
+                className={INPUT}
+                placeholder="pdf,docx,xlsx,png,jpg"
+              />
+              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Comma-separated extensions without dots. Controls what employees can upload in documents and HR modules.</p>
+            </div>
+          </div>
+
+          <button onClick={saveConfig} disabled={saving}
+            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+            {saving ? 'Saving…' : 'Save Configuration'}
           </button>
         </div>
       )}
