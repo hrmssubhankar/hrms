@@ -59,8 +59,9 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
 
     // Email notifications (fire-and-forget)
     try {
-      // Prefer the newly saved deploymentUrl from settings, fall back to slug-based URL
       const savedSettings = newSettings as Record<string, unknown>
+
+      // Prefer the saved deploymentUrl, fall back to slug-based URL
       const loginUrl = (savedSettings.deploymentUrl as string | undefined)?.trim()
         || `https://${updated.slug}-hrmsapp.vercel.app`
 
@@ -76,16 +77,16 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
       if (adminEmails.length) {
         if (isActive === false) {
           const tmpl = tenantSuspendedEmail({ recipientName: 'Portal Admin', orgName: updated.name, loginUrl })
-          sendEmail(tmpl, emailOpts).catch(console.error)
+          sendEmail({ to: adminEmails, ...tmpl }, emailOpts).catch(console.error)
         } else if (isActive === true && existing) {
           const tmpl = tenantReactivatedEmail({ recipientName: 'Portal Admin', orgName: updated.name, loginUrl })
-          sendEmail(tmpl, emailOpts).catch(console.error)
+          sendEmail({ to: adminEmails, ...tmpl }, emailOpts).catch(console.error)
         }
         if (tier !== undefined && existing) {
           const prev = await db.select({ tier: tenants.tier }).from(tenants).where(eq(tenants.id, id))
           if (prev[0]?.tier && prev[0].tier !== tier) {
             const tmpl = tenantTierChangedEmail({ recipientName: 'Portal Admin', orgName: updated.name, oldTier: prev[0].tier, newTier: tier, loginUrl })
-            sendEmail(tmpl, emailOpts).catch(console.error)
+            sendEmail({ to: adminEmails, ...tmpl }, emailOpts).catch(console.error)
           }
         }
       }
