@@ -393,4 +393,15 @@ export const MIGRATIONS: Migration[] = [
     `,
   },
 
+  // ── 0057: password reset columns ──────────────────────────────────────────
+  {
+    name: '0057_password_reset_columns',
+    description: 'Add password_changed_at, password_reset_token, password_reset_expiry to hrms_users',
+    sql: `
+      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_changed_at  TIMESTAMPTZ;
+      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_reset_token TEXT;
+      ALTER TABLE hrms_users ADD COLUMN IF NOT EXISTS password_reset_expiry TIMESTAMPTZ;
+    `,
+  },
+
 ]
