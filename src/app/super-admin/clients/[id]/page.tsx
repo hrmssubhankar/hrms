@@ -389,7 +389,7 @@ function EditClientInner() {
 
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving}
-              className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+              className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
               {saving ? 'Saving…' : 'Save Changes'}
             </button>
             <button type="button" onClick={() => router.push('/super-admin/clients')}
@@ -599,7 +599,7 @@ function EditClientInner() {
           </div>
 
           <button onClick={saveTheme} disabled={saving}
-            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+            className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
             {saving ? 'Saving…' : 'Save Theme — applies immediately to tenant portal'}
           </button>
         </div>
@@ -662,7 +662,7 @@ function EditClientInner() {
           </div>
 
           <button onClick={saveNotFound} disabled={saving}
-            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+            className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
             {saving ? 'Saving…' : 'Save 404 Page'}
           </button>
         </div>
@@ -706,7 +706,7 @@ function EditClientInner() {
               />
               <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Format: <code className="text-xs text-gray-600 dark:text-gray-400">Name &lt;email@domain.com&gt;</code></p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={LABEL}>Support Email</label>
                 <input
@@ -770,7 +770,7 @@ function EditClientInner() {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className={LABEL}>SMTP Host</label>
                     <input value={smtpConfig.smtpHost} onChange={e => setSmtpConfig(c => ({ ...c, smtpHost: e.target.value }))}
@@ -849,7 +849,7 @@ function EditClientInner() {
           </div>
 
           <button onClick={saveConfig} disabled={saving}
-            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+            className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
             {saving ? 'Saving…' : 'Save Configuration'}
           </button>
         </div>
