@@ -50,6 +50,12 @@ function EditClientInner() {
   const [theme, setTheme] = useState({
     accentColor: '#7c3aed', fontFamily: 'Inter', borderRadius: '8px', sidebarDark: true,
   })
+  const [notFound, setNotFound] = useState({
+    headline: 'Page not found',
+    message:  "The page you're looking for doesn't exist or has been moved.",
+    ctaLabel: 'Go to dashboard',
+    ctaHref:  '/tenant/dashboard',
+  })
   const [logoUrl,        setLogoUrl]        = useState<string>('')
   const [logoUploading,  setLogoUploading]  = useState(false)
   const [deploymentUrl,  setDeploymentUrl]  = useState<string>('')
@@ -57,8 +63,8 @@ function EditClientInner() {
   const [loading,      setLoading]      = useState(true)
   const [saving,       setSaving]       = useState(false)
   const [applyingTier, setApplyingTier] = useState(false)
-  const initialTab = (searchParams.get('tab') as 'general'|'branding'|'theme') ?? 'general'
-  const [activeTab,    setActiveTab]    = useState<'general'|'branding'|'theme'>(initialTab)
+  const initialTab = (searchParams.get('tab') as 'general'|'branding'|'theme'|'errorPages') ?? 'general'
+  const [activeTab,    setActiveTab]    = useState<'general'|'branding'|'theme'|'errorPages'>(initialTab)
   const [error,        setError]        = useState('')
   const [success,      setSuccess]      = useState('')
 
@@ -82,6 +88,10 @@ function EditClientInner() {
           borderRadius: themeSettings.borderRadius ?? s.borderRadius ?? '8px',
           sidebarDark:  (themeSettings.sidebarDark ?? s.sidebarDark) !== false,
         })
+        // Load custom 404 config if set
+        if (s.notFound && typeof s.notFound === 'object') {
+          setNotFound(prev => ({ ...prev, ...s.notFound }))
+        }
         setLoading(false)
       })
       .catch(err => { console.error('[edit-client] fetch error:', err); setError('Failed to load client'); setLoading(false) })
@@ -142,6 +152,20 @@ function EditClientInner() {
       })
       if (!res.ok) throw new Error('Theme save failed')
       setSuccess('Theme saved — changes reflect immediately in tenant portal.')
+    } catch (err: any) { setError(err.message) }
+    finally { setSaving(false); setTimeout(() => setSuccess(''), 4000) }
+  }
+
+  // ── Save 404 / error page config ──────────────────────
+  async function saveNotFound() {
+    setSaving(true); setError(''); setSuccess('')
+    try {
+      const res = await fetch(`/api/super-admin/clients/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: { notFound } }),
+      })
+      if (!res.ok) throw new Error('Save failed')
+      setSuccess('404 page updated — changes are live immediately.')
     } catch (err: any) { setError(err.message) }
     finally { setSaving(false); setTimeout(() => setSuccess(''), 4000) }
   }
@@ -214,14 +238,15 @@ function EditClientInner() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-gray-800">
+      <div className="flex border-b border-gray-200 dark:border-gray-800 overflow-x-auto">
         {([
-          { id: 'general',  label: '️ General' },
-          { id: 'branding', label: 'Logo & Branding' },
-          { id: 'theme',    label: 'Theme & Colours' },
-        ] as { id: 'general'|'branding'|'theme'; label: string }[]).map(t => (
+          { id: 'general',    label: '️ General' },
+          { id: 'branding',   label: 'Logo & Branding' },
+          { id: 'theme',      label: 'Theme & Colours' },
+          { id: 'errorPages', label: 'Error Pages' },
+        ] as { id: 'general'|'branding'|'theme'|'errorPages'; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${activeTab === t.id ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300'}`}>
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition ${activeTab === t.id ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-600 dark:text-gray-300'}`}>
             {t.label}
           </button>
         ))}
@@ -526,6 +551,106 @@ function EditClientInner() {
           <button onClick={saveTheme} disabled={saving}
             className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
             {saving ? 'Saving…' : 'Save Theme — applies immediately to tenant portal'}
+          </button>
+        </div>
+      )}
+
+      {/* ── ERROR PAGES TAB ── */}
+      {activeTab === 'errorPages' && (
+        <div className="space-y-5">
+
+          {/* Info banner */}
+          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+            <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Custom 404 page</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+              These settings control what this tenant's users see when they navigate to a page that doesn't exist.
+              Changes are live immediately — no rebuild required.
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 space-y-5">
+
+            <div>
+              <label className={LABEL}>Headline</label>
+              <input
+                value={notFound.headline}
+                onChange={e => setNotFound(n => ({ ...n, headline: e.target.value }))}
+                placeholder="Page not found"
+                className={INPUT}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">The large heading on the 404 page.</p>
+            </div>
+
+            <div>
+              <label className={LABEL}>Message</label>
+              <textarea
+                value={notFound.message}
+                onChange={e => setNotFound(n => ({ ...n, message: e.target.value }))}
+                placeholder="The page you're looking for doesn't exist or has been moved."
+                rows={3}
+                className={INPUT + ' resize-none'}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Shown below the headline. Keep it short and helpful.</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL}>Primary button label</label>
+                <input
+                  value={notFound.ctaLabel}
+                  onChange={e => setNotFound(n => ({ ...n, ctaLabel: e.target.value }))}
+                  placeholder="Go to dashboard"
+                  className={INPUT}
+                />
+              </div>
+              <div>
+                <label className={LABEL}>Primary button destination</label>
+                <input
+                  value={notFound.ctaHref}
+                  onChange={e => setNotFound(n => ({ ...n, ctaHref: e.target.value }))}
+                  placeholder="/tenant/dashboard"
+                  className={INPUT}
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Relative path or full URL.</p>
+              </div>
+            </div>
+
+            {/* Live mini-preview */}
+            <div className="rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700">
+              <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400">404 page preview</div>
+              <div className="bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center py-10 px-6 gap-3">
+                {/* Logo mark */}
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain mb-1" />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm mb-1"
+                    style={{ background: form.primaryColor }}>
+                    {form.name[0] ?? 'H'}
+                  </div>
+                )}
+                <p className="text-5xl font-extrabold text-gray-200 dark:text-gray-800 select-none">404</p>
+                <p className="text-base font-semibold text-gray-900 dark:text-gray-100 text-center">
+                  {notFound.headline || 'Page not found'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center max-w-xs">
+                  {notFound.message || "The page you're looking for doesn't exist or has been moved."}
+                </p>
+                <div className="flex gap-2 mt-1">
+                  <span className="inline-flex items-center px-4 py-1.5 rounded-lg text-xs font-medium text-white"
+                    style={{ background: form.primaryColor }}>
+                    {notFound.ctaLabel || 'Go to dashboard'}
+                  </span>
+                  <span className="inline-flex items-center px-4 py-1.5 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    Back to login
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onClick={saveNotFound} disabled={saving}
+            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition">
+            {saving ? 'Saving…' : 'Save — applies immediately to tenant portal'}
           </button>
         </div>
       )}
