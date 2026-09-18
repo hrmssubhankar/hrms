@@ -1,5 +1,5 @@
 /**
- * API route tests — GET /api/auth/refresh
+ * API route tests — POST /api/auth/refresh
  * src/app/api/auth/refresh/route.ts
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -37,7 +37,7 @@ vi.mock('@/lib/auth/jwt', () => ({
 
 // ── Import after mocks ────────────────────────────────────────────────────────
 
-import { GET } from '@/app/api/auth/refresh/route'
+import { POST } from '@/app/api/auth/refresh/route'
 import { sessionCookieOptions } from '@/lib/auth/session'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -55,17 +55,17 @@ beforeEach(() => {
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
-describe('GET /api/auth/refresh', () => {
+describe('POST /api/auth/refresh', () => {
   it('returns 401 when no session exists', async () => {
     mockGetSession.mockResolvedValue(null)
-    const res = await GET() as any
+    const res = await POST() as any
     expect(res.status).toBe(401)
     expect(res.body.error).toMatch(/unauthenticated/i)
   })
 
   it('returns 200 and sets a fresh session cookie', async () => {
     mockGetSession.mockResolvedValue(SESSION)
-    const res = await GET() as any
+    const res = await POST() as any
     expect(res.status).toBe(200)
     expect(res.body.ok).toBe(true)
     expect(mockSignToken).toHaveBeenCalledWith(expect.objectContaining({ sub: 'u-1' }))

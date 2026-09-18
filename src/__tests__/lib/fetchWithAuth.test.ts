@@ -54,7 +54,7 @@ describe('fetchWithAuth', () => {
     const res = await fetchWithAuth('/api/tenant/employees')
     expect(res.status).toBe(200)
     expect(fetchMock).toHaveBeenCalledTimes(3)
-    expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/auth/refresh', { method: 'GET' })
+    expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/auth/refresh', { method: 'POST' })
   })
 
   it('redirects to /login when refresh fails on 401', async () => {

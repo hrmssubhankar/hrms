@@ -17,7 +17,7 @@ async function tryRefresh(): Promise<boolean> {
   // Deduplicate: if a refresh is already in-flight, await that one
   if (refreshInFlight) return refreshInFlight
 
-  refreshInFlight = fetch('/api/auth/refresh', { method: 'GET' })
+  refreshInFlight = fetch('/api/auth/refresh', { method: 'POST' })
     .then((r) => r.ok)
     .catch(() => false)
     .finally(() => { refreshInFlight = null })
