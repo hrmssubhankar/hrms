@@ -135,8 +135,8 @@ describe('apiGuard — multiple required permissions', () => {
     expect(result.error).toBeNull()
   })
 
-  it('denies hr_officer who lacks payroll:write', async () => {
-    mockGetSession.mockResolvedValue(mockSession({ userRole: 'hr_officer' }) as any)
+  it('denies compliance_manager who lacks payroll:write', async () => {
+    mockGetSession.mockResolvedValue(mockSession({ userRole: 'compliance_manager' }) as any)
     const result = await apiGuard('employees:read', 'payroll:write')
     expect((result.error as any).status).toBe(403)
   })

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { apiGuard } from '@/lib/auth/apiGuard'
 import { myobAuthUrl } from '@/lib/myob/client'
-import { randomBytes } from 'crypto'
+import { newOAuthState, oauthStateCookie } from '@/lib/auth/oauthState'
 
 // GET /api/tenant/myob/connect
 // Returns the MYOB OAuth2 authorization URL; frontend redirects there.
@@ -16,7 +16,10 @@ export async function GET() {
     )
   }
 
-  // State = "<tenantId>:<nonce>" — callback uses the tenantId without needing a session cookie
-  const state = `${guard.session.tenantId}:${randomBytes(16).toString('hex')}`
-  return NextResponse.json({ url: myobAuthUrl(state) })
+  // State is "<tenantId>:<nonce>" and is also pinned to this browser via an httpOnly cookie;
+  // the callback rejects any state that doesn't match it (CSRF / account-linking protection).
+  const state = newOAuthState(guard.session.tenantId)
+  const res = NextResponse.json({ url: myobAuthUrl(state) })
+  res.cookies.set(oauthStateCookie('myob', state))
+  return res
 }

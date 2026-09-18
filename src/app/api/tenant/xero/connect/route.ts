@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { apiGuard } from '@/lib/auth/apiGuard'
 import { xeroAuthUrl } from '@/lib/xero/client'
-import { randomBytes } from 'crypto'
+import { newOAuthState, oauthStateCookie } from '@/lib/auth/oauthState'
 
 // GET /api/tenant/xero/connect
 // Returns the Xero OAuth2 authorization URL; frontend redirects the user there.
@@ -16,9 +16,10 @@ export async function GET() {
     )
   }
 
-  // State encodes tenantId so the callback can look it up without a session cookie
-  const state = `${guard.session.tenantId}:${randomBytes(16).toString('hex')}`
-  const url   = xeroAuthUrl(state)
-
-  return NextResponse.json({ url })
+  // State is "<tenantId>:<nonce>" and is also pinned to this browser via an httpOnly cookie;
+  // the callback rejects any state that doesn't match it (CSRF / account-linking protection).
+  const state = newOAuthState(guard.session.tenantId)
+  const res = NextResponse.json({ url: xeroAuthUrl(state) })
+  res.cookies.set(oauthStateCookie('xero', state))
+  return res
 }

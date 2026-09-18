@@ -30,7 +30,7 @@ const mockDbSelect = vi.fn()
 vi.mock('@/lib/db', () => ({
   db: {
     select: () => ({ from: () => ({ where: mockDbSelect }) }),
-    update: () => ({ set: () => ({ where: vi.fn() }) }),
+    update: () => ({ set: () => ({ where: vi.fn(() => Promise.resolve()) }) }),
   },
 }))
 

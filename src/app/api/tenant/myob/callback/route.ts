@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { apiGuard } from '@/lib/auth/apiGuard'
+import { clearOAuthStateCookie, oauthStateCookieName, validateOAuthState } from '@/lib/auth/oauthState'
 import {
   myobExchangeCode, listMyobCompanyFiles, saveMyobTokens,
 } from '@/lib/myob/client'
@@ -15,18 +17,33 @@ export async function GET(req: NextRequest) {
   const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? ''
   const settingsUrl = `${appUrl}/tenant/settings?tab=integrations`
 
+  // Every exit clears the one-time state cookie
+  const redirect = (url: string) => {
+    const res = NextResponse.redirect(url)
+    res.cookies.set(clearOAuthStateCookie('myob'))
+    return res
+  }
+
   if (error) {
-    return NextResponse.redirect(`${settingsUrl}&myob_error=${encodeURIComponent(error)}`)
+    return redirect(`${settingsUrl}&myob_error=${encodeURIComponent(error)}`)
   }
 
   if (!code || !state) {
-    return NextResponse.redirect(`${settingsUrl}&myob_error=missing_params`)
+    return redirect(`${settingsUrl}&myob_error=missing_params`)
   }
 
-  // State = "<tenantId>:<nonce>"
-  const tenantId = state.split(':')[0]
-  if (!tenantId || tenantId.length < 10) {
-    return NextResponse.redirect(`${settingsUrl}&myob_error=invalid_state`)
+  // The callback is only valid for the logged-in user who started the flow:
+  // require a session with the same permission `connect` needs, and a state that
+  // matches the httpOnly cookie set by `connect` and the session's own tenant.
+  const guard = await apiGuard('payroll:write')
+  if (guard.error) {
+    return redirect(`${settingsUrl}&myob_error=unauthorized`)
+  }
+
+  const cookieState = req.cookies.get(oauthStateCookieName('myob'))?.value
+  const tenantId = validateOAuthState(state, cookieState, guard.session.tenantId)
+  if (!tenantId) {
+    return redirect(`${settingsUrl}&myob_error=invalid_state`)
   }
 
   try {
@@ -35,7 +52,7 @@ export async function GET(req: NextRequest) {
     // Get the list of MYOB company files and pick the first
     const files = await listMyobCompanyFiles(accessToken)
     if (files.length === 0) {
-      return NextResponse.redirect(`${settingsUrl}&myob_error=no_company_files`)
+      return redirect(`${settingsUrl}&myob_error=no_company_files`)
     }
 
     const { Uri: companyFileUri, Name: companyFileName } = files[0]
@@ -45,10 +62,10 @@ export async function GET(req: NextRequest) {
       companyFileUri, companyFileName,
     })
 
-    return NextResponse.redirect(`${settingsUrl}&myob_success=1`)
+    return redirect(`${settingsUrl}&myob_success=1`)
   } catch (err: any) {
     console.error('MYOB callback error:', err)
-    return NextResponse.redirect(
+    return redirect(
       `${settingsUrl}&myob_error=${encodeURIComponent(err.message ?? 'unknown')}`,
     )
   }

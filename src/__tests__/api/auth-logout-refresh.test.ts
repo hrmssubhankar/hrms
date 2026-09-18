@@ -1,7 +1,7 @@
 /**
- * API route tests — POST /api/auth/logout  &  POST /api/auth/refresh
+ * API route tests — POST /api/auth/logout
  * src/app/api/auth/logout/route.ts
- * src/app/api/auth/refresh/route.ts
+ * (refresh is covered in auth-refresh.test.ts)
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
@@ -43,7 +43,6 @@ vi.mock('@/lib/auth/jwt', () => ({
 // ── Imports after mocks ───────────────────────────────────────────────────────
 
 import { POST as logoutPOST } from '@/app/api/auth/logout/route'
-import { POST as refreshPOST } from '@/app/api/auth/refresh/route'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -63,41 +62,6 @@ describe('POST /api/auth/logout', () => {
     await logoutPOST()
     expect(mockCookiesSet).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'hrms_session', maxAge: 0 })
-    )
-  })
-})
-
-// ── Refresh ───────────────────────────────────────────────────────────────────
-
-describe('POST /api/auth/refresh', () => {
-  it('returns 401 when no session exists', async () => {
-    mockGetSession.mockResolvedValue(null)
-    const res = await refreshPOST() as any
-    expect(res.status).toBe(401)
-    expect(res.body.error).toBe('Unauthenticated')
-  })
-
-  it('returns 200 when session is valid', async () => {
-    mockGetSession.mockResolvedValue({
-      sub: 'user-1', email: 'a@b.com', role: 'tenant_user', tenantId: 't-1'
-    })
-    const res = await refreshPOST() as any
-    expect(res.status).toBe(200)
-    expect(res.body.ok).toBe(true)
-  })
-
-  it('re-signs token with same claims', async () => {
-    const session = { sub: 'user-1', email: 'a@b.com', role: 'tenant_user' as const, tenantId: 't-1' }
-    mockGetSession.mockResolvedValue(session)
-    await refreshPOST()
-    expect(mockSignToken).toHaveBeenCalledWith(expect.objectContaining({ sub: 'user-1', email: 'a@b.com' }))
-  })
-
-  it('sets a new session cookie after refresh', async () => {
-    mockGetSession.mockResolvedValue({ sub: 'u', email: 'e@e.com', role: 'tenant_user' as const })
-    await refreshPOST()
-    expect(mockCookiesSet).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'hrms_session', value: 'new.signed.token' })
     )
   })
 })
