@@ -59,11 +59,16 @@ export default function RolesPage() {
 
   const load = async () => {
     setLoading(true)
-    const res  = await fetchWithAuth('/api/tenant/roles')
-    if (res.status === 403) { setDenied(true); setLoading(false); return }
-    const data = await res.json()
-    setUsers(data.users ?? [])
-    setLoading(false)
+    try {
+      const res = await fetchWithAuth('/api/tenant/roles')
+      if (res.status === 403) { setDenied(true); setLoading(false); return }
+      const data = await res.json()
+      setUsers(data.users ?? [])
+    } catch (err) {
+      console.error('Failed to load roles:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [])
