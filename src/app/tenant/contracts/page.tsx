@@ -208,7 +208,7 @@ export default function ContractsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Employment Contracts</h1>
+          <h1 className="text-2xl font-bold text-foreground">Employment Contracts</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Create, send, and track employment contracts and onboarding documents</p>
         </div>
         <div className="flex items-center gap-2">
@@ -223,7 +223,7 @@ export default function ContractsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Total',  value: stats.total,  color: 'text-white' },
+          { label: 'Total',  value: stats.total,  color: 'text-foreground' },
           { label: 'Draft',  value: stats.draft,  color: 'text-gray-400' },
           { label: 'Sent',   value: stats.sent,   color: 'text-blue-400' },
           { label: 'Signed', value: stats.signed, color: 'text-green-400' },
@@ -313,7 +313,7 @@ export default function ContractsPage() {
                 <div className="flex items-center gap-4 px-5 py-4">
                   <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpanded(isOpen ? null : c.id)}>
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <span className="text-white font-medium text-sm">{c.employeeFirstName} {c.employeeLastName}</span>
+                      <span className="text-foreground font-medium text-sm">{c.employeeFirstName} {c.employeeLastName}</span>
                       <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                         {CONTRACT_TYPES.find(t => t.value === c.type)?.label ?? c.type}
                       </span>
@@ -444,7 +444,7 @@ export default function ContractsPage() {
 
                     {/* Signed info */}
                     {c.status === 'signed' && (
-                      <div className="bg-green-950/40 border border-green-800/50 rounded-lg p-3 flex items-center gap-3">
+                      <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800/50 rounded-lg p-3 flex items-center gap-3">
                         <span className="text-xl">✅</span>
                         <div>
                           <p className="text-sm font-semibold text-green-300">Contract Executed</p>

@@ -168,7 +168,7 @@ export default function ReferralsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Referral Program</h1>
+          <h1 className="text-2xl font-bold text-foreground">Referral Program</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track employee referrals and bonus payments</p>
         </div>
         <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function ReferralsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label:'Total',      value:stats.total,     color:'text-white' },
+          { label:'Total',      value:stats.total,     color:'text-foreground' },
           { label:'Pending',    value:stats.pending,   color:'text-blue-400' },
           { label:'Hired',      value:stats.hired,     color:'text-green-400' },
           { label:'Bonus Paid', value:stats.bonusPaid, color:'text-purple-400' },
@@ -234,7 +234,7 @@ export default function ReferralsPage() {
             <div key={r.id} className="card-premium px-5 py-4 flex items-center gap-4 group">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-white font-medium text-sm">{r.referredName}</span>
+                  <span className="text-foreground font-medium text-sm">{r.referredName}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>{r.status}</span>
                   {r.bonusPaidAt && <span className="text-xs text-green-400">Bonus paid</span>}
                 </div>
@@ -253,13 +253,13 @@ export default function ReferralsPage() {
                 )}
                 {r.status === 'screening' && (
                   <button onClick={() => advance(r.id, 'hired')}
-                    className="text-xs bg-green-900/40 border border-green-800 text-green-300 hover:bg-green-900/60 px-2.5 py-1 rounded transition">
+                    className="text-xs bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60 px-2.5 py-1 rounded transition">
                     Hired
                   </button>
                 )}
                 {r.status === 'hired' && !r.bonusPaidAt && r.bonusAmount && (
                   <button onClick={() => payBonus(r.id)}
-                    className="text-xs bg-amber-900/40 border border-amber-800 text-amber-300 hover:bg-amber-900/60 px-2.5 py-1 rounded transition">
+                    className="text-xs bg-amber-50 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60 px-2.5 py-1 rounded transition">
                     Pay Bonus
                   </button>
                 )}

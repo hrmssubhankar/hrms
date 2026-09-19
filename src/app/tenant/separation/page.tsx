@@ -226,7 +226,7 @@ export default function SeparationPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Separation & Exit Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">Separation & Exit Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage employee departures, offboarding checklists, and exit interviews</p>
         </div>
         <div className="flex items-center gap-2">
@@ -241,7 +241,7 @@ export default function SeparationPage() {
       {/* Stats bar */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: 'Total',        value: stats.total,       color: 'text-white' },
+          { label: 'Total',        value: stats.total,       color: 'text-foreground' },
           { label: 'Pending',      value: stats.pending,     color: 'text-blue-400' },
           { label: 'Active',       value: stats.active,      color: 'text-amber-400' },
           { label: 'Completed',    value: stats.completed,   color: 'text-green-400' },
@@ -324,7 +324,7 @@ export default function SeparationPage() {
               .slice(0, 5)
             if (!upcoming.length) return null
             return (
-              <div className="bg-amber-950/30 border border-amber-800/50 rounded-xl p-5">
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-amber-300 mb-3">⏰ Upcoming Last Working Days</h3>
                 <div className="space-y-2">
                   {upcoming.map(r => {
@@ -439,7 +439,7 @@ export default function SeparationPage() {
                   rows={2} placeholder="Brief reason for separation…" className={INPUT} />
               </div>
               {form.type === 'termination' && (
-                <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
+                <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-700 rounded-lg p-3 text-sm text-red-600 dark:text-red-300">
                   ⚠️ Termination — ensure proper documentation and HR sign-off before proceeding. Seek legal advice if required.
                 </div>
               )}
@@ -709,7 +709,7 @@ export default function SeparationPage() {
 
                         {/* Completion badge */}
                         {r.status === 'completed' && (
-                          <div className="bg-green-950/40 border border-green-800/50 rounded-lg p-3 flex items-center gap-3">
+                          <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800/50 rounded-lg p-3 flex items-center gap-3">
                             <span className="text-2xl">🎉</span>
                             <div>
                               <p className="text-sm font-semibold text-green-300">Offboarding Complete</p>

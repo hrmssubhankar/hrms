@@ -133,14 +133,14 @@ export default function MyPerformancePage() {
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">My Performance</h1>
+        <h1 className="text-2xl font-bold text-foreground">My Performance</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Your reviews, goals and self-assessments</p>
       </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Reviews',       value: reviews.length,    color: 'text-white' },
+          { label: 'Reviews',       value: reviews.length,    color: 'text-foreground' },
           { label: 'Active Goals',  value: activeGoals.length, color: 'text-blue-400' },
           { label: 'Goals Done',    value: completedGoals.length, color: 'text-green-400' },
           { label: 'Avg Progress',  value: `${avgProgress}%`, color: 'text-purple-400' },
@@ -168,7 +168,7 @@ export default function MyPerformancePage() {
       {selfAssessModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="card-premium p-6 w-full max-w-xl space-y-4 my-4">
-            <h3 className="text-lg font-bold text-white">My Self-Assessment</h3>
+            <h3 className="text-lg font-bold text-foreground">My Self-Assessment</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">Your input will be shared with your reviewer ahead of the performance meeting.</p>
             {[
               { key: 'strengths',    label: 'Key Strengths',           placeholder: 'What are you most proud of this period?' },
@@ -201,7 +201,7 @@ export default function MyPerformancePage() {
       {updatingGoal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="card-premium p-6 w-full max-w-sm space-y-4">
-            <h3 className="text-lg font-bold text-white">Update Progress</h3>
+            <h3 className="text-lg font-bold text-foreground">Update Progress</h3>
             <div>
               <label className="text-xs text-gray-600 dark:text-gray-400 mb-2 block">Progress: {updatingGoal.progress}%</label>
               <input type="range" min={0} max={100} step={5} value={updatingGoal.progress}
@@ -254,7 +254,7 @@ export default function MyPerformancePage() {
                   <div className="flex items-center justify-between px-5 py-4 gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-sm font-semibold text-foreground">
                           {REVIEW_TYPES.find(t => t.value === r.type)?.label ?? r.type}
                         </p>
                         <span className={`capitalize ${STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
@@ -272,7 +272,7 @@ export default function MyPerformancePage() {
                         </div>
                       )}
                       <button onClick={() => openSelfAssess(r)}
-                        className={`text-xs border px-3 py-1.5 rounded-lg transition font-medium ${hasSelfAssess ? 'border-green-700 text-green-400 bg-green-900/10' : 'border-purple-800 text-purple-400 hover:bg-purple-900/20'}`}>
+                        className={`text-xs border px-3 py-1.5 rounded-lg transition font-medium ${hasSelfAssess ? 'border-green-500 dark:border-green-700 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/10' : 'border-purple-800 text-purple-400 hover:bg-purple-900/20'}`}>
                         {hasSelfAssess ? '✓ Self-Assessed' : 'Self-Assess'}
                       </button>
                       <button onClick={() => setExpanded(isOpen ? null : r.id)}
@@ -312,7 +312,7 @@ export default function MyPerformancePage() {
 
                       {/* Self-assessment preview */}
                       {hasSelfAssess && (
-                        <div className="bg-blue-900/10 border border-blue-900/30 rounded-lg p-3 space-y-2">
+                        <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-lg p-3 space-y-2">
                           <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Your Self-Assessment</p>
                           {ei.strengths    && <div><p className="text-xs text-gray-500">Strengths</p><p className="text-xs text-gray-300">{ei.strengths}</p></div>}
                           {ei.improvements && <div><p className="text-xs text-gray-500">Improvements</p><p className="text-xs text-gray-300">{ei.improvements}</p></div>}
@@ -345,7 +345,7 @@ export default function MyPerformancePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-white">{g.title}</p>
+                        <p className="text-sm font-semibold text-foreground">{g.title}</p>
                         <span className={statusStyle}>
                           {GOAL_STATUSES.find(s => s.value === g.status)?.label ?? g.status}
                         </span>
@@ -373,7 +373,7 @@ export default function MyPerformancePage() {
                     )}
                   </div>
                   {g.managerNote && (
-                    <div className="bg-green-900/10 border border-green-900/30 rounded-lg px-3 py-2">
+                    <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-lg px-3 py-2">
                       <p className="text-xs text-gray-500 mb-0.5">Manager feedback</p>
                       <p className="text-xs text-green-300">{g.managerNote}</p>
                     </div>

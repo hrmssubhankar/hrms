@@ -196,7 +196,7 @@ export default function MyLeavePage() {
     return (
       <div className="p-6 max-w-2xl mx-auto">
         <div className="card-premium rounded-2xl p-10 text-center">
-          <p className="text-lg font-semibold text-white mb-2">Profile Not Linked</p>
+          <p className="text-lg font-semibold text-foreground mb-2">Profile Not Linked</p>
           <p className="text-gray-600 dark:text-gray-400 text-sm">
             Your account is not linked to an employee record. Contact HR to set this up.
           </p>
@@ -211,7 +211,7 @@ export default function MyLeavePage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">My Leave</h1>
+          <h1 className="text-2xl font-bold text-foreground">My Leave</h1>
           {employee && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
               {employee.firstName} {employee.lastName}
@@ -231,7 +231,7 @@ export default function MyLeavePage() {
           {[
             { label: 'Days Approved',  value: stats.totalDaysApproved, color: 'text-green-400' },
             { label: 'Days Pending',   value: stats.totalDaysPending,  color: 'text-yellow-400' },
-            { label: 'Requests',       value: stats.total,             color: 'text-white' },
+            { label: 'Requests',       value: stats.total,             color: 'text-foreground' },
             { label: 'Pending Review', value: stats.pending,           color: 'text-amber-400' },
           ].map(s => (
             <div key={s.label} className="card-premium p-4">
@@ -263,7 +263,7 @@ export default function MyLeavePage() {
           <form onSubmit={submitRequest}
             className="card-premium rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">New Leave Request</h2>
+              <h2 className="text-lg font-semibold text-foreground">New Leave Request</h2>
               <button type="button" onClick={() => { setShowForm(false); setFormError(null) }}
                 className="text-gray-500 hover:text-white text-2xl leading-none">×</button>
             </div>
@@ -292,7 +292,7 @@ export default function MyLeavePage() {
             </div>
 
             {computedDays > 0 && (
-              <div className="bg-purple-900/30 border border-purple-800 rounded-lg px-4 py-2.5 space-y-1.5">
+              <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg px-4 py-2.5 space-y-1.5">
                 <p className="text-sm text-purple-300 font-medium">
                   {computedDays} calendar day{computedDays !== 1 ? 's' : ''} requested
                 </p>
@@ -318,7 +318,7 @@ export default function MyLeavePage() {
             </div>
 
             {formError && (
-              <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-sm text-red-300">
+              <div className="bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 rounded-lg px-4 py-3 text-sm text-red-700 dark:text-red-300">
                 {formError}
               </div>
             )}
@@ -360,7 +360,7 @@ export default function MyLeavePage() {
                       {leaveTypes.find(t => t.key === r.leaveType)?.emoji ?? '📋'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white">
+                      <p className="text-sm font-medium text-foreground">
                         {leaveTypes.find(t => t.key === r.leaveType)?.label ?? r.leaveType}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -385,12 +385,12 @@ export default function MyLeavePage() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-xs text-gray-500 dark:text-gray-400">Requested on</p>
-                          <p className="text-white">{fmt(r.createdAt)}</p>
+                          <p className="text-foreground">{fmt(r.createdAt)}</p>
                         </div>
                         {r.reviewedAt && (
                           <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Reviewed on</p>
-                            <p className="text-white">{fmt(r.reviewedAt)}</p>
+                            <p className="text-foreground">{fmt(r.reviewedAt)}</p>
                           </div>
                         )}
                         {r.reason && (
@@ -410,7 +410,7 @@ export default function MyLeavePage() {
                         <button
                           onClick={() => cancelRequest(r.id)}
                           disabled={cancelling === r.id}
-                          className="text-xs px-3 py-1.5 border border-red-800 text-red-400 hover:bg-red-900/20 disabled:opacity-50 rounded-lg transition">
+                          className="text-xs px-3 py-1.5 border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 rounded-lg transition">
                           {cancelling === r.id ? 'Cancelling…' : 'Cancel Request'}
                         </button>
                       )}
@@ -447,7 +447,7 @@ export default function MyLeavePage() {
                   <div className="flex items-center gap-2.5">
                     <span className="text-2xl">{b.emoji}</span>
                     <div>
-                      <p className="text-sm font-semibold text-white">{b.label}</p>
+                      <p className="text-sm font-semibold text-foreground">{b.label}</p>
                       {b.accrualNote && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{b.accrualNote}</p>}
                     </div>
                   </div>
@@ -455,13 +455,13 @@ export default function MyLeavePage() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg px-3 py-2">
                       <p className="text-xs text-gray-500 dark:text-gray-400">Entitlement</p>
-                      <p className="font-semibold text-white">
+                      <p className="font-semibold text-foreground">
                         {b.entitlement == null || b.entitlement >= 999 ? '∞' : `${b.entitlement}d`}
                       </p>
                     </div>
                     <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg px-3 py-2">
                       <p className="text-xs text-gray-500 dark:text-gray-400">Taken</p>
-                      <p className="font-semibold text-white">{b.taken}d</p>
+                      <p className="font-semibold text-foreground">{b.taken}d</p>
                     </div>
                     <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg px-3 py-2">
                       <p className="text-xs text-gray-500 dark:text-gray-400">Pending</p>

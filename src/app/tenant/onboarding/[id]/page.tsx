@@ -243,7 +243,7 @@ export default function OnboardingDetailPage() {
             {(rec.employeeFirstName?.[0] ?? '?').toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-foreground">
               {rec.employeeFirstName} {rec.employeeLastName}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm">{rec.employeeEmail}</p>
@@ -261,14 +261,14 @@ export default function OnboardingDetailPage() {
         </div>
       </div>
 
-      {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 rounded-lg p-3 text-sm text-red-600 dark:text-red-300">{error}</div>}
 
       {/* Progress + stage */}
       <div className="card-premium p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Overall Progress</p>
-            <p className="text-2xl font-bold text-white">{pct}%
+            <p className="text-2xl font-bold text-foreground">{pct}%
               <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-2">{done}/{checklist.length} tasks</span>
             </p>
           </div>

@@ -165,7 +165,7 @@ export default function GrievancesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Grievances & Investigations</h1>
+          <h1 className="text-2xl font-bold text-foreground">Grievances & Investigations</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Lodge and manage grievances, misconduct, and NDIS safeguarding concerns</p>
         </div>
         <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export default function GrievancesPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: 'Total',    value: stats.total,    color: 'text-white' },
+          { label: 'Total',    value: stats.total,    color: 'text-foreground' },
           { label: 'New',      value: stats.new,      color: 'text-blue-400' },
           { label: 'Active',   value: stats.active,   color: 'text-amber-400' },
           { label: 'Closed',   value: stats.closed,   color: 'text-green-400' },
@@ -243,12 +243,12 @@ export default function GrievancesPage() {
           </div>
 
           {form.type === 'ndis_safeguarding' && (
-            <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
+            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-700 rounded-lg p-3 text-sm text-red-600 dark:text-red-300">
               NDIS Safeguarding — this may require mandatory reporting to the NDIS Quality and Safeguards Commission. Escalate immediately per your reporting obligations.
             </div>
           )}
           {form.riskRating === 'critical' && (
-            <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
+            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-700 rounded-lg p-3 text-sm text-red-600 dark:text-red-300">
               ️ Critical risk — stand-down of subject may be required pending investigation. Seek legal advice.
             </div>
           )}
@@ -304,7 +304,7 @@ export default function GrievancesPage() {
                   }`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <span className="text-white font-medium text-sm">
+                      <span className="text-foreground font-medium text-sm">
                         {TYPES.find(t => t.value === g.type)?.label ?? g.type}
                       </span>
                       <span className={`text-xs px-2 py-0.5 rounded-full border ${r.bg} ${r.color}`}>{r.label}</span>
@@ -383,7 +383,7 @@ export default function GrievancesPage() {
                     )}
 
                     {g.outcome && (
-                      <div className="bg-green-950/40 border border-green-800/50 rounded-lg p-3">
+                      <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800/50 rounded-lg p-3">
                         <p className="text-xs font-semibold text-green-400 mb-1">Outcome</p>
                         <p className="text-sm text-gray-600 dark:text-gray-300">{g.outcome}</p>
                         {g.closedAt && <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Closed {new Date(g.closedAt).toLocaleDateString('en-AU')}</p>}

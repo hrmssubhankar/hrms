@@ -107,7 +107,7 @@ export default function MyBenefitsPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">My Benefits</h1>
+        <h1 className="text-2xl font-bold text-foreground">My Benefits</h1>
         {employee && (
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
             {employee.firstName} {employee.lastName} · {activeBenefits.length} active benefit{activeBenefits.length !== 1 ? 's' : ''}
@@ -117,7 +117,7 @@ export default function MyBenefitsPage() {
 
       {/* Expiry warning */}
       {expiringCount > 0 && (
-        <div className="bg-amber-900/20 border border-amber-800 rounded-xl px-5 py-3.5 flex items-center gap-3">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-5 py-3.5 flex items-center gap-3">
           <span className="text-amber-400 text-lg">⚠️</span>
           <p className="text-sm text-amber-300">
             <span className="font-semibold">{expiringCount} benefit{expiringCount > 1 ? 's' : ''}</span> expiring within 30 days. Contact HR if you need to renew.
@@ -153,7 +153,7 @@ export default function MyBenefitsPage() {
                   className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
                   <span className="text-3xl shrink-0">{info?.emoji ?? '⭐'}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white">{info?.label ?? b.type}</p>
+                    <p className="text-sm font-semibold text-foreground">{info?.label ?? b.type}</p>
                     {b.description && (
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{b.description}</p>
                     )}
@@ -195,15 +195,15 @@ export default function MyBenefitsPage() {
                     <div className="flex gap-6 text-xs">
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">Start Date</p>
-                        <p className="text-white font-medium">{fmt(b.startDate)}</p>
+                        <p className="text-foreground font-medium">{fmt(b.startDate)}</p>
                       </div>
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">End Date</p>
-                        <p className="text-white font-medium">{b.endDate ? fmt(b.endDate) : 'Ongoing'}</p>
+                        <p className="text-foreground font-medium">{b.endDate ? fmt(b.endDate) : 'Ongoing'}</p>
                       </div>
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">Assigned</p>
-                        <p className="text-white font-medium">{fmt(b.createdAt.slice(0, 10))}</p>
+                        <p className="text-foreground font-medium">{fmt(b.createdAt.slice(0, 10))}</p>
                       </div>
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-500">

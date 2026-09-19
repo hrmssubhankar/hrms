@@ -375,7 +375,7 @@ export default function RecruitmentPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Recruitment & ATS</h1>
+          <h1 className="text-2xl font-bold text-foreground">Recruitment & ATS</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Manage job requisitions and candidate pipelines</p>
         </div>
         <div className="flex gap-2">
@@ -397,7 +397,7 @@ export default function RecruitmentPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: 'Total Jobs',   value: stats.total,    color: 'text-white' },
+          { label: 'Total Jobs',   value: stats.total,    color: 'text-foreground' },
           { label: 'Open',         value: stats.open,     color: 'text-green-400' },
           { label: 'Draft',        value: stats.draft,    color: 'text-gray-400' },
           { label: 'Closed',       value: stats.closed,   color: 'text-red-400' },
@@ -503,7 +503,7 @@ export default function RecruitmentPage() {
                   <div className="flex items-start gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-white font-semibold">{r.title}</span>
+                        <span className="text-foreground font-semibold">{r.title}</span>
                         <span className={`text-xs px-2.5 py-0.5 rounded-full border font-medium ${REQ_STATUS_STYLE[r.status] ?? 'badge badge-gray'}`}>
                           {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                         </span>

@@ -1163,7 +1163,7 @@ export default function EmployeeProfilePage() {
                     <div key={rec.id} className="flex items-start gap-4 p-4 bg-gray-800/50 border border-gray-700 rounded-xl">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-medium text-white">
+                          <p className="text-sm font-medium text-foreground">
                             {rec.courseTitle ?? 'Untitled Course'}
                             {rec.courseMandatory && <span className="ml-1 text-amber-400 text-xs">★ Mandatory</span>}
                           </p>

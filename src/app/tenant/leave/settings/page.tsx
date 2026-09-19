@@ -83,7 +83,7 @@ export default function LeaveSettingsPage() {
             className="text-gray-500 hover:text-white transition dark:text-gray-400">
             ← Leave
           </Link>
-          <h1 className="text-2xl font-bold text-white">Leave Settings</h1>
+          <h1 className="text-2xl font-bold text-foreground">Leave Settings</h1>
         </div>
         <div className="flex items-center gap-3">
           {saved && (
@@ -106,7 +106,7 @@ export default function LeaveSettingsPage() {
       </p>
 
       {error && (
-        <div className="bg-red-900/40 border border-red-700 rounded-xl px-4 py-3 text-sm text-red-300">
+        <div className="bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 rounded-xl px-4 py-3 text-sm text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
@@ -129,7 +129,7 @@ export default function LeaveSettingsPage() {
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{t.emoji}</span>
                   <div>
-                    <p className="text-sm font-semibold text-white">{t.label}</p>
+                    <p className="text-sm font-semibold text-foreground">{t.label}</p>
                     <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{t.accrualNote}</p>
                   </div>
                   {t._dirty && (

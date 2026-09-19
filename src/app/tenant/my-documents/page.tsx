@@ -66,10 +66,10 @@ const in30  = new Date(Date.now() + 30 * 864e5).toISOString().split('T')[0]
 
 function expiryBadge(exp: string | null) {
   if (!exp) return null
-  if (exp < today) return { text: 'Expired', cls: 'text-red-400 bg-red-900/30 border-red-800' }
+  if (exp < today) return { text: 'Expired', cls: 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-800' }
   if (exp <= in30) {
     const d = Math.round((new Date(exp + 'T00:00:00').getTime() - Date.now()) / 86400000)
-    return { text: `Expires in ${d}d`, cls: 'text-amber-400 bg-amber-900/30 border-amber-800' }
+    return { text: `Expires in ${d}d`, cls: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-800' }
   }
   return { text: `Expires ${fmtDate(exp)}`, cls: 'text-gray-500 bg-gray-800 border-gray-700' }
 }
@@ -181,7 +181,7 @@ export default function MyDocumentsPage() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">My Documents</h1>
+          <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Upload personal compliance documents for HR review</p>
         </div>
         {linked && (
@@ -209,7 +209,7 @@ export default function MyDocumentsPage() {
 
       {/* Info note */}
       {linked && (
-        <div className="bg-blue-950/30 border border-blue-800/40 rounded-xl px-4 py-3">
+        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 rounded-xl px-4 py-3">
           <p className="text-xs text-blue-300">
             Documents you upload are sent to <strong>Pending Review</strong>. HR will activate them once verified.
             Expiry dates trigger alerts to HR before they lapse.
@@ -220,7 +220,7 @@ export default function MyDocumentsPage() {
       {/* Upload form */}
       {showForm && linked && (
         <form onSubmit={submit} className="card-premium border-purple-500/30 p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-white">Upload Document for HR Review</h3>
+          <h3 className="text-sm font-semibold text-foreground">Upload Document for HR Review</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className={LABEL}>Title *</label>
@@ -266,7 +266,7 @@ export default function MyDocumentsPage() {
             </div>
           </div>
           {saveError && (
-            <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-sm text-red-300">
+            <div className="bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 rounded-lg px-4 py-3 text-sm text-red-700 dark:text-red-300">
               {saveError}
             </div>
           )}
@@ -339,7 +339,7 @@ function DocSection({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <h2 className="text-sm font-semibold text-white">{title}</h2>
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
         <span className="text-xs text-gray-600 dark:text-gray-400">({docs.length})</span>
         {note && <span className="text-xs text-gray-500 ml-1 dark:text-gray-400">— {note}</span>}
       </div>

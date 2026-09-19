@@ -173,7 +173,7 @@ export default function DEIPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Diversity, Equity &amp; Inclusion</h1>
+          <h1 className="text-2xl font-bold text-foreground">Diversity, Equity &amp; Inclusion</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Self-reported diversity data to support equity and inclusion initiatives</p>
         </div>
         <div className="flex items-center gap-2">

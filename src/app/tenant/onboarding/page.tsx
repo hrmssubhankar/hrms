@@ -152,7 +152,7 @@ export default function OnboardingPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Onboarding & Induction</h1>
+          <h1 className="text-2xl font-bold text-foreground">Onboarding & Induction</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track new employee onboarding progress across all stages</p>
         </div>
         <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ export default function OnboardingPage() {
       {/* Stat cards — clickable to filter Pipeline tab */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total',       value: stats.total,       color: 'text-white',       fs: '' },
+          { label: 'Total',       value: stats.total,       color: 'text-foreground',       fs: '' },
           { label: 'Pending',     value: stats.pending,     color: 'text-yellow-400',  fs: 'pending' },
           { label: 'In Progress', value: stats.in_progress, color: 'text-blue-400',    fs: 'in_progress' },
           { label: 'Completed',   value: stats.completed,   color: 'text-green-400',   fs: 'completed' },
@@ -248,7 +248,7 @@ export default function OnboardingPage() {
 
           {/* Upcoming starters */}
           {upcoming.length > 0 && (
-            <div className="bg-blue-950/30 border border-blue-800/50 rounded-xl p-5">
+            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 rounded-xl p-5">
               <h3 className="text-sm font-semibold text-blue-300 mb-3">📅 Upcoming Starters (next 30 days)</h3>
               <div className="space-y-2">
                 {upcoming.map(r => (

@@ -272,7 +272,7 @@ export default function WorkforcePlanningPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Workforce Planning</h1>
+          <h1 className="text-2xl font-bold text-foreground">Workforce Planning</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
             Headcount targets, live workforce snapshot, and position management
           </p>
@@ -318,7 +318,7 @@ export default function WorkforcePlanningPage() {
 
             {/* Summary stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <StatCard label="Active Employees" value={summary!.totalActive} color="text-white" />
+              <StatCard label="Active Employees" value={summary!.totalActive} color="text-foreground" />
               <StatCard label="Departments"      value={summary!.departments} color="text-blue-400" />
               <StatCard label="Active Positions" value={summary!.positions}   color="text-purple-400" />
               <StatCard label="Open Plans"       value={planStats.openRoles}  color="text-amber-400" />
@@ -451,7 +451,7 @@ export default function WorkforcePlanningPage() {
 
           {/* Plan stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatCard label="Planned Headcount" value={planStats.totalPlanned}   color="text-white" />
+            <StatCard label="Planned Headcount" value={planStats.totalPlanned}   color="text-foreground" />
             <StatCard label="Current Headcount" value={planStats.totalCurrent}   color="text-green-400" />
             <StatCard label="Total Vacancies"   value={planStats.totalVacancies} color="text-amber-400" />
             <StatCard label="Open Roles"        value={planStats.openRoles}      color="text-blue-400" />

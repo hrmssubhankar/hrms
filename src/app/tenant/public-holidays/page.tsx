@@ -217,7 +217,7 @@ export default function PublicHolidaysPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">{countryFlag(tenantCountry)} Public Holidays</h1>
+          <h1 className="text-2xl font-bold text-foreground">{countryFlag(tenantCountry)} Public Holidays</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
             {canManage
               ? `Manage public holidays for your organisation (${COUNTRY_NAMES[tenantCountry] ?? tenantCountry})`
@@ -267,18 +267,18 @@ export default function PublicHolidaysPage() {
       </div>
 
       {importMsg && (
-        <div className={`rounded-lg px-4 py-2.5 text-sm border ${importMsg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-amber-900/40 border-amber-700 text-amber-300'}`}>
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${importMsg.startsWith('') ? 'bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300' : 'bg-amber-50 dark:bg-amber-900/40 border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300'}`}>
           {importMsg}
         </div>
       )}
 
       {/* Next holiday banner */}
       {nextHoliday && year === currentYear && (
-        <div className="bg-purple-900/30 border border-purple-700 rounded-xl px-5 py-4 flex items-center gap-4">
+        <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded-xl px-5 py-4 flex items-center gap-4">
           <span className="text-3xl"></span>
           <div>
             <p className="text-xs text-purple-400 font-medium uppercase tracking-wider">Next Public Holiday</p>
-            <p className="text-white font-semibold">{nextHoliday.name}</p>
+            <p className="text-foreground font-semibold">{nextHoliday.name}</p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {fmt(nextHoliday.date)}
               {daysUntil(nextHoliday.date) === 0 ? ' — Today!'
@@ -297,7 +297,7 @@ export default function PublicHolidaysPage() {
             className="card-premium rounded-2xl p-6 w-full max-w-md space-y-4"
           >
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-foreground">
                 {editing ? 'Edit Holiday' : 'Add Public Holiday'}
               </h2>
               <button type="button" onClick={() => setShowForm(false)} className="text-gray-500 hover:text-white text-xl leading-none dark:text-gray-400">×</button>
@@ -366,7 +366,7 @@ export default function PublicHolidaysPage() {
             </div>
 
             {formError && (
-              <div className="rounded-lg bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
+              <div className="rounded-lg bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 px-4 py-3 text-sm text-red-700 dark:text-red-300">
                 {formError}
               </div>
             )}
@@ -430,7 +430,7 @@ export default function PublicHolidaysPage() {
                         <div
                           key={h.id}
                           className={`flex items-center gap-4 px-5 py-3.5 rounded-xl border transition-colors ${
-                            isToday ? 'bg-purple-900/40 border-purple-600'
+                            isToday ? 'bg-purple-100 dark:bg-purple-900/40 border-purple-400 dark:border-purple-600'
                             : isPast ? 'bg-gray-800/30 border-gray-800 opacity-50'
                             : 'bg-gray-800/60 border-gray-700'
                           }`}
@@ -440,7 +440,7 @@ export default function PublicHolidaysPage() {
                             <p className="text-xs text-gray-500 uppercase dark:text-gray-400">
                               {new Date(h.date + 'T00:00:00').toLocaleDateString('en-AU', { month: 'short' })}
                             </p>
-                            <p className={`text-2xl font-bold leading-none ${isToday ? 'text-purple-300' : isPast ? 'text-gray-600' : 'text-white'}`}>
+                            <p className={`text-2xl font-bold leading-none ${isToday ? 'text-purple-300' : isPast ? 'text-gray-400 dark:text-gray-600' : 'text-foreground'}`}>
                               {new Date(h.date + 'T00:00:00').getDate()}
                             </p>
                             <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -450,13 +450,13 @@ export default function PublicHolidaysPage() {
 
                           {/* Name + badges */}
                           <div className="flex-1 min-w-0">
-                            <p className={`font-medium ${isPast ? 'text-gray-600' : 'text-white'}`}>{h.name}</p>
+                            <p className={`font-medium ${isPast ? 'text-gray-400 dark:text-gray-600' : 'text-foreground'}`}>{h.name}</p>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-900/50 text-green-400 border border-green-800">
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-800">
                                 {h.country}
                               </span>
                               {h.isNational && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-900/50 text-blue-400 border border-blue-800">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-800">
                                   National
                                 </span>
                               )}

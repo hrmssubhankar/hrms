@@ -29,9 +29,9 @@ const INCIDENT_TYPES = [
 
 const SEVERITIES = [
   { value: 'low',      label: 'Low',      color: 'text-gray-400',   bg: 'bg-gray-800 border-gray-700' },
-  { value: 'medium',   label: 'Medium',   color: 'text-yellow-400', bg: 'bg-yellow-900/40 border-yellow-800' },
+  { value: 'medium',   label: 'Medium',   color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-900/40 border-yellow-300 dark:border-yellow-800' },
   { value: 'high',     label: 'High',     color: 'text-orange-400', bg: 'bg-orange-900/40 border-orange-800' },
-  { value: 'critical', label: 'Critical', color: 'text-red-400',    bg: 'bg-red-900/50 border-red-800' },
+  { value: 'critical', label: 'Critical', color: 'text-red-600 dark:text-red-400',    bg: 'bg-red-100 dark:bg-red-900/50 border-red-300 dark:border-red-800' },
 ]
 
 const STATUS_STYLE: Record<string, string> = {
@@ -160,7 +160,7 @@ export default function WhsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">WHS & Injury Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">WHS & Injury Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Report incidents, track investigations and corrective actions</p>
         </div>
         <div className="flex items-center gap-2">
@@ -175,7 +175,7 @@ export default function WhsPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: 'Total',         value: stats.total,         color: 'text-white' },
+          { label: 'Total',         value: stats.total,         color: 'text-foreground' },
           { label: 'Open',          value: stats.open,          color: 'text-red-400' },
           { label: 'Investigating', value: stats.investigating,  color: 'text-amber-400' },
           { label: 'Closed',        value: stats.closed,        color: 'text-green-400' },
@@ -238,7 +238,7 @@ export default function WhsPage() {
             </div>
           </div>
           {form.severity === 'critical' && (
-            <div className="bg-red-950 border border-red-700 rounded-lg p-3 text-sm text-red-300">
+            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-700 rounded-lg p-3 text-sm text-red-600 dark:text-red-300">
               ️ Critical incident — notify SafeWork Australia / state WHS regulator as required by law.
             </div>
           )}
@@ -297,7 +297,7 @@ export default function WhsPage() {
                   }`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-white font-medium text-sm">
+                      <span className="text-foreground font-medium text-sm">
                         {INCIDENT_TYPES.find(t => t.value === inc.type)?.label ?? inc.type}
                       </span>
                       <span className={`text-xs px-2 py-0.5 rounded-full border ${s.bg} ${s.color}`}>{s.label}</span>
@@ -334,13 +334,13 @@ export default function WhsPage() {
                       <span className="text-xs text-gray-500 self-center dark:text-gray-400">Move to:</span>
                       {inc.status !== 'investigating' && (
                         <button onClick={() => updateStatus(inc.id, 'investigating')}
-                          className="text-xs border border-amber-800 text-amber-300 hover:bg-amber-900/30 px-3 py-1.5 rounded-lg transition">
+                          className="text-xs border border-amber-400 dark:border-amber-800 text-amber-600 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 px-3 py-1.5 rounded-lg transition">
                           Investigating
                         </button>
                       )}
                       {inc.status !== 'closed' && (
                         <button onClick={() => updateStatus(inc.id, 'closed')}
-                          className="text-xs border border-green-800 text-green-300 hover:bg-green-900/30 px-3 py-1.5 rounded-lg transition">
+                          className="text-xs border border-green-400 dark:border-green-800 text-green-600 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 px-3 py-1.5 rounded-lg transition">
                           Close
                         </button>
                       )}

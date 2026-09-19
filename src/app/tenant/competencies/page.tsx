@@ -137,7 +137,7 @@ export default function CompetencyPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Competency Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">Competency Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Define competency frameworks and track employee assessments</p>
         </div>
         <div className="flex gap-2">
@@ -160,7 +160,7 @@ export default function CompetencyPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: 'Total Assessments', value: stats.total,       color: 'text-white' },
+          { label: 'Total Assessments', value: stats.total,       color: 'text-foreground' },
           { label: 'Competent',         value: stats.competent,   color: 'text-green-400' },
           { label: 'Not Yet Competent', value: stats.notYet,      color: 'text-red-400' },
           { label: 'Expiring Soon',     value: stats.expiringSoon,color: 'text-amber-400' },
@@ -304,7 +304,7 @@ export default function CompetencyPage() {
                         return (
                           <div key={c.id} className="group card-premium p-4">
                             <div className="flex items-start justify-between gap-2">
-                              <p className="text-sm font-medium text-white">{c.name}</p>
+                              <p className="text-sm font-medium text-foreground">{c.name}</p>
                               <div className="flex items-center gap-2 shrink-0">
                                 <span className="text-xs text-gray-500 dark:text-gray-400">{pass}/{compAss.length} competent</span>
                                 <button

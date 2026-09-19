@@ -311,7 +311,7 @@ export default function PerformancePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Performance Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">Performance Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Probation check-ins, KPI reviews and performance plans</p>
         </div>
         {tab === 'reviews' ? (
@@ -333,7 +333,7 @@ export default function PerformancePage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: 'Total',      value: stats.total,     color: 'text-white' },
+          { label: 'Total',      value: stats.total,     color: 'text-foreground' },
           { label: 'Scheduled',  value: stats.scheduled, color: 'text-blue-400' },
           { label: 'Completed',  value: stats.completed, color: 'text-green-400' },
           { label: 'Overdue',    value: stats.overdue,   color: 'text-red-400' },
@@ -395,12 +395,12 @@ export default function PerformancePage() {
           {editing && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
               <div className="card-premium p-6 w-full max-w-2xl space-y-5 my-4">
-                <h3 className="text-lg font-bold text-white">Complete Review</h3>
+                <h3 className="text-lg font-bold text-foreground">Complete Review</h3>
                 <div className="space-y-3">
                   <p className="section-label">KPI Ratings (1–5)</p>
                   {editing.kpis.map((kpi, i) => (
                     <div key={kpi.id} className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 space-y-2">
-                      <p className="text-sm font-medium text-white">{kpi.area}</p>
+                      <p className="text-sm font-medium text-foreground">{kpi.area}</p>
                       <RatingButtons value={kpi.rating} onChange={n => {
                         const k = [...editing.kpis]; k[i] = { ...k[i], rating: n }; setEditing({ ...editing, kpis: k })
                       }} />
@@ -455,7 +455,7 @@ export default function PerformancePage() {
           {selfAssessModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
               <div className="card-premium p-6 w-full max-w-xl space-y-4 my-4">
-                <h3 className="text-lg font-bold text-white">Employee Self-Assessment</h3>
+                <h3 className="text-lg font-bold text-foreground">Employee Self-Assessment</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">This input is shared with the reviewer ahead of the performance review.</p>
                 {[
                   { key: 'strengths',    label: 'Key Strengths',           placeholder: 'What are you most proud of this period?' },
@@ -531,7 +531,7 @@ export default function PerformancePage() {
                       <>
                         <tr key={r.id} className="border-b border-gray-200 dark:border-gray-800/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/20 transition">
                           <td className="px-4 py-3.5">
-                            <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
+                            <p className="text-foreground font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
                             <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                           </td>
                           <td className="px-4 py-3.5 text-gray-600 dark:text-gray-300 text-sm">
@@ -548,7 +548,7 @@ export default function PerformancePage() {
                           <td className="px-4 py-3.5">
                             {r.overallRating ? (
                               <div className="flex items-center gap-2">
-                                <span className="text-white font-semibold">{Number(r.overallRating).toFixed(1)}</span>
+                                <span className="text-foreground font-semibold">{Number(r.overallRating).toFixed(1)}</span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">/5</span>
                               </div>
                             ) : '—'}
@@ -613,7 +613,7 @@ export default function PerformancePage() {
                                     </div>
                                   )}
                                   {r.employeeInput && (r.employeeInput.strengths || r.employeeInput.improvements) && (
-                                    <div className="bg-blue-900/10 border border-blue-900/30 rounded-lg p-3 space-y-2">
+                                    <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-lg p-3 space-y-2">
                                       <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Employee Self-Assessment</p>
                                       {r.employeeInput.strengths    && <div><p className="text-xs text-gray-500">Strengths</p><p className="text-xs text-gray-300">{r.employeeInput.strengths}</p></div>}
                                       {r.employeeInput.improvements && <div><p className="text-xs text-gray-500">Improvements</p><p className="text-xs text-gray-300">{r.employeeInput.improvements}</p></div>}
@@ -696,7 +696,7 @@ export default function PerformancePage() {
           {editingGoal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
               <div className="card-premium p-6 w-full max-w-lg space-y-4 my-4">
-                <h3 className="text-lg font-bold text-white">Edit Goal</h3>
+                <h3 className="text-lg font-bold text-foreground">Edit Goal</h3>
                 <div>
                   <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Title</label>
                   <input value={editingGoal.title} onChange={e => setEditingGoal({ ...editingGoal, title: e.target.value })} className={INPUT} />
@@ -795,7 +795,7 @@ export default function PerformancePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-white">{g.title}</p>
+                        <p className="text-sm font-semibold text-foreground">{g.title}</p>
                         <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${goalStatusStyle(g.status)}`}>
                           {GOAL_STATUSES.find(s => s.value === g.status)?.label ?? g.status}
                         </span>

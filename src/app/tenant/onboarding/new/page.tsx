@@ -61,11 +61,11 @@ export default function NewOnboardingPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Start Onboarding</h1>
+        <h1 className="text-2xl font-bold text-foreground">Start Onboarding</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Create an onboarding record for a new employee</p>
       </div>
 
-      {error && <div className="bg-red-900/50 border border-red-700 rounded-lg p-3 text-sm text-red-300">{error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 rounded-lg p-3 text-sm text-red-600 dark:text-red-300">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-6 card-premium p-6">
 
@@ -98,7 +98,7 @@ export default function NewOnboardingPage() {
                 <input type="radio" name="stage" value={s.value} checked={form.stage === s.value}
                   onChange={() => setForm(f => ({ ...f, stage: s.value }))} />
                 <div>
-                  <p className="text-sm font-medium text-white">{s.label}</p>
+                  <p className="text-sm font-medium text-foreground">{s.label}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">{s.desc}</p>
                 </div>
               </label>

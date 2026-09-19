@@ -49,7 +49,7 @@ export default function TrainingPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Training & LMS</h1>
+        <h1 className="text-2xl font-bold text-foreground">Training & LMS</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage courses, enrolments and completion records</p>
       </div>
 
@@ -212,8 +212,8 @@ function LibraryTab() {
       {enrollCourse && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="card-premium p-6 w-full max-w-md space-y-4">
-            <h3 className="text-lg font-bold text-white">Enrol Employees</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Course: <span className="text-white font-medium">{enrollCourse.title}</span></p>
+            <h3 className="text-lg font-bold text-foreground">Enrol Employees</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Course: <span className="text-foreground font-medium">{enrollCourse.title}</span></p>
             <div className="max-h-60 overflow-y-auto space-y-1 border border-gray-200 dark:border-gray-800 rounded-lg p-2">
               {employees.map(e => (
                 <label key={e.id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-100 dark:bg-gray-800 cursor-pointer">
@@ -256,13 +256,13 @@ function LibraryTab() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     {c.isMandatory && (
-                      <span className="text-xs bg-red-900/60 text-red-300 px-2 py-0.5 rounded-full font-medium">Mandatory</span>
+                      <span className="text-xs bg-red-100 dark:bg-red-900/60 text-red-600 dark:text-red-300 px-2 py-0.5 rounded-full font-medium">Mandatory</span>
                     )}
                     {c.category && (
                       <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">{c.category}</span>
                     )}
                   </div>
-                  <h3 className="text-white font-semibold text-sm leading-snug">{c.title}</h3>
+                  <h3 className="text-foreground font-semibold text-sm leading-snug">{c.title}</h3>
                 </div>
               </div>
               {c.description && (
@@ -371,7 +371,7 @@ function RecordsTab() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: 'Total',      value: stats.total,     color: 'text-white' },
+          { label: 'Total',      value: stats.total,     color: 'text-foreground' },
           { label: 'Enrolled',   value: stats.enrolled,  color: 'text-blue-400' },
           { label: 'Completed',  value: stats.completed, color: 'text-green-400' },
           { label: 'Overdue',    value: stats.overdue,   color: 'text-red-400' },
@@ -429,14 +429,14 @@ function RecordsTab() {
                 return (
                   <tr key={r.id}>
                     <td className="px-5 py-3.5">
-                      <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
+                      <p className="text-foreground font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
                       <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                     </td>
                     <td className="px-5 py-3.5">
                       <p className="text-gray-700 dark:text-gray-200 text-sm">{r.courseTitle}</p>
                       <div className="flex items-center gap-1 mt-0.5">
                         {r.courseCategory && <span className="text-xs text-gray-500 dark:text-gray-400">{r.courseCategory}</span>}
-                        {r.courseMandatory && <span className="text-xs bg-red-900/40 text-red-400 px-1.5 rounded">Mandatory</span>}
+                        {r.courseMandatory && <span className="text-xs bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 px-1.5 rounded">Mandatory</span>}
                       </div>
                     </td>
                     <td className="px-5 py-3.5">

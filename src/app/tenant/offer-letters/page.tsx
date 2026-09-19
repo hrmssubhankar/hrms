@@ -508,7 +508,7 @@ export default function OfferLettersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Offer Letters</h1>
+          <h1 className="text-2xl font-bold text-foreground">Offer Letters</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-0.5">Generate, send and track candidate offer letters</p>
         </div>
         <button onClick={initForm}
@@ -592,7 +592,7 @@ export default function OfferLettersPage() {
               <div className="card-premium p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h2 className="text-lg font-bold text-white">{selected.candidateName}</h2>
+                    <h2 className="text-lg font-bold text-foreground">{selected.candidateName}</h2>
                     <p className="text-sm text-purple-400">{selected.position}</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">{selected.candidateEmail}</p>
                   </div>
@@ -753,7 +753,7 @@ export default function OfferLettersPage() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="card-premium rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
-              <h2 className="text-lg font-bold text-white">New Offer Letter</h2>
+              <h2 className="text-lg font-bold text-foreground">New Offer Letter</h2>
               <button onClick={()=>setShowForm(false)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl">×</button>
             </div>
             <form onSubmit={submit} className="p-6 space-y-4">
@@ -881,7 +881,7 @@ export default function OfferLettersPage() {
             </div>
             <div className="p-5 space-y-4">
               {/* Merge tag guide */}
-              <div className="bg-purple-900/20 border border-purple-800 rounded-lg p-3 text-xs text-purple-300 space-y-1">
+              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3 text-xs text-purple-700 dark:text-purple-300 space-y-1">
                 <p className="font-semibold text-purple-200">Available merge tags</p>
                 <p><code>{'{{candidateName}}'}</code> · <code>{'{{position}}'}</code> · <code>{'{{department}}'}</code></p>
                 <p><code>{'{{employmentType}}'}</code> · <code>{'{{startDate}}'}</code> · <code>{'{{salary}}'}</code> · <code>{'{{salaryCycle}}'}</code></p>

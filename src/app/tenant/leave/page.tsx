@@ -396,7 +396,7 @@ export default function LeavePage() {
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { label: 'Total',        value: stats.total,             color: 'text-white' },
+              { label: 'Total',        value: stats.total,             color: 'text-foreground' },
               { label: 'Pending',      value: stats.pending,           color: 'text-yellow-400' },
               { label: 'Approved',     value: stats.approved,          color: 'text-green-400' },
               { label: 'Rejected',     value: stats.rejected,          color: 'text-red-400' },
@@ -507,7 +507,7 @@ export default function LeavePage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           {canApprove && (
-                            <span className="text-sm font-medium text-white">{r.employeeFirstName} {r.employeeLastName}</span>
+                            <span className="text-sm font-medium text-foreground">{r.employeeFirstName} {r.employeeLastName}</span>
                           )}
                           <span className="text-xs text-gray-600 dark:text-gray-400">{typeLabel[r.leaveType] ?? r.leaveType}</span>
                         </div>
@@ -530,7 +530,7 @@ export default function LeavePage() {
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                           <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Requested on</p>
-                            <p className="text-white">{fmt(r.createdAt)}</p>
+                            <p className="text-foreground">{fmt(r.createdAt)}</p>
                           </div>
                           {r.reason && (
                             <div className="col-span-2">
@@ -541,7 +541,7 @@ export default function LeavePage() {
                           {r.reviewedAt && (
                             <div>
                               <p className="text-xs text-gray-500 dark:text-gray-400">Reviewed on</p>
-                              <p className="text-white">{fmt(r.reviewedAt)}</p>
+                              <p className="text-foreground">{fmt(r.reviewedAt)}</p>
                             </div>
                           )}
                           {r.reviewNote && (
@@ -649,7 +649,7 @@ export default function LeavePage() {
                     <div className="flex items-center gap-2.5">
                       <span className="text-2xl">{b.emoji}</span>
                       <div>
-                        <p className="text-sm font-semibold text-white">{b.label}</p>
+                        <p className="text-sm font-semibold text-foreground">{b.label}</p>
                         {b.accrualNote && <p className="text-xs text-gray-600 mt-0.5 dark:text-gray-400">{b.accrualNote}</p>}
                       </div>
                     </div>
@@ -714,7 +714,7 @@ export default function LeavePage() {
               }}
               className="px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white transition"
             >← Prev</button>
-            <h2 className="text-lg font-semibold text-white">{MONTHS[calMonth - 1]} {calYear}</h2>
+            <h2 className="text-lg font-semibold text-foreground">{MONTHS[calMonth - 1]} {calYear}</h2>
             <button
               onClick={() => {
                 let m = calMonth + 1, y = calYear
@@ -819,7 +819,7 @@ export default function LeavePage() {
           <form onSubmit={submit}
             className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">New Leave Request</h2>
+              <h2 className="text-lg font-semibold text-foreground">New Leave Request</h2>
               <button type="button" onClick={() => { setShowForm(false); setFormError(null) }}
                 className="text-gray-500 hover:text-white text-2xl leading-none dark:text-gray-400">×</button>
             </div>
@@ -865,7 +865,7 @@ export default function LeavePage() {
             </div>
 
             {computedDays > 0 && (
-              <div className="bg-purple-900/30 border border-purple-800 rounded-lg px-4 py-2.5">
+              <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg px-4 py-2.5">
                 <p className="text-sm text-purple-300 font-medium">
                   {computedDays} calendar day{computedDays !== 1 ? 's' : ''} requested
                 </p>
@@ -893,7 +893,7 @@ export default function LeavePage() {
             </div>
 
             {formError && (
-              <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-sm text-red-300">
+              <div className="bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 rounded-lg px-4 py-3 text-sm text-red-700 dark:text-red-300">
                 {formError}
               </div>
             )}

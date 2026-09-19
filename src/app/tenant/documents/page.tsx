@@ -381,7 +381,7 @@ export default function DocumentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Document Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">Document Management</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Centralised register with expiry tracking and Vercel Blob storage</p>
         </div>
         <button
@@ -395,7 +395,7 @@ export default function DocumentsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: 'Total',          value: stats.total,         color: 'text-white' },
+          { label: 'Total',          value: stats.total,         color: 'text-foreground' },
           { label: 'Active',         value: stats.active,        color: 'text-green-400' },
           { label: 'Pending Review', value: stats.pendingReview, color: 'text-amber-400' },
           { label: 'Expiring (30d)', value: stats.expiringSoon,  color: stats.expiringSoon > 0 ? 'text-amber-400' : 'text-gray-600' },
@@ -410,7 +410,7 @@ export default function DocumentsPage() {
 
       {/* Expired alert */}
       {expiredActiveDocs.length > 0 && (
-        <div className="bg-red-950/40 border border-red-700/60 rounded-2xl px-5 py-4 space-y-2">
+        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-700/60 rounded-2xl px-5 py-4 space-y-2">
           <p className="text-sm font-semibold text-red-300">{expiredActiveDocs.length} document{expiredActiveDocs.length > 1 ? 's' : ''} are expired but still marked active</p>
           <div className="flex flex-wrap gap-2">
             {expiredActiveDocs.slice(0, 5).map(d => (
@@ -426,7 +426,7 @@ export default function DocumentsPage() {
 
       {/* Expiring soon alert */}
       {expiringDocs.length > 0 && (
-        <div className="bg-amber-950/30 border border-amber-700/50 rounded-2xl px-5 py-4 space-y-2">
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/50 rounded-2xl px-5 py-4 space-y-2">
           <p className="text-sm font-semibold text-amber-300">️ {expiringDocs.length} document{expiringDocs.length > 1 ? 's' : ''} expiring within 30 days</p>
           <div className="flex flex-wrap gap-2">
             {expiringDocs.map(d => {
@@ -445,7 +445,7 @@ export default function DocumentsPage() {
       {/* Add document form */}
       {showForm && (
         <form onSubmit={create} className="card-premium border-purple-500/30 p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-white">Add Document to Register</h3>
+          <h3 className="text-sm font-semibold text-foreground">Add Document to Register</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className={LABEL}>Title *</label>

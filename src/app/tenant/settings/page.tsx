@@ -228,17 +228,17 @@ export default function TenantSettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Portal Settings</h1>
+        <h1 className="text-2xl font-bold text-foreground">Portal Settings</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Configure your branding, domain, email delivery, and notifications</p>
       </div>
 
       {saved && (
-        <div className="bg-green-900/40 border border-green-700 rounded-lg px-4 py-2.5 text-sm text-green-300">
+        <div className="bg-green-50 dark:bg-green-900/40 border border-green-200 dark:border-green-700 rounded-lg px-4 py-2.5 text-sm text-green-700 dark:text-green-300">
           Settings saved — changes take effect on next page load
         </div>
       )}
       {error && (
-        <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-2.5 text-sm text-red-300">{error}</div>
+        <div className="bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 rounded-lg px-4 py-2.5 text-sm text-red-700 dark:text-red-300">{error}</div>
       )}
 
       {/* Tab nav */}
@@ -252,7 +252,7 @@ export default function TenantSettingsPage() {
           { id: 'integrations',  label: 'Integrations' },
         ] as { id: Tab; label: string }[]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === t.id ? 'border-purple-500 text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
+            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition ${tab === t.id ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
             {t.label}
           </button>
         ))}
@@ -268,7 +268,7 @@ export default function TenantSettingsPage() {
               {/* Logo */}
               <div className="card-premium p-6 space-y-5">
                 <div>
-                  <p className="text-sm font-medium text-white mb-1">Organisation Logo</p>
+                  <p className="text-sm font-medium text-foreground mb-1">Organisation Logo</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Shown in the sidebar header. PNG, JPG, SVG or WebP · max 512 KB · Recommended: transparent background, min 200px wide.</p>
                 </div>
 
@@ -366,9 +366,9 @@ export default function TenantSettingsPage() {
           {/* ── DOMAIN TAB ── */}
           {tab === 'domain' && (
             <div className="card-premium p-6 space-y-5">
-              <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3 text-xs text-blue-300">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
                 <strong>DNS Configuration:</strong> Point your custom domain CNAME to{' '}
-                <code className="bg-blue-900/50 px-1 rounded">cname.vercel-dns.com</code>, then enter it below.
+                <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">cname.vercel-dns.com</code>, then enter it below.
                 Vercel will automatically provision an SSL certificate.
               </div>
 
@@ -421,7 +421,7 @@ export default function TenantSettingsPage() {
           {/* ── EMAIL TAB ── */}
           {tab === 'email' && (
             <div className="card-premium p-6 space-y-5">
-              <div className="bg-amber-900/20 border border-amber-800 rounded-lg p-3 text-xs text-amber-300">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-xs text-amber-700 dark:text-amber-300">
                 Configure your own SMTP server to send system emails (onboarding, compliance alerts, etc.) from your own domain.
                 Leave blank to use the platform default sender.
               </div>
@@ -655,10 +655,10 @@ export default function TenantSettingsPage() {
               })()}
 
               {leaveTypesError && (
-                <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-2.5 text-sm text-red-300">{leaveTypesError}</div>
+                <div className="bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700 rounded-lg px-4 py-2.5 text-sm text-red-700 dark:text-red-300">{leaveTypesError}</div>
               )}
               {leaveTypesSaved && (
-                <div className="bg-green-900/40 border border-green-700 rounded-lg px-4 py-2.5 text-sm text-green-300">✓ Leave configuration saved</div>
+                <div className="bg-green-50 dark:bg-green-900/40 border border-green-200 dark:border-green-700 rounded-lg px-4 py-2.5 text-sm text-green-700 dark:text-green-300">✓ Leave configuration saved</div>
               )}
 
               {leaveTypesLoading ? (
@@ -674,14 +674,14 @@ export default function TenantSettingsPage() {
                         <div className="flex items-center gap-2.5">
                           <span className="text-xl">{lt.emoji}</span>
                           <div>
-                            <p className="text-sm font-semibold text-white">{lt.label}</p>
+                            <p className="text-sm font-semibold text-foreground">{lt.label}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{lt.accrualNote}</p>
                           </div>
                         </div>
                         {/* Active toggle */}
                         <button
                           onClick={() => setLeaveTypes(prev => prev.map((t, i) => i === idx ? { ...t, isActive: !t.isActive } : t))}
-                          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${lt.isActive ? 'bg-purple-600' : 'bg-gray-700'}`}
+                          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${lt.isActive ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-700'}`}
                         >
                           <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${lt.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
                         </button>
@@ -768,7 +768,7 @@ export default function TenantSettingsPage() {
             <div className="space-y-6">
 
               {xeroMsg && (
-                <div className={`rounded-lg px-4 py-2.5 text-sm border ${xeroMsg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+                <div className={`rounded-lg px-4 py-2.5 text-sm border ${xeroMsg.startsWith('') ? 'bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/40 border-red-200 dark:border-red-700 text-red-700 dark:text-red-300'}`}>
                   {xeroMsg}
                 </div>
               )}
@@ -780,14 +780,14 @@ export default function TenantSettingsPage() {
                     {/* Xero logo (blue X) */}
                     <div className="w-10 h-10 rounded-xl bg-[#13B5EA] flex items-center justify-center text-white font-black text-lg shrink-0">X</div>
                     <div>
-                      <p className="text-sm font-semibold text-white">Xero Accounting</p>
+                      <p className="text-sm font-semibold text-foreground">Xero Accounting</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Export payroll runs as manual journal entries to your Xero ledger</p>
                     </div>
                   </div>
                   {xeroLoading ? (
                     <span className="text-xs text-gray-500 dark:text-gray-400">Checking…</span>
                   ) : xeroStatus?.connected ? (
-                    <span className="text-xs px-2 py-1 rounded-full bg-green-900/40 border border-green-700 text-green-300">
+                    <span className="text-xs px-2 py-1 rounded-full bg-green-50 dark:bg-green-900/40 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300">
                       {xeroStatus.tokenExpired ? 'Token expired' : '● Connected'}
                     </span>
                   ) : (
@@ -799,7 +799,7 @@ export default function TenantSettingsPage() {
                   <div className="bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Organisation</span>
-                      <span className="text-white font-medium">{xeroStatus.orgName}</span>
+                      <span className="text-foreground font-medium">{xeroStatus.orgName}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Xero Tenant ID</span>
@@ -809,7 +809,7 @@ export default function TenantSettingsPage() {
                 )}
 
                 {xeroStatus?.tokenExpired && (
-                  <div className="bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-2 text-xs text-amber-300">
+                  <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
                     Your Xero access token has expired. Reconnect to restore the integration.
                   </div>
                 )}
@@ -850,7 +850,7 @@ export default function TenantSettingsPage() {
 
               {/* MYOB */}
               {myobMsg && (
-                <div className={`rounded-lg px-4 py-2.5 text-sm border ${myobMsg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-red-900/40 border-red-700 text-red-300'}`}>
+                <div className={`rounded-lg px-4 py-2.5 text-sm border ${myobMsg.startsWith('') ? 'bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/40 border-red-200 dark:border-red-700 text-red-700 dark:text-red-300'}`}>
                   {myobMsg}
                 </div>
               )}
@@ -861,14 +861,14 @@ export default function TenantSettingsPage() {
                     {/* MYOB logo (purple M) */}
                     <div className="w-10 h-10 rounded-xl bg-[#7B2D8B] flex items-center justify-center text-white font-black text-lg shrink-0">M</div>
                     <div>
-                      <p className="text-sm font-semibold text-white">MYOB AccountRight</p>
+                      <p className="text-sm font-semibold text-foreground">MYOB AccountRight</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Export payroll runs as General Journal Transactions to your MYOB ledger</p>
                     </div>
                   </div>
                   {myobLoading ? (
                     <span className="text-xs text-gray-500 dark:text-gray-400">Checking…</span>
                   ) : myobStatus?.connected ? (
-                    <span className="text-xs px-2 py-1 rounded-full bg-green-900/40 border border-green-700 text-green-300">
+                    <span className="text-xs px-2 py-1 rounded-full bg-green-50 dark:bg-green-900/40 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300">
                       {myobStatus.tokenExpired ? 'Token expired' : '● Connected'}
                     </span>
                   ) : (
@@ -880,13 +880,13 @@ export default function TenantSettingsPage() {
                   <div className="bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Company File</span>
-                      <span className="text-white font-medium">{myobStatus.companyFileName}</span>
+                      <span className="text-foreground font-medium">{myobStatus.companyFileName}</span>
                     </div>
                   </div>
                 )}
 
                 {myobStatus?.tokenExpired && (
-                  <div className="bg-amber-900/30 border border-amber-700 rounded-lg px-3 py-2 text-xs text-amber-300">
+                  <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
                     Your MYOB access token has expired. Reconnect to restore the integration.
                   </div>
                 )}

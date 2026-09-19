@@ -375,7 +375,7 @@ export default function PayrollPage() {
       </div>
 
       {exportMsg && (
-        <div className={`rounded-lg px-4 py-2.5 text-sm border ${exportMsg.startsWith('') ? 'bg-green-900/40 border-green-700 text-green-300' : 'bg-amber-900/40 border-amber-700 text-amber-300'}`}>
+        <div className={`rounded-lg px-4 py-2.5 text-sm border ${exportMsg.startsWith("") ? "bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300" : "bg-amber-50 dark:bg-amber-900/40 border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300"}`}>
           {exportMsg}
         </div>
       )}
@@ -651,31 +651,31 @@ export default function PayrollPage() {
 
             <div className="px-6 py-5 space-y-4">
               {bulkError && (
-                <div className="bg-red-900/30 border border-red-700 rounded-lg px-3 py-2 text-sm text-red-300">{bulkError}</div>
+                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg px-3 py-2 text-sm text-red-700 dark:text-red-300">{bulkError}</div>
               )}
 
               {!bulkResult ? (
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1">Period Start *</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Period Start *</label>
                       <input type="date" value={bulkForm.periodStart}
                         onChange={e => setBulkForm(f => ({ ...f, periodStart: e.target.value }))}
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                        className="input-premium" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1">Period End *</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Period End *</label>
                       <input type="date" value={bulkForm.periodEnd}
                         onChange={e => setBulkForm(f => ({ ...f, periodEnd: e.target.value }))}
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                        className="input-premium" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1">Pay Frequency</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">Pay Frequency</label>
                     <select value={bulkForm.frequency}
                       onChange={e => setBulkForm(f => ({ ...f, frequency: e.target.value as any }))}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500">
+                      className="input-premium">
                       <option value="weekly">Weekly</option>
                       <option value="fortnightly">Fortnightly</option>
                       <option value="monthly">Monthly</option>
@@ -684,20 +684,20 @@ export default function PayrollPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1">Taxable Allowances</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Taxable Allowances</label>
                       <input type="number" min="0" step="0.01" value={bulkForm.allowances}
                         onChange={e => setBulkForm(f => ({ ...f, allowances: e.target.value }))}
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                        className="input-premium" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1">Pre-tax Deductions</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Pre-tax Deductions</label>
                       <input type="number" min="0" step="0.01" value={bulkForm.deductions}
                         onChange={e => setBulkForm(f => ({ ...f, deductions: e.target.value }))}
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" />
+                        className="input-premium" />
                     </div>
                   </div>
 
-                  <div className="bg-amber-900/20 border border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-300">
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-700 dark:text-amber-300">
                     Hourly employees without hours logged will be calculated using standard period hours (weekly: 38h, fortnightly: 76h, monthly: 164h).
                   </div>
 
@@ -712,34 +712,34 @@ export default function PayrollPage() {
                   {/* Summary */}
                   <div className="grid grid-cols-4 gap-3">
                     {[
-                      { label: 'Total',   value: bulkResult.summary.total,   color: 'text-white' },
+                      { label: 'Total',   value: bulkResult.summary.total,   color: 'text-foreground' },
                       { label: 'Created', value: bulkResult.summary.created, color: 'text-green-400' },
                       { label: 'Skipped', value: bulkResult.summary.skipped, color: 'text-amber-400' },
                       { label: 'Failed',  value: bulkResult.summary.failed,  color: 'text-red-400' },
                     ].map(s => (
-                      <div key={s.label} className="bg-gray-800 rounded-xl p-3 text-center">
+                      <div key={s.label} className="bg-muted rounded-xl p-3 text-center">
                         <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
                         <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="bg-gray-800 rounded-xl px-4 py-3 flex justify-between items-center">
-                    <span className="text-sm text-gray-400">Total Net Pay Created</span>
+                  <div className="bg-muted rounded-xl px-4 py-3 flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Total Net Pay Created</span>
                     <span className="text-lg font-bold text-green-400">${Number(bulkResult.summary.totalNet).toLocaleString('en-AU', { minimumFractionDigits: 2 })}</span>
                   </div>
 
                   {/* Per-employee results */}
                   <div className="max-h-48 overflow-y-auto space-y-1">
                     {bulkResult.results.map((r, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs px-3 py-2 rounded-lg bg-gray-800/60">
-                        <span className="text-gray-300">{r.name}</span>
+                      <div key={i} className="flex items-center justify-between text-xs px-3 py-2 rounded-lg bg-muted/60">
+                        <span className="text-foreground/80">{r.name}</span>
                         <div className="flex items-center gap-2">
                           {r.netPay != null && <span className="text-green-400 font-mono">${r.netPay.toFixed(2)}</span>}
                           <span className={`px-2 py-0.5 rounded-full border text-xs ${
-                            r.status === 'created' ? 'bg-green-900/40 border-green-800 text-green-300' :
-                            r.status === 'skipped' ? 'bg-amber-900/40 border-amber-800 text-amber-300' :
-                            'bg-red-900/40 border-red-800 text-red-300'
+                            r.status === 'created' ? 'bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' :
+                            r.status === 'skipped' ? 'bg-amber-50 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300' :
+                            'bg-red-50 dark:bg-red-900/40 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
                           }`}>
                             {r.status}{r.reason ? ` — ${r.reason}` : ''}
                           </span>

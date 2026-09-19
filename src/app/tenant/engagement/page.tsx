@@ -167,7 +167,7 @@ export default function EngagementPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Employee Voice &amp; Surveys</h1>
+          <h1 className="text-2xl font-bold text-foreground">Employee Voice &amp; Surveys</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Create surveys, collect responses, and track engagement</p>
         </div>
         <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ export default function EngagementPage() {
             <div key={s.id} className={`card-premium p-5 ${selected?.id === s.id ? 'border-purple-600' : 'border-gray-800'}`}>
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div>
-                  <p className="text-white font-medium">{s.title}</p>
+                  <p className="text-foreground font-medium">{s.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">
                     {typeLabel(s.type)}{s.isAnonymous && ' · Anonymous'}
                     <span className="ml-2 text-gray-600 dark:text-gray-500">{new Date(s.createdAt).toLocaleDateString('en-AU')}</span>

@@ -347,7 +347,7 @@ export default function MyProfilePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
               </div>
-          <h2 className="text-lg font-semibold text-white mb-2">Profile Not Linked</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-2">Profile Not Linked</h2>
           <p className="text-gray-600 dark:text-gray-400 text-sm">
             Your user account has not yet been linked to an employee profile.
             Please contact your HR administrator to set this up.
@@ -395,7 +395,7 @@ export default function MyProfilePage() {
             />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-foreground">
               {profile.preferredName || profile.firstName} {profile.lastName}
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -420,7 +420,7 @@ export default function MyProfilePage() {
       {/* Edit form */}
       {editing && (
         <div className="card-premium border-purple-500/30 p-6">
-          <h2 className="text-sm font-semibold text-white mb-4">Update Contact Information</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-4">Update Contact Information</h2>
           <form onSubmit={save} className="space-y-4">
             <div>
               <label className={LABEL}>Preferred Name</label>
@@ -457,23 +457,23 @@ export default function MyProfilePage() {
       {/* Personal Information */}
       <div className="card-premium rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Personal Information</h2>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Full Name</span><span className="text-white text-sm font-medium">{profile.firstName} {profile.lastName}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Preferred Name</span><span className="text-white text-sm">{profile.preferredName || '—'}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Email</span><span className="text-white text-sm">{profile.email}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Phone</span><span className="text-white text-sm">{profile.phone || '—'}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Address</span><span className="text-white text-sm text-right max-w-xs">{profile.address || '—'}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Full Name</span><span className="text-foreground text-sm font-medium">{profile.firstName} {profile.lastName}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Preferred Name</span><span className="text-foreground text-sm">{profile.preferredName || '—'}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Email</span><span className="text-foreground text-sm">{profile.email}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Phone</span><span className="text-foreground text-sm">{profile.phone || '—'}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Address</span><span className="text-foreground text-sm text-right max-w-xs">{profile.address || '—'}</span></div>
         {profile.dateOfBirth && (
-          <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Date of Birth</span><span className="text-white text-sm">{fmt(profile.dateOfBirth)}</span></div>
+          <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Date of Birth</span><span className="text-foreground text-sm">{fmt(profile.dateOfBirth)}</span></div>
         )}
       </div>
 
       {/* Employment Details */}
       <div className="card-premium rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">Employment Details</h2>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employee Number</span><span className="text-white text-sm font-mono">#{profile.employeeNumber}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Organisation</span><span className="text-white text-sm">{profile.entityName || '—'}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employment Type</span><span className="text-white text-sm">{employmentTypeLabel[profile.employmentType] ?? profile.employmentType}</span></div>
-        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Start Date</span><span className="text-white text-sm">{fmt(profile.startDate)}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employee Number</span><span className="text-foreground text-sm font-mono">#{profile.employeeNumber}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Organisation</span><span className="text-foreground text-sm">{profile.entityName || '—'}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Employment Type</span><span className="text-foreground text-sm">{employmentTypeLabel[profile.employmentType] ?? profile.employmentType}</span></div>
+        <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Start Date</span><span className="text-foreground text-sm">{fmt(profile.startDate)}</span></div>
         <div className={ROW}><span className="text-gray-500 text-sm dark:text-gray-400">Status</span>
           <span className={profile.isActive ? 'badge badge-green' : 'badge badge-red'}>
             {profile.isActive ? 'Active' : 'Inactive'}
@@ -549,7 +549,7 @@ export default function MyProfilePage() {
               <div key={c.id} className="bg-gray-100 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-white text-sm">{c.name}</p>
+                    <p className="font-medium text-foreground text-sm">{c.name}</p>
                     {c.isPrimary && (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-purple-900/40 border border-purple-700 text-purple-300">Primary</span>
                     )}

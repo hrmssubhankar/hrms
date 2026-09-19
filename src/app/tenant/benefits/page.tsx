@@ -191,7 +191,7 @@ export default function BenefitsPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Employee Benefits</h1>
+          <h1 className="text-2xl font-bold text-foreground">Employee Benefits</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Track and manage benefit assignments across the team</p>
         </div>
         <div className="flex items-center gap-2">
@@ -206,7 +206,7 @@ export default function BenefitsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Assigned', value: stats.total,    color: 'text-white' },
+          { label: 'Total Assigned', value: stats.total,    color: 'text-foreground' },
           { label: 'Active',         value: stats.active,   color: 'text-green-400' },
           { label: 'Expiring Soon',  value: stats.expiring, color: 'text-amber-400' },
           { label: 'Expired',        value: stats.expired,  color: 'text-gray-500' },
@@ -343,7 +343,7 @@ export default function BenefitsPage() {
                 return (
                   <tr key={b.id} className="border-b border-gray-100 dark:border-gray-800/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/20 transition">
                     <td className="px-4 py-3.5">
-                      <p className="text-white font-medium">{b.employeeFirstName} {b.employeeLastName}</p>
+                      <p className="text-foreground font-medium">{b.employeeFirstName} {b.employeeLastName}</p>
                     </td>
                     <td className="px-4 py-3.5">
                       <span className="flex items-center gap-1.5 text-sm text-gray-300">
@@ -390,7 +390,7 @@ export default function BenefitsPage() {
               <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 dark:border-gray-800"
                 style={{ borderLeft: `4px solid ${group.color}` }}>
                 <span className="text-xl">{group.emoji}</span>
-                <p className="text-sm font-semibold text-white">{group.label}</p>
+                <p className="text-sm font-semibold text-foreground">{group.label}</p>
                 <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">{group.items.length} assigned</span>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-800/50">
@@ -399,7 +399,7 @@ export default function BenefitsPage() {
                   return (
                     <div key={b.id} className="flex items-center gap-4 px-5 py-3.5">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white font-medium">{b.employeeFirstName} {b.employeeLastName}</p>
+                        <p className="text-sm text-foreground font-medium">{b.employeeFirstName} {b.employeeLastName}</p>
                         {b.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{b.description}</p>}
                         <p className="text-xs text-gray-600 dark:text-gray-500 mt-0.5">
                           {b.startDate ? fmt(b.startDate) : 'No start'}
@@ -433,7 +433,7 @@ export default function BenefitsPage() {
 
       {/* Expiry alert banner */}
       {stats.expiring > 0 && (
-        <div className="bg-amber-900/20 border border-amber-800 rounded-xl px-5 py-3.5 flex items-center gap-3">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-5 py-3.5 flex items-center gap-3">
           <span className="text-amber-400 text-lg">⚠️</span>
           <p className="text-sm text-amber-300">
             <span className="font-semibold">{stats.expiring} benefit{stats.expiring > 1 ? 's' : ''}</span> expiring within 30 days.

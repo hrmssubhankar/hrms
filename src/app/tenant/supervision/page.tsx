@@ -141,7 +141,7 @@ export default function SupervisionPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Supervision Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">Supervision Management</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Schedule and track employee supervision sessions and action items</p>
         </div>
         <div className="flex items-center gap-2">
@@ -156,7 +156,7 @@ export default function SupervisionPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Total',     value: stats.total,     color: 'text-white' },
+          { label: 'Total',     value: stats.total,     color: 'text-foreground' },
           { label: 'Scheduled', value: stats.scheduled, color: 'text-blue-400' },
           { label: 'Completed', value: stats.completed, color: 'text-green-400' },
           { label: 'Overdue',   value: stats.overdue,   color: 'text-red-400' },
@@ -250,7 +250,7 @@ export default function SupervisionPage() {
                 <div className="flex items-center gap-4 px-5 py-4 cursor-pointer" onClick={() => setExpanded(isOpen ? null : r.id)}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <span className="text-white font-medium text-sm">
+                      <span className="text-foreground font-medium text-sm">
                         {r.employeeFirstName} {r.employeeLastName}
                       </span>
                       <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full dark:text-gray-400">
@@ -322,7 +322,7 @@ export default function SupervisionPage() {
                     {r.status === 'scheduled' && (
                       <div className="pt-1">
                         <button onClick={() => complete(r.id, r.notes ?? '')}
-                          className="text-sm bg-green-900/40 border border-green-800 text-green-300 hover:bg-green-900/60 px-4 py-2 rounded-lg transition">
+                          className="text-sm bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60 px-4 py-2 rounded-lg transition">
                           Mark Session Complete
                         </button>
                         {r.conductedAt && (

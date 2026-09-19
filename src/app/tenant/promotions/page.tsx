@@ -170,7 +170,7 @@ export default function PromotionsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Promotions</h1>
+          <h1 className="text-2xl font-bold text-foreground">Promotions</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-0.5">Raise, review and track promotion cases</p>
         </div>
         <div className="flex items-center gap-2">
@@ -271,7 +271,7 @@ export default function PromotionsPage() {
               <div className="card-premium p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h2 className="text-lg font-bold text-white">
+                    <h2 className="text-lg font-bold text-foreground">
                       {selected.employeeFirstName} {selected.employeeLastName}
                     </h2>
                     <p className="text-xs text-gray-600 dark:text-gray-400">{selected.employeeEmail}</p>
@@ -285,18 +285,18 @@ export default function PromotionsPage() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-gray-100 dark:bg-gray-800/60 rounded-xl p-3">
                     <p className="text-xs text-gray-500 mb-1 dark:text-gray-400">Current</p>
-                    <p className="text-sm font-semibold text-white">{selected.currentTitle || '—'}</p>
+                    <p className="text-sm font-semibold text-foreground">{selected.currentTitle || '—'}</p>
                     {selected.currentSalary && <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">${selected.currentSalary.toLocaleString()} / yr</p>}
                   </div>
-                  <div className="bg-purple-900/30 border border-purple-800/50 rounded-xl p-3">
+                  <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800/50 rounded-xl p-3">
                     <p className="text-xs text-purple-400 mb-1">Proposed →</p>
-                    <p className="text-sm font-semibold text-white">{selected.proposedTitle}</p>
+                    <p className="text-sm font-semibold text-foreground">{selected.proposedTitle}</p>
                     {selected.proposedSalary && <p className="text-xs text-green-400 mt-0.5">${selected.proposedSalary.toLocaleString()} / yr</p>}
                   </div>
                 </div>
 
                 {salaryDiff(selected.currentSalary, selected.proposedSalary) && (
-                  <div className="bg-green-900/20 border border-green-800/40 rounded-lg px-3 py-2 mb-4">
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 rounded-lg px-3 py-2 mb-4">
                     <p className="text-xs text-green-300">Salary increase: {salaryDiff(selected.currentSalary, selected.proposedSalary)}</p>
                   </div>
                 )}
@@ -406,7 +406,7 @@ export default function PromotionsPage() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="card-premium rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
-              <h2 className="text-lg font-bold text-white">Raise Promotion Case</h2>
+              <h2 className="text-lg font-bold text-foreground">Raise Promotion Case</h2>
               <button onClick={()=>setShowForm(false)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl">×</button>
             </div>
             <form onSubmit={submitForm} className="p-6 space-y-4">

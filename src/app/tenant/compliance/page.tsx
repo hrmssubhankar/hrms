@@ -190,7 +190,7 @@ function ScreeningTab() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Total Checks',   value: stats.total,    color: 'text-white' },
+          { label: 'Total Checks',   value: stats.total,    color: 'text-foreground' },
           { label: 'Verified',     value: stats.green,    color: 'text-green-400' },
           { label: 'Expiring <30d', value: stats.expiring, color: 'text-amber-400' },
           { label: 'Expired/Red',  value: stats.red + stats.expired, color: 'text-red-400' },
@@ -295,12 +295,12 @@ function ScreeningTab() {
                   return (
                     <tr key={r.id} className="cursor-default">
                       <td className="px-5 py-3.5">
-                        <p className="text-white font-medium text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
+                        <p className="text-foreground font-medium text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
                         <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                       </td>
                       <td className="px-5 py-3.5">
                         <span className="text-gray-600 dark:text-gray-300 text-sm">{r.checkType}</span>
-                        {r.employeeNdis && <span className="ml-2 text-xs bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded">NDIS</span>}
+                        {r.employeeNdis && <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 px-1.5 py-0.5 rounded">NDIS</span>}
                       </td>
                       <td className="px-5 py-3.5">
                         {editId === r.id ? (
@@ -428,7 +428,7 @@ function TrackingTab() {
       {/* Overview cards */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total',   value: stats.total,   color: 'text-white' },
+          { label: 'Total',   value: stats.total,   color: 'text-foreground' },
           { label: 'Green', value: stats.green,   color: 'text-green-400' },
           { label: 'Amber', value: stats.amber,   color: 'text-amber-400' },
           { label: 'Red',   value: stats.red,     color: 'text-red-400' },
@@ -503,7 +503,7 @@ function TrackingTab() {
                 {records.map(r => (
                   <tr key={r.id}>
                     <td className="px-5 py-3.5">
-                      <p className="text-white font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
+                      <p className="text-foreground font-medium">{r.employeeFirstName} {r.employeeLastName}</p>
                       <p className="text-gray-500 text-xs dark:text-gray-400">{r.employeeEmail}</p>
                     </td>
                     <td className="px-5 py-3.5 text-gray-600 dark:text-gray-300">{r.itemType}</td>
@@ -606,7 +606,7 @@ function LockTab() {
 
   return (
     <div className="space-y-5">
-      <div className="bg-amber-950 border border-amber-800 rounded-xl p-4 text-sm text-amber-300">
+      <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-sm text-amber-700 dark:text-amber-300">
         ️ Compliance Lock exceptions allow non-compliant employees to temporarily work while gaps are resolved. Each exception requires a reason and expiry date and is logged for audit purposes.
       </div>
 
@@ -654,7 +654,7 @@ function LockTab() {
                 {active.map(r => (
                   <div key={r.id} className="flex items-center gap-4 px-5 py-4 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
                     <div className="flex-1">
-                      <p className="text-white font-medium text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
+                      <p className="text-foreground font-medium text-sm">{r.employeeFirstName} {r.employeeLastName}</p>
                       <p className="text-gray-600 dark:text-gray-400 text-xs mt-0.5">{r.reason}</p>
                     </div>
                     <div className="text-right shrink-0">

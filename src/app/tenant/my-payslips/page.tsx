@@ -89,7 +89,7 @@ export default function MyPayslipsPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">My Payslips</h1>
+        <h1 className="text-2xl font-bold text-foreground">My Payslips</h1>
         {employee && (
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
             {employee.firstName} {employee.lastName} · {employee.email}
@@ -142,7 +142,7 @@ export default function MyPayslipsPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-left">
-                      <p className="text-sm font-medium text-white">
+                      <p className="text-sm font-medium text-foreground">
                         {fmtDate(p.periodStart)} → {fmtDate(p.periodEnd)}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">Created {fmtDate(p.createdAt)}</p>
@@ -215,7 +215,7 @@ export default function MyPayslipsPage() {
         <div className="bg-gray-100 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 rounded-xl p-4 text-xs text-gray-500 dark:text-gray-400">
           <p className="font-medium text-gray-600 dark:text-gray-400 mb-1">Year-to-Date Summary (Paid runs)</p>
           <div className="flex gap-6">
-            <span>Gross: <span className="text-white">{fmt(totalGross)}</span></span>
+            <span>Gross: <span className="text-foreground">{fmt(totalGross)}</span></span>
             <span>Net: <span className="text-green-400">{fmt(totalPaid)}</span></span>
             <span>Super: <span className="text-purple-400">{fmt(totalSuper)}</span></span>
           </div>

@@ -75,7 +75,7 @@ export default function AnalyticsPage() {
   if (denied) return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-white">Reporting & Analytics</h1>
+        <h1 className="text-2xl font-bold text-foreground">Reporting & Analytics</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Organisation-wide metrics across all HR modules</p>
       </div>
       <div className="flex flex-col items-center justify-center h-64 card-premium gap-3">
@@ -99,7 +99,7 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Reporting & Analytics</h1>
+        <h1 className="text-2xl font-bold text-foreground">Reporting & Analytics</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Organisation-wide metrics across all HR modules</p>
       </div>
 
@@ -107,7 +107,7 @@ export default function AnalyticsPage() {
       <section>
         <SectionHeader title="Headcount" icon="" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-          <StatCard label="Total Active" value={headcount.total} color="text-white" />
+          <StatCard label="Total Active" value={headcount.total} color="text-foreground" />
           <StatCard label="New (30 days)" value={headcount.newLast30} color="text-green-400" />
           <StatCard label="NDIS Workers" value={headcount.ndisWorkers} color="text-purple-400" />
           <StatCard label="Compliance OK" value={headcount.complianceGreen}

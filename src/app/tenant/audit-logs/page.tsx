@@ -57,7 +57,7 @@ export default function AuditLogsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Audit Log</h1>
+        <h1 className="text-2xl font-bold text-foreground">Audit Log</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Immutable record of all system actions — who did what, and when</p>
       </div>
 
