@@ -103,10 +103,11 @@
 .card-premium {
   @apply rounded-xl;
   border: 1px solid rgba(0,0,0,0.06);
-  background: white;
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
 }
 .dark .card-premium {
-  background: rgba(255,255,255,0.03);
+  background: hsl(var(--card));
   border-color: rgba(255,255,255,0.06);
 }
 
@@ -121,28 +122,28 @@
 .table-premium tbody tr:hover { background: rgba(0,0,0,0.02); }
 .dark .table-premium tbody tr:hover { background: rgba(255,255,255,0.025); }
 
-/* ── Premium badge system */
+/* ── Premium badge system — light defaults, dark overrides */
 .badge { @apply inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full; }
-.badge-green  { background: rgba(34,197,94,0.12);  color: #4ade80; }
-.badge-blue   { background: rgba(59,130,246,0.12); color: #60a5fa; }
-.badge-amber  { background: rgba(245,158,11,0.12); color: #fbbf24; }
-.badge-red    { background: rgba(239,68,68,0.12);  color: #f87171; }
-.badge-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
-.badge-gray   { background: rgba(100,116,139,0.12);color: #94a3b8; }
-:root:not(.dark) .badge-green  { background: rgba(34,197,94,0.1);  color: #16a34a; }
-:root:not(.dark) .badge-blue   { background: rgba(59,130,246,0.1); color: #2563eb; }
-:root:not(.dark) .badge-amber  { background: rgba(245,158,11,0.1); color: #d97706; }
-:root:not(.dark) .badge-red    { background: rgba(239,68,68,0.1);  color: #dc2626; }
-:root:not(.dark) .badge-purple { background: rgba(124,58,237,0.1); color: #7c3aed; }
-:root:not(.dark) .badge-gray   { background: rgba(100,116,139,0.1);color: #64748b; }
+.badge-green  { background: rgba(34,197,94,0.1);   color: #16a34a; }
+.badge-blue   { background: rgba(59,130,246,0.1);  color: #2563eb; }
+.badge-amber  { background: rgba(245,158,11,0.1);  color: #d97706; }
+.badge-red    { background: rgba(239,68,68,0.1);   color: #dc2626; }
+.badge-purple { background: rgba(124,58,237,0.1);  color: #7c3aed; }
+.badge-gray   { background: rgba(100,116,139,0.1); color: #64748b; }
+.dark .badge-green  { background: rgba(34,197,94,0.12);   color: #4ade80; }
+.dark .badge-blue   { background: rgba(59,130,246,0.12);  color: #60a5fa; }
+.dark .badge-amber  { background: rgba(245,158,11,0.12);  color: #fbbf24; }
+.dark .badge-red    { background: rgba(239,68,68,0.12);   color: #f87171; }
+.dark .badge-purple { background: rgba(124,58,237,0.15);  color: #a78bfa; }
+.dark .badge-gray   { background: rgba(100,116,139,0.12); color: #94a3b8; }
 
 /* ── Section label */
 .section-label { @apply text-[10px] font-semibold uppercase tracking-[0.12em]; color: rgba(100,116,139,0.8); }
 .dark .section-label { color: rgba(148,163,184,0.35); }
 
 /* ── Premium input */
-.input-premium { @apply w-full rounded-lg px-3 py-2 text-[13px] transition-all duration-150 outline-none; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); color: #0f172a; }
-.dark .input-premium { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #e2e8f4; }
+.input-premium { @apply w-full rounded-lg px-3 py-2 text-[13px] transition-all duration-150 outline-none; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); color: hsl(var(--foreground)); }
+.dark .input-premium { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
 .input-premium::placeholder { color: rgba(100,116,139,0.5); }
 .input-premium:focus { border-color: rgba(59,130,246,0.4); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 .dark .input-premium:focus { border-color: rgba(124,58,237,0.4); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
@@ -150,7 +151,6 @@
 /* ── Page wrapper helpers */
 .page-premium { @apply space-y-5; }
 .page-premium-header { @apply flex items-center justify-between; }
-.page-premium-title { @apply text-[20px] font-semibold tracking-tight; color: #0f172a; }
-.dark .page-premium-title { color: #e2e8f4; }
+.page-premium-title { @apply text-[20px] font-semibold tracking-tight; color: hsl(var(--foreground)); }
 .page-premium-subtitle { @apply text-[13px] mt-0.5; color: rgba(71,85,105,0.7); }
 .dark .page-premium-subtitle { color: rgba(148,163,184,0.4); }
