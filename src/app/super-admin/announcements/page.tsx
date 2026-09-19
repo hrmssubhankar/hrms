@@ -26,33 +26,41 @@ const PRIORITY_CONFIG: Record<Priority, {
   label: string
   icon: string
   dot: string
-  badge: string
-  border: string
-  glow: string
+  badgeClass: string
+  borderLight: string
+  borderDark: string
+  glowLight: string
+  glowDark: string
 }> = {
   info: {
-    label:  'Info',
-    icon:   'ℹ',
-    dot:    '#60a5fa',
-    badge:  'bg-blue-900/30 text-blue-300 border-blue-700/50',
-    border: 'rgba(96,165,250,0.15)',
-    glow:   'rgba(96,165,250,0.06)',
+    label:       'Info',
+    icon:        'ℹ',
+    dot:         '#3b82f6',
+    badgeClass:  'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700/50',
+    borderLight: 'rgba(59,130,246,0.2)',
+    borderDark:  'rgba(96,165,250,0.15)',
+    glowLight:   'rgba(59,130,246,0.04)',
+    glowDark:    'rgba(96,165,250,0.06)',
   },
   warning: {
-    label:  'Warning',
-    icon:   '⚠',
-    dot:    '#fbbf24',
-    badge:  'bg-yellow-900/30 text-yellow-300 border-yellow-700/50',
-    border: 'rgba(251,191,36,0.15)',
-    glow:   'rgba(251,191,36,0.06)',
+    label:       'Warning',
+    icon:        '⚠',
+    dot:         '#f59e0b',
+    badgeClass:  'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700/50',
+    borderLight: 'rgba(245,158,11,0.2)',
+    borderDark:  'rgba(251,191,36,0.15)',
+    glowLight:   'rgba(245,158,11,0.04)',
+    glowDark:    'rgba(251,191,36,0.06)',
   },
   critical: {
-    label:  'Critical',
-    icon:   '🚨',
-    dot:    '#f87171',
-    badge:  'bg-red-900/30 text-red-300 border-red-700/50',
-    border: 'rgba(248,113,113,0.2)',
-    glow:   'rgba(248,113,113,0.08)',
+    label:       'Critical',
+    icon:        '🚨',
+    dot:         '#ef4444',
+    badgeClass:  'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700/50',
+    borderLight: 'rgba(239,68,68,0.2)',
+    borderDark:  'rgba(248,113,113,0.2)',
+    glowLight:   'rgba(239,68,68,0.04)',
+    glowDark:    'rgba(248,113,113,0.08)',
   },
 }
 
@@ -65,7 +73,7 @@ const EMPTY_FORM = {
 function PriorityBadge({ priority }: { priority: Priority }) {
   const c = PRIORITY_CONFIG[priority]
   return (
-    <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${c.badge}`}>
+    <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${c.badgeClass}`}>
       <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: c.dot }} />
       {c.label}
     </span>
@@ -146,15 +154,20 @@ export default function AnnouncementsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-[22px] font-semibold tracking-tight text-white">Platform Announcements</h1>
-          <p className="text-[13px] text-white/40 mt-0.5">
+          <h1 className="text-[22px] font-semibold tracking-tight text-foreground">Platform Announcements</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
             Broadcast notices to all tenants — shown as a banner in every client dashboard and delivered by email.
           </p>
         </div>
         <button
           onClick={() => { setShowForm(v => !v); setError(null) }}
           className="shrink-0 text-[13px] font-semibold px-4 py-2 rounded-lg text-white transition-all"
-          style={{ background: showForm ? 'rgba(255,255,255,0.06)' : `linear-gradient(135deg, ${ACCENT}, ${ACCENT}cc)`, boxShadow: showForm ? 'none' : `0 0 20px ${ACCENT}40` }}
+          style={{
+            background: showForm ? 'transparent' : `linear-gradient(135deg, ${ACCENT}, ${ACCENT}cc)`,
+            boxShadow:  showForm ? 'none' : `0 0 20px ${ACCENT}40`,
+            color:      showForm ? ACCENT : 'white',
+            border:     showForm ? `1px solid ${ACCENT}40` : 'none',
+          }}
         >
           {showForm ? '✕ Cancel' : '+ New Announcement'}
         </button>
@@ -164,13 +177,12 @@ export default function AnnouncementsPage() {
       {!loading && (
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Active',   value: active.length,             accent: '#4ade80' },
-            { label: 'Inactive', value: inactive.length,           accent: 'rgba(255,255,255,0.3)' },
-            { label: 'Total',    value: announcements.length,      accent: 'rgba(255,255,255,0.5)' },
+            { label: 'Active',   value: active.length,        accent: '#22c55e' },
+            { label: 'Inactive', value: inactive.length,      accent: 'hsl(var(--muted-foreground))' },
+            { label: 'Total',    value: announcements.length, accent: 'hsl(var(--foreground))' },
           ].map(c => (
-            <div key={c.label} className="rounded-xl p-4"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-[11px] uppercase tracking-widest text-white/30 mb-1">{c.label}</p>
+            <div key={c.label} className="card-premium p-4">
+              <p className="section-label mb-1">{c.label}</p>
               <p className="text-2xl font-bold tabular-nums" style={{ color: c.accent }}>{c.value}</p>
             </div>
           ))}
@@ -179,41 +191,37 @@ export default function AnnouncementsPage() {
 
       {/* Create form */}
       {showForm && (
-        <div className="rounded-xl p-5 space-y-4"
-          style={{ background: 'rgba(124,58,237,0.06)', border: `1px solid ${ACCENT}30` }}>
-          <p className="text-[13px] font-semibold text-purple-300">New Announcement</p>
+        <div className="card-premium p-5 space-y-4" style={{ borderColor: `${ACCENT}30` }}>
+          <p className="text-[13px] font-semibold text-purple-600 dark:text-purple-400">New Announcement</p>
 
           <div>
-            <label className="text-[11px] uppercase tracking-widest text-white/30 mb-1.5 block">Title *</label>
+            <label className="section-label mb-1.5 block">Title *</label>
             <input
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               placeholder="e.g. Scheduled maintenance on 15 Sep"
-              className="w-full rounded-lg px-3 py-2 text-[13px] text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+              className="input-premium"
             />
           </div>
 
           <div>
-            <label className="text-[11px] uppercase tracking-widest text-white/30 mb-1.5 block">Message *</label>
+            <label className="section-label mb-1.5 block">Message *</label>
             <textarea
               value={form.body}
               onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
               rows={3}
               placeholder="Enter the message all tenants will see…"
-              className="w-full rounded-lg px-3 py-2 text-[13px] text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500 resize-none"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+              className="input-premium resize-none"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="text-[11px] uppercase tracking-widest text-white/30 mb-1.5 block">Priority</label>
+              <label className="section-label mb-1.5 block">Priority</label>
               <select
                 value={form.priority}
                 onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}
-                className="w-full rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:ring-1 focus:ring-purple-500"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                className="input-premium"
               >
                 <option value="info">ℹ Info</option>
                 <option value="warning">⚠ Warning</option>
@@ -221,29 +229,27 @@ export default function AnnouncementsPage() {
               </select>
             </div>
             <div>
-              <label className="text-[11px] uppercase tracking-widest text-white/30 mb-1.5 block">Audience</label>
+              <label className="section-label mb-1.5 block">Audience</label>
               <select
                 value={form.targetTenants}
                 onChange={e => setForm(f => ({ ...f, targetTenants: e.target.value }))}
-                className="w-full rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:ring-1 focus:ring-purple-500"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                className="input-premium"
               >
                 <option value="all">All Tenants</option>
               </select>
             </div>
             <div>
-              <label className="text-[11px] uppercase tracking-widest text-white/30 mb-1.5 block">Expires (optional)</label>
+              <label className="section-label mb-1.5 block">Expires (optional)</label>
               <input
                 type="date"
                 value={form.expiresAt}
                 onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))}
-                className="w-full rounded-lg px-3 py-2 text-[13px] text-white focus:outline-none focus:ring-1 focus:ring-purple-500"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                className="input-premium"
               />
             </div>
           </div>
 
-          {error && <p className="text-[12px] text-red-400">{error}</p>}
+          {error && <p className="text-[12px] text-red-500 dark:text-red-400">{error}</p>}
 
           <button
             onClick={publish}
@@ -260,25 +266,24 @@ export default function AnnouncementsPage() {
       {loading && (
         <div className="space-y-2">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
+            <div key={i} className="h-24 rounded-xl animate-pulse bg-muted" />
           ))}
         </div>
       )}
 
       {/* Empty state */}
       {!loading && announcements.length === 0 && (
-        <div className="rounded-xl p-14 text-center"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="card-premium p-14 text-center">
           <p className="text-4xl mb-3">📢</p>
-          <p className="text-[14px] font-medium text-white/40">No announcements yet</p>
-          <p className="text-[12px] text-white/20 mt-1">Create one to broadcast a message to all client tenants</p>
+          <p className="text-[14px] font-medium text-foreground/60">No announcements yet</p>
+          <p className="text-[12px] text-muted-foreground mt-1">Create one to broadcast a message to all client tenants</p>
         </div>
       )}
 
       {/* Active announcements */}
       {active.length > 0 && (
         <section className="space-y-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Active ({active.length})</p>
+          <p className="section-label">Active ({active.length})</p>
           {active.map(ann => <AnnCard key={ann.id} ann={ann} onToggle={toggleActive} onDelete={deleteAnn} />)}
         </section>
       )}
@@ -286,7 +291,7 @@ export default function AnnouncementsPage() {
       {/* Inactive / expired */}
       {inactive.length > 0 && (
         <section className="space-y-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/20 mt-2">Inactive / Expired ({inactive.length})</p>
+          <p className="section-label mt-2">Inactive / Expired ({inactive.length})</p>
           {inactive.map(ann => <AnnCard key={ann.id} ann={ann} onToggle={toggleActive} onDelete={deleteAnn} dimmed />)}
         </section>
       )}
@@ -309,35 +314,35 @@ function AnnCard({
 
   return (
     <div
-      className="rounded-xl p-4 transition-opacity"
+      className={`card-premium p-4 transition-opacity ${dimmed ? 'opacity-60' : ''}`}
       style={{
-        background: dimmed ? 'rgba(255,255,255,0.02)' : p.glow,
-        border: `1px solid ${dimmed ? 'rgba(255,255,255,0.06)' : p.border}`,
-        opacity: dimmed ? 0.6 : 1,
+        borderColor: dimmed ? undefined : `color-mix(in srgb, ${p.dot} 25%, transparent)`,
+        background: dimmed
+          ? undefined
+          : `color-mix(in srgb, ${p.dot} 5%, hsl(var(--card)))`,
       }}
     >
       <div className="flex items-start gap-3">
-        {/* Priority dot */}
         <span className="text-[18px] shrink-0 mt-0.5 leading-none">{p.icon}</span>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center flex-wrap gap-2 mb-1">
-            <span className="text-[13px] font-semibold text-white/90">{ann.title}</span>
+            <span className="text-[13px] font-semibold text-foreground">{ann.title}</span>
             <PriorityBadge priority={ann.priority} />
             {!ann.isActive && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full border border-white/10 text-white/30">Inactive</span>
+              <span className="text-[11px] px-2 py-0.5 rounded-full border border-border text-muted-foreground">Inactive</span>
             )}
             {exp && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full border border-red-700/40 text-red-400/70">Expired</span>
+              <span className="text-[11px] px-2 py-0.5 rounded-full border border-red-200 dark:border-red-700/40 text-red-500 dark:text-red-400">Expired</span>
             )}
-            <span className="text-[11px] text-white/25">
+            <span className="text-[11px] text-muted-foreground">
               → {ann.targetTenants === 'all' ? 'All tenants' : ann.targetTenants}
             </span>
           </div>
 
-          <p className="text-[12px] text-white/50 leading-relaxed whitespace-pre-wrap">{ann.body}</p>
+          <p className="text-[12px] text-muted-foreground leading-relaxed whitespace-pre-wrap">{ann.body}</p>
 
-          <div className="flex items-center gap-4 mt-2 text-[11px] text-white/25">
+          <div className="flex items-center gap-4 mt-2 text-[11px] text-muted-foreground/60">
             <span>By {ann.createdBy}</span>
             <span>{fmtDate(ann.createdAt)}</span>
             {ann.expiresAt && !exp && <span>Expires {fmtDate(ann.expiresAt)}</span>}
@@ -348,16 +353,17 @@ function AnnCard({
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => onToggle(ann.id, ann.isActive)}
-            className="text-[11px] px-3 py-1 rounded-lg border transition"
-            style={ann.isActive
-              ? { borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)' }
-              : { borderColor: 'rgba(74,222,128,0.3)', color: '#4ade80' }}
+            className={`text-[11px] px-3 py-1 rounded-lg border transition ${
+              ann.isActive
+                ? 'border-border text-muted-foreground hover:border-red-300 hover:text-red-500 dark:hover:text-red-400'
+                : 'border-green-300 dark:border-green-700/50 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
+            }`}
           >
             {ann.isActive ? 'Deactivate' : 'Activate'}
           </button>
           <button
             onClick={() => onDelete(ann.id)}
-            className="text-[11px] text-red-400/60 hover:text-red-400 px-2 py-1 transition"
+            className="text-[11px] text-red-400/70 hover:text-red-500 dark:hover:text-red-400 px-2 py-1 transition"
           >
             Delete
           </button>
