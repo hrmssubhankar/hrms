@@ -25,7 +25,7 @@ const ROLE_STYLE: Record<string, string> = {
   operations_manager:  'badge badge-teal',
   team_leader:         'badge badge-teal',
   payroll_officer:     'badge badge-green',
-  employee:            'bg-gray-800 text-gray-300 border-gray-700',
+  employee:            'badge badge-gray',
   contractor:          'badge badge-amber',
   auditor:             'badge badge-purple',
   it_admin:            'badge badge-red',
@@ -144,7 +144,7 @@ export default function RolesPage() {
   if (denied) return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-white">Roles & Access</h1>
+        <h1 className="text-2xl font-bold text-foreground">Roles & Access</h1>
         <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage portal users and their access roles</p>
       </div>
       <div className="flex flex-col items-center justify-center h-64 card-premium gap-3">
@@ -161,7 +161,7 @@ export default function RolesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Roles & Access</h1>
+          <h1 className="text-2xl font-bold text-foreground">Roles & Access</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage portal users and their access roles</p>
         </div>
         <PermissionGate permission="roles:write">
@@ -177,15 +177,15 @@ export default function RolesPage() {
       <div className="grid grid-cols-3 gap-3">
         <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Total Users</p>
-          <p className="text-2xl font-bold text-white mt-1">{users.length}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{users.length}</p>
         </div>
         <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Active</p>
-          <p className="text-2xl font-bold text-green-400 mt-1">{activeCount}</p>
+          <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{activeCount}</p>
         </div>
         <div className="card-premium p-4">
           <p className="text-xs text-gray-600 dark:text-gray-400">Suspended</p>
-          <p className="text-2xl font-bold text-red-400 mt-1">{inactiveCount}</p>
+          <p className="text-2xl font-bold text-red-500 dark:text-red-400 mt-1">{inactiveCount}</p>
         </div>
       </div>
 
@@ -206,7 +206,7 @@ export default function RolesPage() {
       {/* Invite form */}
       {showForm && (
         <form onSubmit={invite} className="card-premium border-purple-500/30 p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-purple-300">Invite new portal user</h3>
+          <h3 className="text-sm font-semibold text-purple-600 dark:text-purple-300">Invite new portal user</h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">Email *</label>
@@ -284,7 +284,7 @@ export default function RolesPage() {
                           <button onClick={() => changeRole(u.id, editRole)}
                             className="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded transition"></button>
                           <button onClick={() => setEditId(null)}
-                            className="text-xs text-gray-500 hover:text-white px-1 dark:text-gray-400"></button>
+                            className="text-xs text-gray-500 dark:text-gray-400 hover:text-foreground px-1"></button>
                         </div>
                       ) : (
                         <button onClick={() => { setEditId(u.id); setEditRole(u.role) }}
@@ -295,7 +295,7 @@ export default function RolesPage() {
                     </PermissionGate>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs ${u.totpEnabled ? 'text-green-400' : 'text-gray-600'}`}>
+                    <span className={`text-xs ${u.totpEnabled ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-600'}`}>
                       {u.totpEnabled ? 'On' : 'Off'}
                     </span>
                   </td>
@@ -311,8 +311,8 @@ export default function RolesPage() {
                     <PermissionGate permission="roles:write">
                       <button onClick={() => toggleActive(u.id, !u.isActive)}
                         className={`text-xs px-2.5 py-1 rounded border transition ${u.isActive
-                          ? 'bg-red-900/20 border-red-800 text-red-400 hover:bg-red-900/40'
-                          : 'bg-green-900/20 border-green-800 text-green-400 hover:bg-green-900/40'}`}>
+                          ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40'
+                          : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40'}`}>
                         {u.isActive ? 'Suspend' : 'Activate'}
                       </button>
                     </PermissionGate>
