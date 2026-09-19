@@ -38,14 +38,14 @@ const ACCENT = '#7c3aed'
 function MigBadge({ status }: { status: MigrationStatus }) {
   return status === 'applied' ? (
     <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full
-      bg-green-900/40 text-green-300 border border-green-700/50">
-      <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+      bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700/50">
+      <span className="w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-green-400 inline-block" />
       Applied
     </span>
   ) : (
     <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full
-      bg-yellow-900/30 text-yellow-300 border border-yellow-700/50">
-      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block animate-pulse" />
+      bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700/50">
+      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 dark:bg-yellow-400 inline-block animate-pulse" />
       Pending
     </span>
   )
@@ -53,9 +53,9 @@ function MigBadge({ status }: { status: MigrationStatus }) {
 
 function ResultBadge({ status }: { status: 'applied' | 'error' }) {
   return status === 'applied' ? (
-    <span className="text-[11px] font-semibold text-green-400">✓ Applied</span>
+    <span className="text-[11px] font-semibold text-green-600 dark:text-green-400">✓ Applied</span>
   ) : (
-    <span className="text-[11px] font-semibold text-red-400">✗ Error</span>
+    <span className="text-[11px] font-semibold text-red-500 dark:text-red-400">✗ Error</span>
   )
 }
 
@@ -102,7 +102,6 @@ export default function MigrationsPage() {
       setRunError('Network error — could not reach migrations API')
     }
     setApplying(false)
-    // Refresh list after run
     await fetchMigrations()
   }
 
@@ -114,8 +113,8 @@ export default function MigrationsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-[22px] font-semibold tracking-tight text-white">Schema Migrations</h1>
-          <p className="text-[13px] text-white/40 mt-0.5">
+          <h1 className="text-[22px] font-semibold tracking-tight text-foreground">Schema Migrations</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
             All tenants share one database — running migrations here keeps every client in sync automatically.
           </p>
         </div>
@@ -123,21 +122,22 @@ export default function MigrationsPage() {
           <button
             onClick={fetchMigrations}
             disabled={loading}
-            className="text-[13px] px-3 py-2 rounded-lg border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 transition disabled:opacity-40"
+            className="text-[13px] px-3 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition disabled:opacity-40"
           >
             {loading ? '⟳' : '⟳ Refresh'}
           </button>
           <button
             onClick={applyPending}
             disabled={applying || loading || pending === 0}
-            className="text-[13px] px-4 py-2 rounded-lg font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className={`text-[13px] px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${pending === 0 ? 'bg-muted text-muted-foreground' : 'text-white'}`}
             style={{
               background: pending > 0
                 ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT}cc)`
-                : 'rgba(255,255,255,0.06)',
+                : undefined,
               boxShadow: pending > 0 ? `0 0 20px ${ACCENT}40` : 'none',
+              color: pending > 0 ? 'white' : undefined,
             }}
-          >
+            >
             {applying
               ? '⟳ Applying…'
               : pending === 0
@@ -151,13 +151,12 @@ export default function MigrationsPage() {
       {data && (
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Total',   value: data.summary.total,   accent: 'rgba(255,255,255,0.5)' },
-            { label: 'Applied', value: data.summary.applied, accent: '#4ade80' },
-            { label: 'Pending', value: data.summary.pending, accent: data.summary.pending > 0 ? '#fbbf24' : '#4ade80' },
+            { label: 'Total',   value: data.summary.total,   accent: 'hsl(var(--foreground))' },
+            { label: 'Applied', value: data.summary.applied, accent: '#22c55e' },
+            { label: 'Pending', value: data.summary.pending, accent: data.summary.pending > 0 ? '#f59e0b' : '#22c55e' },
           ].map(c => (
-            <div key={c.label} className="rounded-xl p-4"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <p className="text-[11px] uppercase tracking-widest text-white/30 mb-1">{c.label}</p>
+            <div key={c.label} className="card-premium p-4">
+              <p className="section-label mb-1">{c.label}</p>
               <p className="text-2xl font-bold tabular-nums" style={{ color: c.accent }}>{c.value}</p>
             </div>
           ))}
@@ -166,38 +165,35 @@ export default function MigrationsPage() {
 
       {/* Run results */}
       {runResults && runResults.length > 0 && (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-          <div className="px-4 py-3 flex items-center justify-between"
-            style={{ background: runError ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <p className="text-[13px] font-semibold" style={{ color: runError ? '#f87171' : '#4ade80' }}>
+        <div className="card-premium overflow-hidden">
+          <div className={`px-4 py-3 flex items-center justify-between border-b border-border ${runError ? 'bg-red-50 dark:bg-red-950/20' : 'bg-green-50 dark:bg-green-950/20'}`}>
+            <p className={`text-[13px] font-semibold ${runError ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
               {runMessage}
             </p>
           </div>
           {runResults.map((r, i) => (
             <div key={r.name}
               className="flex items-center gap-3 px-4 py-3"
-              style={i < runResults.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : {}}>
+              style={i < runResults.length - 1 ? { borderBottom: '1px solid hsl(var(--border))' } : {}}>
               <ResultBadge status={r.status} />
-              <span className="text-[13px] text-white/70 font-mono flex-1 truncate">{r.name}</span>
-              <span className="text-[11px] text-white/25 shrink-0">{r.durationMs}ms</span>
-              {r.error && <span className="text-[11px] text-red-400 truncate max-w-[200px]">{r.error}</span>}
+              <span className="text-[13px] text-foreground/70 font-mono flex-1 truncate">{r.name}</span>
+              <span className="text-[11px] text-muted-foreground shrink-0">{r.durationMs}ms</span>
+              {r.error && <span className="text-[11px] text-red-500 truncate max-w-[200px]">{r.error}</span>}
             </div>
           ))}
         </div>
       )}
 
       {runResults && runResults.length === 0 && runMessage && (
-        <div className="rounded-xl px-4 py-3 text-[13px] text-white/50"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="card-premium px-4 py-3 text-[13px] text-muted-foreground">
           {runMessage}
         </div>
       )}
 
       {/* Error state */}
       {error && (
-        <div className="rounded-xl px-4 py-4"
-          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
-          <p className="text-[13px] font-medium text-red-400">{error}</p>
+        <div className="rounded-xl px-4 py-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40">
+          <p className="text-[13px] font-medium text-red-600 dark:text-red-400">{error}</p>
         </div>
       )}
 
@@ -205,28 +201,26 @@ export default function MigrationsPage() {
       {loading && !data ? (
         <div className="space-y-2">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-14 rounded-xl animate-pulse"
-              style={{ background: 'rgba(255,255,255,0.03)' }} />
+            <div key={i} className="h-14 rounded-xl animate-pulse bg-muted" />
           ))}
         </div>
       ) : data && (
-        <div className="rounded-xl overflow-hidden"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="card-premium overflow-hidden">
           {/* Column headers */}
-          <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-2.5 border-b border-white/[0.05]">
-            <span className="text-[10px] uppercase tracking-widest text-white/25 font-semibold">Migration</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/25 font-semibold text-right">Status</span>
+          <div className="grid grid-cols-[1fr_auto] gap-4 px-4 py-2.5 border-b border-border">
+            <span className="section-label">Migration</span>
+            <span className="section-label text-right">Status</span>
           </div>
 
           {data.migrations.map((m, i) => (
             <div
               key={m.name}
-              className="grid grid-cols-[1fr_auto] gap-4 px-4 py-3.5 items-center hover:bg-white/[0.02] transition-colors"
-              style={i < data.migrations.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.04)' } : {}}
+              className="grid grid-cols-[1fr_auto] gap-4 px-4 py-3.5 items-center hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+              style={i < data.migrations.length - 1 ? { borderBottom: '1px solid hsl(var(--border))' } : {}}
             >
               <div className="min-w-0">
-                <p className="text-[13px] font-mono text-white/80 truncate">{m.name}</p>
-                <p className="text-[11px] text-white/30 mt-0.5 truncate">{m.description}</p>
+                <p className="text-[13px] font-mono text-foreground/80 truncate">{m.name}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{m.description}</p>
               </div>
               <MigBadge status={m.status} />
             </div>
@@ -235,12 +229,11 @@ export default function MigrationsPage() {
       )}
 
       {/* Info footer */}
-      <div className="rounded-xl px-4 py-3.5 flex items-start gap-3"
-        style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
-        <span className="text-purple-400 text-[16px] shrink-0 mt-0.5">ℹ</span>
-        <p className="text-[12px] text-white/40 leading-relaxed">
-          All migrations use <code className="text-purple-300/70 text-[11px]">CREATE TABLE IF NOT EXISTS</code> /
-          {' '}<code className="text-purple-300/70 text-[11px]">ADD COLUMN IF NOT EXISTS</code> — they are safe to
+      <div className="rounded-xl px-4 py-3.5 flex items-start gap-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/30">
+        <span className="text-purple-500 dark:text-purple-400 text-[16px] shrink-0 mt-0.5">ℹ</span>
+        <p className="text-[12px] text-foreground/60 leading-relaxed">
+          All migrations use <code className="text-purple-600 dark:text-purple-300/70 text-[11px]">CREATE TABLE IF NOT EXISTS</code> /
+          {' '}<code className="text-purple-600 dark:text-purple-300/70 text-[11px]">ADD COLUMN IF NOT EXISTS</code> — they are safe to
           run multiple times. New clients added via the platform automatically share this database and inherit the
           current schema with no extra steps.
         </p>
