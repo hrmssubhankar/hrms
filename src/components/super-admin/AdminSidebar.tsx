@@ -37,9 +37,9 @@ export default function AdminSidebar({ mobileOpen, onMobileClose }: Props) {
   }
 
   const sidebarContent = (
-    <aside className="w-60 flex flex-col h-full shrink-0 select-none bg-[#070c1a] border-r border-white/[0.055]">
+    <aside className="w-60 flex flex-col h-full shrink-0 select-none bg-card dark:bg-[#070c1a] border-r border-border dark:border-white/[0.055]">
       {/* Brand */}
-      <div className="px-4 py-4 border-b border-white/[0.055]">
+      <div className="px-4 py-4 border-b border-border dark:border-white/[0.055]">
         <div className="flex items-center gap-2.5">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
@@ -51,8 +51,8 @@ export default function AdminSidebar({ mobileOpen, onMobileClose }: Props) {
             ⚡
           </div>
           <div>
-            <p className="text-[13px] font-semibold text-white leading-tight tracking-tight">Super Admin</p>
-            <p className="text-[10px] font-medium tracking-widest uppercase text-purple-400/70">Platform Control</p>
+            <p className="text-[13px] font-semibold text-foreground leading-tight tracking-tight">Super Admin</p>
+            <p className="text-[10px] font-medium tracking-widest uppercase text-purple-500 dark:text-purple-400/70">Platform Control</p>
           </div>
         </div>
       </div>
@@ -70,41 +70,37 @@ export default function AdminSidebar({ mobileOpen, onMobileClose }: Props) {
               style={active ? {
                 background: `linear-gradient(90deg, ${ACCENT}25, ${ACCENT}10)`,
                 borderLeft: `2px solid ${ACCENT}`,
-                color: '#ffffff',
+                color: ACCENT,
                 fontWeight: 600,
                 paddingLeft: '10px',
               } : {
-                color: 'rgba(226,232,244,0.6)',
                 paddingLeft: '12px',
               }}
               onMouseEnter={e => {
                 if (!active) {
                   const el = e.currentTarget as HTMLElement
-                  el.style.background = 'rgba(255,255,255,0.05)'
-                  el.style.opacity = '1'
-                  el.style.color = '#e2e8f4'
+                  el.style.background = 'rgba(124,58,237,0.07)'
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
                   const el = e.currentTarget as HTMLElement
                   el.style.background = 'transparent'
-                  el.style.color = 'rgba(226,232,244,0.6)'
                 }
               }}
             >
-              <span style={active ? { color: ACCENT } : {}}>
+              <span style={active ? { color: ACCENT } : { color: 'hsl(var(--muted-foreground))' }}>
                 <Icon name={item.icon} className="w-4 h-4 shrink-0" strokeWidth={active ? 2 : 1.6} />
               </span>
-              {item.label}
+              <span className={active ? '' : 'text-muted-foreground'}>{item.label}</span>
             </Link>
           )
         })}
       </nav>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-white/[0.055]">
-        <p className="text-[11px] text-slate-600 font-medium">HRMS Platform v1.0</p>
+      <div className="px-4 py-3 border-t border-border dark:border-white/[0.055]">
+        <p className="text-[11px] text-muted-foreground font-medium">HRMS Platform v1.0</p>
       </div>
     </aside>
   )

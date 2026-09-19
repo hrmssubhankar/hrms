@@ -56,8 +56,8 @@ export default async function SuperAdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[22px] font-semibold tracking-tight text-white">Platform Dashboard</h1>
-        <p className="text-[13px] text-white/40 mt-0.5">Manage all client tenants and platform settings</p>
+        <h1 className="text-[22px] font-semibold tracking-tight text-foreground">Platform Dashboard</h1>
+        <p className="text-[13px] text-muted-foreground mt-0.5">Manage all client tenants and platform settings</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -76,7 +76,7 @@ export default async function SuperAdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30 mb-3">Quick Actions</p>
+            <p className="section-label mb-3">Quick Actions</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               {[
                 { label: 'Add Client',    href: '/super-admin/clients/new',   desc: 'Onboard a new organisation' },
@@ -90,10 +90,9 @@ export default async function SuperAdminDashboard() {
                 { label: 'Admins',        href: '/super-admin/admins',        desc: 'Super admin accounts' },
                 { label: 'Settings',      href: '/super-admin/settings',      desc: 'Email, security, maintenance' },
               ].map((a) => (
-                <Link key={a.href} href={a.href} className="group block rounded-xl p-3.5 transition-all duration-150"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p className="text-[13px] font-semibold text-white/80 group-hover:text-white transition-colors leading-tight">{a.label}</p>
-                  <p className="text-[11px] text-white/30 mt-0.5 leading-snug">{a.desc}</p>
+                <Link key={a.href} href={a.href} className="group card-premium block p-3.5 transition-all duration-150 hover:border-purple-500/30">
+                  <p className="text-[13px] font-semibold text-foreground/80 group-hover:text-foreground transition-colors leading-tight">{a.label}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{a.desc}</p>
                 </Link>
               ))}
             </div>
@@ -102,35 +101,34 @@ export default async function SuperAdminDashboard() {
           {d.clients.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">Client Setup Status</p>
-                <Link href="/super-admin/clients" className="text-[11px] text-purple-400/70 hover:text-purple-300 transition-colors">View all →</Link>
+                <p className="section-label">Client Setup Status</p>
+                <Link href="/super-admin/clients" className="text-[11px] text-purple-500 dark:text-purple-400/70 hover:text-purple-600 dark:hover:text-purple-300 transition-colors">View all →</Link>
               </div>
-              <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="card-premium overflow-hidden">
                 {d.clients.map((c: any, i: number) => (
-                  <div key={c.id} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]"
-                    style={i < d.clients.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : {}}>
+                  <div key={c.id} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+                    style={i < d.clients.length - 1 ? { borderBottom: '1px solid hsl(var(--border))' } : {}}>
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
                       style={{ background: `linear-gradient(135deg, ${c.primaryColor || ACCENT}, ${c.primaryColor || ACCENT}99)` }}>
                       {c.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] text-white/80 font-medium truncate">{c.name}</p>
+                      <p className="text-[13px] text-foreground/80 font-medium truncate">{c.name}</p>
                       <div className="flex items-center gap-1 mt-1">
                         {[{ label: 'Active', done: c.isActive }, { label: 'Themed', done: c.primaryColor !== '#1a4fff' }, { label: 'Slug', done: Boolean(c.slug) }].map((step) => (
-                          <span key={step.label} className="text-[10px] px-1.5 py-0.5 rounded"
-                            style={step.done ? { background: 'rgba(34,197,94,0.12)', color: '#4ade80' } : { background: 'rgba(255,255,255,0.05)', color: 'rgba(148,163,184,0.6)' }}>
+                          <span key={step.label} className={`text-[10px] px-1.5 py-0.5 rounded ${step.done ? 'badge-green' : 'badge-gray'}`}>
                             {step.done ? '✓ ' : '○ '}{step.label}
                           </span>
                         ))}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-[11px] text-white/30">{c.onboardingScore}/{c.onboardingTotal}</p>
-                      <div className="w-14 rounded-full h-1 mt-1" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <p className="text-[11px] text-muted-foreground">{c.onboardingScore}/{c.onboardingTotal}</p>
+                      <div className="w-14 rounded-full h-1 mt-1 bg-border">
                         <div className="h-1 rounded-full" style={{ width: `${(c.onboardingScore / c.onboardingTotal) * 100}%`, background: ACCENT }} />
                       </div>
                     </div>
-                    <Link href={`/super-admin/clients/${c.id}`} className="text-[12px] text-white/20 hover:text-purple-400 transition-colors shrink-0">→</Link>
+                    <Link href={`/super-admin/clients/${c.id}`} className="text-[12px] text-muted-foreground hover:text-purple-500 transition-colors shrink-0">→</Link>
                   </div>
                 ))}
               </div>
@@ -140,24 +138,24 @@ export default async function SuperAdminDashboard() {
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">Recent Activity</p>
-            <Link href="/super-admin/audit-logs" className="text-[11px] text-purple-400/70 hover:text-purple-300 transition-colors">View all →</Link>
+            <p className="section-label">Recent Activity</p>
+            <Link href="/super-admin/audit-logs" className="text-[11px] text-purple-500 dark:text-purple-400/70 hover:text-purple-600 dark:hover:text-purple-300 transition-colors">View all →</Link>
           </div>
-          <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="card-premium overflow-hidden">
             {d.recentLogs.length === 0 ? (
               <div className="px-4 py-10 text-center">
                 <p className="text-3xl mb-2">📋</p>
-                <p className="text-[12px] text-white/25">No audit events yet</p>
+                <p className="text-[12px] text-muted-foreground">No audit events yet</p>
               </div>
             ) : d.recentLogs.map((log: any, i: number) => (
-              <div key={log.id} className="px-4 py-3 transition-colors hover:bg-white/[0.02]"
-                style={i < d.recentLogs.length - 1 ? { borderBottom: '1px solid rgba(255,255,255,0.05)' } : {}}>
+              <div key={log.id} className="px-4 py-3 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                style={i < d.recentLogs.length - 1 ? { borderBottom: '1px solid hsl(var(--border))' } : {}}>
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: actionDot(log.action) }} />
-                  <span className="text-[12px] font-semibold text-white/70">{log.action}</span>
-                  <span className="text-[12px] text-white/30 truncate flex-1">{log.resource}</span>
+                  <span className="text-[12px] font-semibold text-foreground/70">{log.action}</span>
+                  <span className="text-[12px] text-muted-foreground truncate flex-1">{log.resource}</span>
                 </div>
-                <p className="text-[11px] text-white/25 mt-0.5 pl-3.5">
+                <p className="text-[11px] text-muted-foreground mt-0.5 pl-3.5">
                   {log.tenantName ?? 'Platform'} · {new Date(log.createdAt).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -171,20 +169,20 @@ export default async function SuperAdminDashboard() {
 
 function StatCard({ label, value, sub, accent }: { label: string; value: string | number; sub: string; accent: string }) {
   return (
-    <div className="rounded-xl p-4 relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+    <div className="card-premium p-4 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-16 h-16 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${accent}18, transparent 70%)` }} />
-      <p className="text-[11px] text-white/35 uppercase tracking-[0.1em] mb-2">{label}</p>
+      <p className="text-[11px] text-muted-foreground uppercase tracking-[0.1em] mb-2">{label}</p>
       <p className="text-2xl font-bold tabular-nums" style={{ color: accent }}>{value}</p>
-      <p className="text-[11px] text-white/25 mt-1">{sub}</p>
+      <p className="text-[11px] text-muted-foreground mt-1">{sub}</p>
     </div>
   )
 }
 
 function TierCard({ tier, count, accent }: { tier: string; count: number; accent: string }) {
   return (
-    <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${accent}25` }}>
+    <div className="card-premium p-4" style={{ borderColor: `${accent}25` }}>
       <p className="text-2xl font-bold tabular-nums" style={{ color: accent }}>{count}</p>
-      <p className="text-[13px] text-white/40 mt-1 font-medium">{tier}</p>
+      <p className="text-[13px] text-muted-foreground mt-1 font-medium">{tier}</p>
     </div>
   )
 }
