@@ -117,7 +117,7 @@ export default async function SuperAdminDashboard() {
                       <div className="flex items-center gap-1 mt-1">
                         {[{ label: 'Active', done: c.isActive }, { label: 'Themed', done: c.primaryColor !== '#1a4fff' }, { label: 'Slug', done: Boolean(c.slug) }].map((step) => (
                           <span key={step.label} className={`text-[10px] px-1.5 py-0.5 rounded ${step.done ? 'badge-green' : 'badge-gray'}`}>
-                            {step.done ? '✓ ' : '○ '}{step.label}
+                            {step.done ? '✓ ' : '· '}{step.label}
                           </span>
                         ))}
                       </div>
@@ -144,7 +144,7 @@ export default async function SuperAdminDashboard() {
           <div className="card-premium overflow-hidden">
             {d.recentLogs.length === 0 ? (
               <div className="px-4 py-10 text-center">
-                <p className="text-3xl mb-2">📋</p>
+                <div className="mb-2"><Icon name="clipboard-list" className="w-10 h-10 opacity-40 mx-auto" /></div>
                 <p className="text-[12px] text-muted-foreground">No audit events yet</p>
               </div>
             ) : d.recentLogs.map((log: any, i: number) => (

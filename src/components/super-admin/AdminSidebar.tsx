@@ -48,7 +48,7 @@ export default function AdminSidebar({ mobileOpen, onMobileClose }: Props) {
               boxShadow: `0 0 12px ${ACCENT}50`,
             }}
           >
-            ⚡
+            <ZapIcon size={14} />
           </div>
           <div>
             <p className="text-[13px] font-semibold text-foreground leading-tight tracking-tight">Super Admin</p>
