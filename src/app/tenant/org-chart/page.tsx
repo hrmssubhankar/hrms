@@ -384,7 +384,7 @@ export default function OrgChartPage() {
       {/* Empty */}
       {!loading && !error && displayTree.length === 0 && (
         <EmptyState
-          icon="building"
+          icon="🏢"
           title="No employees found"
           message={
             search || deptFilter

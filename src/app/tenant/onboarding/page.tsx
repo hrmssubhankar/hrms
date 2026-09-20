@@ -307,7 +307,7 @@ export default function OnboardingPage() {
           {/* Empty state */}
           {stats.total === 0 && !loading && (
             <EmptyState
-              icon="rocket"
+              icon="🚀"
               title="No onboarding tasks"
               message="Create onboarding checklists for new employees."
             />
@@ -354,7 +354,7 @@ export default function OnboardingPage() {
             <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
           ) : records.length === 0 ? (
             <EmptyState
-              icon="rocket"
+              icon="🚀"
               title="No onboarding tasks"
               message="Create onboarding checklists for new employees."
             />

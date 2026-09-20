@@ -1,6 +1,4 @@
 'use client'
-
-import Icon, { type IconName } from '@/components/ui/Icon'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { exportCsv, fmtCsvDate } from '@/lib/exportCsv'
 import { ExportButton } from '@/components/ui/ExportButton'
@@ -59,7 +57,7 @@ export default function TrainingPage() {
         {([
           { key: 'library', label: 'Course Library' },
           { key: 'records', label: 'Training Records' },
-          { key: 'gap',     label: 'Gap Report' },
+          { key: 'gap',     label: '⚠️ Gap Report' },
         ] as const).map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
@@ -245,7 +243,7 @@ function LibraryTab() {
       {/* Course grid */}
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : courseList.length === 0 ? (
         <EmptyState
-          icon="training"
+          icon="🎓"
           title="No courses yet"
           message="Create your first course to get started."
           action={{ label: 'New Course', onClick: () => setShowForm(true) }}
@@ -404,7 +402,7 @@ function RecordsTab() {
       {/* Table */}
       {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : records.length === 0 ? (
         <EmptyState
-          icon="training"
+          icon="🎓"
           title="No training records"
           message="Training completions will appear here."
         />
@@ -530,7 +528,7 @@ function GapTab() {
 
   if (mandatory.length === 0) return (
     <div className="card-premium p-8 text-center text-gray-400">
-      <Icon name="clipboard-list" className="w-8 h-8 mb-2 opacity-40 mx-auto" />
+      <p className="text-2xl mb-2">📋</p>
       <p className="font-medium">No mandatory courses configured</p>
       <p className="text-sm mt-1">Mark courses as mandatory in the Course Library to generate a gap report.</p>
     </div>
@@ -556,7 +554,7 @@ function GapTab() {
 
       {gaps.length === 0 ? (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-8 text-center">
-          <Icon name="check" className="w-8 h-8 mb-2 text-green-500 mx-auto" />
+          <p className="text-3xl mb-2">✅</p>
           <p className="font-medium text-green-700 dark:text-green-400">All employees compliant</p>
           <p className="text-sm text-green-600 dark:text-green-500 mt-1">Everyone has completed all {mandatory.length} mandatory course{mandatory.length !== 1 ? 's' : ''}</p>
         </div>

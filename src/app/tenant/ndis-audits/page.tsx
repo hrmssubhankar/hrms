@@ -1,7 +1,5 @@
 'use client'
 
-import Icon, { type IconName } from '@/components/ui/Icon'
-
 import { useState, useCallback, useEffect } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
@@ -403,7 +401,7 @@ export default function NDISAuditsPage() {
           <div className="flex items-center justify-center h-48 text-gray-400">Loading…</div>
         ) : audits.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-gray-400 gap-2">
-            <Icon name="clipboard-list" className="w-10 h-10 opacity-40" />
+            <span className="text-3xl">📋</span>
             <p className="text-sm">No audits found</p>
             <button onClick={() => setShowModal(true)} className="text-sm text-indigo-500 hover:underline">Create your first audit</button>
           </div>

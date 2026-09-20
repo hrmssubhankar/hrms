@@ -280,7 +280,7 @@ export default function RecognitionPage() {
       ) : filtered.length === 0 ? (
         <div className="card-premium">
           <EmptyState
-            icon="trophy"
+            icon="🏆"
             title={search || filterType || filterEmp ? 'No recognitions match your filters' : 'No recognitions yet'}
             message={search || filterType || filterEmp ? 'Try adjusting your search or filters.' : 'Start celebrating your team\'s achievements.'}
             action={!search && !filterType && !filterEmp ? { label: 'Give Recognition', onClick: openCreate } : undefined}

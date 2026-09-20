@@ -1,6 +1,4 @@
 'use client'
-
-import Icon, { type IconName } from '@/components/ui/Icon'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -552,7 +550,7 @@ export default function TimesheetsPage() {
           <div className="flex items-center justify-center py-16 text-gray-600 dark:text-gray-400 text-sm">Loading timesheets…</div>
         ) : timesheets.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-600 dark:text-gray-400 text-sm gap-2">
-            <Icon name="timesheet" className="w-8 h-8 opacity-40" />
+            <span className="text-3xl"></span>
             <span>No timesheet entries this week.</span>
           </div>
         ) : (

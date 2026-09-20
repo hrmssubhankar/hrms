@@ -1,5 +1,4 @@
 'use client'
-import Icon from '@/components/ui/Icon'
 
 import { useEffect, useRef, useState, Suspense } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
@@ -411,7 +410,7 @@ function EditClientInner() {
                 {logoUrl ? (
                   <img src={logoUrl} alt="Logo" className="max-h-full max-w-full object-contain p-2" />
                 ) : (
-                  <Icon name="file-image" className="w-8 h-8 text-gray-400" />
+                  <span className="text-3xl text-gray-400">🖼</span>
                 )}
               </div>
               <div className="space-y-2 flex-1">

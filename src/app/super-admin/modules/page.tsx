@@ -1,5 +1,4 @@
 'use client'
-import Icon from '@/components/ui/Icon'
 
 import { useEffect, useState } from 'react'
 
@@ -134,7 +133,7 @@ export default function ModulesPage() {
             ) : fetchError ? (
               <tr>
                 <td colSpan={5} className="px-4 py-12 text-center">
-                  <div className="mb-2"><Icon name="warning" className="w-8 h-8 text-amber-500 mx-auto" /></div>
+                  <p className="text-2xl mb-2">⚠️</p>
                   <p className="text-sm font-medium text-red-600 dark:text-red-400">{fetchError}</p>
                 </td>
               </tr>

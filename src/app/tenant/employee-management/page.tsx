@@ -379,7 +379,7 @@ export default function EmployeeManagementPage() {
           { label: 'Total',    value: employees.length, icon: '', cls: 'text-blue-600 dark:text-blue-400' },
           { label: 'Active',   value: activeCount,       icon: '', cls: 'text-green-600 dark:text-green-400' },
           { label: 'Inactive', value: inactiveCount,     icon: '⏸', cls: 'text-gray-500' },
-          ...(process.env.NEXT_PUBLIC_TENANT_SLUG !== 'yahwehpc' ? [{ label: 'NDIS', value: ndisCount, icon: '', cls: 'text-purple-600 dark:text-purple-400' }] : []),
+          { label: 'NDIS',     value: ndisCount,         icon: '', cls: 'text-purple-600 dark:text-purple-400' },
         ].map(s => (
           <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>

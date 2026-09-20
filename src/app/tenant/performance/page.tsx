@@ -507,7 +507,7 @@ export default function PerformancePage() {
           {/* Table */}
           {loading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : reviews.length === 0 ? (
             <EmptyState
-              icon="bar-chart"
+              icon="📊"
               title="No performance reviews"
               message="Performance reviews will appear here."
               action={{ label: 'Schedule Review', onClick: () => setShowForm(true) }}
@@ -783,7 +783,7 @@ export default function PerformancePage() {
           {/* Goals list */}
           {goalsLoading ? <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div> : goals.length === 0 ? (
             <EmptyState
-              icon="target"
+              icon="🎯"
               title="No goals found"
               message="Create a goal for an employee to get started."
               action={{ label: 'Add Goal', onClick: () => setShowGoalForm(true) }}

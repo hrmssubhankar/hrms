@@ -242,7 +242,7 @@ export default function NotificationsPage() {
           <div className="px-5 py-10 text-center text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon="bell"
+            icon="🔔"
             title="No notifications"
             message={typeFilter ? `No ${typeFilter} notifications.` : 'System notifications will appear here.'}
           />

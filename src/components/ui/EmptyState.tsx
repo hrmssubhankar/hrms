@@ -1,14 +1,12 @@
 'use client'
 
-import Icon, { type IconName } from '@/components/ui/Icon'
-
 /**
  * Consistent empty state for tables and lists.
  *
  * Usage:
  *   {items.length === 0 && !loading && (
  *     <EmptyState
- *       icon="clipboard-list"
+ *       icon="📋"
  *       title="No records found"
  *       message="Add your first record to get started."
  *       action={{ label: 'Add Record', onClick: () => setShowForm(true) }}
@@ -17,7 +15,7 @@ import Icon, { type IconName } from '@/components/ui/Icon'
  */
 
 type EmptyStateProps = {
-  icon?: IconName
+  icon?: string
   title: string
   message?: string
   action?: {
@@ -30,7 +28,7 @@ type EmptyStateProps = {
 }
 
 export default function EmptyState({
-  icon = 'document',
+  icon = '📭',
   title,
   message,
   action,
@@ -39,7 +37,7 @@ export default function EmptyState({
 }: EmptyStateProps) {
   const content = (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      {icon && <Icon name={icon} className="w-10 h-10 opacity-40 mb-4" />}
+      <div className="text-4xl mb-4 opacity-60">{icon}</div>
       <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">{title}</h3>
       {message && (
         <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">{message}</p>

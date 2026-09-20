@@ -1,5 +1,4 @@
 'use client'
-import Icon, { type IconName } from '@/components/ui/Icon'
 
 import { useEffect, useState } from 'react'
 
@@ -25,7 +24,7 @@ const ACCENT = '#7c3aed'
 
 const PRIORITY_CONFIG: Record<Priority, {
   label: string
-  icon: IconName
+  icon: string
   dot: string
   badgeClass: string
   borderLight: string
@@ -35,7 +34,7 @@ const PRIORITY_CONFIG: Record<Priority, {
 }> = {
   info: {
     label:       'Info',
-    icon:        'info',
+    icon:        'ℹ',
     dot:         '#3b82f6',
     badgeClass:  'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700/50',
     borderLight: 'rgba(59,130,246,0.2)',
@@ -45,7 +44,7 @@ const PRIORITY_CONFIG: Record<Priority, {
   },
   warning: {
     label:       'Warning',
-    icon:        'warning',
+    icon:        '⚠',
     dot:         '#f59e0b',
     badgeClass:  'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700/50',
     borderLight: 'rgba(245,158,11,0.2)',
@@ -55,7 +54,7 @@ const PRIORITY_CONFIG: Record<Priority, {
   },
   critical: {
     label:       'Critical',
-    icon:        'flag',
+    icon:        '🚨',
     dot:         '#ef4444',
     badgeClass:  'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700/50',
     borderLight: 'rgba(239,68,68,0.2)',
@@ -225,8 +224,8 @@ export default function AnnouncementsPage() {
                 className="input-premium"
               >
                 <option value="info">ℹ Info</option>
-                <option value="warning">Warning</option>
-                <option value="critical">Critical</option>
+                <option value="warning">⚠ Warning</option>
+                <option value="critical">🚨 Critical</option>
               </select>
             </div>
             <div>
@@ -275,7 +274,7 @@ export default function AnnouncementsPage() {
       {/* Empty state */}
       {!loading && announcements.length === 0 && (
         <div className="card-premium p-14 text-center">
-          <div className="mb-3"><Icon name="megaphone" className="w-12 h-12 opacity-40 mx-auto" /></div>
+          <p className="text-4xl mb-3">📢</p>
           <p className="text-[14px] font-medium text-foreground/60">No announcements yet</p>
           <p className="text-[12px] text-muted-foreground mt-1">Create one to broadcast a message to all client tenants</p>
         </div>
@@ -324,7 +323,7 @@ function AnnCard({
       }}
     >
       <div className="flex items-start gap-3">
-        <span className="shrink-0 mt-0.5" style={{ color: p.dot }}><Icon name={p.icon} className="w-4 h-4" strokeWidth={2} /></span>
+        <span className="text-[18px] shrink-0 mt-0.5 leading-none">{p.icon}</span>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center flex-wrap gap-2 mb-1">
