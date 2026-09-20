@@ -15,6 +15,8 @@ export async function GET() {
   const checks: Record<string, { status: 'ok' | 'warn' | 'error'; message: string; latencyMs?: number }> = {}
 
   // DB connectivity + latency
+  // Thresholds: ok < 500 ms, warn < 2000 ms, error >= 2000 ms
+  // (Supabase free-tier cold starts routinely hit 400–600 ms — 300 ms was too strict)
   try {
     const dbStart = Date.now()
     const [tenantCount] = await db.select({ total: count() }).from(tenants)
@@ -22,7 +24,7 @@ export async function GET() {
     const dbLatency = Date.now() - dbStart
 
     checks.database = {
-      status: dbLatency < 300 ? 'ok' : dbLatency < 1000 ? 'warn' : 'error',
+      status: dbLatency < 500 ? 'ok' : dbLatency < 2000 ? 'warn' : 'error',
       message: `Connected · ${tenantCount.total} tenants · ${userCount.total} users`,
       latencyMs: dbLatency,
     }
@@ -41,12 +43,28 @@ export async function GET() {
     checks.auditLog = { status: 'error', message: 'Audit log table unreachable' }
   }
 
-  // Environment
-  const envChecks = ['DATABASE_URL', 'JWT_SECRET', 'APP_URL', 'RESEND_API_KEY', 'BLOB_READ_WRITE_TOKEN']
-  const missingEnv = envChecks.filter(k => !process.env[k])
-  checks.environment = {
-    status: missingEnv.length === 0 ? 'ok' : 'warn',
-    message: missingEnv.length === 0 ? 'All required env vars set' : `Missing: ${missingEnv.join(', ')}`,
+  // Environment — split required vs optional so optional absences don't
+  // trigger a platform-level Warning that obscures real problems.
+  const requiredEnv  = ['DATABASE_URL', 'JWT_SECRET', 'APP_URL']
+  const optionalEnv  = ['RESEND_API_KEY', 'BLOB_READ_WRITE_TOKEN']
+  const missingRequired = requiredEnv.filter(k => !process.env[k])
+  const missingOptional = optionalEnv.filter(k => !process.env[k])
+
+  if (missingRequired.length > 0) {
+    checks.environment = {
+      status: 'error',
+      message: `Missing required env vars: ${missingRequired.join(', ')}`,
+    }
+  } else if (missingOptional.length > 0) {
+    checks.environment = {
+      status: 'ok',
+      message: `All required vars set · optional not set: ${missingOptional.join(', ')} (email & file storage disabled)`,
+    }
+  } else {
+    checks.environment = {
+      status: 'ok',
+      message: 'All env vars set',
+    }
   }
 
   // Migration status

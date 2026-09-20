@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
-import { tenants, tenantModules, users } from '@/lib/db/schema'
+import { tenants, tenantModules, users, auditLogs } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth/session'
 import { sendEmail } from '@/lib/email/resend'
@@ -214,6 +214,19 @@ export async function POST(req: NextRequest) {
         tempPassword:  adminPassword,
       })
       sendEmail({ to: adminEmail, ...tmpl }).catch(console.error)
+    }
+
+    // Audit: record tenant creation (fire-and-forget)
+    const session = await getSession()
+    if (session) {
+      db.insert(auditLogs).values({
+        tenantId:  tenant.id,
+        action:    'create',
+        resource:  'tenant',
+        resourceId: tenant.id,
+        newValues: { name: tenant.name, slug: tenant.slug, tier: tenant.tier },
+        ipAddress:  null,
+      }).catch(console.error)
     }
 
     return NextResponse.json({ tenant, adminUser, deploymentUrl }, { status: 201 })
