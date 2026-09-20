@@ -195,7 +195,12 @@ export default async function TenantLayout({ children }: { children: React.React
     .filter(([id]) => {
       const numId = Number(id)
       if (numId === 1) return false                      // Dashboard shown separately
-      if (numId >= 31) return true                       // Built-in routes always included
+      if (numId >= 31) {
+        // NDIS-specific modules (37-45, 49) are only for disability care tenants — hide for YPC
+        const NDIS_MODULE_IDS = new Set([37, 38, 39, 40, 41, 42, 43, 44, 45, 49])
+        if (NDIS_MODULE_IDS.has(numId) && tenantSlug === 'yahwehpc') return false
+        return true                                        // Built-in routes always included
+      }
       return enabledModuleIds.includes(numId)            // Tenant-toggled modules
     })
     .map(([, { key, label }]) => ({ key, label }))
