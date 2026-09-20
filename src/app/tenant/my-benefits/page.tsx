@@ -1,4 +1,6 @@
 'use client'
+
+import Icon, { type IconName } from '@/components/ui/Icon'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useEffect, useState } from 'react'
@@ -17,21 +19,21 @@ type Benefit = {
 type Employee = { id: string; firstName: string; lastName: string }
 
 const BENEFIT_TYPES = [
-  { value: 'eap',               label: 'Employee Assistance Program', emoji: '🧠', color: '#8b5cf6',
+  { value: 'eap',               label: 'Employee Assistance Program', icon: 'shield' as IconName, color: '#8b5cf6',
     detail: 'Confidential counselling and support services for mental health, financial stress, relationships and more.' },
-  { value: 'study_support',     label: 'Study Support',               emoji: '📚', color: '#3b82f6',
+  { value: 'study_support',     label: 'Study Support',               icon: 'training' as IconName, color: '#3b82f6',
     detail: 'Financial support or paid study leave to assist with approved educational programs.' },
-  { value: 'discount',          label: 'Employee Discount',           emoji: '🏷️', color: '#f59e0b',
+  { value: 'discount',          label: 'Employee Discount',           icon: 'star' as IconName, color: '#f59e0b',
     detail: 'Access to discounted products or services through our employee discount program.' },
-  { value: 'wellbeing',         label: 'Wellbeing Allowance',         emoji: '💚', color: '#10b981',
+  { value: 'wellbeing',         label: 'Wellbeing Allowance',         icon: 'gift' as IconName, color: '#10b981',
     detail: 'Annual allowance to spend on health, fitness, or wellness activities of your choice.' },
-  { value: 'salary_packaging',  label: 'Salary Packaging',            emoji: '💼', color: '#6366f1',
+  { value: 'salary_packaging',  label: 'Salary Packaging',            icon: 'folder' as IconName, color: '#6366f1',
     detail: 'Pre-tax salary packaging arrangements for eligible expenses to maximise take-home pay.' },
-  { value: 'extra_leave',       label: 'Extra Leave',                 emoji: '🌴', color: '#14b8a6',
+  { value: 'extra_leave',       label: 'Extra Leave',                 icon: 'beach' as IconName, color: '#14b8a6',
     detail: 'Additional paid leave days beyond the statutory entitlement.' },
-  { value: 'flexible_work',     label: 'Flexible Work',               emoji: '🏠', color: '#f97316',
+  { value: 'flexible_work',     label: 'Flexible Work',               icon: 'building' as IconName, color: '#f97316',
     detail: 'Approved arrangement for remote work, modified hours, or job sharing.' },
-  { value: 'other',             label: 'Other Benefit',               emoji: '⭐', color: '#94a3b8',
+  { value: 'other',             label: 'Other Benefit',               icon: 'star' as IconName, color: '#94a3b8',
     detail: 'A benefit specific to your role or circumstances. See description for details.' },
 ]
 
@@ -118,7 +120,7 @@ export default function MyBenefitsPage() {
       {/* Expiry warning */}
       {expiringCount > 0 && (
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-5 py-3.5 flex items-center gap-3">
-          <span className="text-amber-400 text-lg">⚠️</span>
+          <Icon name="warning" className="w-5 h-5 text-amber-400" />
           <p className="text-sm text-amber-300">
             <span className="font-semibold">{expiringCount} benefit{expiringCount > 1 ? 's' : ''}</span> expiring within 30 days. Contact HR if you need to renew.
           </p>
@@ -128,7 +130,7 @@ export default function MyBenefitsPage() {
       {/* No benefits state */}
       {benefits.length === 0 && (
         <div className="card-premium rounded-2xl py-16 text-center">
-          <div className="text-4xl mb-3">🎁</div>
+          <div className="mb-3"><Icon name="gift" className="w-12 h-12 opacity-40 mx-auto" /></div>
           <p className="text-gray-600 dark:text-gray-300 font-medium">No benefits assigned yet</p>
           <p className="text-gray-500 text-sm mt-1 dark:text-gray-400">
             Benefits will appear here once HR assigns them to your profile.
@@ -151,7 +153,7 @@ export default function MyBenefitsPage() {
                 <button
                   onClick={() => setExpanded(isOpen ? null : b.id)}
                   className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
-                  <span className="text-3xl shrink-0">{info?.emoji ?? '⭐'}</span>
+                  <span className="shrink-0 flex items-center justify-center w-8 h-8"><Icon name={(info?.icon ?? 'star') as IconName} className="w-6 h-6" /></span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">{info?.label ?? b.type}</p>
                     {b.description && (
@@ -227,7 +229,7 @@ export default function MyBenefitsPage() {
               return (
                 <div key={b.id}
                   className={`flex items-center gap-3 px-5 py-3 text-sm ${i > 0 ? 'border-t border-gray-100 dark:border-gray-800' : ''}`}>
-                  <span>{info?.emoji}</span>
+                  <Icon name={(info?.icon ?? 'star') as IconName} className="w-4 h-4" />
                   <span className="text-gray-500">{info?.label ?? b.type}</span>
                   <span className="ml-auto text-xs text-gray-600 dark:text-gray-600">Ended {fmt(b.endDate)}</span>
                 </div>

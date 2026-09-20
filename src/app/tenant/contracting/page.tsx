@@ -1,4 +1,6 @@
 'use client'
+
+import Icon, { type IconName } from '@/components/ui/Icon'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -283,7 +285,7 @@ function SendForSignaturePanel({
     return (
       <div className="border border-green-200 bg-green-50 rounded-xl p-4 dark:bg-green-950/30 dark:border-green-800">
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-green-600 text-lg">✅</span>
+          <Icon name="check" className="w-5 h-5 text-green-600" />
           <p className="text-sm font-semibold text-green-800 dark:text-green-300">Contract signed electronically</p>
         </div>
         {contract.pdfUrl && (
@@ -299,7 +301,7 @@ function SendForSignaturePanel({
     return (
       <div className="border border-blue-200 bg-blue-50 rounded-xl p-4 space-y-3 dark:bg-blue-950/30 dark:border-blue-800">
         <div className="flex items-center gap-2">
-          <span className="text-blue-600 text-lg">📧</span>
+          <Icon name="mail" className="w-5 h-5 text-blue-600" />
           <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">Awaiting employee signature</p>
         </div>
         <p className="text-xs text-blue-700 dark:text-blue-400">
@@ -326,7 +328,7 @@ function SendForSignaturePanel({
   return (
     <div className="border border-gray-200 rounded-xl p-4 space-y-3 dark:border-gray-700">
       <div className="flex items-center gap-2">
-        <span className="text-gray-500 text-lg">📄</span>
+        <Icon name="document" className="w-5 h-5 text-gray-500" />
         <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Send for e-signature</p>
       </div>
 
@@ -372,7 +374,7 @@ function SendForSignaturePanel({
             >
               {file ? (
                 <div className="flex items-center justify-center gap-2">
-                  <span className="text-indigo-600">📎</span>
+                  <Icon name="paperclip" className="w-4 h-4 text-indigo-600" />
                   <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">{file.name}</span>
                   <button
                     onClick={e => { e.stopPropagation(); setFile(null) }}
@@ -397,11 +399,11 @@ function SendForSignaturePanel({
           <div className="flex gap-2">
             <button onClick={sendForSignature} disabled={sending}
               className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
-              {sending ? 'Sending…' : '📧 Send for Signature'}
+              {sending ? 'Sending…' : 'Send for Signature'}
             </button>
             <button onClick={copyLink} title="Copy signing link"
               className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800">
-              {copyDone ? '✓' : '🔗'}
+              {copyDone ? <Icon name="check" className="w-4 h-4" /> : <Icon name="link" className="w-4 h-4" />}
             </button>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">

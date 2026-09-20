@@ -287,7 +287,7 @@ export default function MyDocumentsPage() {
         <div className="text-center py-12 text-gray-500 dark:text-gray-400">Loading…</div>
       ) : linked && docs.length === 0 ? (
         <EmptyState
-          icon="📁"
+          icon="folder"
           title="No documents"
           message="Your shared documents will appear here."
           action={{ label: 'Upload Document', onClick: () => setShowForm(true) }}

@@ -484,7 +484,7 @@ export default function SeparationPage() {
             <div className="text-gray-600 dark:text-gray-400 text-sm">Loading…</div>
           ) : records.length === 0 ? (
             <EmptyState
-              icon="👋"
+              icon="door-exit"
               title="No separation records"
               message="Employee offboarding records will appear here."
               action={{ label: 'Initiate Separation', onClick: () => { setShowForm(true) } }}

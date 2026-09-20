@@ -280,7 +280,7 @@ export default function ScreeningPage() {
           </div>
         ) : records.length === 0 ? (
           <EmptyState
-            icon="🛡️"
+            icon="shield"
             title="No screening records found"
             message={search || statusFilter || typeFilter ? 'Try adjusting your filters.' : 'Add the first screening check to get started.'}
             action={!search && !statusFilter && !typeFilter ? { label: '+ Add Check', onClick: () => { setForm({ ...EMPTY_FORM }); setShowCreate(true) } } : undefined}

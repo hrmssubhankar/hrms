@@ -253,13 +253,13 @@ export default function DEIPage() {
         <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p>
       ) : records.length === 0 ? (
         <div className="card-premium">
-          <EmptyState icon="🌏" title="No DEI data on record"
+          <EmptyState icon="globe" title="No DEI data on record"
             message="Encourage employees to self-report to support DEI reporting."
             action={{ label: '+ Add Data', onClick: () => setShowForm(true) }} />
         </div>
       ) : filtered.length === 0 ? (
         <div className="card-premium">
-          <EmptyState icon="🔍" title="No records match" message="Try adjusting your search or filters." />
+          <EmptyState icon="search" title="No records match" message="Try adjusting your search or filters." />
         </div>
       ) : (
         <div className="card-premium overflow-hidden">

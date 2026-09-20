@@ -1,5 +1,7 @@
 'use client'
 
+import Icon, { type IconName } from '@/components/ui/Icon'
+
 import { useState, useEffect, useCallback } from 'react'
 import ConfirmModal, { type ConfirmState } from '@/components/ui/ConfirmModal'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
@@ -430,7 +432,7 @@ export default function ParticipantsPage() {
             <div className="flex items-center justify-center h-32 text-gray-400 text-sm">Loading…</div>
           ) : participants.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 text-gray-400 text-sm">
-              <span className="text-2xl mb-1">👤</span>No participants found
+              <Icon name="user-circle" className="w-8 h-8 mb-1 opacity-40" />No participants found
             </div>
           ) : participants.map(p => (
             <button key={p.id} onClick={() => selectParticipant(p)}
@@ -455,7 +457,7 @@ export default function ParticipantsPage() {
       {!selected ? (
         <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-500">
           <div className="text-center">
-            <div className="text-5xl mb-3">👤</div>
+            <div className="mb-3"><Icon name="user-circle" className="w-12 h-12 opacity-40" /></div>
             <p className="text-lg font-medium">Select a participant</p>
             <p className="text-sm mt-1">or create a new one</p>
           </div>
@@ -684,8 +686,8 @@ export default function ParticipantsPage() {
                           </div>
                         </div>
                         <div className="mt-2 space-y-0.5 text-sm">
-                          {c.phone && <p className="text-gray-600 dark:text-gray-400">📞 {c.phone}</p>}
-                          {c.email && <p className="text-gray-600 dark:text-gray-400">✉ {c.email}</p>}
+                          {c.phone && <p className="text-gray-600 dark:text-gray-400 flex items-center gap-1"><Icon name="phone" className="w-3.5 h-3.5 shrink-0" />{c.phone}</p>}
+                          {c.email && <p className="text-gray-600 dark:text-gray-400 flex items-center gap-1"><Icon name="mail" className="w-3.5 h-3.5 shrink-0" />{c.email}</p>}
                           {c.address && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{c.address}</p>}
                         </div>
                         {c.notes && <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 italic">{c.notes}</p>}
@@ -978,7 +980,7 @@ function Spinner() {
 function Empty({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center h-24 text-gray-400 text-sm">
-      <span className="text-2xl mb-1">📋</span>{label}
+      <Icon name="clipboard-list" className="w-8 h-8 mb-1 opacity-40" />{label}
     </div>
   )
 }

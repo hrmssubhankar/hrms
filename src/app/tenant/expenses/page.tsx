@@ -175,7 +175,7 @@ function SubmitModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
               onChange={e => setFile(e.target.files?.[0] ?? null)} />
             <button type="button" onClick={() => fileRef.current?.click()}
               className="w-full border-2 border-dashed dark:border-gray-600 rounded-lg p-4 text-center text-sm text-gray-500 dark:text-gray-400 hover:border-blue-400 transition-colors">
-              {file ? `✓ ${file.name}` : '📎 Click to attach receipt (PDF/JPG/PNG)'}
+              {file ? `✓ ${file.name}` : 'Click to attach receipt (PDF/JPG/PNG)'}
             </button>
           </div>
 
@@ -263,7 +263,7 @@ function ReviewModal({ claim, onClose, onSaved }: { claim: Claim; onClose: () =>
               <div className="pt-2">
                 <a href={claim.receiptUrl} target="_blank" rel="noopener noreferrer"
                   className="text-blue-600 dark:text-blue-400 hover:underline text-xs">
-                  📎 View Receipt
+                  View Receipt
                 </a>
               </div>
             )}

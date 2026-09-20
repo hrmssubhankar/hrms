@@ -207,13 +207,13 @@ export default function EngagementPage() {
         <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p>
       ) : surveys.length === 0 ? (
         <div className="card-premium">
-          <EmptyState icon="📋" title="No surveys yet"
+          <EmptyState icon="clipboard-list" title="No surveys yet"
             message="Create your first survey to start collecting employee feedback."
             action={{ label: '+ New Survey', onClick: () => setShowForm(true) }} />
         </div>
       ) : filtered.length === 0 ? (
         <div className="card-premium">
-          <EmptyState icon="🔍" title="No surveys match" message="Try adjusting your search or filters." />
+          <EmptyState icon="search" title="No surveys match" message="Try adjusting your search or filters." />
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

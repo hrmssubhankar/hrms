@@ -341,7 +341,7 @@ export default function MyLeavePage() {
       {tab === 'history' && (
         requests.length === 0 ? (
           <EmptyState
-            icon="🌴"
+            icon="beach"
             title="No leave requests"
             message="Your leave requests will appear here."
             action={{ label: 'New Request', onClick: () => { setShowForm(true); setFormError(null) } }}

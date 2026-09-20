@@ -882,7 +882,7 @@ export default function RosteringPage() {
                   <EmptyState
                     as="table"
                     cols={8}
-                    icon="🗓️"
+                    icon="rostering"
                     title="No shifts scheduled"
                     message="Create shifts to start building your roster."
                     action={{ label: 'Add Shift', onClick: () => openCreate(weekStart) }}

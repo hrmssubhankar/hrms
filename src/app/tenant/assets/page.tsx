@@ -457,7 +457,7 @@ export default function AssetsPage() {
                       <EmptyState
                         as="table"
                         cols={6}
-                        icon="📦"
+                        icon="package"
                         title={search || filterStatus || filterCategory ? 'No assets match your filters' : 'No assets registered'}
                         message={search || filterStatus || filterCategory ? 'Try adjusting your search or filters.' : 'Add your first asset to get started.'}
                         action={!search && !filterStatus && !filterCategory ? { label: '+ Add Asset', onClick: () => setShowAssetForm(true) } : undefined}
@@ -528,7 +528,7 @@ export default function AssetsPage() {
           {tab === 'assignments' && (
             <div className="space-y-2">
               {activeAssignments.length === 0 ? (
-                <EmptyState icon="📋" title="No active assignments" message={search ? 'No assignments match your search.' : 'Assign an asset from the Asset Register tab.'} />
+                <EmptyState icon="clipboard-list" title="No active assignments" message={search ? 'No assignments match your search.' : 'Assign an asset from the Asset Register tab.'} />
               ) : activeAssignments.map(a => {
                 const asset = assets.find(x => x.id === a.assetId)
                 return (

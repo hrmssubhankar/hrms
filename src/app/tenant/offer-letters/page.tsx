@@ -554,7 +554,7 @@ export default function OfferLettersPage() {
             <p className="text-gray-500 text-sm text-center py-8 dark:text-gray-400">Loading…</p>
           ) : offers.length === 0 ? (
             <EmptyState
-              icon="✉️"
+              icon="mail"
               title="No offer letters"
               message="Generated offer letters will appear here."
               action={{ label: 'New Offer Letter', onClick: initForm }}

@@ -220,13 +220,13 @@ export default function ReferralsPage() {
         <p className="text-gray-600 dark:text-gray-400 text-sm">Loading…</p>
       ) : referrals.length === 0 ? (
         <div className="card-premium">
-          <EmptyState icon="🤝" title="No referrals yet"
+          <EmptyState icon="handshake" title="No referrals yet"
             message="Encourage employees to refer candidates and earn bonuses."
             action={{ label: '+ Submit Referral', onClick: () => setShowForm(true) }} />
         </div>
       ) : filtered.length === 0 ? (
         <div className="card-premium">
-          <EmptyState icon="🔍" title="No referrals match" message="Try adjusting your search or filters." />
+          <EmptyState icon="search" title="No referrals match" message="Try adjusting your search or filters." />
         </div>
       ) : (
         <div className="space-y-2">

@@ -1,5 +1,7 @@
 'use client'
 
+import Icon, { type IconName } from '@/components/ui/Icon'
+
 /**
  * HR — ESS Onboarding Submissions Review
  * Lists all employee onboarding submissions; HR can view details and mark reviewed.
@@ -201,7 +203,7 @@ export default function EssOnboardingReviewPage() {
           </div>
         ) : submissions.length === 0 ? (
           <div className="text-center py-16 text-gray-400 dark:text-gray-600">
-            <p className="text-4xl mb-3">📋</p>
+            <div className="mb-3"><Icon name="clipboard-list" className="w-12 h-12 opacity-40 mx-auto" /></div>
             <p className="font-medium">No submissions found</p>
             <p className="text-sm mt-1">Try a different filter</p>
           </div>

@@ -293,7 +293,7 @@ export default function ContractsPage() {
       ) : filtered.length === 0 ? (
         <div className="card-premium">
           <EmptyState
-            icon="📄"
+            icon="document"
             title="No contracts found"
             message={search ? 'Try adjusting your search.' : 'Create a contract to begin the employment documentation process.'}
             action={!search ? { label: '+ New Contract', onClick: () => setShowForm(true) } : undefined}

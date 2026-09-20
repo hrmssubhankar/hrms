@@ -261,7 +261,7 @@ export default function ExperiencePage() {
       ) : records.length === 0 ? (
         <div className="card-premium">
           <EmptyState
-            icon="💼"
+            icon="folder"
             title="No experience records"
             message="Add employment history for your employees to get started."
             action={{ label: '+ Add Record', onClick: openCreate }}

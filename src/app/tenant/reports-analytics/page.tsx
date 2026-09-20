@@ -1,5 +1,7 @@
 'use client'
 
+import Icon, { type IconName } from '@/components/ui/Icon'
+
 import { useState, useCallback, useEffect } from 'react'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
@@ -24,7 +26,7 @@ interface FilterDef {
 interface ReportConfig {
   type: ReportType
   label: string
-  icon: string
+  icon: IconName
   description: string
   group: string
   filters: FilterDef[]
@@ -36,7 +38,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'headcount',
     label: 'Headcount Report',
-    icon: '👥',
+    icon: 'users',
     description: 'Active employee count by employment type',
     group: 'Workforce',
     filters: [],
@@ -45,7 +47,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'leave_liability',
     label: 'Leave Liability',
-    icon: '💰',
+    icon: 'currency',
     description: 'Dollar value of accrued annual leave per employee',
     group: 'Workforce',
     filters: [],
@@ -54,7 +56,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'turnover',
     label: 'Turnover & Retention',
-    icon: '📉',
+    icon: 'chart-line',
     description: 'Separations by type and reason for a period',
     group: 'Workforce',
     filters: [
@@ -67,7 +69,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'leave_summary',
     label: 'Leave Summary',
-    icon: '🌴',
+    icon: 'beach',
     description: 'Leave requests by type and status for a period',
     group: 'Leave & Attendance',
     filters: [
@@ -85,7 +87,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'shift_summary',
     label: 'Shift Summary',
-    icon: '📅',
+    icon: 'calendar',
     description: 'Shifts by type and status for a period',
     group: 'Leave & Attendance',
     filters: [
@@ -98,7 +100,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'payroll_summary',
     label: 'Payroll Summary',
-    icon: '💸',
+    icon: 'currency',
     description: 'All payroll runs with totals',
     group: 'Finance',
     filters: [],
@@ -107,7 +109,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'expense_summary',
     label: 'Expense Summary',
-    icon: '🧾',
+    icon: 'document',
     description: 'Expense claims by category and status',
     group: 'Finance',
     filters: [
@@ -127,7 +129,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'compliance_expiry',
     label: 'Compliance Expiry',
-    icon: '⚠️',
+    icon: 'warning',
     description: 'Checks expiring within N days',
     group: 'Compliance & NDIS',
     filters: [
@@ -138,7 +140,7 @@ const REPORT_CONFIGS: ReportConfig[] = [
   {
     type: 'ndis_workforce',
     label: 'NDIS Workforce Export',
-    icon: '📋',
+    icon: 'clipboard-list',
     description: 'Active workers for NDIS Commission reporting',
     group: 'Compliance & NDIS',
     filters: [],
@@ -348,7 +350,7 @@ export default function ReportsAnalyticsPage() {
       {/* LEFT: Report picker */}
       <div className="w-72 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">📊 Reports</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2"><Icon name="bar-chart" className="w-5 h-5" />Reports</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Choose a report to run</p>
           {/* Tabs */}
           <div className="flex gap-1 mt-3 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
@@ -376,7 +378,7 @@ export default function ReportsAnalyticsPage() {
                       className={`w-full text-left p-3 rounded-xl border transition-all ${selected?.type === cfg.type ? 'border-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-600' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">{cfg.icon}</span>
+                        <Icon name={cfg.icon} className="w-5 h-5" />
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">{cfg.label}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{cfg.description}</p>
@@ -393,7 +395,7 @@ export default function ReportsAnalyticsPage() {
                 <p className="text-xs text-gray-400 text-center py-4">Loading…</p>
               ) : savedReports.length === 0 ? (
                 <div className="text-center py-6 text-gray-400 dark:text-gray-500">
-                  <p className="text-2xl mb-1">💾</p>
+                  <Icon name="save" className="w-8 h-8 mb-1 opacity-40" />
                   <p className="text-xs">No saved reports yet</p>
                 </div>
               ) : (
@@ -436,7 +438,7 @@ export default function ReportsAnalyticsPage() {
         {!selected ? (
           <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-500">
             <div className="text-center">
-              <div className="text-5xl mb-3">📊</div>
+              <div className="mb-3"><Icon name="bar-chart" className="w-12 h-12 opacity-40" /></div>
               <p className="text-lg font-medium">Select a report</p>
               <p className="text-sm mt-1">Choose from the list on the left to get started</p>
             </div>
@@ -448,7 +450,7 @@ export default function ReportsAnalyticsPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <h1 className="page-premium-title">
-                    {selected.icon} {selected.label}
+                    <><Icon name={selected.icon} className="w-5 h-5 inline mr-2" />{selected.label}</>
                   </h1>
                   <p className="page-premium-subtitle mt-1">{selected.description}</p>
                 </div>
@@ -463,17 +465,17 @@ export default function ReportsAnalyticsPage() {
                       <button
                         onClick={() => exportPDF(selected.label, columns, results, filters)}
                         className="px-3 py-2 border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                        🖨 PDF
+                        PDF
                       </button>
                       <button onClick={() => setSaveModal(true)}
                         className="px-3 py-2 border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                        💾 Save
+                        Save
                       </button>
                     </>
                   )}
                   <button onClick={() => runReport()} disabled={running}
                     className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50">
-                    {running ? 'Running…' : '▶ Run Report'}
+                    {running ? 'Running…' : 'Run Report'}
                   </button>
                 </div>
               </div>
@@ -515,7 +517,7 @@ export default function ReportsAnalyticsPage() {
               {running && (
                 <div className="flex items-center justify-center py-16 text-gray-400 dark:text-gray-500">
                   <div className="text-center">
-                    <div className="text-3xl mb-2">⏳</div>
+                    <div className="mb-2"><Icon name="clock" className="w-8 h-8 opacity-40" /></div>
                     <p className="text-sm">Running report…</p>
                   </div>
                 </div>
@@ -524,7 +526,7 @@ export default function ReportsAnalyticsPage() {
               {!running && results === null && !error && (
                 <div className="flex items-center justify-center py-16 text-gray-400 dark:text-gray-500">
                   <div className="text-center">
-                    <div className="text-3xl mb-2">▶</div>
+                    <div className="mb-2"><Icon name="arrow-right" className="w-8 h-8 opacity-40" /></div>
                     <p className="text-sm">Click &ldquo;Run Report&rdquo; to see results</p>
                   </div>
                 </div>
