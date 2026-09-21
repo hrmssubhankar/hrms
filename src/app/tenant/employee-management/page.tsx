@@ -320,6 +320,10 @@ export default function EmployeeManagementPage() {
   const activeCount   = employees.filter(e => e.isActive).length
   const inactiveCount = employees.length - activeCount
   const ndisCount     = employees.filter(e => e.ndisWorker).length
+  const tenantSlug    = typeof document !== 'undefined'
+    ? (document.cookie.split('; ').find(r => r.startsWith('tenant_slug='))?.split('=')[1] ?? '')
+    : ''
+  const isYPC = tenantSlug === 'yahwehpc'
 
   if (denied) return (
     <div className="space-y-4">
@@ -374,12 +378,12 @@ export default function EmployeeManagementPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className={`grid gap-4 ${isYPC ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
         {[
           { label: 'Total',    value: employees.length, icon: '', cls: 'text-blue-600 dark:text-blue-400' },
           { label: 'Active',   value: activeCount,       icon: '', cls: 'text-green-600 dark:text-green-400' },
-          { label: 'Inactive', value: inactiveCount,     icon: '⏸', cls: 'text-gray-500' },
-          { label: 'NDIS',     value: ndisCount,         icon: '', cls: 'text-purple-600 dark:text-purple-400' },
+          { label: 'Inactive', value: inactiveCount,     icon: '', cls: 'text-gray-500' },
+          ...(!isYPC ? [{ label: 'NDIS', value: ndisCount, icon: '', cls: 'text-purple-600 dark:text-purple-400' }] : []),
         ].map(s => (
           <div key={s.label} className="card-premium p-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">{s.label}</p>
