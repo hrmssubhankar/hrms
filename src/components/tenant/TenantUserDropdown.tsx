@@ -32,6 +32,7 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
   const [mounted, setMounted]   = useState(false)
   const [panelPos, setPanelPos] = useState({ top: 0, right: 0 })
   const triggerRef = useRef<HTMLDivElement>(null)
+  const panelRef   = useRef<HTMLDivElement>(null)
   const router     = useRouter()
 
   useEffect(() => { setMounted(true) }, [])
@@ -57,7 +58,9 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
   useEffect(() => {
     if (!open) return
     function handleClick(e: MouseEvent) {
-      if (triggerRef.current && !triggerRef.current.contains(e.target as Node)) setOpen(false)
+      const inTrigger = triggerRef.current?.contains(e.target as Node)
+      const inPanel   = panelRef.current?.contains(e.target as Node)
+      if (!inTrigger && !inPanel) setOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -88,6 +91,7 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
 
   const panel = (
     <div
+      ref={panelRef}
       style={{
         position:     'fixed',
         top:          panelPos.top,
