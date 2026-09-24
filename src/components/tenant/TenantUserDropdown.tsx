@@ -153,7 +153,7 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
         ].map(({ label, href, icon }: { label: string; href: string; icon: React.ReactNode }) => (
           <button
             key={label}
-            onClick={() => { setOpen(false); router.push(href) }}
+            onClick={() => { setOpen(false); window.location.href = href }}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 10,
               padding: '10px 16px', fontSize: 13, color: mutedFg,
