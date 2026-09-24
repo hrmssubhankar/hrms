@@ -1,7 +1,7 @@
 'use client'
 import { fetchWithAuth } from '@/lib/fetchWithAuth'
-
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 
 type Notification = {
@@ -27,21 +27,32 @@ const TYPE_COLOUR: Record<string, string> = {
 
 export default function NotificationBell({ primaryColor }: { primaryColor: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [open, setOpen]     = useState(false)
+  const [open, setOpen]       = useState(false)
   const [loading, setLoading] = useState(false)
   const [isDark, setIsDark]   = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [panelPos, setPanelPos] = useState({ top: 0, right: 0 })
   const triggerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   const unread = notifications.filter(n => !n.isRead).length
 
-  /* Track dark mode */
+  useEffect(() => { setMounted(true) }, [])
+
+  /* Detect dark mode */
   useEffect(() => {
-    const check = () => setIsDark(document.documentElement.classList.contains('dark'))
+    const check = () => {
+      const html = document.documentElement
+      setIsDark(
+        html.classList.contains('dark') ||
+        document.body.classList.contains('dark') ||
+        html.getAttribute('data-theme') === 'dark'
+      )
+    }
     check()
     const obs = new MutationObserver(check)
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] })
+    obs.observe(document.body,            { attributes: true, attributeFilter: ['class'] })
     return () => obs.disconnect()
   }, [])
 
@@ -60,13 +71,15 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
     return () => clearInterval(id)
   }, [fetchNotifications])
 
+  /* Close on outside click */
   useEffect(() => {
+    if (!open) return
     function handleClick(e: MouseEvent) {
       if (triggerRef.current && !triggerRef.current.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
+  }, [open])
 
   function handleOpen() {
     if (!open && triggerRef.current) {
@@ -100,12 +113,88 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
     return `${Math.floor(h / 24)}d ago`
   }
 
-  /* Hardcoded solid colors — immune to backdrop-filter bleed */
   const panelBg    = isDark ? '#0f172a' : '#ffffff'
   const panelFg    = isDark ? '#f1f5f9' : '#111827'
   const dividerClr = isDark ? '#1e293b' : '#f3f4f6'
   const mutedFg    = isDark ? '#94a3b8' : '#6b7280'
   const hoverBg    = isDark ? '#1e293b' : '#f9fafb'
+
+  const panel = (
+    <div
+      style={{
+        position:     'fixed',
+        top:          panelPos.top,
+        right:        panelPos.right,
+        width:        320,
+        background:   panelBg,
+        color:        panelFg,
+        borderRadius: 12,
+        border:       `1px solid ${dividerClr}`,
+        boxShadow:    '0 8px 32px rgba(0,0,0,0.24), 0 2px 8px rgba(0,0,0,0.12)',
+        zIndex:       2147483647,
+        overflow:     'hidden',
+        isolation:    'isolate',
+        willChange:   'transform',
+      }}
+    >
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: panelBg, borderBottom: `1px solid ${dividerClr}` }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: panelFg }}>Notifications</span>
+        {unread > 0 && (
+          <button onClick={markAllRead} style={{ fontSize: 12, color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer' }}>
+            Mark all read
+          </button>
+        )}
+      </div>
+
+      {/* List */}
+      <div style={{ maxHeight: 320, overflowY: 'auto', background: panelBg }}>
+        {loading ? (
+          <p style={{ padding: '24px 16px', fontSize: 13, color: mutedFg, textAlign: 'center', background: panelBg }}>Loading…</p>
+        ) : notifications.length === 0 ? (
+          <div style={{ padding: '32px 16px', textAlign: 'center', background: panelBg }}>
+            <svg style={{ width: 32, height: 32, margin: '0 auto 8px', color: mutedFg, display: 'block' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <p style={{ fontSize: 13, color: mutedFg }}>No notifications yet</p>
+          </div>
+        ) : notifications.map(n => (
+          <button
+            key={n.id}
+            onClick={() => { markRead(n.id); setOpen(false) }}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'flex-start', gap: 10,
+              padding: '12px 16px', textAlign: 'left', border: 'none', cursor: 'pointer',
+              borderBottom: `1px solid ${dividerClr}`,
+              background: !n.isRead ? (isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)') : panelBg,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = hoverBg }}
+            onMouseLeave={e => { e.currentTarget.style.background = !n.isRead ? (isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)') : panelBg }}
+          >
+            <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${TYPE_COLOUR[n.type] ?? 'bg-gray-400'}`} />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontSize: 13, fontWeight: n.isRead ? 400 : 600, color: panelFg, margin: 0, lineHeight: 1.4 }}>{n.title}</p>
+              {n.body && <p style={{ fontSize: 12, color: mutedFg, margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.body}</p>}
+              <p style={{ fontSize: 11, color: mutedFg, margin: '4px 0 0' }}>{timeAgo(n.createdAt)}</p>
+            </div>
+            {!n.isRead && (
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: primaryColor, flexShrink: 0, marginTop: 6 }} />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div style={{ padding: '10px 16px', background: panelBg, borderTop: `1px solid ${dividerClr}`, textAlign: 'center' }}>
+        <button
+          onClick={() => { setOpen(false); router.push('/tenant/notifications') }}
+          style={{ fontSize: 12, color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          View all notifications →
+        </button>
+      </div>
+    </div>
+  )
 
   return (
     <div className="relative" ref={triggerRef}>
@@ -128,84 +217,8 @@ export default function NotificationBell({ primaryColor }: { primaryColor: strin
         )}
       </button>
 
-      {/* Panel — position:fixed escapes the header's backdrop-filter stacking context */}
-      {open && (
-        <div
-          style={{
-            position:     'fixed',
-            top:          panelPos.top,
-            right:        panelPos.right,
-            width:        320,
-            background:   panelBg,
-            color:        panelFg,
-            borderRadius: 12,
-            border:       `1px solid ${dividerClr}`,
-            boxShadow:    '0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10)',
-            zIndex:       9999,
-            overflow:     'hidden',
-          }}
-        >
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${dividerClr}` }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: panelFg }}>Notifications</span>
-            {unread > 0 && (
-              <button
-                onClick={markAllRead}
-                style={{ fontSize: 12, color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                Mark all read
-              </button>
-            )}
-          </div>
-
-          {/* List */}
-          <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-            {loading ? (
-              <p style={{ padding: '24px 16px', fontSize: 13, color: mutedFg, textAlign: 'center' }}>Loading…</p>
-            ) : notifications.length === 0 ? (
-              <div style={{ padding: '32px 16px', textAlign: 'center' }}>
-                <svg style={{ width: 32, height: 32, margin: '0 auto 8px', color: mutedFg, display: 'block' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-                <p style={{ fontSize: 13, color: mutedFg }}>No notifications yet</p>
-              </div>
-            ) : notifications.map(n => (
-              <button
-                key={n.id}
-                onClick={() => { markRead(n.id); setOpen(false) }}
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'flex-start', gap: 10,
-                  padding: '12px 16px', textAlign: 'left', border: 'none', cursor: 'pointer',
-                  borderBottom: `1px solid ${dividerClr}`,
-                  background: !n.isRead ? (isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)') : 'transparent',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = hoverBg }}
-                onMouseLeave={e => { e.currentTarget.style.background = !n.isRead ? (isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)') : 'transparent' }}
-              >
-                <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${TYPE_COLOUR[n.type] ?? 'bg-gray-400'}`} />
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <p style={{ fontSize: 13, fontWeight: n.isRead ? 400 : 600, color: panelFg, margin: 0, lineHeight: 1.4 }}>{n.title}</p>
-                  {n.body && <p style={{ fontSize: 12, color: mutedFg, margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.body}</p>}
-                  <p style={{ fontSize: 11, color: mutedFg, margin: '4px 0 0' }}>{timeAgo(n.createdAt)}</p>
-                </div>
-                {!n.isRead && (
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: primaryColor, flexShrink: 0, marginTop: 6 }} />
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Footer */}
-          <div style={{ padding: '10px 16px', borderTop: `1px solid ${dividerClr}`, textAlign: 'center' }}>
-            <button
-              onClick={() => { setOpen(false); router.push('/tenant/notifications') }}
-              style={{ fontSize: 12, color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              View all notifications →
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Portal — renders directly into document.body, outside the header's backdrop-filter stacking context */}
+      {mounted && open && createPortal(panel, document.body)}
     </div>
   )
 }
