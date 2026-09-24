@@ -73,9 +73,10 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
 
   async function logout() {
     setLoading(true)
-    await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/login')
-    router.refresh()
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch (_) { /* ignore network errors — still redirect */ }
+    window.location.href = '/login'
   }
 
   /* Solid hardcoded colors — never CSS vars */
