@@ -21,10 +21,11 @@ const ROLE_LABELS: Record<string, string> = {
   employee:           'Employee',
   auditor:            'Auditor',
   it_admin:           'IT Admin',
+  contractor:         'Contractor',
 }
 
 export default function TenantUserDropdown({ email, role, initial, primaryColor, borderRadius }: Props) {
-  const [open, setOpen]     = useState(false)
+  const [open, setOpen]       = useState(false)
   const [loading, setLoading] = useState(false)
   const ref    = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -46,58 +47,75 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
 
   return (
     <div className="relative" ref={ref}>
+      {/* Trigger */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        className={`flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800 ${open ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
       >
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+          className="w-8 h-8 flex items-center justify-center text-white text-xs font-bold shrink-0"
           style={{ background: primaryColor, borderRadius }}
         >
           {initial}
         </div>
-        <svg className={`w-3.5 h-3.5 text-gray-600 dark:text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          className={`w-3.5 h-3.5 text-gray-500 dark:text-gray-400 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
+      {/* Dropdown panel — explicit solid background, no overflow-hidden on wrapper */}
       {open && (
-        <div className="absolute right-0 mt-2 w-60 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden">
-          {/* Identity */}
+        <div
+          className="absolute right-0 mt-2 w-60 rounded-xl z-50 shadow-xl border border-gray-200 dark:border-gray-700"
+          style={{ background: 'hsl(var(--card))', color: 'hsl(var(--card-foreground))' }}
+        >
+          {/* Identity header */}
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-3">
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0"
-                style={{ background: primaryColor }}
+                className="w-10 h-10 flex items-center justify-center text-white font-bold shrink-0"
+                style={{ background: primaryColor, borderRadius }}
               >
                 {initial}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{email}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">{ROLE_LABELS[role] ?? role}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{ROLE_LABELS[role] ?? role}</p>
               </div>
             </div>
           </div>
 
-          {/* Actions */}
+          {/* Menu actions */}
           <div className="py-1">
-            <button className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}><path strokeLinecap="round" strokeLinejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <button className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
               My Profile
             </button>
-            <button className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <button className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
               Change Password
             </button>
           </div>
 
+          {/* Sign out */}
           <div className="border-t border-gray-100 dark:border-gray-800 py-1">
             <button
               onClick={logout}
               disabled={loading}
-              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-60"
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-60 text-left"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}><path strokeLinecap="round" strokeLinejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+              </svg>
               {loading ? 'Signing out…' : 'Sign out'}
             </button>
           </div>
