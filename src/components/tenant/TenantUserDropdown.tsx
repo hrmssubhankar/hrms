@@ -70,7 +70,7 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
       {open && (
         <div
           className="absolute right-0 mt-2 w-60 rounded-xl z-50 shadow-xl border border-gray-200 dark:border-gray-700"
-          style={{ background: 'hsl(var(--card))', color: 'hsl(var(--card-foreground))' }}
+          style={{ background: 'var(--dropdown-bg, #ffffff)', color: 'var(--dropdown-fg, #111827)' }}
         >
           {/* Identity header */}
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">

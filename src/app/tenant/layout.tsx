@@ -222,8 +222,6 @@ export default async function TenantLayout({ children }: { children: React.React
     <>
       <style>{`
         :root {
-          --primary:  ${primaryColor};
-          --tenant-accent: ${accentColor};
           --radius:   ${borderRadius};
           --font:     ${fontFamily}, system-ui, sans-serif;
         }

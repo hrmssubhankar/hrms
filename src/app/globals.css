@@ -52,6 +52,10 @@
     /* Typography scale vars */
     --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    /* Dropdown tokens — immune to tenant CSS overrides */
+    --dropdown-bg: #ffffff;
+    --dropdown-fg: #111827;
   }
 
   .dark {
@@ -97,6 +101,10 @@
     --danger:                0 68% 60%;
     --danger-dim:            0 55% 12%;
     --indigo:                243 75% 70%;
+
+    /* Dropdown tokens — dark */
+    --dropdown-bg: #0f172a;
+    --dropdown-fg: #f1f5f9;
   }
 }
 
