@@ -131,6 +131,7 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
         {[
           {
             label: 'My Profile',
+            href:  '/tenant/my-profile',
             icon: (
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -140,6 +141,7 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
           },
           {
             label: 'Change Password',
+            href:  '/tenant/settings',
             icon: (
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                 <rect x="3" y="11" width="18" height="11" rx="2"/>
@@ -147,9 +149,10 @@ export default function TenantUserDropdown({ email, role, initial, primaryColor,
               </svg>
             ),
           },
-        ].map(({ label, icon }) => (
+        ].map(({ label, href, icon }: { label: string; href: string; icon: React.ReactNode }) => (
           <button
             key={label}
+            onClick={() => { setOpen(false); router.push(href) }}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 10,
               padding: '10px 16px', fontSize: 13, color: mutedFg,
