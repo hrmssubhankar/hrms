@@ -88,19 +88,21 @@ const EMP_TYPE_COLOR: Record<string, string> = {
 }
 const ENTITY_COLORS = ['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ef4444']
 
+// moduleId = 0 means always visible (core/uncontrolled).
+// moduleId > 0 = must be enabled in hrms_tenant_modules to appear.
 const MODULE_SHORTCUTS = [
-  { key: 'employee-management', icon: '', label: 'Employees', desc: 'View & manage staff' },
-  { key: 'leave',           icon: '', label: 'Leave',       desc: 'Requests & balances' },
-  { key: 'payroll',         icon: '', label: 'Payroll',     desc: 'Pay runs & exports' },
-  { key: 'documents',       icon: '', label: 'Documents',   desc: 'Upload & manage docs' },
-  { key: 'whs',             icon: '️', label: 'WHS',         desc: 'Incidents & hazards' },
-  { key: 'public-holidays', icon: '', label: 'Holidays',    desc: 'Public holiday calendar' },
-  { key: 'training',        icon: '', label: 'Training',    desc: 'Courses & records' },
-  { key: 'recruitment',     icon: '', label: 'Recruitment', desc: 'Jobs & candidates' },
-  { key: 'rostering',       icon: '', label: 'Rostering',   desc: 'Shifts & timesheets' },
-  { key: 'onboarding',      icon: '', label: 'Onboarding',  desc: 'New starter checklist' },
-  { key: 'settings',        icon: '',  label: 'Settings',    desc: 'Tenant configuration' },
-  { key: 'audit-logs',      icon: '', label: 'Audit Log',   desc: 'System activity' },
+  { key: 'employee-management', icon: '', label: 'Employees',  desc: 'View & manage staff',          moduleId: 2  },
+  { key: 'leave',               icon: '', label: 'Leave',       desc: 'Requests & balances',          moduleId: 0  },
+  { key: 'payroll',             icon: '', label: 'Payroll',     desc: 'Pay runs & exports',           moduleId: 28 },
+  { key: 'documents',           icon: '', label: 'Documents',   desc: 'Upload & manage docs',         moduleId: 5  },
+  { key: 'whs',                 icon: '️',label: 'WHS',         desc: 'Incidents & hazards',          moduleId: 17 },
+  { key: 'public-holidays',     icon: '', label: 'Holidays',    desc: 'Public holiday calendar',      moduleId: 0  },
+  { key: 'training',            icon: '', label: 'Training',    desc: 'Courses & records',            moduleId: 10 },
+  { key: 'recruitment',         icon: '', label: 'Recruitment', desc: 'Jobs & candidates',            moduleId: 14 },
+  { key: 'rostering',           icon: '', label: 'Rostering',   desc: 'Shifts & timesheets',          moduleId: 27 },
+  { key: 'onboarding',          icon: '', label: 'Onboarding',  desc: 'New starter checklist',        moduleId: 9  },
+  { key: 'settings',            icon: '', label: 'Settings',    desc: 'Tenant configuration',         moduleId: 0  },
+  { key: 'audit-logs',          icon: '', label: 'Audit Log',   desc: 'System activity',              moduleId: 4  },
 ]
 
 // ── Mini bar chart ────────────────────────────────────────────────────────────
@@ -214,18 +216,18 @@ type LeaveBalance = {
 }
 
 const PERSONAL_SHORTCUTS = [
-  { key: 'my-profile',   icon: '', label: 'My Profile',   desc: 'Your personal details' },
-  { key: 'my-payslips',  icon: '', label: 'My Payslips',  desc: 'Pay history & slips' },
-  { key: 'my-documents', icon: '', label: 'My Documents',  desc: 'Your documents' },
-  { key: 'leave',        icon: '', label: 'Leave',         desc: 'Apply & track leave' },
-  { key: 'timesheets',   icon: '⏱',label: 'Timesheets',   desc: 'Clock in / out' },
-  { key: 'training',     icon: '', label: 'Training',      desc: 'Courses & records' },
-  { key: 'rostering',    icon: '', label: 'Rostering',     desc: 'My schedule' },
-  { key: 'benefits',     icon: '', label: 'Benefits',      desc: 'Entitlements' },
-  { key: 'whs',          icon: '️', label: 'WHS',           desc: 'Report a hazard' },
-  { key: 'recognition',  icon: '', label: 'Recognition',   desc: 'Kudos & shoutouts' },
-  { key: 'referrals',    icon: '', label: 'Referrals',     desc: 'Refer a friend' },
-  { key: 'engagement',   icon: '', label: 'Engagement',    desc: 'Pulse surveys' },
+  { key: 'my-profile',   icon: '', label: 'My Profile',   desc: 'Your personal details', moduleId: 0  },
+  { key: 'my-payslips',  icon: '', label: 'My Payslips',  desc: 'Pay history & slips',   moduleId: 28 },
+  { key: 'my-documents', icon: '', label: 'My Documents', desc: 'Your documents',         moduleId: 5  },
+  { key: 'leave',        icon: '', label: 'Leave',        desc: 'Apply & track leave',    moduleId: 0  },
+  { key: 'timesheets',   icon: '⏱',label: 'Timesheets',  desc: 'Clock in / out',         moduleId: 27 },
+  { key: 'training',     icon: '', label: 'Training',     desc: 'Courses & records',      moduleId: 10 },
+  { key: 'rostering',    icon: '', label: 'Rostering',    desc: 'My schedule',            moduleId: 27 },
+  { key: 'benefits',     icon: '', label: 'Benefits',     desc: 'Entitlements',           moduleId: 21 },
+  { key: 'whs',          icon: '️',label: 'WHS',          desc: 'Report a hazard',        moduleId: 17 },
+  { key: 'recognition',  icon: '', label: 'Recognition',  desc: 'Kudos & shoutouts',      moduleId: 22 },
+  { key: 'referrals',    icon: '', label: 'Referrals',    desc: 'Refer a friend',         moduleId: 23 },
+  { key: 'engagement',   icon: '', label: 'Engagement',   desc: 'Pulse surveys',          moduleId: 25 },
 ]
 
 const LEAVE_TYPE_LABEL: Record<string, string> = {
@@ -239,8 +241,8 @@ const LEAVE_STATUS_COLOR: Record<string, string> = {
   cancelled:'badge badge-gray',
 }
 
-function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }: {
-  userName: string; tenantName: string; primaryColor: string; greetingText: string
+function PersonalDashboard({ userName, tenantName, primaryColor, greetingText, enabledModuleIds }: {
+  userName: string; tenantName: string; primaryColor: string; greetingText: string; enabledModuleIds: Set<number> | null
 }) {
   const [leaveRequests,   setLeaveRequests]   = useState<LeaveRequest[]>([])
   const [holidays,        setHolidays]        = useState<PublicHoliday[]>([])
@@ -415,7 +417,7 @@ function PersonalDashboard({ userName, tenantName, primaryColor, greetingText }:
       <section>
         <h2 className="section-label mb-3">My Modules</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {PERSONAL_SHORTCUTS.map(m => (
+          {PERSONAL_SHORTCUTS.filter(m => m.moduleId === 0 || enabledModuleIds === null || enabledModuleIds.has(m.moduleId)).map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}
               className="group card-premium px-4 py-4 flex flex-col items-center gap-2 text-center transition-all hover:-translate-y-px hover:shadow-sm">
               <span className="text-2xl leading-none">{m.icon}</span>
@@ -473,6 +475,7 @@ export default function DashboardPage() {
   const [reviewsDue,      setReviewsDue]      = useState<ReviewDue[]>([])
   const [trend,         setTrend]         = useState<HeadcountTrend[]>([])
   const [compliance,    setCompliance]    = useState<ComplianceScore | null>(null)
+  const [enabledModuleIds, setEnabledModuleIds] = useState<Set<number> | null>(null)
 
   useEffect(() => {
     // Greeting is computed client-side only to avoid SSR/CSR hydration mismatch
@@ -493,8 +496,13 @@ export default function DashboardPage() {
     }).catch(() => {})
 
     fetchWithAuth('/api/tenant/config').then(r => r.json()).then(d => {
-      setTenantName(d.name ?? '')
-      setPrimaryColor(d.primaryColor ?? '#6d28d9')
+      setTenantName(d.tenant?.name ?? '')
+      setPrimaryColor(d.tenant?.primaryColor ?? '#6d28d9')
+      // Build a set of enabled module IDs for fast O(1) lookup
+      // Config returns enabledModules: [{ id, name }] — all already filtered to isEnabled
+      if (Array.isArray(d.enabledModules)) {
+        setEnabledModuleIds(new Set(d.enabledModules.map((m: { id: number }) => m.id)))
+      }
     }).catch(() => {})
 
     loadDashboard()
@@ -542,6 +550,7 @@ export default function DashboardPage() {
       tenantName={tenantName}
       primaryColor={primaryColor}
       greetingText={greetingText}
+      enabledModuleIds={enabledModuleIds}
     />
   }
 
@@ -1045,7 +1054,7 @@ export default function DashboardPage() {
       <section>
         <h2 className="section-label mb-3">Modules</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {MODULE_SHORTCUTS.map(m => (
+          {MODULE_SHORTCUTS.filter(m => m.moduleId === 0 || enabledModuleIds === null || enabledModuleIds.has(m.moduleId)).map(m => (
             <Link key={m.key} href={`/tenant/${m.key}`}
               className="group card-premium px-4 py-4 flex flex-col items-center gap-2 text-center transition-all hover:-translate-y-px hover:shadow-sm">
               <span className="text-2xl leading-none">{m.icon}</span>

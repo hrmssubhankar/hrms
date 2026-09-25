@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { employees, departments, positions } from '@/lib/db/schema'
-import { eq, and, ilike, or, desc, asc, count } from 'drizzle-orm'
+import { eq, and, ilike, or, asc, count, sql } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
 // GET /api/tenant/employees?search=&status=&type=&page=1&limit=20
@@ -87,12 +87,34 @@ export async function GET(req: NextRequest) {
           ilike(employees.employeeNumber, `%${search}%`),
         ))
       : and(...conditions)
+    // Total matching (filtered) count + unfiltered counts for stat cards
     const [{ value: total }] = await db
       .select({ value: count() })
       .from(employees)
       .where(whereClause)
 
-    return NextResponse.json({ employees: rows, page, limit, total: Number(total), pages: Math.ceil(Number(total) / limit) })
+    // Always count against the full tenant (ignoring search/status/type filters)
+    // so stat cards reflect the entire workforce, not the current filter slice.
+    const tenantCondition = eq(employees.tenantId, session.tenantId!)
+    const [stats] = await db
+      .select({
+        activeCount:   sql<number>`count(*) filter (where ${employees.isActive} = true)`,
+        inactiveCount: sql<number>`count(*) filter (where ${employees.isActive} = false)`,
+        ndisCount:     sql<number>`count(*) filter (where ${employees.ndisWorker} = true)`,
+      })
+      .from(employees)
+      .where(tenantCondition)
+
+    return NextResponse.json({
+      employees: rows,
+      page,
+      limit,
+      total:         Number(total),
+      pages:         Math.ceil(Number(total) / limit),
+      activeCount:   Number(stats.activeCount),
+      inactiveCount: Number(stats.inactiveCount),
+      ndisCount:     Number(stats.ndisCount),
+    })
   } catch (err) {
     console.error('GET /api/tenant/employees', err)
     return NextResponse.json({ error: 'Failed to fetch employees', detail: String(err) }, { status: 500 })

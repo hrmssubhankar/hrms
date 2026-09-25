@@ -210,12 +210,20 @@ export default function EmployeeManagementPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [bulkLoading, setBulkLoading] = useState(false)
+  // Workforce-wide stat totals (from API, not derived from the current page slice)
+  const [statTotals, setStatTotals] = useState<{ active: number; inactive: number; ndis: number } | null>(null)
+  // Tenant-specific flags
+  const [isYPC, setIsYPC] = useState(false)
 
-  // Fetch screening expiry data
+  // Fetch screening expiry data + tenant config (for isYPC flag)
   useEffect(() => {
     fetchWithAuth('/api/tenant/employees/screening-expiry')
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.screeningExpiry) setScreeningExpiry(d.screeningExpiry) })
+      .catch(() => {})
+    fetchWithAuth('/api/tenant/config')
+      .then(r => r.json())
+      .then(d => { setIsYPC((d.tenant?.slug ?? '') === 'yahwehpc') })
       .catch(() => {})
   }, [])
 
@@ -244,6 +252,9 @@ export default function EmployeeManagementPage() {
       setEmployees(data.employees ?? [])
       setTotalPages(data.pages ?? 1)
       setTotalCount(data.total ?? 0)
+      if (data.activeCount !== undefined) {
+        setStatTotals({ active: data.activeCount, inactive: data.inactiveCount, ndis: data.ndisCount })
+      }
     } catch {
       setEmployees([])
     } finally {
@@ -311,19 +322,16 @@ export default function EmployeeManagementPage() {
         { header: 'Start Date',       key: 'startDate', format: v => fmtCsvDate(v as string) },
         { header: 'Status',           key: 'isActive', format: v => v ? 'Active' : 'Inactive' },
         { header: 'Compliance',       key: 'complianceStatus' },
-        { header: 'NDIS Worker',      key: 'ndisWorker', format: v => v ? 'Yes' : 'No' },
+        ...(!isYPC ? [{ header: 'NDIS Worker', key: 'ndisWorker', format: (v: unknown) => v ? 'Yes' : 'No' }] : []),
       ],
       rows: employees,
     })
   }
 
-  const activeCount   = employees.filter(e => e.isActive).length
-  const inactiveCount = employees.length - activeCount
-  const ndisCount     = employees.filter(e => e.ndisWorker).length
-  const tenantSlug    = typeof document !== 'undefined'
-    ? (document.cookie.split('; ').find(r => r.startsWith('tenant_slug='))?.split('=')[1] ?? '')
-    : ''
-  const isYPC = tenantSlug === 'yahwehpc'
+  // Use API-returned totals (whole workforce) rather than current page slice
+  const activeCount   = statTotals?.active   ?? employees.filter(e => e.isActive).length
+  const inactiveCount = statTotals?.inactive ?? (employees.length - (statTotals?.active ?? employees.filter(e => e.isActive).length))
+  const ndisCount     = statTotals?.ndis     ?? employees.filter(e => e.ndisWorker).length
 
   if (denied) return (
     <div className="space-y-4">
@@ -423,7 +431,7 @@ export default function EmployeeManagementPage() {
         {(search || status || empType) && (
           <button
             onClick={() => { setSearch(''); setStatus(''); setEmpType('') }}
-            className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-600 dark:text-gray-300 transition dark:text-gray-400"
+            className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition"
           >
             Clear
           </button>
@@ -530,7 +538,7 @@ export default function EmployeeManagementPage() {
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
                               {fullName}
-                              {emp.ndisWorker && <span className="ml-1.5 text-xs text-purple-500">NDIS</span>}
+                              {emp.ndisWorker && !isYPC && <span className="ml-1.5 text-xs text-purple-500">NDIS</span>}
                             </p>
                             <p className="text-xs text-gray-600 dark:text-gray-400">{emp.email}</p>
                           </div>

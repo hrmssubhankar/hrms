@@ -149,7 +149,7 @@ We are delighted to offer you the position of ${o.position || '[Position Title]'
 EMPLOYMENT DETAILS
 Position:         ${o.position || '[Position Title]'}
 Department:       ${o.department || '[Department]'}
-Employment Type:  ${o.employmentType || 'Full-Time'}
+Employment Type:  ${EMP_TYPES.find(t => t.value === o.employmentType)?.label || 'Full-Time'}
 Start Date:       ${o.startDate || '[Start Date]'}
 Salary:           $${o.salaryAmount?.toLocaleString() || '[Salary]'} ${o.salaryCycle || 'per annum'}
 
@@ -296,6 +296,8 @@ export default function OfferLettersPage() {
   const [uploading,       setUploading]         = useState(false)
   const [confirmState, setConfirmState] = useState<ConfirmState>(null)
   const [uploadError,     setUploadError]       = useState('')
+  const [orgName,         setOrgName]           = useState('')
+  const [formError,       setFormError]         = useState('')
   const printRef = useRef<HTMLDivElement>(null)
 
   const [form, setForm] = useState({
@@ -345,6 +347,12 @@ export default function OfferLettersPage() {
   }
   useEffect(() => { loadCustomTemplates() }, [])
 
+  useEffect(() => {
+    fetchWithAuth('/api/tenant/config').then(r => r.json()).then(d => {
+      setOrgName(d.name ?? '')
+    }).catch(() => {})
+  }, [])
+
   // Pre-fill from recruitment pipeline URL params (?candidateName=…&candidateEmail=…)
   const searchParams = useSearchParams()
   useEffect(() => {
@@ -361,6 +369,7 @@ export default function OfferLettersPage() {
       employmentType:'full_time',startDate:'',salaryAmount:'',salaryCycle:'annual',
       notes:'',expiresAt:'',templateContent:'' })
     setSelectedTemplate('0')
+    setFormError('')
     setShowForm(true)
   }
 
@@ -373,7 +382,7 @@ export default function OfferLettersPage() {
         candidateName: form.candidateName, position: form.position,
         department: form.department, employmentType: form.employmentType,
         startDate: form.startDate, salaryAmount: Number(form.salaryAmount) || 0,
-        salaryCycle: form.salaryCycle,
+        salaryCycle: form.salaryCycle, orgName,
       })
       setForm(f => ({ ...f, templateContent: content }))
     } else {
@@ -391,19 +400,32 @@ export default function OfferLettersPage() {
   }
 
   async function submit(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    const content = form.templateContent || DEFAULT_TEMPLATE({
-      candidateName: form.candidateName, position: form.position,
-      department: form.department, employmentType: form.employmentType,
-      startDate: form.startDate, salaryAmount: Number(form.salaryAmount) || 0,
-      salaryCycle: form.salaryCycle,
-    })
-    const res = await fetchWithAuth('/api/tenant/offer-letters', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, salaryAmount: Number(form.salaryAmount)||null, templateContent: content }),
-    })
-    setSaving(false)
-    if (res.ok) { setShowForm(false); load() }
+    e.preventDefault()
+    setSaving(true)
+    setFormError('')
+    try {
+      const content = form.templateContent || DEFAULT_TEMPLATE({
+        candidateName: form.candidateName, position: form.position,
+        department: form.department, employmentType: form.employmentType,
+        startDate: form.startDate, salaryAmount: Number(form.salaryAmount) || 0,
+        salaryCycle: form.salaryCycle, orgName,
+      })
+      const res = await fetchWithAuth('/api/tenant/offer-letters', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, salaryAmount: Number(form.salaryAmount)||null, templateContent: content }),
+      })
+      if (res.ok) {
+        setShowForm(false)
+        load()
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setFormError(data.error ?? `Failed to create offer (${res.status})`)
+      }
+    } catch {
+      setFormError('Network error — please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function selectOffer(offer: Offer) {
@@ -475,7 +497,7 @@ export default function OfferLettersPage() {
 
   function printOffer() {
     if (!selected) return
-    const content = selected.templateContent || DEFAULT_TEMPLATE(selected)
+    const content = selected.templateContent || DEFAULT_TEMPLATE({ ...selected, orgName })
     const win = window.open('', '_blank')
     if (!win) return
     win.document.write(`<!DOCTYPE html><html><head><title>Offer Letter — ${selected.candidateName}</title>
@@ -754,7 +776,7 @@ export default function OfferLettersPage() {
           <div className="card-premium rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
               <h2 className="text-lg font-bold text-foreground">New Offer Letter</h2>
-              <button onClick={()=>setShowForm(false)} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl">×</button>
+              <button onClick={()=>{ setShowForm(false); setFormError('') }} className="text-gray-600 dark:text-gray-400 hover:text-white text-xl">×</button>
             </div>
             <form onSubmit={submit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -857,12 +879,15 @@ export default function OfferLettersPage() {
                 <label className={LABEL}>Internal Notes</label>
                 <input value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} className={INPUT} placeholder="Optional HR notes (not shown to candidate)" />
               </div>
+              {formError && (
+                <p className="text-sm text-red-400 bg-red-900/20 border border-red-800 rounded-lg px-3 py-2">{formError}</p>
+              )}
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={saving}
                   className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition">
                   {saving ? 'Creating…' : 'Create Offer Letter'}
                 </button>
-                <button type="button" onClick={()=>setShowForm(false)}
+                <button type="button" onClick={()=>{ setShowForm(false); setFormError('') }}
                   className="px-5 py-2.5 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-white text-sm rounded-lg">
                   Cancel
                 </button>
