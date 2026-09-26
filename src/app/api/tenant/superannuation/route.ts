@@ -35,10 +35,17 @@ export async function POST(req: NextRequest) {
   const { error, session } = await apiGuard('superannuation:write')
   if (error) return error
 
-  const { employeeId, fundName, fundAbn, memberNumber, isPrimary, verifiedAt } = await req.json()
+  const {
+    employeeId, fundName, fundAbn, usi, memberNumber, isSmsf,
+    smsfBankBsb, smsfBankAccount, smsfEsa, status, isPrimary,
+    effectiveFrom, effectiveTo, source, verifiedAt, verifiedBy, notes,
+  } = await req.json()
 
   if (!employeeId) {
     return NextResponse.json({ error: 'employeeId required' }, { status: 400 })
+  }
+  if (!fundName) {
+    return NextResponse.json({ error: 'fundName required' }, { status: 400 })
   }
 
   // If new fund is primary, un-primary existing ones
@@ -57,14 +64,22 @@ export async function POST(req: NextRequest) {
     .values({
       tenantId: session.tenantId,
       employeeId,
-      ...(fundName      !== undefined && { fundName }),
-      ...(fundAbn       !== undefined && { fundAbn }),
-      ...(memberNumber  !== undefined && { memberNumber }),
-      ...(isPrimary     !== undefined && { isPrimary }),
-      ...(verifiedAt    !== undefined && { verifiedAt }),
-      verifiedBy: verifiedAt ? session.email : undefined,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      fundName,
+      ...(fundAbn        !== undefined && { fundAbn }),
+      ...(usi            !== undefined && { usi }),
+      ...(memberNumber   !== undefined && { memberNumber }),
+      ...(isSmsf         !== undefined && { isSmsf }),
+      ...(smsfBankBsb    !== undefined && { smsfBankBsb }),
+      ...(smsfBankAccount !== undefined && { smsfBankAccount }),
+      ...(smsfEsa        !== undefined && { smsfEsa }),
+      ...(status         !== undefined && { status }),
+      ...(isPrimary      !== undefined && { isPrimary }),
+      ...(effectiveFrom  !== undefined && { effectiveFrom }),
+      ...(effectiveTo    !== undefined && { effectiveTo }),
+      ...(source         !== undefined && { source }),
+      ...(verifiedAt     !== undefined && { verifiedAt }),
+      ...(verifiedBy     !== undefined && { verifiedBy }),
+      ...(notes          !== undefined && { notes }),
     })
     .returning()
 

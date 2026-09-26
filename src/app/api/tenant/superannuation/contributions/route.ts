@@ -34,34 +34,36 @@ export async function POST(req: NextRequest) {
   if (error) return error
 
   const {
-    employeeId, superFundId: fundId, periodStart, periodEnd,
-    employeeContribution, employerContribution, totalContribution,
-    paymentDate, status, notes,
+    employeeId, superFundId, periodStart, periodEnd, dueDate,
+    paidDate, grossEarnings, sgRate, sgAmount, voluntaryAmount,
+    totalContribution, status, paymentReference, notes,
   } = await req.json()
 
   const [contribution] = await db
     .insert(superContributions)
     .values({
       tenantId: session.tenantId,
-      ...(employeeId           !== undefined && { employeeId }),
-      ...(fundId               !== undefined && { superFundId: fundId }),
-      ...(periodStart          !== undefined && { periodStart }),
-      ...(periodEnd            !== undefined && { periodEnd }),
-      ...(employeeContribution !== undefined && { employeeContribution }),
-      ...(employerContribution !== undefined && { employerContribution }),
+      employeeId,
+      superFundId,
+      periodStart,
+      periodEnd,
+      dueDate,
+      ...(paidDate             !== undefined && { paidDate }),
+      ...(grossEarnings        !== undefined && { grossEarnings }),
+      ...(sgRate               !== undefined && { sgRate }),
+      ...(sgAmount             !== undefined && { sgAmount }),
+      ...(voluntaryAmount      !== undefined && { voluntaryAmount }),
       ...(totalContribution    !== undefined && { totalContribution }),
-      ...(paymentDate          !== undefined && { paymentDate }),
       ...(status               !== undefined && { status }),
+      ...(paymentReference     !== undefined && { paymentReference }),
       ...(notes                !== undefined && { notes }),
-      createdAt: new Date(),
-      updatedAt: new Date(),
     })
     .returning()
 
   return NextResponse.json({ contribution }, { status: 201 })
 }
 
-// PATCH /api/tenant/superannuation/contributions (update by query param id)
+// PATCH /api/tenant/superannuation/contributions?id=...
 export async function PATCH(req: NextRequest) {
   const { error, session } = await apiGuard('superannuation:write')
   if (error) return error
@@ -71,8 +73,9 @@ export async function PATCH(req: NextRequest) {
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
   const {
-    periodStart, periodEnd, employeeContribution, employerContribution,
-    totalContribution, paymentDate, status, notes,
+    periodStart, periodEnd, dueDate, paidDate, grossEarnings,
+    sgRate, sgAmount, voluntaryAmount, totalContribution,
+    status, paymentReference, notes,
   } = await req.json()
 
   const [contribution] = await db
@@ -80,11 +83,15 @@ export async function PATCH(req: NextRequest) {
     .set({
       ...(periodStart          !== undefined && { periodStart }),
       ...(periodEnd            !== undefined && { periodEnd }),
-      ...(employeeContribution !== undefined && { employeeContribution }),
-      ...(employerContribution !== undefined && { employerContribution }),
+      ...(dueDate              !== undefined && { dueDate }),
+      ...(paidDate             !== undefined && { paidDate }),
+      ...(grossEarnings        !== undefined && { grossEarnings }),
+      ...(sgRate               !== undefined && { sgRate }),
+      ...(sgAmount             !== undefined && { sgAmount }),
+      ...(voluntaryAmount      !== undefined && { voluntaryAmount }),
       ...(totalContribution    !== undefined && { totalContribution }),
-      ...(paymentDate          !== undefined && { paymentDate }),
       ...(status               !== undefined && { status }),
+      ...(paymentReference     !== undefined && { paymentReference }),
       ...(notes                !== undefined && { notes }),
       updatedAt: new Date(),
     })
