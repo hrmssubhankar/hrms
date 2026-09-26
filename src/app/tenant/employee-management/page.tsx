@@ -322,7 +322,7 @@ export default function EmployeeManagementPage() {
         { header: 'Start Date',       key: 'startDate', format: v => fmtCsvDate(v as string) },
         { header: 'Status',           key: 'isActive', format: v => v ? 'Active' : 'Inactive' },
         { header: 'Compliance',       key: 'complianceStatus' },
-        ...(!isYPC ? [{ header: 'NDIS Worker', key: 'ndisWorker', format: (v: unknown) => v ? 'Yes' : 'No' }] : []),
+        ...(!isYPC ? [{ header: 'NDIS Worker', key: 'ndisWorker' as const, format: (v: unknown) => v ? 'Yes' : 'No' }] : []),
       ],
       rows: employees,
     })
