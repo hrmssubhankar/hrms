@@ -18,9 +18,24 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { tenantId } = guard.session
   const { conditionId } = await params
 
-  const body = await req.json()
+  const {
+    conditionName, conditionType, icdCode, severity, diagnosedDate,
+    diagnosedBy, status, description, managementPlan, alerts,
+  } = await req.json()
   const [updated] = await db.update(participantHealthConditions)
-    .set({ ...body, updatedAt: new Date() })
+    .set({
+      ...(conditionName    !== undefined && { conditionName }),
+      ...(conditionType    !== undefined && { conditionType }),
+      ...(icdCode          !== undefined && { icdCode }),
+      ...(severity         !== undefined && { severity }),
+      ...(diagnosedDate    !== undefined && { diagnosedDate }),
+      ...(diagnosedBy      !== undefined && { diagnosedBy }),
+      ...(status           !== undefined && { status }),
+      ...(description      !== undefined && { description }),
+      ...(managementPlan   !== undefined && { managementPlan }),
+      ...(alerts           !== undefined && { alerts }),
+      updatedAt: new Date(),
+    })
     .where(and(
       eq(participantHealthConditions.id, conditionId),
       eq(participantHealthConditions.tenantId, tenantId),

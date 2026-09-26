@@ -18,9 +18,32 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const { tenantId } = guard.session
   const { incidentId } = await params
 
-  const body = await req.json()
+  const {
+    incidentDate, incidentTime, location, incidentType, severity, description,
+    immediateAction, witnesses, reportedBy, reportedTo, ndisReportable,
+    policeReport, policeReportNumber, status, outcome, followUpRequired, followUpDate,
+  } = await req.json()
   const [updated] = await db.update(participantIncidents)
-    .set({ ...body, updatedAt: new Date() })
+    .set({
+      ...(incidentDate       !== undefined && { incidentDate }),
+      ...(incidentTime       !== undefined && { incidentTime }),
+      ...(location           !== undefined && { location }),
+      ...(incidentType       !== undefined && { incidentType }),
+      ...(severity           !== undefined && { severity }),
+      ...(description        !== undefined && { description }),
+      ...(immediateAction    !== undefined && { immediateAction }),
+      ...(witnesses          !== undefined && { witnesses }),
+      ...(reportedBy         !== undefined && { reportedBy }),
+      ...(reportedTo         !== undefined && { reportedTo }),
+      ...(ndisReportable     !== undefined && { ndisReportable }),
+      ...(policeReport       !== undefined && { policeReport }),
+      ...(policeReportNumber !== undefined && { policeReportNumber }),
+      ...(status             !== undefined && { status }),
+      ...(outcome            !== undefined && { outcome }),
+      ...(followUpRequired   !== undefined && { followUpRequired }),
+      ...(followUpDate       !== undefined && { followUpDate }),
+      updatedAt: new Date(),
+    })
     .where(and(
       eq(participantIncidents.id, incidentId),
       eq(participantIncidents.tenantId, tenantId),

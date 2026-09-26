@@ -33,9 +33,39 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { tenantId } = guard.session
   const { id } = await params
 
-  const body = await req.json()
+  const {
+    incidentType, incidentCategory, isReportable, status, severity, participantId,
+    participantName, workerName, workerRole, witnessNames, title, description,
+    location, incidentDate, discoveredDate, reportedInternally, internalReportDate,
+    commissionNotified, commissionNotifyDate, commissionRefNumber,
+    policeNotified, policeReportNumber,
+  } = await req.json()
   const [incident] = await db.update(ndisIncidents)
-    .set({ ...body, updatedAt: new Date() })
+    .set({
+      ...(incidentType       !== undefined && { incidentType }),
+      ...(incidentCategory   !== undefined && { incidentCategory }),
+      ...(isReportable       !== undefined && { isReportable }),
+      ...(status             !== undefined && { status }),
+      ...(severity           !== undefined && { severity }),
+      ...(participantId      !== undefined && { participantId }),
+      ...(participantName    !== undefined && { participantName }),
+      ...(workerName         !== undefined && { workerName }),
+      ...(workerRole         !== undefined && { workerRole }),
+      ...(witnessNames       !== undefined && { witnessNames }),
+      ...(title              !== undefined && { title }),
+      ...(description        !== undefined && { description }),
+      ...(location           !== undefined && { location }),
+      ...(incidentDate       !== undefined && { incidentDate }),
+      ...(discoveredDate     !== undefined && { discoveredDate }),
+      ...(reportedInternally !== undefined && { reportedInternally }),
+      ...(internalReportDate !== undefined && { internalReportDate }),
+      ...(commissionNotified !== undefined && { commissionNotified }),
+      ...(commissionNotifyDate !== undefined && { commissionNotifyDate }),
+      ...(commissionRefNumber !== undefined && { commissionRefNumber }),
+      ...(policeNotified     !== undefined && { policeNotified }),
+      ...(policeReportNumber !== undefined && { policeReportNumber }),
+      updatedAt: new Date(),
+    })
     .where(and(eq(ndisIncidents.id, id), eq(ndisIncidents.tenantId, tenantId)))
     .returning()
 

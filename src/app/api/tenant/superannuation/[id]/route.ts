@@ -12,11 +12,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (error) return error
 
   const { id } = await params
-  const body = await req.json()
+  const { fundName, fundAbn, memberNumber, isPrimary, verifiedAt } = await req.json()
 
   const [fund] = await db
     .update(superFunds)
-    .set({ ...body, updatedAt: new Date() })
+    .set({
+      ...(fundName    !== undefined && { fundName }),
+      ...(fundAbn     !== undefined && { fundAbn }),
+      ...(memberNumber !== undefined && { memberNumber }),
+      ...(isPrimary   !== undefined && { isPrimary }),
+      ...(verifiedAt  !== undefined && { verifiedAt }),
+      updatedAt: new Date(),
+    })
     .where(and(
       eq(superFunds.id, id),
       eq(superFunds.tenantId, session.tenantId),

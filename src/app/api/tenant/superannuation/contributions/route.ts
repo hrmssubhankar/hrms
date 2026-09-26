@@ -15,33 +15,14 @@ export async function GET(req: NextRequest) {
   const employeeId = searchParams.get('employeeId')
   const superFundId = searchParams.get('superFundId')
 
-  let query = db
-    .select()
-    .from(superContributions)
-    .where(eq(superContributions.tenantId, session.tenantId))
-    .$dynamic()
-
-  if (employeeId) {
-    query = query.where(and(
-      eq(superContributions.tenantId, session.tenantId),
-      eq(superContributions.employeeId, employeeId),
-    ))
-  }
-  if (superFundId) {
-    query = query.where(and(
-      eq(superContributions.tenantId, session.tenantId),
-      eq(superContributions.superFundId, superFundId),
-    ))
-  }
+  const conditions = [eq(superContributions.tenantId, session.tenantId)]
+  if (employeeId)  conditions.push(eq(superContributions.employeeId, employeeId))
+  if (superFundId) conditions.push(eq(superContributions.superFundId, superFundId))
 
   const contributions = await db
     .select()
     .from(superContributions)
-    .where(
-      employeeId
-        ? and(eq(superContributions.tenantId, session.tenantId), eq(superContributions.employeeId, employeeId))
-        : eq(superContributions.tenantId, session.tenantId)
-    )
+    .where(and(...conditions))
     .orderBy(desc(superContributions.periodEnd))
 
   return NextResponse.json({ contributions })
@@ -52,13 +33,26 @@ export async function POST(req: NextRequest) {
   const { error, session } = await apiGuard('superannuation:write')
   if (error) return error
 
-  const body = await req.json()
+  const {
+    employeeId, superFundId: fundId, periodStart, periodEnd,
+    employeeContribution, employerContribution, totalContribution,
+    paymentDate, status, notes,
+  } = await req.json()
 
   const [contribution] = await db
     .insert(superContributions)
     .values({
-      ...body,
       tenantId: session.tenantId,
+      ...(employeeId           !== undefined && { employeeId }),
+      ...(fundId               !== undefined && { superFundId: fundId }),
+      ...(periodStart          !== undefined && { periodStart }),
+      ...(periodEnd            !== undefined && { periodEnd }),
+      ...(employeeContribution !== undefined && { employeeContribution }),
+      ...(employerContribution !== undefined && { employerContribution }),
+      ...(totalContribution    !== undefined && { totalContribution }),
+      ...(paymentDate          !== undefined && { paymentDate }),
+      ...(status               !== undefined && { status }),
+      ...(notes                !== undefined && { notes }),
       createdAt: new Date(),
       updatedAt: new Date(),
     })
@@ -76,11 +70,24 @@ export async function PATCH(req: NextRequest) {
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
-  const body = await req.json()
+  const {
+    periodStart, periodEnd, employeeContribution, employerContribution,
+    totalContribution, paymentDate, status, notes,
+  } = await req.json()
 
   const [contribution] = await db
     .update(superContributions)
-    .set({ ...body, updatedAt: new Date() })
+    .set({
+      ...(periodStart          !== undefined && { periodStart }),
+      ...(periodEnd            !== undefined && { periodEnd }),
+      ...(employeeContribution !== undefined && { employeeContribution }),
+      ...(employerContribution !== undefined && { employerContribution }),
+      ...(totalContribution    !== undefined && { totalContribution }),
+      ...(paymentDate          !== undefined && { paymentDate }),
+      ...(status               !== undefined && { status }),
+      ...(notes                !== undefined && { notes }),
+      updatedAt: new Date(),
+    })
     .where(and(
       eq(superContributions.id, id),
       eq(superContributions.tenantId, session.tenantId),

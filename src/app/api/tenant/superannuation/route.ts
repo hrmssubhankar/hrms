@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { apiGuard } from '@/lib/auth/apiGuard'
 import { db } from '@/lib/db'
-import { superFunds, employees } from '@/lib/db/schema'
+import { superFunds } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
@@ -35,15 +35,14 @@ export async function POST(req: NextRequest) {
   const { error, session } = await apiGuard('superannuation:write')
   if (error) return error
 
-  const body = await req.json()
-  const { employeeId, ...rest } = body
+  const { employeeId, fundName, fundAbn, memberNumber, isPrimary, verifiedAt } = await req.json()
 
   if (!employeeId) {
     return NextResponse.json({ error: 'employeeId required' }, { status: 400 })
   }
 
   // If new fund is primary, un-primary existing ones
-  if (rest.isPrimary) {
+  if (isPrimary) {
     await db
       .update(superFunds)
       .set({ isPrimary: false, updatedAt: new Date() })
@@ -56,10 +55,14 @@ export async function POST(req: NextRequest) {
   const [fund] = await db
     .insert(superFunds)
     .values({
-      ...rest,
       tenantId: session.tenantId,
       employeeId,
-      verifiedBy: rest.verifiedAt ? session.email : undefined,
+      ...(fundName      !== undefined && { fundName }),
+      ...(fundAbn       !== undefined && { fundAbn }),
+      ...(memberNumber  !== undefined && { memberNumber }),
+      ...(isPrimary     !== undefined && { isPrimary }),
+      ...(verifiedAt    !== undefined && { verifiedAt }),
+      verifiedBy: verifiedAt ? session.email : undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
     })

@@ -31,24 +31,42 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (error) return error
 
   const { id } = await params
-  const body = await req.json()
+  const {
+    status, reviewDate, effectiveDate, currentSalary, currentBasis,
+    proposedSalary, proposedBasis, justification, performanceRating,
+    marketData, hrNotes, reviewType,
+  } = await req.json()
 
   // Stamp workflow timestamps based on status transitions
-  const updates: Record<string, unknown> = { ...body, updatedAt: new Date() }
+  const updates: Record<string, unknown> = {
+    ...(status           !== undefined && { status }),
+    ...(reviewDate       !== undefined && { reviewDate }),
+    ...(effectiveDate    !== undefined && { effectiveDate }),
+    ...(currentSalary    !== undefined && { currentSalary }),
+    ...(currentBasis     !== undefined && { currentBasis }),
+    ...(proposedSalary   !== undefined && { proposedSalary }),
+    ...(proposedBasis    !== undefined && { proposedBasis }),
+    ...(justification    !== undefined && { justification }),
+    ...(performanceRating !== undefined && { performanceRating }),
+    ...(marketData       !== undefined && { marketData }),
+    ...(hrNotes          !== undefined && { hrNotes }),
+    ...(reviewType       !== undefined && { reviewType }),
+    updatedAt: new Date(),
+  }
 
-  if (body.status === 'submitted') {
+  if (status === 'submitted') {
     updates.submittedBy = session.email
     updates.submittedAt = new Date()
   }
-  if (body.status === 'under_review') {
+  if (status === 'under_review') {
     updates.reviewedBy = session.email
     updates.reviewedAt = new Date()
   }
-  if (body.status === 'approved') {
+  if (status === 'approved') {
     updates.approvedBy = session.email
     updates.approvedAt = new Date()
   }
-  if (body.status === 'rejected') {
+  if (status === 'rejected') {
     updates.reviewedBy = session.email
     updates.reviewedAt = new Date()
   }

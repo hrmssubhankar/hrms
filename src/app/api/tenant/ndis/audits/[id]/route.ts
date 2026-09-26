@@ -33,9 +33,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { tenantId } = guard.session
   const { id } = await params
 
-  const body = await req.json()
+  const {
+    title, auditType, standard, outcomeGroup, status, result, riskRating,
+    scheduledDate, completedDate, nextReviewDate, auditorName, auditorOrg,
+    findingSummary, correctiveActions, evidenceUrl, notes, assignedTo,
+  } = await req.json()
   const [audit] = await db.update(ndisAudits)
-    .set({ ...body, updatedAt: new Date() })
+    .set({
+      ...(title            !== undefined && { title }),
+      ...(auditType        !== undefined && { auditType }),
+      ...(standard         !== undefined && { standard }),
+      ...(outcomeGroup     !== undefined && { outcomeGroup }),
+      ...(status           !== undefined && { status }),
+      ...(result           !== undefined && { result }),
+      ...(riskRating       !== undefined && { riskRating }),
+      ...(scheduledDate    !== undefined && { scheduledDate }),
+      ...(completedDate    !== undefined && { completedDate }),
+      ...(nextReviewDate   !== undefined && { nextReviewDate }),
+      ...(auditorName      !== undefined && { auditorName }),
+      ...(auditorOrg       !== undefined && { auditorOrg }),
+      ...(findingSummary   !== undefined && { findingSummary }),
+      ...(correctiveActions !== undefined && { correctiveActions }),
+      ...(evidenceUrl      !== undefined && { evidenceUrl }),
+      ...(notes            !== undefined && { notes }),
+      ...(assignedTo       !== undefined && { assignedTo }),
+      updatedAt: new Date(),
+    })
     .where(and(eq(ndisAudits.id, id), eq(ndisAudits.tenantId, tenantId)))
     .returning()
 

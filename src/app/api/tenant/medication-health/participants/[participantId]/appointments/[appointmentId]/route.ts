@@ -18,9 +18,28 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const { tenantId } = guard.session
   const { appointmentId } = await params
 
-  const body = await req.json()
+  const {
+    appointmentType, providerName, providerOrg, appointmentDate, appointmentTime,
+    location, purpose, outcome, followUpDate, followUpNotes, status,
+    requiresTransport, supportWorkerNeeded,
+  } = await req.json()
   const [updated] = await db.update(participantHealthAppointments)
-    .set({ ...body, updatedAt: new Date() })
+    .set({
+      ...(appointmentType      !== undefined && { appointmentType }),
+      ...(providerName         !== undefined && { providerName }),
+      ...(providerOrg          !== undefined && { providerOrg }),
+      ...(appointmentDate      !== undefined && { appointmentDate }),
+      ...(appointmentTime      !== undefined && { appointmentTime }),
+      ...(location             !== undefined && { location }),
+      ...(purpose              !== undefined && { purpose }),
+      ...(outcome              !== undefined && { outcome }),
+      ...(followUpDate         !== undefined && { followUpDate }),
+      ...(followUpNotes        !== undefined && { followUpNotes }),
+      ...(status               !== undefined && { status }),
+      ...(requiresTransport    !== undefined && { requiresTransport }),
+      ...(supportWorkerNeeded  !== undefined && { supportWorkerNeeded }),
+      updatedAt: new Date(),
+    })
     .where(and(
       eq(participantHealthAppointments.id, appointmentId),
       eq(participantHealthAppointments.tenantId, tenantId),

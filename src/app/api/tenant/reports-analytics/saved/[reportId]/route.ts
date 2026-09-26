@@ -11,15 +11,15 @@ import { apiGuard } from '@/lib/auth/apiGuard'
 export const dynamic = 'force-dynamic'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ reportId: string }> }) {
-  const guard = await apiGuard('reports_analytics:read')
+  const guard = await apiGuard('reports_analytics:write')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
   const { reportId } = await params
 
-  const body = await req.json()
+  const { name, config, isDefault } = await req.json()
   const [updated] = await db
     .update(savedReports)
-    .set({ ...body, updatedAt: new Date() })
+    .set({ ...(name !== undefined && { name }), ...(config !== undefined && { config }), ...(isDefault !== undefined && { isDefault }), updatedAt: new Date() })
     .where(and(eq(savedReports.id, reportId), eq(savedReports.tenantId, tenantId)))
     .returning()
 
@@ -28,7 +28,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ re
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ reportId: string }> }) {
-  const guard = await apiGuard('reports_analytics:read')
+  const guard = await apiGuard('reports_analytics:write')
   if (guard.error) return guard.error
   const { tenantId } = guard.session
   const { reportId } = await params

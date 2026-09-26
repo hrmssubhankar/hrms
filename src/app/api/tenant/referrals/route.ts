@@ -3,7 +3,6 @@ import { db } from '@/lib/db'
 import { referrals, employees } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
-import { getSession } from '@/lib/auth/session'
 
 export async function GET(req: NextRequest) {
   try {
@@ -52,8 +51,9 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session?.tenantId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await apiGuard('referrals:write')
+    if (guard.error) return guard.error
+    const { session } = guard
     const { id, status, bonusPaidAt } = await req.json()
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
     const updates: Record<string, unknown> = {}

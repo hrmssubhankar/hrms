@@ -18,9 +18,27 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const { tenantId } = guard.session
   const { planId } = await params
 
-  const body = await req.json()
+  const {
+    planName, behaviourType, triggers, earlyWarnings, preventionStrategies,
+    deEscalationStrategies, responseStrategies, postIncidentSupport,
+    authorisedBy, reviewDate, status, notes,
+  } = await req.json()
   const [updated] = await db.update(participantBehaviourPlans)
-    .set({ ...body, updatedAt: new Date() })
+    .set({
+      ...(planName                  !== undefined && { planName }),
+      ...(behaviourType             !== undefined && { behaviourType }),
+      ...(triggers                  !== undefined && { triggers }),
+      ...(earlyWarnings             !== undefined && { earlyWarnings }),
+      ...(preventionStrategies      !== undefined && { preventionStrategies }),
+      ...(deEscalationStrategies    !== undefined && { deEscalationStrategies }),
+      ...(responseStrategies        !== undefined && { responseStrategies }),
+      ...(postIncidentSupport       !== undefined && { postIncidentSupport }),
+      ...(authorisedBy              !== undefined && { authorisedBy }),
+      ...(reviewDate                !== undefined && { reviewDate }),
+      ...(status                    !== undefined && { status }),
+      ...(notes                     !== undefined && { notes }),
+      updatedAt: new Date(),
+    })
     .where(and(
       eq(participantBehaviourPlans.id, planId),
       eq(participantBehaviourPlans.tenantId, tenantId),
