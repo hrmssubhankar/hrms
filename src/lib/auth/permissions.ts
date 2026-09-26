@@ -134,6 +134,7 @@ export type Permission =
   | 'self_service:write'
   // Reports & Analytics (enhanced)
   | 'reports_analytics:read'
+  | 'reports_analytics:write'
   // Settings (tenant branding / config)
   | 'settings:read'
   | 'settings:write'
@@ -188,7 +189,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'roster_shifts:read', 'roster_shifts:write',
     'payroll_finance:read', 'payroll_finance:write',
     'self_service:read', 'self_service:write',
-    'reports_analytics:read',
+    'reports_analytics:read', 'reports_analytics:write',
     'settings:read', 'settings:write',
     'superannuation:read', 'superannuation:write',
     'salary_review:read', 'salary_review:write',
@@ -232,7 +233,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'roster_shifts:read', 'roster_shifts:write',
     'payroll_finance:read', 'payroll_finance:write',
     'self_service:read', 'self_service:write',
-    'reports_analytics:read',
+    'reports_analytics:read', 'reports_analytics:write',
     'settings:read',
     'superannuation:read', 'superannuation:write',
     'salary_review:read', 'salary_review:write',
@@ -282,7 +283,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'incident_behaviour:read', 'incident_behaviour:write',
     'roster_shifts:read', 'roster_shifts:write',
     'payroll_finance:read', 'payroll_finance:write',
-    'reports_analytics:read',
+    'reports_analytics:read', 'reports_analytics:write',
     'toil:read', 'toil:write',
   ],
 
@@ -314,7 +315,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'analytics:read',
     'leave:read',
     'payroll_finance:read', 'payroll_finance:write',
-    'reports_analytics:read',
+    'reports_analytics:read', 'reports_analytics:write',
     'superannuation:read', 'superannuation:write',
     'salary_review:read', 'salary_review:write',
     'toil:read', 'toil:write',
