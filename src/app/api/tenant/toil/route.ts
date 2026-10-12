@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   if (error) return error
 
   const body = await req.json()
-  const { employeeId, entryType = 'accrual', hours, multiplier = 1.0, workDate, description, notes } = body
+  const { employeeId, entryType = 'accrual', hours, multiplier = 1.0, workDate, description } = body
 
   if (!employeeId || !hours || !workDate) {
     return NextResponse.json({ error: 'employeeId, hours, and workDate required' }, { status: 400 })
@@ -60,7 +60,6 @@ export async function POST(req: NextRequest) {
       multiplier: String(multiplier),
       workDate,
       description: description ?? null,
-      notes: notes ?? null,
       status,
       requestedAt: entryType !== 'accrual' ? new Date() : undefined,
       createdBy: session.email,
