@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
-import { employees, departments, positions } from '@/lib/db/schema'
+import { employees, departments, positions, users } from '@/lib/db/schema'
 import { eq, and, ilike, or, asc, count, sql } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -145,13 +146,50 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const normalizedEmail = email.toLowerCase().trim()
+
     // Auto-generate employee number: EMP-{year}-{4 random digits}
     const empNumber = `EMP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
+
+    // Map employment type to a user role
+    const roleForType = employmentType === 'contract' ? 'contractor' : 'employee'
+
+    // Derive a default password from the employee's last name + birth year (or a fallback)
+    // e.g. "Smith@1990" — they should reset on first login
+    const birthYear = dateOfBirth ? new Date(dateOfBirth).getFullYear() : new Date().getFullYear()
+    const defaultPassword = `${lastName.trim()}@${birthYear}`
+    const passwordHash = await bcrypt.hash(defaultPassword, 12)
+
+    // Create (or find) the login account first, then link it to the employee record
+    let userId: string
+    const existing = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.tenantId, session.tenantId!), eq(users.email, normalizedEmail)))
+      .limit(1)
+
+    if (existing.length > 0) {
+      // User account already exists (e.g. invited separately) — just link it
+      userId = existing[0].id
+    } else {
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          tenantId:     session.tenantId!,
+          email:        normalizedEmail,
+          passwordHash,
+          role:         roleForType as any,
+          isActive:     true,
+        })
+        .returning({ id: users.id })
+      userId = newUser.id
+    }
 
     const [emp] = await db
       .insert(employees)
       .values({
         tenantId:          session.tenantId!,
+        userId,
         employeeNumber:    empNumber,
         firstName:         firstName.trim(),
         lastName:          lastName.trim(),
@@ -159,7 +197,7 @@ export async function POST(req: NextRequest) {
         dateOfBirth:       dateOfBirth ?? null,
         gender:            gender ?? null,
         phone:             phone ?? null,
-        email:             email.toLowerCase().trim(),
+        email:             normalizedEmail,
         address:           address ?? null,
         photoUrl:          photoUrl ?? null,
         entityName:        entityName ?? null,
@@ -176,7 +214,14 @@ export async function POST(req: NextRequest) {
       })
       .returning()
 
-    return NextResponse.json({ employee: emp }, { status: 201 })
+    return NextResponse.json({
+      employee: emp,
+      loginCreated: existing.length === 0,
+      defaultPassword: existing.length === 0 ? defaultPassword : undefined,
+      message: existing.length === 0
+        ? `Login account created. Default password: ${defaultPassword} — employee should reset on first login.`
+        : 'Linked to existing login account.',
+    }, { status: 201 })
   } catch (err: any) {
     console.error('POST /api/tenant/employees', err)
     if (err?.code === '23505') {
