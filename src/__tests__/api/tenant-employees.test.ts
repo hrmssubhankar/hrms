@@ -25,6 +25,12 @@ vi.mock('@/lib/auth/apiGuard', () => ({
   apiGuard: (...a: unknown[]) => mockApiGuard(...a),
 }))
 
+// ── bcrypt stub ───────────────────────────────────────────────────────────────
+
+vi.mock('bcryptjs', () => ({
+  default: { hash: vi.fn().mockResolvedValue('$hashed') },
+}))
+
 // ── DB stubs ──────────────────────────────────────────────────────────────────
 //
 // select()  → fluent chain that when awaited calls mockDbSelect (queued)
@@ -58,11 +64,12 @@ vi.mock('@/lib/db/schema', () => ({
   employees:   {},
   departments: {},
   positions:   {},
+  users:       {},
 }))
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn(), and: vi.fn(), or: vi.fn(), ilike: vi.fn(),
-  desc: vi.fn(), asc: vi.fn(), count: vi.fn(),
+  desc: vi.fn(), asc: vi.fn(), count: vi.fn(), sql: vi.fn(),
 }))
 
 // ── Imports after mocks ───────────────────────────────────────────────────────
@@ -181,10 +188,15 @@ describe('POST /api/tenant/employees', () => {
     expect(res.body.error).toMatch(/required/i)
   })
 
-  it('returns 201 with newly created employee', async () => {
+  it('returns 201 with newly created employee and login account', async () => {
     mockApiGuard.mockResolvedValue(GUARD_OK_DIRECTOR)
     const created = { id: 'e-2', firstName: 'Bob', lastName: 'Jones', email: 'bob@acme.com' }
-    mockDbInsert.mockResolvedValue([created])
+    // user lookup → no existing user; user insert → new user; employee insert → employee
+    mockDbSelect
+      .mockResolvedValueOnce([])          // existing user lookup returns empty
+    mockDbInsert
+      .mockResolvedValueOnce([{ id: 'u-99' }])  // user insert
+      .mockResolvedValueOnce([created])           // employee insert
     const res = await POST(makeReq({
       body: {
         firstName: 'Bob', lastName: 'Jones', email: 'bob@acme.com',
@@ -193,6 +205,24 @@ describe('POST /api/tenant/employees', () => {
     })) as any
     expect(res.status).toBe(201)
     expect(res.body.employee).toEqual(created)
+    expect(res.body.loginCreated).toBe(true)
+    expect(res.body.defaultPassword).toBeDefined()
+  })
+
+  it('returns 201 and links existing user account when email already has a login', async () => {
+    mockApiGuard.mockResolvedValue(GUARD_OK_DIRECTOR)
+    const created = { id: 'e-3', firstName: 'Carol', lastName: 'White', email: 'carol@acme.com' }
+    mockDbSelect.mockResolvedValueOnce([{ id: 'u-existing' }])
+    mockDbInsert.mockResolvedValueOnce([created])
+    const res = await POST(makeReq({
+      body: {
+        firstName: 'Carol', lastName: 'White', email: 'carol@acme.com',
+        employmentType: 'full_time', startDate: '2024-01-15',
+      },
+    })) as any
+    expect(res.status).toBe(201)
+    expect(res.body.loginCreated).toBe(false)
+    expect(res.body.defaultPassword).toBeUndefined()
   })
 
   it('returns 409 on duplicate employee (unique constraint violation)', async () => {
