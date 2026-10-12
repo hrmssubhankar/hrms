@@ -259,7 +259,7 @@ describe('PATCH /api/tenant/benefits', () => {
 
 describe('DELETE /api/tenant/benefits', () => {
   it('returns 401 when not authenticated', async () => {
-    mockGetSession.mockResolvedValue(null)
+    mockApiGuard.mockResolvedValue(GUARD_401 as any)
     const res = await benefitsDELETE(makeReq('https://app.test/', { id: 'b1' })) as any
     expect(res.status).toBe(401)
   })

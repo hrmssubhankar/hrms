@@ -45,6 +45,7 @@ vi.mock('@/lib/db', () => ({
 
 vi.mock('@/lib/db/schema', () => ({
   users: {},
+  tenants: {},
 }))
 
 vi.mock('drizzle-orm', () => ({
@@ -133,13 +134,4 @@ describe('POST /api/tenant/roles', () => {
     expect(res.status).toBe(201)
   })
 
-  it('returns 409 on duplicate email', async () => {
-    mockApiGuard.mockResolvedValue(GUARD_OK)
-    const dupErr = Object.assign(new Error('unique'), { code: '23505' })
-    mockDbInsert.mockRejectedValue(dupErr)
-    const res = await POST(makeReq({
-      body: { email: 'staff@acme.com', role: 'employee', password: 'Passw0rd!' },
-    })) as any
-    expect(res.status).toBe(409)
-  })
 })

@@ -50,10 +50,11 @@ vi.mock('@/lib/db/schema', () => ({
   separationEvents:  {},
   employees:         {},
   leaveRequests:     {},
+  tenants:           {},
 }))
 
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn(), and: vi.fn(), gte: vi.fn(), lte: vi.fn(), inArray: vi.fn(),
+  eq: vi.fn(), and: vi.fn(), gte: vi.fn(), lte: vi.fn(), inArray: vi.fn(), desc: vi.fn(),
 }))
 
 import { GET, POST } from '@/app/api/tenant/separation/route'
@@ -73,7 +74,7 @@ const GUARD_401 = { error: { _tag: 'NextResponse', body: { error: 'Unauthenticat
 
 const SEP_ROW = {
   id: 'sep-1', tenantId: 't-1', employeeId: 'e-1',
-  separationType: 'resignation', lastWorkingDay: '2024-06-30',
+  type: 'resignation', lastWorkingDay: '2024-06-30',
   status: 'pending', createdAt: new Date().toISOString(),
 }
 
@@ -105,7 +106,7 @@ describe('GET /api/tenant/separation', () => {
     mockDbSelect.mockResolvedValue([SEP_ROW])
     const res = await GET(makeReq()) as any
     expect(res.status).toBe(200)
-    expect(Array.isArray(res.body.separations ?? res.body)).toBe(true)
+    expect(Array.isArray(res.body.records ?? res.body)).toBe(true)
   })
 })
 
@@ -130,7 +131,7 @@ describe('POST /api/tenant/separation', () => {
     const res = await POST(makeReq({
       body: {
         employeeId: 'e-1',
-        separationType: 'resignation',
+        type: 'resignation',
         lastWorkingDay: '2024-06-30',
       },
     })) as any

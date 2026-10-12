@@ -153,6 +153,7 @@ describe('GET /api/tenant/employees', () => {
     mockDbSelect
       .mockResolvedValueOnce(EMP_ROWS)           // list query
       .mockResolvedValueOnce([{ value: '1' }])   // count query
+      .mockResolvedValueOnce([{ activeCount: 1, inactiveCount: 0, ndisCount: 0 }]) // stats
     const res = await GET(makeReq()) as any
     expect(res.status).toBe(200)
     expect(res.body.employees).toEqual(EMP_ROWS)
@@ -166,6 +167,7 @@ describe('GET /api/tenant/employees', () => {
     mockDbSelect
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{ value: '0' }])
+      .mockResolvedValueOnce([{ activeCount: 0, inactiveCount: 0, ndisCount: 0 }])
     const res = await GET(makeReq()) as any
     expect(res.body.limit).toBe(20)
     expect(res.body.page).toBe(1)

@@ -31,7 +31,7 @@ const mockDbUpdate = vi.fn()
 
 function makeChain(): any {
   const c: any = {}
-  ;['from', 'leftJoin', 'where', 'orderBy', 'limit', 'offset', 'set'].forEach(m => { c[m] = () => c })
+  ;['from', 'leftJoin', 'innerJoin', 'where', 'orderBy', 'limit', 'offset', 'set'].forEach(m => { c[m] = () => c })
   c.then = (res: any, rej: any) => mockDbSelect().then(res, rej)
   return c
 }
@@ -46,22 +46,28 @@ vi.mock('@/lib/db', () => ({
 }))
 
 vi.mock('@/lib/db/schema', () => ({
-  supervisionSessions: {},
-  toilRequests: {},
+  supervisionRecords: {},
+  toilEntries: {},
+  toilBalances: {},
   employeeBenefits: {},
-  engagementSurveys: {},
-  workExperience: {},
+  surveys: {},
+  surveyResponses: {},
+  employeeExperience: {},
   referrals: {},
-  workforcePlanning: {},
-  promotions: {},
+  headcountPlan: {},
+  promotionRequests: {},
+  promotionEvents: {},
   competencies: {},
+  competencyAssessments: {},
   employees: {},
   departments: {},
+  positions: {},
 }))
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn(), and: vi.fn(), gte: vi.fn(), lte: vi.fn(),
   desc: vi.fn(), asc: vi.fn(), count: vi.fn(), ilike: vi.fn(),
+  sql: (..._args: any[]) => ({ as: () => null }),
 }))
 
 import { db } from '@/lib/db'
@@ -69,7 +75,7 @@ import { db } from '@/lib/db'
 function makeReq(path: string, opts: { searchParams?: Record<string, string>; body?: unknown } = {}): any {
   const url = new URL(`http://localhost${path}`)
   Object.entries(opts.searchParams ?? {}).forEach(([k, v]) => url.searchParams.set(k, v))
-  return { nextUrl: url, json: async () => opts.body ?? {} }
+  return { nextUrl: url, url: url.toString(), json: async () => opts.body ?? {} }
 }
 
 const SESSION = { sub: 'u-1', email: 'hr@acme.com', tenantId: 't-1', userRole: 'hr_officer' }
@@ -153,7 +159,7 @@ describe('POST /api/tenant/toil', async () => {
     mockApiGuard.mockResolvedValue(GUARD_OK)
     mockDbInsert.mockResolvedValue([{ id: 'toil-1' }])
     const res = await POST(makeReq('/api/tenant/toil', {
-      body: { employeeId: 'e-1', hoursAccrued: 4, earnedDate: '2024-07-20' },
+      body: { employeeId: 'e-1', hours: 4, workDate: '2024-07-20' },
     })) as any
     expect([200, 201]).toContain(res.status)
   })
@@ -206,11 +212,12 @@ describe('POST /api/tenant/promotions', async () => {
 
   it('returns 201 on successful promotion creation', async () => {
     mockApiGuard.mockResolvedValue(GUARD_OK)
+    mockDbSelect.mockResolvedValueOnce([{ id: 'e-1', firstName: 'Alice', lastName: 'Smith' }])
     mockDbInsert.mockResolvedValue([{ id: 'promo-1' }])
     const res = await POST(makeReq('/api/tenant/promotions', {
       body: {
-        employeeId: 'e-1', effectiveDate: '2024-08-01',
-        previousTitle: 'Junior Dev', newTitle: 'Senior Dev',
+        employeeId: 'e-1', proposedTitle: 'Senior Dev',
+        justification: 'Strong performance and team lead responsibilities',
       },
     })) as any
     expect([200, 201]).toContain(res.status)

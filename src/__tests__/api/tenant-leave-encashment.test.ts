@@ -45,6 +45,7 @@ vi.mock('@/lib/db', () => ({
 
 vi.mock('@/lib/db/schema', () => ({
   separationRecords: {},
+  separationEvents:  {},
   employees:         {},
   leaveRequests:     {},
 }))
