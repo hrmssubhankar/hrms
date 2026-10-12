@@ -230,8 +230,8 @@ async function computeEncashment(
     .where(and(
       eq(leaveRequests.tenantId,   tenantId),
       eq(leaveRequests.employeeId, employeeId),
-      inArray(leaveRequests.status, ['approved']),
-      inArray(leaveRequests.leaveType, ANNUAL_LEAVE_TYPES as ('annual' | 'long_service')[]),
+      inArray(leaveRequests.status, ['approved'] as ('approved')[]),
+      inArray(leaveRequests.leaveType, ['annual', 'long_service'] as ('annual' | 'long_service')[]),
       gte(leaveRequests.startDate, lyStartStr),
       lte(leaveRequests.startDate, lyEndStr),
     ))

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { supervisionRecords, employees } from '@/lib/db/schema'
-import { eq, and, desc, gte, lte } from 'drizzle-orm'
+import { eq, and, desc } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
 export async function GET(req: NextRequest) {
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
     if (employeeId) conditions.push(eq(supervisionRecords.employeeId, employeeId))
     if (type)       conditions.push(eq(supervisionRecords.type, type))
 
-    const supervisorEmp = employees
+    const supervisorEmp = alias(employees, 'supervisorEmp')
 
     const records = await db
       .select({
@@ -37,9 +38,12 @@ export async function GET(req: NextRequest) {
         employeeFirstName:    employees.firstName,
         employeeLastName:     employees.lastName,
         employeeEmail:        employees.email,
+        supervisorFirstName:  supervisorEmp.firstName,
+        supervisorLastName:   supervisorEmp.lastName,
       })
       .from(supervisionRecords)
       .leftJoin(employees, eq(supervisionRecords.employeeId, employees.id))
+      .leftJoin(supervisorEmp, eq(supervisionRecords.supervisorId, supervisorEmp.id))
       .where(and(...conditions))
       .orderBy(desc(supervisionRecords.scheduledDate))
 

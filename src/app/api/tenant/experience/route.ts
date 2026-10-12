@@ -36,24 +36,20 @@ export async function GET(req: NextRequest) {
       })
       .from(employeeExperience)
       .innerJoin(employees, eq(employeeExperience.employeeId, employees.id))
-      .where(eq(employeeExperience.tenantId, session.tenantId))
+      .where(and(
+        eq(employeeExperience.tenantId, session.tenantId),
+        employmentType ? eq(employeeExperience.employmentType, employmentType as 'full_time' | 'part_time' | 'casual' | 'contract') : undefined,
+        search
+          ? or(
+              ilike(employees.firstName, `%${search}%`),
+              ilike(employees.lastName, `%${search}%`),
+              ilike(employeeExperience.companyName, `%${search}%`),
+            )
+          : undefined,
+      ))
       .orderBy(desc(employeeExperience.startDate))
 
-    let results = rows
-
-    if (search) {
-      const q = search.toLowerCase()
-      results = results.filter(r =>
-        `${r.firstName} ${r.lastName}`.toLowerCase().includes(q) ||
-        r.companyName.toLowerCase().includes(q)
-      )
-    }
-
-    if (employmentType) {
-      results = results.filter(r => r.employmentType === employmentType)
-    }
-
-    return NextResponse.json({ experience: results })
+    return NextResponse.json({ experience: rows })
   } catch (err) {
     console.error('Experience GET error:', err)
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })

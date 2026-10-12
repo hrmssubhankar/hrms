@@ -4,7 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { employees } from '@/lib/db/schema'
+import { employees, positions } from '@/lib/db/schema'
 import { eq, and, ilike, or } from 'drizzle-orm'
 import { apiGuard } from '@/lib/auth/apiGuard'
 
@@ -22,10 +22,11 @@ export async function GET(req: NextRequest) {
       id:        employees.id,
       firstName: employees.firstName,
       lastName:  employees.lastName,
-      employmentType: employees.employmentType,
+      jobTitle:  positions.title,
       email:     employees.email,
     })
     .from(employees)
+    .leftJoin(positions, eq(employees.positionId, positions.id))
     .where(and(
       eq(employees.tenantId, tenantId),
       eq(employees.isActive, true),

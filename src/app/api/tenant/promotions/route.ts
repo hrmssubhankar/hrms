@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
   const [promotion] = await db.insert(promotionRequests).values({
     tenantId:       session.tenantId,
     employeeId,
-    raisedById:     session.sub as string,
+    raisedById:     session.sub ?? session.email ?? null,
     raisedByName:   raisedByName || session.email,
     currentTitle:   currentTitle || null,
     currentSalary:  currentSalary ? Number(currentSalary) : null,

@@ -54,21 +54,44 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
+  const {
+    employeeId, reviewType, reviewDate, effectiveDate,
+    currentSalary, currentBasis, proposedSalary, proposedBasis,
+    justification, performanceRating, marketData, status,
+    hrNotes,
+  } = body
+
   // Auto-calculate increment fields if not provided
-  if (body.currentSalary && body.proposedSalary) {
-    const curr = parseFloat(body.currentSalary)
-    const prop = parseFloat(body.proposedSalary)
-    body.incrementAmount = body.incrementAmount ?? (prop - curr).toFixed(2)
-    body.incrementPercent = body.incrementPercent ?? (((prop - curr) / curr) * 100).toFixed(2)
+  let incrementAmount: string | undefined
+  let incrementPercent: string | undefined
+  if (currentSalary && proposedSalary) {
+    const curr = parseFloat(currentSalary)
+    const prop = parseFloat(proposedSalary)
+    incrementAmount = body.incrementAmount ?? (prop - curr).toFixed(2)
+    incrementPercent = body.incrementPercent ?? (((prop - curr) / curr) * 100).toFixed(2)
   }
 
   const [review] = await db
     .insert(salaryReviews)
     .values({
-      ...body,
       tenantId: session.tenantId,
-      submittedBy: body.status === 'submitted' ? session.email : undefined,
-      submittedAt: body.status === 'submitted' ? new Date() : undefined,
+      employeeId,
+      reviewType: reviewType ?? 'annual',
+      reviewDate,
+      effectiveDate: effectiveDate ?? null,
+      currentSalary: currentSalary ?? '0',
+      currentBasis: currentBasis ?? 'annual',
+      proposedSalary: proposedSalary ?? null,
+      proposedBasis: proposedBasis ?? null,
+      incrementAmount: incrementAmount ?? null,
+      incrementPercent: incrementPercent ?? null,
+      justification: justification ?? null,
+      performanceRating: performanceRating ?? null,
+      marketData: marketData ?? null,
+      status: status ?? 'draft',
+      hrNotes: hrNotes ?? null,
+      submittedBy: status === 'submitted' ? session.email : undefined,
+      submittedAt: status === 'submitted' ? new Date() : undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
     })

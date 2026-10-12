@@ -28,8 +28,6 @@ export async function GET(req: NextRequest) {
     if (employeeId)   conditions.push(eq(competencyAssessments.employeeId, employeeId))
     if (competencyId) conditions.push(eq(competencyAssessments.competencyId, competencyId))
 
-    const assessorEmp = { id: employees.id, firstName: employees.firstName, lastName: employees.lastName }
-
     const assessments = await db
       .select({
         id:           competencyAssessments.id,
@@ -67,7 +65,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ competencies: comps, assessments, stats })
   } catch (err) {
-    console.error('GET /api/tenant/competency', err)
+    console.error('GET /api/tenant/competencies', err)
     return NextResponse.json({ error: 'Failed to fetch competencies', detail: String(err) }, { status: 500 })
   }
 }
@@ -108,7 +106,7 @@ export async function POST(req: NextRequest) {
     }).returning()
     return NextResponse.json({ record }, { status: 201 })
   } catch (err) {
-    console.error('POST /api/tenant/competency', err)
+    console.error('POST /api/tenant/competencies', err)
     return NextResponse.json({ error: 'Failed to create', detail: String(err) }, { status: 500 })
   }
 }
@@ -138,7 +136,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ record: updated })
   } catch (err) {
-    console.error('PATCH /api/tenant/competency', err)
+    console.error('PATCH /api/tenant/competencies', err)
     return NextResponse.json({ error: 'Failed to update assessment', detail: String(err) }, { status: 500 })
   }
 }

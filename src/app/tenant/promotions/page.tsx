@@ -9,7 +9,7 @@ import { exportCsv, fmtCsvDate, fmtCsvCurrency } from '@/lib/exportCsv'
 
 type Promotion = {
   id: string; employeeId: string
-  raisedByName: string | null; currentTitle: string | null; currentSalary: number | null
+  raisedById: string | null; raisedByName: string | null; currentTitle: string | null; currentSalary: number | null
   proposedTitle: string; proposedSalary: number | null; effectiveDate: string | null
   justification: string; status: string
   reviewedBy: string | null; reviewedAt: string | null; reviewNotes: string | null
