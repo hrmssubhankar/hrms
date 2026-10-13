@@ -4,16 +4,30 @@ import { tenants, tenantModules } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { getSession } from '@/lib/auth/session'
 
+// Strip credentials and sensitive keys from tenant settings before returning
+// to unauthenticated callers (login-page branding lookups).
+function sanitiseSettings(settings: unknown): Record<string, unknown> {
+  if (!settings || typeof settings !== 'object') return {}
+  const s = settings as Record<string, unknown>
+  const { smtp, ...rest } = s
+  // Allow only the safe SMTP sub-fields (useSmtp flag) — never passwords/keys
+  const safeSMTP = smtp && typeof smtp === 'object'
+    ? { useSmtp: (smtp as Record<string, unknown>).useSmtp }
+    : undefined
+  return safeSMTP ? { ...rest, smtp: safeSMTP } : rest
+}
+
 // GET /api/tenant/config
 // Works two ways:
-//   ?slug=yahweh-care   → used by tenant layout (no auth required)
-//   no slug             → uses session.tenantId (for tenant settings page)
+//   ?slug=yahweh-care   → used by tenant layout (no auth required, settings sanitised)
+//   no slug             → uses session.tenantId (authenticated; full settings returned)
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug')
     ?? req.headers.get('x-tenant-slug')
 
   try {
     let tenantQuery
+    let authenticated = false
     if (slug) {
       tenantQuery = db.select().from(tenants).where(eq(tenants.slug, slug))
     } else {
@@ -21,6 +35,7 @@ export async function GET(req: NextRequest) {
       const session = await getSession()
       if (!session?.tenantId) return NextResponse.json({ error: 'slug or session required' }, { status: 400 })
       tenantQuery = db.select().from(tenants).where(eq(tenants.id, session.tenantId))
+      authenticated = true
     }
 
     const [tenant] = await tenantQuery
@@ -44,6 +59,9 @@ export async function GET(req: NextRequest) {
       )
       .orderBy(tenantModules.moduleId)
 
+    // Only expose full settings to authenticated sessions; sanitise for public/branding calls
+    const settings = authenticated ? tenant.settings : sanitiseSettings(tenant.settings)
+
     return NextResponse.json({
       tenant: {
         id:           tenant.id,
@@ -52,7 +70,7 @@ export async function GET(req: NextRequest) {
         tier:         tenant.tier,
         logoUrl:      tenant.logoUrl,
         primaryColor: tenant.primaryColor,
-        settings:     tenant.settings,
+        settings,
       },
       enabledModules: modules.map(m => ({ id: m.moduleId, name: m.moduleName })),
     })
